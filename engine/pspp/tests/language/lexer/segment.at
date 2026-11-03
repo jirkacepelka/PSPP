@@ -1,0 +1,1834 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([syntax segmentation])
+m4_define([PSPP_CHECK_SEGMENT],
+  [AT_CAPTURE_FILE([input])
+   for strip in "" "-s"; do
+     case $strip in # (
+        '') sed 's/^-//' < expout-base > expout ;; # (
+	-s) sed '/^-/d' < expout-base > expout ;;
+     esac
+     AT_CHECK([segment-test $1 $strip input], [0], [expout])
+     AT_CHECK([segment-test -1 $strip $1 input], [0], [expout])
+     AT_CHECK([segment-test -0 $strip $1 input])
+     AT_CHECK([segment-test -01 $strip $1 input])
+   done])
+
+AT_SETUP([identifiers])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+a ab abc abcd !abcd
+A AB ABC ABCD !ABCD
+aB aBC aBcD !aBcD
+$x $y $z !$z
+grève@<00A0>@Ângstrom@<00A0>@poté
+#a #b #c ## #d !#d
+@efg @ @@. @#@ !@ @&t@
+## # #12345 #.#
+f@#_.#6
+GhIjK
+.x 1y _z
+])
+AT_DATA([expout-base], [dnl
+identifier      a    space
+identifier      ab    space
+identifier      abc    space
+identifier      abcd    space
+macro_id        !abcd
+newline         \n (later)
+
+identifier      A    space
+identifier      AB    space
+identifier      ABC    space
+identifier      ABCD    space
+macro_id        !ABCD
+newline         \n (later)
+
+identifier      aB    space
+identifier      aBC    space
+identifier      aBcD    space
+macro_id        !aBcD
+newline         \n (later)
+
+identifier      $x    space
+identifier      $y    space
+identifier      $z    space
+macro_id        !$z
+newline         \n (later)
+
+identifier      grève
+spaces          <U+00A0>
+identifier      Ângstrom
+spaces          <U+00A0>
+identifier      poté
+newline         \n (later)
+
+identifier      #a    space
+identifier      #b    space
+identifier      #c    space
+identifier      ##    space
+identifier      #d    space
+macro_id        !#d
+newline         \n (later)
+
+identifier      @efg    space
+identifier      @    space
+identifier      @@.    space
+identifier      @#@    space
+macro_id        !@    space
+newline         \n (later)
+
+identifier      ##    space
+identifier      #    space
+identifier      #12345    space
+identifier      #.#
+newline         \n (later)
+
+identifier      f@#\_.#6
+newline         \n (later)
+
+identifier      GhIjK
+newline         \n (later)
+
+start_command   .
+identifier      x    space
+number          1
+identifier      y    space
+punct           \_
+identifier      z
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([identifiers that end in '.'])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+abcd. abcd.
+ABCD. ABCD.
+aBcD. aBcD. @&t@
+$y. $z. あいうえお.
+#c. #d..
+@@. @@....
+#.#.
+#abcd.
+.
+. @&t@
+LMNOP. @&t@
+QRSTUV./* end of line comment */
+qrstuv. /* end of line comment */
+QrStUv./* end of line comment */ @&t@
+wxyz./* unterminated end of line comment
+WXYZ. /* unterminated end of line comment
+WxYz./* unterminated end of line comment @&t@
+])
+AT_DATA([expout-base], [dnl
+identifier      abcd.    space
+identifier      abcd
+end_command     .
+newline         \n (first)
+
+identifier      ABCD.    space
+identifier      ABCD
+end_command     .
+newline         \n (first)
+
+identifier      aBcD.    space
+identifier      aBcD
+end_command     .    space
+newline         \n (first)
+
+identifier      $y.    space
+identifier      $z.    space
+identifier      あいうえお
+end_command     .
+newline         \n (first)
+
+identifier      #c.    space
+identifier      #d.
+end_command     .
+newline         \n (first)
+
+identifier      @@.    space
+identifier      @@...
+end_command     .
+newline         \n (first)
+
+identifier      #.#
+end_command     .
+newline         \n (first)
+
+identifier      #abcd
+end_command     .
+newline         \n (first)
+
+end_command     .
+newline         \n (first)
+
+end_command     .    space
+newline         \n (first)
+
+identifier      LMNOP
+end_command     .    space
+newline         \n (first)
+
+identifier      QRSTUV
+end_command     .
+comment         /*_end_of_line_comment_*/
+newline         \n (first)
+
+identifier      qrstuv
+end_command     .    space
+comment         /*_end_of_line_comment_*/
+newline         \n (first)
+
+identifier      QrStUv
+end_command     .
+comment         /*_end_of_line_comment_*/    space
+newline         \n (first)
+
+identifier      wxyz
+end_command     .
+comment         /*_unterminated_end_of_line_comment
+newline         \n (first)
+
+identifier      WXYZ
+end_command     .    space
+comment         /*_unterminated_end_of_line_comment
+newline         \n (first)
+
+identifier      WxYz
+end_command     .
+comment         /*_unterminated_end_of_line_comment_
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([reserved words])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+and or not eq ge gt le lt ne all by to with
+AND OR NOT EQ GE GT LE LT NE ALL BY TO WITH
+andx orx notx eqx gex gtx lex ltx nex allx byx tox withx
+and. with.
+])
+AT_DATA([expout-base], [dnl
+reserved_word   and    space
+reserved_word   or    space
+reserved_word   not    space
+reserved_word   eq    space
+reserved_word   ge    space
+reserved_word   gt    space
+reserved_word   le    space
+reserved_word   lt    space
+reserved_word   ne    space
+reserved_word   all    space
+reserved_word   by    space
+reserved_word   to    space
+reserved_word   with
+newline         \n (later)
+
+reserved_word   AND    space
+reserved_word   OR    space
+reserved_word   NOT    space
+reserved_word   EQ    space
+reserved_word   GE    space
+reserved_word   GT    space
+reserved_word   LE    space
+reserved_word   LT    space
+reserved_word   NE    space
+reserved_word   ALL    space
+reserved_word   BY    space
+reserved_word   TO    space
+reserved_word   WITH
+newline         \n (later)
+
+identifier      andx    space
+identifier      orx    space
+identifier      notx    space
+identifier      eqx    space
+identifier      gex    space
+identifier      gtx    space
+identifier      lex    space
+identifier      ltx    space
+identifier      nex    space
+identifier      allx    space
+identifier      byx    space
+identifier      tox    space
+identifier      withx
+newline         \n (later)
+
+identifier      and.    space
+reserved_word   with
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([punctuation])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+~ & | = >= > <= < ~= <> ( ) , - + * / [[ ]] **
+~&|=>=><=<~=<>(),-+*/[[]]**!*
+% : ; ? _ ` { } ~ !*
+])
+AT_DATA([expout-base], [dnl
+punct           ~    space
+punct           &    space
+punct           |    space
+punct           =    space
+punct           >=    space
+punct           >    space
+punct           <=    space
+punct           <    space
+punct           ~=    space
+punct           <>    space
+punct           (    space
+punct           )    space
+punct           ,    space
+punct           -    space
+punct           +    space
+punct           *    space
+punct           /    space
+punct           [[    space
+punct           ]]    space
+punct           **
+newline         \n (later)
+
+punct           ~
+punct           &
+punct           |
+punct           =
+punct           >=
+punct           >
+punct           <=
+punct           <
+punct           ~=
+punct           <>
+punct           (
+punct           )
+punct           ,
+punct           -
+punct           +
+punct           *
+punct           /
+punct           [[
+punct           ]]
+punct           **
+macro_id        !*
+newline         \n (later)
+
+punct           %    space
+punct           :    space
+punct           ;    space
+punct           ?    space
+punct           \_    space
+punct           `    space
+punct           {    space
+punct           }    space
+punct           ~    space
+macro_id        !*
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([positive numbers])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+0 1 01 001. 1.
+123. /* comment 1 */ /* comment 2 */
+.1 0.1 00.1 00.10
+5e1 6E-1 7e+1 6E+01 6e-03
+.3E1 .4e-1 .5E+1 .6e+01 .7E-03
+1.23e1 45.6E-1 78.9e+1 99.9E+01 11.2e-03
+. 1e e1 1e+ 1e- 1.
+])
+AT_DATA([expout-base], [dnl
+number          0    space
+number          1    space
+number          01    space
+number          001.    space
+number          1
+end_command     .
+newline         \n (first)
+
+number          123
+end_command     .    space
+comment         /*_comment_1_*/    space
+comment         /*_comment_2_*/
+newline         \n (first)
+
+start_command   .
+number          1    space
+number          0.1    space
+number          00.1    space
+number          00.10
+newline         \n (later)
+
+number          5e1    space
+number          6E-1    space
+number          7e+1    space
+number          6E+01    space
+number          6e-03
+newline         \n (later)
+
+start_command   .
+number          3E1    space
+number          .4e-1    space
+number          .5E+1    space
+number          .6e+01    space
+number          .7E-03
+newline         \n (later)
+
+number          1.23e1    space
+number          45.6E-1    space
+number          78.9e+1    space
+number          99.9E+01    space
+number          11.2e-03
+newline         \n (later)
+
+start_command   .    space
+expected_exponent 1e    space
+identifier      e1    space
+expected_exponent 1e+    space
+expected_exponent 1e-    space
+number          1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([negative numbers])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+ -0 -1 -01 -001. -1.
+ -123. /* comment 1 */ /* comment 2 */
+ -.1 -0.1 -00.1 -00.10
+ -5e1 -6E-1 -7e+1 -6E+01 -6e-03
+ -.3E1 -.4e-1 -.5E+1 -.6e+01 -.7E-03
+ -1.23e1 -45.6E-1 -78.9e+1 -99.9E+01 -11.2e-03
+ -/**/1
+ -. -1e -e1 -1e+ -1e- -1.
+])
+AT_DATA([expout-base], [dnl
+spaces          _
+number          -0    space
+number          -1    space
+number          -01    space
+number          -001.    space
+number          -1
+end_command     .
+newline         \n (first)
+    space
+number          -123
+end_command     .    space
+comment         /*_comment_1_*/    space
+comment         /*_comment_2_*/
+newline         \n (first)
+    space
+number          -.1    space
+number          -0.1    space
+number          -00.1    space
+number          -00.10
+newline         \n (later)
+    space
+number          -5e1    space
+number          -6E-1    space
+number          -7e+1    space
+number          -6E+01    space
+number          -6e-03
+newline         \n (later)
+    space
+number          -.3E1    space
+number          -.4e-1    space
+number          -.5E+1    space
+number          -.6e+01    space
+number          -.7E-03
+newline         \n (later)
+    space
+number          -1.23e1    space
+number          -45.6E-1    space
+number          -78.9e+1    space
+number          -99.9E+01    space
+number          -11.2e-03
+newline         \n (later)
+    space
+punct           -
+comment         /**/
+number          1
+newline         \n (later)
+    space
+punct           -
+punct           .    space
+expected_exponent -1e    space
+punct           -
+identifier      e1    space
+expected_exponent -1e+    space
+expected_exponent -1e-    space
+number          -1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+
+AT_SETUP([strings])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+'x' "y" 'abc'
+'Don''t' "Can't" 'Won''t'
+"""quoted""" '"quoted"'
+'' ""
+'missing end quote
+"missing double quote
+x"4142" X'5152'
+u'fffd' U"041"
++ new command
++ /* comment */ 'string continuation'
++ /* also a punctuator on blank line
+- 'new command'
+])
+AT_DATA([expout-base], [dnl
+quoted_string   'x'    space
+quoted_string   "y"    space
+quoted_string   'abc'
+newline         \n (later)
+
+quoted_string   'Don''t'    space
+quoted_string   "Can't"    space
+quoted_string   'Won''t'
+newline         \n (later)
+
+quoted_string   """quoted"""    space
+quoted_string   '"quoted"'
+newline         \n (later)
+
+quoted_string   ''    space
+quoted_string   ""
+newline         \n (later)
+
+expected_quote  'missing_end_quote
+newline         \n (later)
+
+expected_quote  "missing_double_quote
+newline         \n (later)
+
+hex_string      x"4142"    space
+hex_string      X'5152'
+newline         \n (later)
+
+unicode_string  u'fffd'    space
+unicode_string  U"041"
+newline         \n (later)
+
+start_command   +    space
+identifier      new    space
+identifier      command
+newline         \n (later)
+
+punct           +    space
+comment         /*_comment_*/    space
+quoted_string   'string_continuation'
+newline         \n (later)
+
+punct           +    space
+comment         /*_also_a_punctuator_on_blank_line
+newline         \n (later)
+
+start_command   -    space
+quoted_string   'new_command'
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([@%:@! construct])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+#! /usr/bin/pspp
+title my title.
+#! /usr/bin/pspp
+])
+AT_DATA([expout-base], [dnl
+shbang          #!_/usr/bin/pspp
+newline         \n (first)
+
+identifier      title    space
+identifier      my    space
+identifier      title
+end_command     .
+newline         \n (first)
+
+identifier      #
+macro_id        !    space
+punct           /
+identifier      usr
+punct           /
+identifier      bin
+punct           /
+identifier      pspp
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([* and COMMENT commands])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+* Comment commands "don't dnl "
+
+have to contain valid tokens.
+
+** Check ambiguity with ** token.
+****************.
+
+comment keyword works too.
+COMM also.
+com is ambiguous with COMPUTE.
+
+   * Comment need not start at left margin.
+
+* Comment ends with blank line
+
+next command.
+
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+* Comment commands "don't dnl "
+
+have to contain valid tokens.
+-----
+** Check ambiguity with ** token.
+-----
+****************.
+-----
+comment keyword works too.
+-----
+COMM also.
+-----
+com is ambiguous with COMPUTE.
+-----
+   * Comment need not start at left margin.
+-----
+* Comment ends with blank line
+-----
+next command.
+])
+AT_DATA([expout-base], [dnl
+comment_command *_Comment_commands_"don't dnl "
+
+newline         \n (COMMENT)
+
+comment_command have_to_contain_valid_tokens
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+comment_command **_Check_ambiguity_with_**_token
+end_command     .
+newline         \n (first)
+
+comment_command ****************
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+comment_command comment_keyword_works_too
+end_command     .
+newline         \n (first)
+
+comment_command COMM_also
+end_command     .
+newline         \n (first)
+
+identifier      com    space
+identifier      is    space
+identifier      ambiguous    space
+reserved_word   with    space
+identifier      COMPUTE
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+spaces          ___
+comment_command *_Comment_need_not_start_at_left_margin
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+comment_command *_Comment_ends_with_blank_line
+newline         \n (COMMENT)
+
+separate_commands
+newline         \n (first)
+
+identifier      next    space
+identifier      command
+end_command     .
+newline         \n (first)
+
+-separate_commands
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DOCUMENT command])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+DOCUMENT one line.
+DOC more
+    than
+        one
+            line.
+docu
+first.paragraph
+isn't parsed as tokens
+
+second paragraph.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+DOCUMENT one line.
+-----
+DOC more
+    than
+        one
+            line.
+-----
+docu
+first.paragraph
+isn't parsed as tokens
+
+second paragraph.
+])
+AT_DATA([expout-base], [dnl
+start_document
+document        DOCUMENT_one_line.
+end_command
+separate_commands
+newline         \n (first)
+
+start_document
+document        DOC_more
+newline         \n (DOCUMENT)
+
+document        ____than
+newline         \n (DOCUMENT)
+
+document        ________one
+newline         \n (DOCUMENT)
+
+document        ____________line.
+end_command
+separate_commands
+newline         \n (first)
+
+start_document
+document        docu
+newline         \n (DOCUMENT)
+
+document        first.paragraph
+newline         \n (DOCUMENT)
+
+document        isn't_parsed_as_tokens
+newline         \n (DOCUMENT)
+
+document
+newline         \n (DOCUMENT)
+
+document        second_paragraph.
+-end_command
+-separate_commands
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([FILE LABEL command])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+FIL label isn't quoted.
+FILE
+  lab 'is quoted'.
+FILE /*
+/**/  lab not quoted here either
+
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+FIL label isn't quoted.
+-----
+FILE
+  lab 'is quoted'.
+-----
+FILE /*
+/**/  lab not quoted here either
+])
+AT_DATA([expout-base], [dnl
+identifier      FIL    space
+identifier      label    space
+unquoted_string isn't_quoted
+end_command     .
+newline         \n (first)
+
+identifier      FILE
+newline         \n (later)
+
+spaces          __
+identifier      lab    space
+quoted_string   'is_quoted'
+end_command     .
+newline         \n (first)
+
+identifier      FILE    space
+comment         /*
+newline         \n (later)
+
+comment         /**/
+spaces          __
+identifier      lab    space
+unquoted_string not_quoted_here_either
+newline         \n (later)
+
+-separate_commands
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([BEGIN DATA command])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+begin data.
+end data.
+
+begin data. /*
+123
+xxx
+end data.
+
+BEG /**/ DAT /*
+5 6 7 /* x
+
+end  data
+end data
+.
+
+begin
+ data.
+data
+end data.
+
+begin data "xxx".
+begin data 123.
+not data
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+begin data.
+end data.
+-----
+begin data. /*
+123
+xxx
+end data.
+-----
+BEG /**/ DAT /*
+5 6 7 /* x
+
+end  data
+end data
+.
+-----
+begin
+ data.
+data
+end data.
+-----
+begin data "xxx".
+-----
+begin data 123.
+-----
+not data
+])
+AT_DATA([expout-base], [dnl
+identifier      begin    space
+identifier      data
+inner_end_command .
+newline         \n (data)
+
+identifier      end    space
+identifier      data
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+identifier      begin    space
+identifier      data
+inner_end_command .    space
+comment         /*
+newline         \n (data)
+
+inline_data     123
+newline         \n (data)
+
+inline_data     xxx
+newline         \n (data)
+
+identifier      end    space
+identifier      data
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+identifier      BEG    space
+comment         /**/    space
+identifier      DAT    space
+comment         /*
+newline         \n (data)
+
+inline_data     5_6_7_/*_x
+newline         \n (data)
+
+inline_data
+newline         \n (data)
+
+inline_data     end__data
+newline         \n (data)
+
+identifier      end    space
+identifier      data
+newline         \n (later)
+
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+identifier      begin
+newline         \n (later)
+    space
+identifier      data
+inner_end_command .
+newline         \n (data)
+
+inline_data     data
+newline         \n (data)
+
+identifier      end    space
+identifier      data
+end_command     .
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+identifier      begin    space
+identifier      data    space
+quoted_string   "xxx"
+end_command     .
+newline         \n (first)
+
+identifier      begin    space
+identifier      data    space
+number          123
+end_command     .
+newline         \n (first)
+
+reserved_word   not    space
+identifier      data
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DO REPEAT command])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+do repeat x=a b c
+          y=d e f.
+  do repeat a=1 thru 5.
+another command.
+second command
++ third command.
+end /* x */ /* y */ repeat print.
+end
+ repeat.
+do
+  repeat #a=1.
+  inner command.
+end repeat.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+do repeat x=a b c
+          y=d e f.
+  do repeat a=1 thru 5.
+another command.
+second command
++ third command.
+end /* x */ /* y */ repeat print.
+end
+ repeat.
+-----
+do
+  repeat #a=1.
+  inner command.
+end repeat.
+])
+AT_DATA([expout-base], [dnl
+identifier      do    space
+identifier      repeat    space
+identifier      x
+punct           =
+identifier      a    space
+identifier      b    space
+identifier      c
+newline         \n (later)
+
+spaces          __________
+identifier      y
+punct           =
+identifier      d    space
+identifier      e    space
+identifier      f
+inner_end_command .
+newline         \n (DO REPEAT)
+
+do_repeat_command __do_repeat_a=1_thru_5.
+newline         \n (DO REPEAT)
+
+do_repeat_command another_command.
+newline         \n (DO REPEAT)
+
+do_repeat_command second_command
+newline         \n (DO REPEAT)
+
+do_repeat_command +_third_command.
+newline         \n (DO REPEAT)
+
+do_repeat_command end_/*_x_*/_/*_y_*/_repeat_print.
+newline         \n (DO REPEAT)
+
+identifier      end
+newline         \n (later)
+    space
+identifier      repeat
+end_command     .
+newline         \n (first)
+
+identifier      do
+newline         \n (later)
+
+spaces          __
+identifier      repeat    space
+identifier      #a
+punct           =
+number          1
+inner_end_command .
+newline         \n (DO REPEAT)
+
+do_repeat_command __inner_command.
+newline         \n (DO REPEAT)
+
+identifier      end    space
+identifier      repeat
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DO REPEAT command in batch mode])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+do repeat x=a b c
+          y=d e f
+do repeat a=1 thru 5
+another command
+second command
++ third command
+end /* x */ /* y */ repeat print
+end
+ repeat
+do
+  repeat #a=1
+
+  inner command
+end repeat
+])
+AT_CHECK([segment-test -c -b input], [0], [dnl
+do repeat x=a b c
+          y=d e f
+do repeat a=1 thru 5
+another command
+second command
++ third command
+end /* x */ /* y */ repeat print
+end
+ repeat
+-----
+do
+  repeat #a=1
+
+  inner command
+end repeat
+])
+AT_DATA([expout-base], [dnl
+identifier      do    space
+identifier      repeat    space
+identifier      x
+punct           =
+identifier      a    space
+identifier      b    space
+identifier      c
+newline         \n (later)
+
+spaces          __________
+identifier      y
+punct           =
+identifier      d    space
+identifier      e    space
+identifier      f
+newline         \n (later)
+
+inner_start_command
+do_repeat_command do_repeat_a=1_thru_5
+newline         \n (DO REPEAT)
+
+do_repeat_command another_command
+newline         \n (DO REPEAT)
+
+do_repeat_command second_command
+newline         \n (DO REPEAT)
+
+do_repeat_command +_third_command
+newline         \n (DO REPEAT)
+
+do_repeat_command end_/*_x_*/_/*_y_*/_repeat_print
+newline         \n (DO REPEAT)
+
+identifier      end
+newline         \n (later)
+    space
+identifier      repeat
+newline         \n (later)
+
+start_command
+identifier      do
+newline         \n (later)
+
+spaces          __
+identifier      repeat    space
+identifier      #a
+punct           =
+number          1
+newline         \n (later)
+
+inner_separate_commands
+newline         \n (DO REPEAT)
+
+do_repeat_command __inner_command
+newline         \n (DO REPEAT)
+
+identifier      end    space
+identifier      repeat
+-newline         \n (later)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-b])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - simple])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1()
+var1 var2 var3 "!enddefine"
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_body      var1_var2_var3_"!enddefine"
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - no newline after parentheses])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1() var1 var2 var3 /* !enddefine
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+macro_body      _var1_var2_var3_/*_!enddefine
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - no newline before !ENDDEFINE])
+AT_KEYWORDS([segment ENDDEFINE])
+AT_DATA([input], [dnl
+define !macro1()
+var1 var2 var3!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_body      var1_var2_var3
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - all on one line])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1()var1 var2 var3!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+macro_body      var1_var2_var3
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - empty])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1()
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - blank lines])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1()
+
+
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_body
+newline         \n (DEFINE)
+
+macro_body
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - arguments])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1(a(), b(), c())
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+identifier      a
+punct           (
+punct           )
+punct           ,    space
+identifier      b
+punct           (
+punct           )
+punct           ,    space
+identifier      c
+punct           (
+punct           )
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - multiline arguments])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1(
+  a(), b(
+  ),
+  c()
+)
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+newline         \n (later)
+
+spaces          __
+identifier      a
+punct           (
+punct           )
+punct           ,    space
+identifier      b
+punct           (
+newline         \n (later)
+
+spaces          __
+punct           )
+punct           ,
+newline         \n (later)
+
+spaces          __
+identifier      c
+punct           (
+punct           )
+newline         \n (later)
+
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - arguments start on second line])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1
+(x,y,z
+)
+content 1
+content 2
+!enddefine.
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+newline         \n (later)
+
+punct           (
+identifier      x
+punct           ,
+identifier      y
+punct           ,
+identifier      z
+newline         \n (later)
+
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_body      content_1
+newline         \n (DEFINE)
+
+macro_body      content_2
+newline         \n (DEFINE)
+
+macro_id        !enddefine
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 1])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1.
+data list /x 1.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+define !macro1.
+-----
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+end_command     .
+newline         \n (first)
+
+identifier      data    space
+identifier      list    space
+punct           /
+identifier      x    space
+number          1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 2])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1
+x.
+data list /x 1.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+define !macro1
+x.
+-----
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+newline         \n (later)
+
+identifier      x
+end_command     .
+newline         \n (first)
+
+identifier      data    space
+identifier      list    space
+punct           /
+identifier      x    space
+number          1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 3])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1(.
+x.
+data list /x 1.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+define !macro1@{:@.
+-----
+x.
+-----
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+end_command     .
+newline         \n (first)
+
+identifier      x
+end_command     .
+newline         \n (first)
+
+identifier      data    space
+identifier      list    space
+punct           /
+identifier      x    space
+number          1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 4])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+dnl Notice the command terminator at the end of the DEFINE command,
+dnl which should not be there and ends it early.
+define !macro1.
+data list /x 1.
+])
+AT_CHECK([segment-test -c -i input], [0], [dnl
+define !macro1.
+-----
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+end_command     .
+newline         \n (first)
+
+identifier      data    space
+identifier      list    space
+punct           /
+identifier      x    space
+number          1
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - missing !ENDDEFINE])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+define !macro1()
+content line 1
+content line 2
+])
+AT_DATA([expout-base], [dnl
+identifier      define    space
+macro_name      !macro1
+punct           (
+punct           )
+spaces
+newline         \n (DEFINE)
+
+macro_body      content_line_1
+newline         \n (DEFINE)
+
+macro_body      content_line_2
+-newline         \n (DEFINE)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-i])
+AT_CLEANUP
+
+AT_SETUP([batch mode])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+first command
+     another line of first command
++  second command
+third command
+
+fourth command.
+   fifth command.
+])
+AT_DATA([expout-base], [dnl
+identifier      first    space
+identifier      command
+newline         \n (later)
+
+spaces          _____
+identifier      another    space
+identifier      line    space
+identifier      of    space
+identifier      first    space
+identifier      command
+newline         \n (later)
+
+start_command   +
+spaces          __
+identifier      second    space
+identifier      command
+newline         \n (later)
+
+start_command
+identifier      third    space
+identifier      command
+newline         \n (later)
+
+separate_commands
+newline         \n (first)
+
+identifier      fourth    space
+identifier      command
+end_command     .
+newline         \n (first)
+
+spaces          ___
+identifier      fifth    space
+identifier      command
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-b])
+AT_CLEANUP
+
+AT_SETUP([auto mode])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+command
+     another line of command
+2sls
++  another command
+another line of second command
+data list /x 1
+aggregate.
+print eject.
+twostep cluster
+
+
+fourth command.
+   fifth command.
+])
+AT_DATA([expout-base], [dnl
+identifier      command
+newline         \n (later)
+
+spaces          _____
+identifier      another    space
+identifier      line    space
+identifier      of    space
+identifier      command
+newline         \n (later)
+
+start_command
+number          2
+identifier      sls
+newline         \n (later)
+
+start_command   +
+spaces          __
+identifier      another    space
+identifier      command
+newline         \n (later)
+
+identifier      another    space
+identifier      line    space
+identifier      of    space
+identifier      second    space
+identifier      command
+newline         \n (later)
+
+start_command
+identifier      data    space
+identifier      list    space
+punct           /
+identifier      x    space
+number          1
+newline         \n (later)
+
+start_command
+identifier      aggregate
+end_command     .
+newline         \n (first)
+
+identifier      print    space
+identifier      eject
+end_command     .
+newline         \n (first)
+
+identifier      twostep    space
+identifier      cluster
+newline         \n (later)
+
+separate_commands
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+identifier      fourth    space
+identifier      command
+end_command     .
+newline         \n (first)
+
+spaces          ___
+identifier      fifth    space
+identifier      command
+end_command     .
+-newline         \n (first)
+-
+end
+])
+PSPP_CHECK_SEGMENT([-a])
+AT_CLEANUP
+
+AT_SETUP([empty input])
+AT_KEYWORDS([segment])
+: > input
+AT_DATA([expout-base], [dnl
+end
+])
+AT_CHECK([cp input expout && segment-test -c -i input], [0], [expout])
+PSPP_CHECK_SEGMENT
+AT_CLEANUP
+
+AT_SETUP([blank lines input])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+
+
+
+
+])
+AT_DATA([expout-base], [dnl
+separate_commands
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+separate_commands
+newline         \n (first)
+
+-separate_commands
+-newline         \n (first)
+-
+end
+])
+AT_CHECK([segment-test -c -i input])
+PSPP_CHECK_SEGMENT
+AT_CLEANUP
+
+# This checks for regression against bug #61253.  To see the read of
+# uninitialized data, run with valgrind.  The test will pass either
+# way.  (The bug report has a more complicated crashing case.)
+AT_SETUP([input ends in carriage return])
+AT_KEYWORDS([segment])
+printf '\r' > input
+AT_DATA([expout-base], [dnl
+separate_commands
+spaces          \r
+end
+])
+PSPP_CHECK_SEGMENT
+AT_CLEANUP

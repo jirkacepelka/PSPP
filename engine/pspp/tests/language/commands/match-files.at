@@ -1,0 +1,443 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([MATCH FILES])
+
+m4_define([PREPARE_MATCH_FILES],
+  [AT_DATA([data1.txt], [dnl
+1aB
+8aM
+3aE
+5aG
+0aA
+5aH
+6aI
+7aJ
+2aD
+7aK
+1aC
+7aL
+4aF
+])
+
+   AT_DATA([data2.txt], [dnl
+1bN
+3bO
+4bP
+6bQ
+7bR
+9bS
+])
+
+   AT_DATA([prepare.sps], [dnl
+DATA LIST NOTABLE FILE='data1.txt' /a b c 1-3 (A).
+SAVE OUTFILE='data1.sav'.
+DATA LIST NOTABLE FILE='data2.txt' /a b c 1-3 (A).
+SAVE OUTFILE='data2.sav'.
+])
+   AT_CHECK([pspp -O format=csv prepare.sps])
+   AT_CHECK([test -f data1.sav && test -f data2.sav])])
+
+dnl CHECK_MATCH_FILES(TYPE2, SOURCE1, SOURCE2)
+dnl
+dnl Checks the MATCH FILES procedure with the specified combination of:
+dnl
+dnl - TYPE2: Either "file" or "table" for the type of matching used for
+dnl   the second data source.  (The first data source is always "file").
+dnl
+dnl - SOURCE1: Either "system" or "active" for the source of data for
+dnl   the first data source.
+dnl
+dnl - SOURCE2: Either "system" or "active" for the source of data for
+dnl   the second data source.  (SOURCE1 and SOURCE2 may not both be
+dnl   "active".)
+m4_define([CHECK_MATCH_FILES],
+  [AT_SETUP([MATCH FILES -- $2 file and $3 $1])
+   PREPARE_MATCH_FILES
+   AT_DATA([expout],
+    [m4_if([$1], [file], [dnl
+Table: Data List
+a,b,c,d,ina,inb,first,last
+0,a,A,,1,0,1,1
+1,a,B,N,1,1,1,0
+1,a,C,,1,0,0,1
+2,a,D,,1,0,1,1
+3,a,E,O,1,1,1,1
+4,a,F,P,1,1,1,1
+5,a,G,,1,0,1,0
+5,a,H,,1,0,0,1
+6,a,I,Q,1,1,1,1
+7,a,J,R,1,1,1,0
+7,a,K,,1,0,0,0
+7,a,L,,1,0,0,1
+8,a,M,,1,0,1,1
+9,b,,S,0,1,1,1
+], [dnl
+Table: Data List
+a,b,c,d,ina,inb,first,last
+0,a,A,,1,0,1,1
+1,a,B,N,1,1,1,0
+1,a,C,N,1,1,0,1
+2,a,D,,1,0,1,1
+3,a,E,O,1,1,1,1
+4,a,F,P,1,1,1,1
+5,a,G,,1,0,1,0
+5,a,H,,1,0,0,1
+6,a,I,Q,1,1,1,1
+7,a,J,R,1,1,1,0
+7,a,K,R,1,1,0,0
+7,a,L,R,1,1,0,1
+8,a,M,,1,0,1,1
+])])
+
+   AT_DATA([match-files.sps], [dnl
+m4_if([$2], [active], [GET FILE='data1.sav'.],
+      [$3], [active], [GET FILE='data2.sav'.],
+      [])
+MATCH FILES
+	FILE=m4_if([$2], [active], [*], ['data1.sav']) /IN=ina /SORT
+	$1=m4_if([$3], [active], [*], ['data2.sav']) /in=inb /rename c=d
+	/BY a /FIRST=first /LAST=last.
+LIST.
+])
+   AT_CHECK([pspp -o pspp.csv match-files.sps])
+   AT_CHECK([cat pspp.csv], [0], [expout])
+   AT_CLEANUP])
+
+CHECK_MATCH_FILES([file], [system], [system])
+CHECK_MATCH_FILES([file], [system], [active])
+CHECK_MATCH_FILES([file], [active], [system])
+CHECK_MATCH_FILES([table], [system], [system])
+CHECK_MATCH_FILES([table], [system], [active])
+CHECK_MATCH_FILES([table], [active], [system])
+
+AT_SETUP([MATCH FILES parallel match])
+PREPARE_MATCH_FILES
+AT_DATA([match-files.sps], [dnl
+MATCH FILES FILE='data1.sav' /FILE='data2.sav' /RENAME (a b c=d e f).
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv match-files.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+a,b,c,d,e,f
+1,a,B,1,b,N
+8,a,M,3,b,O
+3,a,E,4,b,P
+5,a,G,6,b,Q
+0,a,A,7,b,R
+5,a,H,9,b,S
+6,a,I,,,
+7,a,J,,,
+2,a,D,,,
+7,a,K,,,
+1,a,C,,,
+7,a,L,,,
+4,a,F,,,
+])
+AT_CLEANUP
+
+dnl Test bug handling TABLE from active dataset found by John Darrington.
+AT_SETUP([MATCH FILES bug with TABLE from active dataset])
+AT_DATA([match-files.sps], [dnl
+DATA LIST LIST NOTABLE /x * y *.
+BEGIN DATA
+3 30
+2 21
+1 22
+END DATA.
+
+SAVE OUTFILE='bar.sav'.
+
+DATA LIST LIST NOTABLE /x * z *.
+BEGIN DATA
+3 8
+2 9
+END DATA.
+
+MATCH FILES TABLE=* /FILE='bar.sav' /BY=x.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv match-files.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+x,z,y
+3.00,8.00,30.00
+2.00,.  ,21.00
+1.00,.  ,22.00
+])
+AT_CLEANUP
+
+dnl Tests for a bug which caused MATCH FILES to crash
+dnl when used with scratch variables.
+AT_SETUP([MATCH FILES bug with scratch variables])
+AT_DATA([match-files.sps], [dnl
+DATA LIST LIST /w * x * y * .
+BEGIN DATA
+4 5 6
+1 2 3
+END DATA.
+
+COMPUTE j=0.
+LOOP #k = 1 to 10.
+COMPUTE j=#k + j.
+END LOOP.
+
+MATCH FILES FILE=* /DROP=w.
+LIST.
+FINISH.
+])
+AT_CHECK([pspp -o pspp.csv match-files.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+w,F8.0
+x,F8.0
+y,F8.0
+
+Table: Data List
+x,y,j
+5.00,6.00,55.00
+2.00,3.00,55.00
+])
+AT_CLEANUP
+
+AT_SETUP([MATCH FILES with different string widths])
+AT_DATA([match-files.sps], [dnl
+DATA LIST LIST NOTABLE/x (F8.2) name (A6).
+BEGIN DATA.
+7,al
+8,brad
+9,carl
+END DATA.
+SAVE OUTFILE='x.sav'.
+
+DATA LIST LIST NOTABLE/name (A7) y.
+BEGIN DATA.
+al,1
+carl,2
+dan,3
+END DATA.
+MATCH FILES/FILE=*/FILE='x.sav'/BY name.
+LIST/name x y.
+])
+AT_CHECK([pspp -O format=csv match-files.sps], [0], [dnl
+Table: Data List
+name,x,y
+al,7.00,1.00
+brad,8.00,.  @&t@
+carl,9.00,2.00
+dan,.  ,3.00
+])
+AT_CLEANUP
+
+AT_SETUP([MATCH FILES syntax errors])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='match-files.sps' ERROR=IGNORE.
+])
+AT_DATA([match-files.sps], [dnl
+MATCH FILES/FILE=*.
+
+DATA LIST LIST NOTABLE/name (A6) x.
+BEGIN DATA.
+al,7
+brad,8
+carl,9
+END DATA.
+SAVE OUTFILE='x.sav'.
+
+TEMPORARY.
+MATCH FILES/FILE=*.
+
+DATA LIST LIST NOTABLE/name (A7) y.
+BEGIN DATA.
+al,1
+carl,2
+dan,3
+END DATA.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x)/BY x.
+MATCH FILES/FILE='x.sav'/IN=**.
+MATCH FILES/FILE='x.sav'/IN=x/IN=y.
+MATCH FILES/FILE='x.sav'/BY=x/BY=y.
+MATCH FILES/FILE='x.sav'/BY=**.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/BY y.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/BY x.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST x/FIRST y.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST=**.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST x/LAST y.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=**.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/DROP=xyzzy.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/DROP=ALL.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/KEEP=xyzzy.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=x **.
+MATCH FILES/FILE='x.sav'/TABLE=*/RENAME(name=name2).
+MATCH FILES/FILE='x.sav'/SORT/FILE=*/RENAME(name=name2)/SORT.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST=x.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=x.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/IN=x.
+MATCH FILES/KEEP=**.
+
+* It's a problem to have different types and the same name,
+but not if we drop them.
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x).
+MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x)/DROP=x.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"match-files.sps:1.18: error: MATCH FILES: Cannot specify the active dataset since none has been defined.
+    1 | MATCH FILES/FILE=*.
+      |                  ^"
+
+"match-files.sps:12.18: error: MATCH FILES: This command may not be used after TEMPORARY when the active dataset is an input source.  Temporary transformations will be made permanent.
+   12 | MATCH FILES/FILE=*.
+      |                  ^"
+
+match-files.sps:20: error: MATCH FILES: Variable x has different types in different files.
+
+"match-files.sps:20.13-20.24: note: MATCH FILES: In file `x.sav', x is numeric.
+   20 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x)/BY x.
+      |             ^~~~~~~~~~~~"
+
+"match-files.sps:20.26-20.31: note: MATCH FILES: In file *, x is a string.
+   20 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x)/BY x.
+      |                          ^~~~~~"
+
+"match-files.sps:21.29-21.30: error: MATCH FILES: Syntax error expecting identifier.
+   21 | MATCH FILES/FILE='x.sav'/IN=**.
+      |                             ^~"
+
+"match-files.sps:22.34: error: MATCH FILES: Multiple IN subcommands for a single FILE or TABLE.
+   22 | MATCH FILES/FILE='x.sav'/IN=x/IN=y.
+      |                                  ^"
+
+"match-files.sps:23.31-23.32: error: MATCH FILES: Subcommand BY may only be specified once.
+   23 | MATCH FILES/FILE='x.sav'/BY=x/BY=y.
+      |                               ^~"
+
+"match-files.sps:24.29-24.30: error: MATCH FILES: Syntax error expecting variable name.
+   24 | MATCH FILES/FILE='x.sav'/BY=**.
+      |                             ^~"
+
+"match-files.sps:25.13-25.24: error: MATCH FILES: File `x.sav' lacks BY variable y.
+   25 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/BY y.
+      |             ^~~~~~~~~~~~"
+
+"match-files.sps:26.26-26.31: error: MATCH FILES: File * lacks BY variable x.
+   26 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/BY x.
+      |                          ^~~~~~"
+
+"match-files.sps:27.60-27.64: error: MATCH FILES: Subcommand FIRST may only be specified once.
+   27 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST x/FIRST y.
+      |                                                            ^~~~~"
+
+"match-files.sps:28.58-28.59: error: MATCH FILES: Syntax error expecting identifier.
+   28 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST=**.
+      |                                                          ^~"
+
+"match-files.sps:29.59-29.62: error: MATCH FILES: Subcommand LAST may only be specified once.
+   29 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST x/LAST y.
+      |                                                           ^~~~"
+
+"match-files.sps:30.57-30.58: error: MATCH FILES: Syntax error expecting identifier.
+   30 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=**.
+      |                                                         ^~"
+
+"match-files.sps:31.57-31.61: error: MATCH FILES: xyzzy is not a variable name.
+   31 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/DROP=xyzzy.
+      |                                                         ^~~~~"
+
+"match-files.sps:32.52-32.59: error: MATCH FILES: Cannot DROP all variables from dictionary.
+   32 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/DROP=ALL.
+      |                                                    ^~~~~~~~"
+
+"match-files.sps:33.57-33.61: error: MATCH FILES: xyzzy is not a variable name.
+   33 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/KEEP=xyzzy.
+      |                                                         ^~~~~"
+
+"match-files.sps:34.59-34.60: error: MATCH FILES: Syntax error expecting end of command.
+   34 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=x **.
+      |                                                           ^~"
+
+"match-files.sps:35.26-35.32: error: MATCH FILES: BY is required when TABLE is specified.
+   35 | MATCH FILES/FILE='x.sav'/TABLE=*/RENAME(name=name2).
+      |                          ^~~~~~~"
+
+"match-files.sps:36.26-36.29: error: MATCH FILES: BY is required when SORT is specified.
+   36 | MATCH FILES/FILE='x.sav'/SORT/FILE=*/RENAME(name=name2)/SORT.
+      |                          ^~~~"
+
+"match-files.sps:37.58: error: MATCH FILES: Variable name x specified on FIRST subcommand duplicates an existing variable name.
+   37 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/FIRST=x.
+      |                                                          ^"
+
+"match-files.sps:38.57: error: MATCH FILES: Variable name x specified on LAST subcommand duplicates an existing variable name.
+   38 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/LAST=x.
+      |                                                         ^"
+
+"match-files.sps:39.55: error: MATCH FILES: Variable name x specified on IN subcommand duplicates an existing variable name.
+   39 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=name2)/IN=x.
+      |                                                       ^"
+
+"match-files.sps:40.13-40.16: error: MATCH FILES: Syntax error expecting FILE or TABLE.
+   40 | MATCH FILES/KEEP=**.
+      |             ^~~~"
+
+match-files.sps:44: error: MATCH FILES: Variable x has different types in different files.
+
+"match-files.sps:44.13-44.24: note: MATCH FILES: In file `x.sav', x is numeric.
+   44 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x).
+      |             ^~~~~~~~~~~~"
+
+"match-files.sps:44.26-44.31: note: MATCH FILES: In file *, x is a string.
+   44 | MATCH FILES/FILE='x.sav'/FILE=*/RENAME(name=x).
+      |                          ^~~~~~"
+])
+AT_CLEANUP
+
+AT_SETUP([MATCH FILES incompatible encoding warning])
+AT_DATA([match-files.sps], [dnl
+SET LOCALE='utf-8'.
+DATA LIST LIST NOTABLE/name (A6) x.
+BEGIN DATA.
+al,7
+brad,8
+carl,9
+END DATA.
+SAVE OUTFILE='x.sav'.
+
+SET LOCALE='US-ASCII'.
+DATA LIST LIST NOTABLE/name (A6) y.
+BEGIN DATA.
+al,1
+carl,2
+dan,3
+END DATA.
+MATCH FILES/FILE=*/FILE='x.sav'/RENAME(x=y).
+])
+AT_CHECK([pspp match-files.sps], [0], [dnl
+warning: Combining files with different encodings.  String data (such as in
+variable `name') may not be represented correctly.
+
+match-files.sps:17.13-17.18: note: MATCH FILES: File * uses encoding US-ASCII.
+The output will use this encoding.
+   17 | MATCH FILES/FILE=*/FILE='x.sav'/RENAME(x=y).
+      |             ^~~~~~
+
+match-files.sps:17.20-17.31: note: MATCH FILES: File `x.sav' uses encoding
+UTF-8.
+   17 | MATCH FILES/FILE=*/FILE='x.sav'/RENAME(x=y).
+      |                    ^~~~~~~~~~~~
+])
+AT_CLEANUP

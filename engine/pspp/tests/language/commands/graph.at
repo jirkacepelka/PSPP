@@ -1,0 +1,644 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([GRAPH])
+
+AT_SETUP([GRAPH simple scatterplot])
+AT_DATA([scatterplot.sps],[
+* Simple Scatterplot test
+NEW FILE.
+INPUT PROGRAM.
+LOOP #i = 1 to 100.
+COMPUTE Age = RV.NORMAL(40,10).
+END CASE.
+END LOOP.
+END FILE.
+END INPUT PROGRAM.
+
+COMPUTE Size = Age * 3 + 50.
+
+GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH Size.
+
+])
+
+AT_CHECK([pspp -O format=csv scatterplot.sps], [0], [ignore])
+
+AT_CLEANUP
+
+
+AT_SETUP([GRAPH Scatter and Histogram])
+AT_KEYWORDS([slow])
+AT_DATA([scatterlong.sps],[
+NEW FILE.
+INPUT PROGRAM.
+LOOP #i = 1 to 10000.
+COMPUTE Age = RV.NORMAL(40,10).
+COMPUTE CityNum = TRUNC(UNIFORM(2.95)).
+END CASE.
+END LOOP.
+END FILE.
+END INPUT PROGRAM.
+
+COMPUTE Size = Age * 3 + 50 + 50*CityNum.
+
+STRING City (a20).
+
+Recode CityNum
+       (0 = "Madrid")
+       (1 = "Paris")
+       (ELSE = "Stockholm")
+       into City.
+
+ GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH Size
+
+ GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH CityNum
+
+ GRAPH
+    /SCATTERPLOT = CityNum WITH Age
+
+ GRAPH
+    /SCATTERPLOT = CityNum WITH Size
+
+ GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH Size BY City
+
+ GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH Size BY CityNum
+
+ ADD VALUE LABELS
+    /CityNum 1 'Rio' 2 'Tokyo' 0 'Mumbai'.
+
+ GRAPH
+    /SCATTERPLOT(BIVARIATE) = Age WITH Size BY CityNum
+
+ GRAPH
+    /HISTOGRAM = Age.
+
+])
+
+AT_CHECK([pspp -O format=pdf scatterlong.sps], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([GRAPH missing values don't crash])
+AT_DATA([scatter.sps], [dnl
+data list list /x * y *.
+begin data.
+1 0
+2 0
+. 0
+3 1
+4 1
+5 .
+6 1
+end data.
+graph
+      /scatterplot = x with y.
+graph
+      /histogram = x.
+])
+AT_CHECK([pspp -o pspp.pdf scatter.sps], [], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+AT_CLEANUP
+
+AT_SETUP([GRAPH missing=VARIABLE no crash])
+AT_DATA([scatter.sps], [dnl
+data list list /x * y *.
+begin data.
+1 0
+2 0
+. 0
+3 1
+4 1
+5 .
+6 1
+end data.
+graph
+      /scatterplot = x with y
+      /missing = VARIABLE.
+graph
+      /histogram = x
+      /missing = VARIABLE.
+])
+AT_CHECK([pspp -o pspp.pdf scatter.sps], [], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+AT_CLEANUP
+
+AT_SETUP([GRAPH missing value in by variable])
+AT_DATA([scatter.sps], [dnl
+data list list /x * y * z *.
+begin data.
+1 0 9
+2 0 9
+. 0 9
+3 1 .
+4 1 8
+5 . 8
+6 1 8
+end data.
+graph
+      /scatterplot = x with y by z
+      /missing = VARIABLE.
+
+graph
+      /scatterplot = x with y by z.
+
+])
+AT_CHECK([pspp -o pspp.pdf scatter.sps], [0], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+AT_CLEANUP
+
+
+AT_SETUP([GRAPH histogram with null data])
+AT_DATA([null-hist.sps], [dnl
+data list list /x *.
+begin data.
+1109
+.
+end data.
+
+graph
+      /histogram = x.
+
+])
+
+AT_CHECK([pspp -o pspp.pdf null-hist.sps], [0], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+AT_CLEANUP
+
+
+AT_SETUP([GRAPH histogram all missing])
+AT_DATA([null-hist.sps], [dnl
+data list list /x *.
+begin data.
+.
+end data.
+
+graph
+      /histogram = x.
+
+])
+
+AT_CHECK([pspp null-hist.sps], [0], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+AT_CLEANUP
+
+
+
+
+AT_SETUP([GRAPH barcharts])
+AT_CHECK([ln -s $top_srcdir/examples/physiology.sav .], [0])
+AT_CHECK([ln -s $top_srcdir/examples/repairs.sav .], [0])
+
+AT_DATA([barchart.sps], [dnl
+GET FILE="physiology.sav".
+
+GRAPH /BAR = COUNT BY SEX.
+
+GRAPH /BAR = MEAN(height) BY SEX.
+
+NEW FILE.
+
+GET FILE="repairs.sav".
+
+GRAPH /BAR = MEAN (mtbf) BY factory.
+
+COMPUTE  R = TRUNC(RV.UNIFORM(1,5)).
+
+GRAPH /BAR = MEAN (mtbf) BY factory BY R.
+])
+
+AT_CHECK([pspp -o pspp.pdf barchart.sps], [0], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+
+AT_CLEANUP
+
+
+
+AT_SETUP([GRAPH barchart arity])
+
+AT_DATA([barchart.sps], [dnl
+data list notable list /x y z*.
+begin data
+1  1  3
+2  1  4
+3  1  3
+4  1  4
+5  .  3
+6  2  4
+7  2  3
+8  2  4
+9  2  3
+10  2  4
+end data.
+
+* This line is invalid
+GRAPH /BAR = COUNT(x) BY y.
+])
+
+AT_CHECK([pspp -o pspp.pdf barchart.sps], [1], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+
+AT_CLEANUP
+
+
+
+
+AT_SETUP([GRAPH barchart bad syntax])
+
+AT_DATA([barchart.sps], [dnl
+data list notable list /x y z*.
+begin data
+1  1  3
+2  1  4
+3  1  3
+4  1  4
+5  .  3
+6  2  4
+7  2  3
+8  2  4
+9  2  3
+10  2  4
+end data.
+
+* This line is invalid
+GRAPH /BAR = SCROD BY y.
+])
+
+AT_CHECK([pspp -o pspp.pdf barchart.sps], [1], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+
+AT_CLEANUP
+
+
+
+AT_SETUP([GRAPH barchart full])
+
+AT_DATA([barchart.sps], [dnl
+data list notable list /x y z*.
+begin data
+1  1  3
+2  1  4
+3  1  3
+4  1  4
+5  .  3
+6  2  4
+7  2  3
+8  2  4
+9  2  3
+10  2  4
+end data.
+
+* This line is invalid
+GRAPH /BAR = COUNT by z.
+GRAPH /BAR = CUFREQ by z.
+GRAPH /BAR = PCT by z.
+GRAPH /BAR = CUPCT by z.
+
+GRAPH /BAR = MEAN(y) BY z.
+GRAPH /BAR = SUM(y) BY z.
+GRAPH /BAR = MAXIMUM(y) BY z.
+GRAPH /BAR = MINIMUM(y) BY z.
+
+GRAPH /BAR = MEAN(y) BY z BY y.
+GRAPH /BAR = SUM(y) BY z BY y.
+GRAPH /BAR = MAXIMUM(y) BY z BY y.
+GRAPH /BAR = MINIMUM(y) BY z BY y.
+])
+
+AT_CHECK([pspp -o pspp.pdf barchart.sps], [0], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+
+AT_CLEANUP
+
+
+
+
+
+AT_SETUP([GRAPH buggy syntax])
+
+AT_DATA([barchart.sps], [dnl
+data list notable list /x y z*.
+begin data
+1  1  3
+2  1  4
+10  2  4
+end data.
+
+GRAPH /BAR = MINIMUM({) BY z BY y.
+])
+
+AT_CHECK([pspp -o pspp.pdf barchart.sps], [1], [ignore])
+dnl Ignore output -- this is just a no-crash check.
+
+AT_CLEANUP
+
+
+dnl Check that percentages are calculated with respect to the
+dnl proper total.  See bug #56247
+AT_SETUP([GRAPH barchart percentage sub-categorical])
+AT_DATA([barchart.sps], [dnl
+data list list notable /penalty_favopp_x * XYdem_racethW8 * w *.
+begin data.
+1 0 1960
+1 1 376
+2 0 678
+2 1 147
+4 0 368
+4 1 164
+5 0 427
+5 1 274
+. . 1522
+end data.
+
+weight by w.
+
+* crosstabs
+*   /tables=penalty_favopp_x by XYdem_racethW8
+*   /format=AVALUE TABLES PIVOT
+*   /statistics=CHISQ
+*   /cells COUNT COLUMN TOTAL.
+
+graph
+  /bar=pct by penalty_favopp_x
+  .
+
+graph
+  /bar=pct by penalty_favopp_x by XYdem_racethW8
+  .
+])
+
+AT_CHECK([pspp --testing barchart.sps], [0], [dnl
+Graphic: Barchart
+Percentage: 0
+Total Categories: 4
+Primary Categories: 4
+Largest Category: 53.1634
+Total Count: 100
+Y Label: "Percentage"
+Categorical Variables:
+  Var: "penalty_favopp_x"
+Categories:
+  0 "    1.00"
+  1 "    2.00"
+  2 "    4.00"
+  3 "    5.00"
+All Categories:
+Count: 53.1634; Cat: "    1.00"
+Count: 18.7756; Cat: "    2.00"
+Count: 12.1074; Cat: "    4.00"
+Count: 15.9536; Cat: "    5.00"
+
+Graphic: Barchart
+Percentage: 0
+Total Categories: 8
+Primary Categories: 4
+Largest Category: 57.0929
+Total Count: 200
+Y Label: "Percentage"
+Categorical Variables:
+  Var: "penalty_favopp_x"
+  Var: "XYdem_racethW8"
+Categories:
+  0 "    1.00"
+  1 "    2.00"
+  2 "    4.00"
+  3 "    5.00"
+Sub-categories:
+  0 "     .00"
+  1 "    1.00"
+All Categories:
+Count: 57.0929; Cat: "    1.00", "     .00"
+Count: 39.1259; Cat: "    1.00", "    1.00"
+Count: 19.7495; Cat: "    2.00", "     .00"
+Count: 15.2966; Cat: "    2.00", "    1.00"
+Count: 10.7195; Cat: "    4.00", "     .00"
+Count: 17.0656; Cat: "    4.00", "    1.00"
+Count: 12.4381; Cat: "    5.00", "     .00"
+Count: 28.512; Cat: "    5.00", "    1.00"
+
+])
+
+AT_CLEANUP
+
+AT_SETUP([GRAPH syntax errors])
+AT_DATA([graph.sps], [dnl
+DATA LIST LIST NOTABLE/x y z.
+GRAPH/HISTOGRAM=x/HISTOGRAM=y.
+GRAPH/HISTOGRAM(**).
+GRAPH/HISTOGRAM(NORMAL **).
+GRAPH/HISTOGRAM=**.
+GRAPH/HISTOGRAM=x y z.
+GRAPH/HISTOGRAM=x/BAR=y.
+GRAPH/BAR(GROUPED).
+GRAPH/BAR(STACKED).
+GRAPH/BAR(RANGE).
+GRAPH/BAR(**).
+GRAPH/BAR **.
+GRAPH/BAR=**.
+GRAPH/BAR=MEAN **.
+GRAPH/BAR=MEAN(**).
+GRAPH/BAR=MEAN(x**).
+GRAPH/BAR=MEAN(x) **.
+GRAPH/BAR=MEAN(x) BY **.
+GRAPH/BAR=MEAN(x) BY y BY **.
+GRAPH/HISTOGRAM=x/SCATTERPLOT=y.
+GRAPH/SCATTERPLOT(OVERLAY).
+GRAPH/SCATTERPLOT(MATRIX).
+GRAPH/SCATTERPLOT(XYZ).
+GRAPH/SCATTERPLOT(**).
+GRAPH/SCATTERPLOT(BIVARIATE **).
+GRAPH/SCATTERPLOT **.
+GRAPH/SCATTERPLOT=**.
+GRAPH/SCATTERPLOT=x y z.
+GRAPH/SCATTERPLOT=x **.
+GRAPH/SCATTERPLOT=x WITH **.
+GRAPH/SCATTERPLOT=x WITH y z.
+GRAPH/SCATTERPLOT=x WITH y BY **.
+GRAPH/LINE.
+GRAPH/PIE.
+GRAPH/ERRORBAR.
+GRAPH/PARETO.
+GRAPH/TITLE.
+GRAPH/SUBTITLE.
+GRAPH/FOOTNOTE.
+GRAPH/MISSING=**.
+GRAPH/ **.
+])
+AT_CHECK([pspp -O format=csv graph.sps], [1], [dnl
+"graph.sps:2.19-2.27: error: GRAPH: Only one chart type is allowed.
+    2 | GRAPH/HISTOGRAM=x/HISTOGRAM=y.
+      |                   ^~~~~~~~~"
+
+"graph.sps:3.17-3.18: error: GRAPH: Syntax error expecting `NORMAL)'.
+    3 | GRAPH/HISTOGRAM(**).
+      |                 ^~"
+
+"graph.sps:4.17-4.25: error: GRAPH: Syntax error expecting `NORMAL)'.
+    4 | GRAPH/HISTOGRAM(NORMAL **).
+      |                 ^~~~~~~~~"
+
+"graph.sps:5.17-5.18: error: GRAPH: Syntax error expecting variable name.
+    5 | GRAPH/HISTOGRAM=**.
+      |                 ^~"
+
+"graph.sps:6.17-6.21: error: GRAPH: Only one variable is allowed.
+    6 | GRAPH/HISTOGRAM=x y z.
+      |                 ^~~~~"
+
+"graph.sps:7.19-7.21: error: GRAPH: Only one chart type is allowed.
+    7 | GRAPH/HISTOGRAM=x/BAR=y.
+      |                   ^~~"
+
+"graph.sps:8.11-8.17: error: GRAPH: GROUPED is not yet implemented.
+    8 | GRAPH/BAR(GROUPED).
+      |           ^~~~~~~"
+
+"graph.sps:9.11-9.17: error: GRAPH: STACKED is not yet implemented.
+    9 | GRAPH/BAR(STACKED).
+      |           ^~~~~~~"
+
+"graph.sps:10.11-10.15: error: GRAPH: RANGE is not yet implemented.
+   10 | GRAPH/BAR(RANGE).
+      |           ^~~~~"
+
+"graph.sps:11.11-11.12: error: GRAPH: Syntax error expecting SIMPLE, GROUPED, STACKED, or RANGE.
+   11 | GRAPH/BAR(**).
+      |           ^~"
+
+"graph.sps:12.11-12.12: error: GRAPH: Syntax error expecting `='.
+   12 | GRAPH/BAR **.
+      |           ^~"
+
+"graph.sps:13.11-13.12: error: GRAPH: Syntax error expecting COUNT, PCT, CUFREQ, CUPCT, MEAN, SUM, MAXIMUM, or MINIMUM.
+   13 | GRAPH/BAR=**.
+      |           ^~"
+
+"graph.sps:14.16-14.17: error: GRAPH: Syntax error expecting `('.
+   14 | GRAPH/BAR=MEAN **.
+      |                ^~"
+
+"graph.sps:15.16-15.17: error: GRAPH: Syntax error expecting variable name.
+   15 | GRAPH/BAR=MEAN(**).
+      |                ^~"
+
+"graph.sps:16.17-16.18: error: GRAPH: Syntax error expecting `)'.
+   16 | GRAPH/BAR=MEAN(x**).
+      |                 ^~"
+
+"graph.sps:17.19-17.20: error: GRAPH: Syntax error expecting `BY'.
+   17 | GRAPH/BAR=MEAN(x) **.
+      |                   ^~"
+
+"graph.sps:18.22-18.23: error: GRAPH: Syntax error expecting variable name.
+   18 | GRAPH/BAR=MEAN(x) BY **.
+      |                      ^~"
+
+"graph.sps:19.27-19.28: error: GRAPH: Syntax error expecting variable name.
+   19 | GRAPH/BAR=MEAN(x) BY y BY **.
+      |                           ^~"
+
+"graph.sps:20.19-20.29: error: GRAPH: Only one chart type is allowed.
+   20 | GRAPH/HISTOGRAM=x/SCATTERPLOT=y.
+      |                   ^~~~~~~~~~~"
+
+"graph.sps:21.19-21.25: error: GRAPH: OVERLAY is not yet implemented.
+   21 | GRAPH/SCATTERPLOT(OVERLAY).
+      |                   ^~~~~~~"
+
+"graph.sps:22.19-22.24: error: GRAPH: MATRIX is not yet implemented.
+   22 | GRAPH/SCATTERPLOT(MATRIX).
+      |                   ^~~~~~"
+
+"graph.sps:23.19-23.21: error: GRAPH: XYZ is not yet implemented.
+   23 | GRAPH/SCATTERPLOT(XYZ).
+      |                   ^~~"
+
+"graph.sps:24.19-24.20: error: GRAPH: Syntax error expecting BIVARIATE, OVERLAY, MATRIX, or XYZ.
+   24 | GRAPH/SCATTERPLOT(**).
+      |                   ^~"
+
+"graph.sps:25.29-25.30: error: GRAPH: Syntax error expecting `)'.
+   25 | GRAPH/SCATTERPLOT(BIVARIATE **).
+      |                             ^~"
+
+"graph.sps:26.19-26.20: error: GRAPH: Syntax error expecting `='.
+   26 | GRAPH/SCATTERPLOT **.
+      |                   ^~"
+
+"graph.sps:27.19-27.20: error: GRAPH: Syntax error expecting variable name.
+   27 | GRAPH/SCATTERPLOT=**.
+      |                   ^~"
+
+"graph.sps:28.19-28.23: error: GRAPH: Only one variable is allowed.
+   28 | GRAPH/SCATTERPLOT=x y z.
+      |                   ^~~~~"
+
+"graph.sps:29.21-29.22: error: GRAPH: Syntax error expecting `WITH'.
+   29 | GRAPH/SCATTERPLOT=x **.
+      |                     ^~"
+
+"graph.sps:30.26-30.27: error: GRAPH: Syntax error expecting variable name.
+   30 | GRAPH/SCATTERPLOT=x WITH **.
+      |                          ^~"
+
+"graph.sps:31.26-31.28: error: GRAPH: Only one variable is allowed.
+   31 | GRAPH/SCATTERPLOT=x WITH y z.
+      |                          ^~~"
+
+"graph.sps:32.31-32.32: error: GRAPH: Syntax error expecting variable name.
+   32 | GRAPH/SCATTERPLOT=x WITH y BY **.
+      |                               ^~"
+
+"graph.sps:33.7-33.10: error: GRAPH: LINE is not yet implemented.
+   33 | GRAPH/LINE.
+      |       ^~~~"
+
+"graph.sps:34.7-34.9: error: GRAPH: PIE is not yet implemented.
+   34 | GRAPH/PIE.
+      |       ^~~"
+
+"graph.sps:35.7-35.14: error: GRAPH: ERRORBAR is not yet implemented.
+   35 | GRAPH/ERRORBAR.
+      |       ^~~~~~~~"
+
+"graph.sps:36.7-36.12: error: GRAPH: PARETO is not yet implemented.
+   36 | GRAPH/PARETO.
+      |       ^~~~~~"
+
+"graph.sps:37.7-37.11: error: GRAPH: TITLE is not yet implemented.
+   37 | GRAPH/TITLE.
+      |       ^~~~~"
+
+"graph.sps:38.7-38.14: error: GRAPH: SUBTITLE is not yet implemented.
+   38 | GRAPH/SUBTITLE.
+      |       ^~~~~~~~"
+
+"graph.sps:39.7-39.14: error: GRAPH: FOOTNOTE is not yet implemented.
+   39 | GRAPH/FOOTNOTE.
+      |       ^~~~~~~~"
+
+"graph.sps:40.15-40.16: error: GRAPH: Syntax error expecting LISTWISE, VARIABLE, EXCLUDE, INCLUDE, REPORT, or NOREPORT.
+   40 | GRAPH/MISSING=**.
+      |               ^~"
+
+"graph.sps:41.8-41.9: error: GRAPH: Syntax error expecting one of the following: HISTOGRAM, BAR, SCATTERPLOT, LINE, PIE, ERRORBAR, PARETO, TITLE, SUBTITLE, FOOTNOTE, MISSING.
+   41 | GRAPH/ **.
+      |        ^~"
+])
+AT_CLEANUP

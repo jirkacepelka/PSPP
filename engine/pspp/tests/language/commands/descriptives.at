@@ -1,0 +1,648 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([DESCRIPTIVES procedure])
+
+AT_SETUP([DESCRIPTIVES basics])
+AT_DATA([descriptives.sps],
+  [title 'Test DESCRIPTIVES procedure'.
+
+data list / V0 to V16 1-17.
+begin data.
+12128989012389023
+34128080123890128
+56127781237893217
+78127378123793112
+90913781237892318
+37978547878935789
+52878237892378279
+12377912789378932
+26787654347894348
+29137178947891888
+end data.
+
+descript all/stat=all/format=serial.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+V0,1,1-1,F1.0
+V1,1,2-2,F1.0
+V2,1,3-3,F1.0
+V3,1,4-4,F1.0
+V4,1,5-5,F1.0
+V5,1,6-6,F1.0
+V6,1,7-7,F1.0
+V7,1,8-8,F1.0
+V8,1,9-9,F1.0
+V9,1,10-10,F1.0
+V10,1,11-11,F1.0
+V11,1,12-12,F1.0
+V12,1,13-13,F1.0
+V13,1,14-14,F1.0
+V14,1,15-15,F1.0
+V15,1,16-16,F1.0
+V16,1,17-17,F1.0
+
+Table: Descriptive Statistics
+,N,Mean,S.E. Mean,Std Dev,Variance,Kurtosis,S.E. Kurt,Skewness,S.E. Skew,Range,Minimum,Maximum,Sum
+V0,10,3.80,.841,2.658,7.07,-.03,1.33,.89,.69,8.00,1,9,38.00
+V1,10,4.60,.957,3.026,9.16,-1.39,1.33,-.03,.69,9.00,0,9,46.00
+V2,10,4.10,1.159,3.665,13.43,-2.02,1.33,.48,.69,8.00,1,9,41.00
+V3,10,4.10,.875,2.767,7.66,-2.05,1.33,.42,.69,7.00,1,8,41.00
+V4,10,7.00,.471,1.491,2.22,7.15,1.33,-2.52,.69,5.00,3,8,70.00
+V5,10,4.90,1.027,3.247,10.54,-1.40,1.33,-.20,.69,9.00,0,9,49.00
+V6,10,5.90,.795,2.514,6.32,-.29,1.33,-.96,.69,7.00,1,8,59.00
+V7,10,4.70,1.096,3.466,12.01,-1.99,1.33,-.16,.69,9.00,0,9,47.00
+V8,10,4.10,1.100,3.479,12.10,-1.93,1.33,.37,.69,9.00,0,9,41.00
+V9,10,4.30,.870,2.751,7.57,-.87,1.33,.73,.69,8.00,1,9,43.00
+V10,10,5.50,.847,2.677,7.17,-1.84,1.33,-.33,.69,7.00,2,9,55.00
+V11,10,6.50,.778,2.461,6.06,-1.28,1.33,-.89,.69,6.00,3,9,65.00
+V12,10,7.90,.605,1.912,3.66,5.24,1.33,-2.21,.69,6.00,3,9,79.00
+V13,10,4.30,.989,3.129,9.79,-1.25,1.33,.33,.69,9.00,0,9,43.00
+V14,10,3.60,1.013,3.204,10.27,-.96,1.33,.81,.69,9.00,0,9,36.00
+V15,10,3.70,.920,2.908,8.46,-1.35,1.33,.71,.69,7.00,1,8,37.00
+V16,10,6.40,.909,2.875,8.27,-1.14,1.33,-.92,.69,7.00,2,9,64.00
+Valid N (listwise),10,,,,,,,,,,,,
+Missing N (listwise),0,,,,,,,,,,,,
+])
+AT_CLEANUP
+
+m4_define([DESCRIPTIVES_MISSING_DATA],
+  [data list notable / V1 TO V3 1-3.
+mis val v1 to v3 (1).
+begin data.
+111
+
+ 1
+1 1
+112
+123
+234
+end data.
+])
+
+AT_SETUP([DESCRIPTIVES -- excluding missing data])
+AT_DATA([descriptives.sps],
+  [DESCRIPTIVES_MISSING_DATA
+descript all/stat=all/format=serial.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,S.E. Mean,Std Dev,Variance,Kurtosis,S.E. Kurt,Skewness,S.E. Skew,Range,Minimum,Maximum,Sum
+V1,1,2.00,.   ,.   ,.  ,.  ,.  ,.  ,.  ,.00,2,2,2.00
+V2,2,2.50,.500,.707,.50,.  ,.  ,.  ,.  ,1.00,2,3,5.00
+V3,3,3.00,.577,1.000,1.00,.  ,.  ,.00,1.22,2.00,2,4,9.00
+Valid N (listwise),1,,,,,,,,,,,,
+Missing N (listwise),6,,,,,,,,,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- including missing data])
+AT_DATA([descriptives.sps],
+  [DESCRIPTIVES_MISSING_DATA
+descript all/stat=all/format=serial/missing=include.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,S.E. Mean,Std Dev,Variance,Kurtosis,S.E. Kurt,Skewness,S.E. Skew,Range,Minimum,Maximum,Sum
+V1,5,1.20,.200,.447,.20,5.00,2.00,2.24,.91,1.00,1,2,6.00
+V2,5,1.60,.400,.894,.80,.31,2.00,1.26,.91,2.00,1,3,8.00
+V3,5,2.20,.583,1.304,1.70,-1.49,2.00,.54,.91,3.00,1,4,11.00
+Valid N (listwise),4,,,,,,,,,,,,
+Missing N (listwise),3,,,,,,,,,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- excluding missing data listwise])
+AT_DATA([descriptives.sps],
+  [DESCRIPTIVES_MISSING_DATA
+descript all/stat=all/format=serial/missing=listwise.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,S.E. Mean,Std Dev,Variance,Kurtosis,S.E. Kurt,Skewness,S.E. Skew,Range,Minimum,Maximum,Sum
+V1,1,2.00,.   ,.   ,.  ,.  ,.  ,.  ,.  ,.00,2,2,2.00
+V2,1,3.00,.   ,.   ,.  ,.  ,.  ,.  ,.  ,.00,3,3,3.00
+V3,1,4.00,.   ,.   ,.  ,.  ,.  ,.  ,.  ,.00,4,4,4.00
+Valid N (listwise),1,,,,,,,,,,,,
+Missing N (listwise),6,,,,,,,,,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- including missing data listwise])
+AT_DATA([descriptives.sps],
+  [DESCRIPTIVES_MISSING_DATA
+descript all/stat=all/format=serial/missing=listwise include.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,S.E. Mean,Std Dev,Variance,Kurtosis,S.E. Kurt,Skewness,S.E. Skew,Range,Minimum,Maximum,Sum
+V1,4,1.25,.250,.500,.25,4.00,2.62,2.00,1.01,1.00,1,2,5.00
+V2,4,1.75,.479,.957,.92,-1.29,2.62,.85,1.01,2.00,1,3,7.00
+V3,4,2.50,.645,1.291,1.67,-1.20,2.62,.00,1.01,3.00,1,4,10.00
+Valid N (listwise),4,,,,,,,,,,,,
+Missing N (listwise),3,,,,,,,,,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES bug calculating mean only])
+AT_DATA([descriptives.sps],
+  [SET FORMAT F8.3.
+
+data list notable / X 1.
+begin data.
+0
+1
+2
+3
+4
+5
+end data.
+
+descript all/stat=mean.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean
+X,6,2.50
+Valid N (listwise),6,
+Missing N (listwise),0,
+])
+AT_CLEANUP
+
+dnl Git history shows that this was probably a bug in the PSPP
+dnl core regarding multipass procedures, not anything specific
+dnl to DESCRIPTIVES.
+AT_SETUP([DESCRIPTIVES bug with TEMPORARY])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /id * abc *.
+BEGIN DATA.
+1 3.5
+2 2.0
+3 2.0
+4 3.5
+5 3.0
+6 4.0
+7 5.0
+END DATA.
+
+TEMPORARY.
+SELECT IF id < 7 .
+
+DESCRIPTIVES /VAR=abc.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+abc,6,3.0000,.83666,2.00,4.00
+Valid N (listwise),6,,,,
+Missing N (listwise),0,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- Z scores])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /a b.
+BEGIN DATA.
+1 .
+. 50
+2 60
+. .
+3 70
+END DATA.
+
+DESCRIPTIVES /VAR=a b /SAVE.
+LIST.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Mapping of Variables to Z-scores
+Source,Target
+a,Za
+b,Zb
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+a,3,2.0000,1.00000,1.00,3.00
+b,3,60.0000,10.00000,50.00,70.00
+Valid N (listwise),2,,,,
+Missing N (listwise),3,,,,
+
+Table: Data List
+a,b,Za,Zb
+1.00,.  ,-1.00,.  @&t@
+.  ,50.00,.  ,-1.00
+2.00,60.00,.00,.00
+.  ,.  ,.  ,.  @&t@
+3.00,70.00,1.00,1.00
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- Z scores, listwise missing])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /a b.
+BEGIN DATA.
+1 50
+. 5
+2 60
+4 .
+3 70
+. .
+END DATA.
+
+DESCRIPTIVES /VAR=a b /MISSING=LISTWISE /SAVE.
+LIST.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Mapping of Variables to Z-scores
+Source,Target
+a,Za
+b,Zb
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+a,3,2.0000,1.00000,1.00,3.00
+b,3,60.0000,10.00000,50.00,70.00
+Valid N (listwise),3,,,,
+Missing N (listwise),3,,,,
+
+Table: Data List
+a,b,Za,Zb
+1.00,50.00,-1.00,-1.00
+.  ,5.00,.  ,.  @&t@
+2.00,60.00,.00,.00
+4.00,.  ,.  ,.  @&t@
+3.00,70.00,1.00,1.00
+.  ,.  ,.  ,.  @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- Z scores with SPLIT FILE])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /group a b.
+BEGIN DATA.
+1 . .
+1 1 .
+1 . 50
+1 2 60
+1 3 70
+2 100 6000
+2 200 7000
+2 400 9000
+2 500 .
+2 . 10000
+2 . .
+3 . .
+END DATA.
+
+SPLIT FILE BY group.
+DESCRIPTIVES /VAR=a b /SAVE.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt descriptives.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Mapping of Variables to Z-scores
+Source,Target
+a,Za
+b,Zb
+
+Table: Split Values
+Variable,Value
+group,1.00
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+a,3,2.0000,1.00000,1.00,3.00
+b,3,60.0000,10.00000,50.00,70.00
+Valid N (listwise),2,,,,
+Missing N (listwise),3,,,,
+
+Table: Split Values
+Variable,Value
+group,2.00
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+a,4,300.0000,182.57419,100.00,500.00
+b,4,8000.0000,1825.74186,6000.00,10000.00
+Valid N (listwise),3,,,,
+Missing N (listwise),3,,,,
+
+Table: Split Values
+Variable,Value
+group,3.00
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+a,0,.    ,.     ,.  ,.  @&t@
+b,0,.    ,.     ,.  ,.  @&t@
+Valid N (listwise),0,,,,
+Missing N (listwise),1,,,,
+
+Table: Split Values
+Variable,Value
+group,1.00
+
+Table: Data List
+group,a,b,Za,Zb
+1.00,.  ,.  ,.  ,.  @&t@
+1.00,1.00,.  ,-1.00,.  @&t@
+1.00,.  ,50.00,.  ,-1.00
+1.00,2.00,60.00,.00,.00
+1.00,3.00,70.00,1.00,1.00
+
+Table: Split Values
+Variable,Value
+group,2.00
+
+Table: Data List
+group,a,b,Za,Zb
+2.00,100.00,6000.00,-1.10,-1.10
+2.00,200.00,7000.00,-.55,-.55
+2.00,400.00,9000.00,.55,.55
+2.00,500.00,.  ,1.10,.  @&t@
+2.00,.  ,10000.00,.  ,1.10
+2.00,.  ,.  ,.  ,.  @&t@
+
+Table: Split Values
+Variable,Value
+group,3.00
+
+Table: Data List
+group,a,b,Za,Zb
+3.00,.  ,.  ,.  ,.  @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- Z scores with TEMPORARY (1)])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /id abc.
+BEGIN DATA.
+1 3.5
+2 2.0
+3 2.0
+4 3.5
+5 3.0
+5.5 .
+6 4.0
+7 5.0
+8 .
+END DATA.
+
+TEMPORARY.
+SELECT IF id < 7 .
+
+DESCRIPTIVES /VAR=abc/SAVE.
+LIST.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Mapping of Variables to Z-scores
+Source,Target
+abc,Zabc
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+abc,6,3.0000,.83666,2.00,4.00
+Valid N (listwise),6,,,,
+Missing N (listwise),1,,,,
+
+Table: Data List
+id,abc,Zabc
+1.00,3.50,.60
+2.00,2.00,-1.20
+3.00,2.00,-1.20
+4.00,3.50,.60
+5.00,3.00,.00
+5.50,.  ,.  @&t@
+6.00,4.00,1.20
+7.00,5.00,.  @&t@
+8.00,.  ,.  @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- Z scores with TEMPORARY (2)])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /id abc.
+DATA LIST LIST NOTABLE /x.
+BEGIN DATA.
+1
+.
+2
+3
+4
+5
+6
+7
+END DATA.
+
+COMPUTE y = x * 2.
+TEMPORARY.
+SELECT IF x < 7 .
+COMPUTE z = x * 2.
+
+DESCRIPTIVES /VAR=x y z/SAVE.
+LIST.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Mapping of Variables to Z-scores
+Source,Target
+x,Zx
+y,Zy
+z,Zz
+
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+x,6,3.5000,1.87083,1.00,6.00
+y,6,7.0000,3.74166,2.00,12.00
+z,6,7.0000,3.74166,2.00,12.00
+Valid N (listwise),6,,,,
+Missing N (listwise),0,,,,
+
+Table: Data List
+x,y,Zx,Zy,Zz
+1.00,2.00,-1.34,-1.34,-1.34
+.  ,.  ,.  ,.  ,.  @&t@
+2.00,4.00,-.80,-.80,-.80
+3.00,6.00,-.27,-.27,-.27
+4.00,8.00,.27,.27,.27
+5.00,10.00,.80,.80,.80
+6.00,12.00,1.34,1.34,1.34
+7.00,14.00,.  ,.  ,.  @&t@
+])
+AT_CLEANUP
+
+dnl This test was supplied by Mindaugus as part of the report for bug #42012.
+AT_SETUP([DESCRIPTIVES -- Z scores with FILTER])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST/filter1 filter2 x.
+BEGIN DATA.
+0,0,.
+0,0,300
+0,1,200
+0,1,100
+1,0,5
+1,0,4
+1,0,.
+1,1,3
+1,1,.
+1,1,2
+1,1,1
+END DATA.
+
+FILTER OFF.
+SPLIT FILE OFF.
+DESCRIPTIVES /VARIABLES=X /SAVE.
+
+FILTER BY filter1.
+SPLIT FILE OFF.
+DESCRIPTIVES /VARIABLES=X /SAVE.
+
+FILTER OFF.
+SORT CASES BY filter1.
+SPLIT FILE BY filter1.
+DESCRIPTIVES /VARIABLES=X /SAVE.
+
+FILTER BY filter2.
+SPLIT FILE BY filter1.
+DESCRIPTIVES /VARIABLES=X /SAVE.
+
+FILTER OFF.
+SORT CASES BY filter1 filter2.
+SPLIT FILE BY filter1 filter2.
+DESCRIPTIVES /VARIABLES=X /SAVE.
+EXECUTE.
+
+SPLIT FILE OFF.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv descriptives.sps])
+AT_CHECK([sed -n '/Table: Data List/,$p' < pspp.csv], [0], [dnl
+Table: Data List
+filter1,filter2,x,Zx,ZSC001,ZSC002,ZSC003,ZSC004
+.00,.00,.  ,.  ,.  ,.  ,.  ,.  @&t@
+.00,.00,300.00,1.94,.  ,1.00,.  ,.  @&t@
+.00,1.00,200.00,1.07,.  ,.00,.71,.71
+.00,1.00,100.00,.20,.  ,-1.00,-.71,-.71
+1.00,.00,5.00,-.62,1.26,1.26,.  ,.71
+1.00,.00,4.00,-.63,.63,.63,.  ,-.71
+1.00,.00,.  ,.  ,.  ,.  ,.  ,.  @&t@
+1.00,1.00,3.00,-.64,.00,.00,1.00,1.00
+1.00,1.00,.  ,.  ,.  ,.  ,.  ,.  @&t@
+1.00,1.00,2.00,-.65,-.63,-.63,.00,.00
+1.00,1.00,1.00,-.66,-1.26,-1.26,-1.00,-1.00
+])
+AT_CLEANUP
+
+dnl This is an example from doc/tutorial.texi
+dnl So if the results of this have to be changed in any way,
+dnl make sure to update that file.
+AT_SETUP([DESCRIPTIVES tutorial example])
+cp $top_srcdir/examples/physiology.sav .
+AT_DATA([descriptives.sps], [dnl
+GET FILE='physiology.sav'.
+DESCRIPTIVES sex, weight, height.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt descriptives.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+Sex of subject  ,40,.45,.504,0,1
+Weight in kilograms ,40,72.120,26.7049,-55.6,92.1
+Height in millimeters   ,40,1677.12,262.869,179,1903
+Valid N (listwise),40,,,,
+Missing N (listwise),0,,,,
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES syntax errors])
+AT_DATA([descriptives.sps], [dnl
+DATA LIST LIST NOTABLE /x y z.
+DESCRIPTIVES MISSING=**.
+DESCRIPTIVES FORMAT=**.
+DESCRIPTIVES STATISTICS=**.
+DESCRIPTIVES SORT=**.
+DESCRIPTIVES SORT=NAME (**).
+DESCRIPTIVES SORT=NAME (A **).
+DESCRIPTIVES **.
+DESCRIPTIVES x/ **.
+DESCRIPTIVES MISSING=INCLUDE.
+TEMPORARY.
+NUMERIC Zx ZSC001 TO ZSC099 STDZ01 TO STDZ09 ZZZZ01 TO ZZZZ09 ZQZQ01 TO ZQZQ09.
+DESCRIPTIVES x/SAVE.
+])
+AT_CHECK([pspp descriptives.sps], [1], [dnl
+descriptives.sps:2.22-2.23: error: DESCRIPTIVES: Syntax error expecting
+VARIABLE, LISTWISE, or INCLUDE.
+    2 | DESCRIPTIVES MISSING=**.
+      |                      ^~
+
+descriptives.sps:3.21-3.22: error: DESCRIPTIVES: Syntax error expecting LABELS,
+NOLABELS, INDEX, NOINDEX, LINE, or SERIAL.
+    3 | DESCRIPTIVES FORMAT=**.
+      |                     ^~
+
+descriptives.sps:5.19-5.20: error: DESCRIPTIVES: Syntax error expecting
+variable name.
+    5 | DESCRIPTIVES SORT=**.
+      |                   ^~
+
+descriptives.sps:6.25-6.26: error: DESCRIPTIVES: Syntax error expecting A or D.
+    6 | DESCRIPTIVES SORT=NAME (**).
+      |                         ^~
+
+descriptives.sps:7.27-7.28: error: DESCRIPTIVES: Syntax error expecting `)'.
+    7 | DESCRIPTIVES SORT=NAME (A **).
+      |                           ^~
+
+descriptives.sps:8.14-8.15: error: DESCRIPTIVES: Syntax error expecting
+variable name.
+    8 | DESCRIPTIVES **.
+      |              ^~
+
+descriptives.sps:9.17-9.18: error: DESCRIPTIVES: Syntax error expecting
+MISSING, SAVE, FORMAT, STATISTICS, SORT, or VARIABLES.
+    9 | DESCRIPTIVES x/ **.
+      |                 ^~
+
+descriptives.sps:10: error: DESCRIPTIVES: No variables specified.
+
+descriptives.sps:13: error: DESCRIPTIVES: Ran out of generic names for Z-score
+variables.  There are only 126 generic names: ZSC001-ZSC099, STDZ01-STDZ09,
+ZZZZ01-ZZZZ09, ZQZQ01-ZQZQ09.
+])
+AT_CLEANUP
+
+AT_SETUP([DESCRIPTIVES -- listwise missing N])
+AT_DATA([descriptives.sps],
+  [DATA LIST LIST NOTABLE /x y
+BEGIN DATA.
+1 1
+2 0
+  3
+0 4
+END DATA.
+MISSING VALUES x y (0).
+DESCRIPTIVES x y.
+])
+AT_CHECK([pspp -O format=csv descriptives.sps], [0], [dnl
+Table: Descriptive Statistics
+,N,Mean,Std Dev,Minimum,Maximum
+x,3,2.0000,1.00000,1.00,3.00
+y,2,2.5000,2.12132,1.00,4.00
+Valid N (listwise),1,,,,
+Missing N (listwise),3,,,,
+])
+AT_CLEANUP

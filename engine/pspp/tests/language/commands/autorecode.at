@@ -1,0 +1,606 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([AUTORECODE procedure])
+
+AT_SETUP([AUTORECODE multiple missing values])
+AT_DATA([autorecode.sps],
+  [DATA LIST LIST NOTABLE /u v w x y z (F2.0).
+BEGIN DATA.
+11 11 11 11 11 11
+12 12 12 12 12 12
+13 13 13 13 13 13
+14 14 14 14 14 14
+15 15 15 15 15 15
+16 16 16 16 16 16
+END DATA.
+
+MISSING VALUES u (11)
+	       v (11, 12)
+               w (11, 12, 13)
+	       x (11 THRU 14)
+	       y (11 THRU 15)
+	       z (11 THRU 16).
+
+AUTORECODE u v w x y z INTO a b c d e f/print.
+LIST.
+DISPLAY VARIABLES/VARIABLES=a TO f.
+])
+AT_CHECK([pspp -O format=csv autorecode.sps], [0], [dnl
+Table: Recoding u into a.
+Old Value,New Value,Value Label
+12,1,12
+13,2,13
+14,3,14
+15,4,15
+16,5,16
+11,6,11
+
+Table: Recoding v into b.
+Old Value,New Value,Value Label
+13,1,13
+14,2,14
+15,3,15
+16,4,16
+11,5,11
+12,6,12
+
+Table: Recoding w into c.
+Old Value,New Value,Value Label
+14,1,14
+15,2,15
+16,3,16
+11,4,11
+12,5,12
+13,6,13
+
+Table: Recoding x into d.
+Old Value,New Value,Value Label
+15,1,15
+16,2,16
+11,3,11
+12,4,12
+13,5,13
+14,6,14
+
+Table: Recoding y into e.
+Old Value,New Value,Value Label
+16,1,16
+11,2,11
+12,3,12
+13,4,13
+14,5,14
+15,6,15
+
+Table: Recoding z into f.
+Old Value,New Value,Value Label
+11,1,11
+12,2,12
+13,3,13
+14,4,14
+15,5,15
+16,6,16
+
+Table: Data List
+u,v,w,x,y,z,a,b,c,d,e,f
+11,11,11,11,11,11,6,5,4,3,2,1
+12,12,12,12,12,12,1,6,5,4,3,2
+13,13,13,13,13,13,2,1,6,5,4,3
+14,14,14,14,14,14,3,2,1,6,5,4
+15,15,15,15,15,15,4,3,2,1,6,5
+16,16,16,16,16,16,5,4,3,2,1,6
+
+Table: Variables
+Name,Position,Print Format,Write Format,Missing Values
+a,7,F1.0,F1.0,6
+b,8,F1.0,F1.0,5; 6
+c,9,F1.0,F1.0,4; 5; 6
+d,10,F1.0,F1.0,3 THRU 6
+e,11,F1.0,F1.0,2 THRU 6
+f,12,F1.0,F1.0,1 THRU 6
+])
+AT_CLEANUP
+
+AT_SETUP([AUTORECODE numbers and short strings])
+AT_DATA([autorecode.sps],
+  [data list /X 1-5(a) Y 7.
+begin data.
+lasdj 1
+asdfk 0
+asdfj 2
+asdfj 1
+asdfk 2
+asdfj 9
+lajks 9
+asdfk 0
+asdfk 1
+end data.
+
+missing values x('asdfk') y(9).
+
+autorecode x y into A B/descend/print.
+
+list.
+compute Z=trunc(y/2).
+formats z(F1.0).
+autorecode z into W.
+list.
+])
+AT_CHECK([pspp -O format=csv autorecode.sps], [0],
+  [Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+X,1,1-5,A5
+Y,1,7-7,F1.0
+
+Table: Recoding X into A.
+Old Value,New Value,Value Label
+lasdj,1,lasdj
+lajks,2,lajks
+asdfj,3,asdfj
+asdfk,4,asdfk
+
+Table: Recoding Y into B.
+Old Value,New Value,Value Label
+2,1,2
+1,2,1
+0,3,0
+9,4,9
+
+Table: Data List
+X,Y,A,B
+lasdj,1,1,2
+asdfk,0,4,3
+asdfj,2,3,1
+asdfj,1,3,2
+asdfk,2,4,1
+asdfj,9,3,4
+lajks,9,2,4
+asdfk,0,4,3
+asdfk,1,4,2
+
+Table: Data List
+X,Y,A,B,Z,W
+lasdj,1,1,2,0,1
+asdfk,0,4,3,0,1
+asdfj,2,3,1,1,2
+asdfj,1,3,2,0,1
+asdfk,2,4,1,1,2
+asdfj,9,3,4,.,.
+lajks,9,2,4,.,.
+asdfk,0,4,3,0,1
+asdfk,1,4,2,0,1
+])
+AT_CLEANUP
+
+AT_SETUP([AUTORECODE long strings and check the value labels])
+AT_DATA([ar.sps],
+  [data list notable list /s (a16) x (f1.0).
+begin data.
+widgets      1
+thingummies  2
+oojars       3
+widgets      4
+oojars       5
+thingummies  6
+oojimiflips  7
+end data.
+
+variable labels s 'tracking my stuff'.
+value labels /s 'thingummies' 'Funny sticky things'.
+
+autorecode s into new/print.
+
+list.
+
+display dictionary/variables=new.
+])
+
+AT_CHECK([pspp -O format=csv ar.sps], [0],
+  [Table: Recoding s into new (tracking my stuff).
+Old Value,New Value,Value Label
+oojars,1,oojars
+oojimiflips,2,oojimiflips
+thingummies,3,Funny sticky things
+widgets,4,widgets
+
+Table: Data List
+s,x,new
+widgets,1,4
+thingummies,2,3
+oojars,3,1
+widgets,4,4
+oojars,5,1
+thingummies,6,3
+oojimiflips,7,2
+
+Table: Variables
+Name,Position,Label,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+new,3,tracking my stuff,Nominal,Input,8,Right,F1.0,F1.0
+
+Table: Value Labels
+Variable Value,,Label
+tracking my stuff,1,oojars
+,2,oojimiflips
+,3,Funny sticky things
+,4,widgets
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([AUTORECODE group subcommand])
+AT_DATA([ar-group.sps],
+[data list notable list /x y (f8.0).
+begin data.
+11 10
+12 12
+13 15
+14 11
+15 12
+16 18
+end data.
+
+missing values y (12).
+
+autorecode
+	x y into a b
+	/group
+	/print.
+
+list.
+display variables /variables=a b.
+])
+
+AT_CHECK([pspp -O format=csv ar-group.sps], [0],
+[Table: Recoding grouped variables.
+Old Value,New Value,Value Label
+10,1,10
+11,2,11
+13,3,13
+14,4,14
+15,5,15
+16,6,16
+18,7,18
+12,8,12
+
+Table: Data List
+x,y,a,b
+11,10,2,1
+12,12,8,8
+13,15,3,5
+14,11,4,2
+15,12,5,8
+16,18,6,7
+
+Table: Variables
+Name,Position,Print Format,Write Format,Missing Values
+a,3,F1.0,F1.0,8
+b,4,F1.0,F1.0,8
+])
+
+AT_CLEANUP
+
+
+
+AT_SETUP([AUTORECODE group - string variables])
+AT_DATA([strings.sps],
+[data list notable list /x (a8) y (a16).
+begin data.
+fred bert
+charlie "         "
+delta echo
+"      " windows
+" "  nothing
+end data.
+
+
+autorecode x y into a b
+	/group
+	/print.
+
+delete variables x y.
+
+list.
+
+])
+
+AT_CHECK([pspp -O format=csv strings.sps], [0],
+[Table: Recoding grouped variables.
+Old Value,New Value,Value Label
+,1,
+bert,2,bert
+charlie,3,charlie
+delta,4,delta
+echo,5,echo
+fred,6,fred
+nothing,7,nothing
+windows,8,windows
+
+Table: Data List
+a,b
+6,2
+3,1
+4,5
+1,8
+1,7
+])
+
+AT_CLEANUP
+
+
+dnl Tests for a crash which happened when the /GROUP subcommand
+dnl appeared with string variables of different widths.
+AT_SETUP([AUTORECODE group vs. strings])
+AT_DATA([ar-strings.sps],
+  [data list notable list /a (a12) b (a6).
+begin data.
+one    nine
+two    ten
+three  eleven
+four   nought
+end data.
+
+autorecode a b into x y
+	/group
+	/print.
+
+list.
+])
+
+AT_CHECK([pspp -O format=csv ar-strings.sps], [0], [dnl
+Table: Recoding grouped variables.
+Old Value,New Value,Value Label
+eleven,1,eleven
+four,2,four
+nine,3,nine
+nought,4,nought
+one,5,one
+ten,6,ten
+three,7,three
+two,8,two
+
+Table: Data List
+a,b,x,y
+one,nine,5,3
+two,ten,8,6
+three,eleven,7,1
+four,nought,2,4
+])
+
+AT_CLEANUP
+
+
+
+AT_SETUP([AUTORECODE /blank])
+
+AT_DATA([auto-blank.sps],  [dnl
+data list notable list /x (a8) y (f8.0) z (a16).
+begin data.
+one   2  fred
+two   4  ""
+""    4  fred
+""    2  charliebrown
+three 2  charliebrown
+end data.
+
+autorecode variables x y z into a b c  /blank=missing /print.
+
+list a b c y.
+])
+
+AT_CHECK([pspp -O format=csv auto-blank.sps], [0], [dnl
+Table: Recoding x into a.
+Old Value,New Value,Value Label
+one,1,one
+three,2,three
+two,3,two
+
+Table: Recoding y into b.
+Old Value,New Value,Value Label
+2,1,2
+4,2,4
+
+Table: Recoding z into c.
+Old Value,New Value,Value Label
+charliebrown,1,charliebrown
+fred,2,fred
+
+Table: Data List
+a,b,c,y
+1,1,2,2
+3,2,.,4
+.,2,2,4
+.,1,1,2
+2,1,1,2
+])
+
+AT_CLEANUP
+
+dnl AUTORECODE had a use-after-free error when TEMPORARY was in use.
+dnl Bug #32757.
+AT_SETUP([AUTORECODE with TEMPORARY])
+AT_DATA([autorecode.sps],
+  [data list /X 1-5(a) Y 7.
+begin data.
+lasdj 1
+asdfk 0
+asdfj 2
+asdfj 1
+asdfk 2
+asdfj 9
+lajks 9
+asdfk 0
+asdfk 1
+end data.
+
+temporary.
+select if y > 1.
+autorecode x y into A B/descend/print.
+list.
+])
+AT_CHECK([pspp -O format=csv autorecode.sps], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+X,1,1-5,A5
+Y,1,7-7,F1.0
+
+"autorecode.sps:16.1-16.10: warning: AUTORECODE: AUTORECODE ignores TEMPORARY.  Temporary transformations will be made permanent.
+   16 | autorecode x y into A B/descend/print.
+      | ^~~~~~~~~~"
+
+Table: Recoding X into A.
+Old Value,New Value,Value Label
+lajks,1,lajks
+asdfk,2,asdfk
+asdfj,3,asdfj
+
+Table: Recoding Y into B.
+Old Value,New Value,Value Label
+9,1,9
+2,2,2
+
+Table: Data List
+X,Y,A,B
+asdfj,2,3,2
+asdfk,2,2,2
+asdfj,9,3,1
+lajks,9,1,1
+])
+AT_CLEANUP
+
+dnl AUTORECODE had a use-after-free error when scratch variables
+dnl caused the variables being recoded to change indexes.
+dnl See bug report at:
+dnl https://lists.gnu.org/archive/html/bug-gnu-pspp/2024-02/msg00011.html
+AT_SETUP([AUTORECODE with scratch variables])
+AT_DATA([autorecode.sps],
+  [data list /X0 1-5(a) Y0 7.
+begin data.
+lasdj 1
+asdfk 0
+asdfj 2
+asdfj 1
+asdfk 2
+asdfj 9
+lajks 9
+asdfk 0
+asdfk 1
+end data.
+compute #foo = 0.
+compute #bar = 1.
+compute #baz = 2.
+compute #quux = 3.
+string X(a5).
+numeric Y(f1.0).
+compute x = x0.
+compute y = y0.
+autorecode x y into A B/descend/print.
+list x y a b.
+])
+AT_CHECK([pspp -O format=csv autorecode.sps], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+X0,1,1-5,A5
+Y0,1,7-7,F1.0
+
+Table: Recoding X into A.
+Old Value,New Value,Value Label
+lasdj,1,lasdj
+lajks,2,lajks
+asdfk,3,asdfk
+asdfj,4,asdfj
+
+Table: Recoding Y into B.
+Old Value,New Value,Value Label
+9,1,9
+2,2,2
+1,3,1
+0,4,0
+
+Table: Data List
+X,Y,A,B
+lasdj,1,1,3
+asdfk,0,3,4
+asdfj,2,4,2
+asdfj,1,4,3
+asdfk,2,3,2
+asdfj,9,4,1
+lajks,9,2,1
+asdfk,0,3,4
+asdfk,1,3,3
+])
+AT_CLEANUP
+
+dnl For compatibility, make sure that /INTO (with leading slash) is accepted
+dnl (bug #48762)
+AT_SETUP([AUTORECODE with /INTO])
+AT_DATA([autorecode.sps],
+  [data list list notable /x (f8.0).
+begin data.
+1
+8
+-901
+4
+1
+99
+8
+end data.
+
+autorecode x  /into y /print.
+
+list.
+])
+AT_CHECK([pspp -O format=csv autorecode.sps], [0],
+[Table: Recoding x into y.
+Old Value,New Value,Value Label
+-901,1,-901
+1,2,1
+4,3,4
+8,4,8
+99,5,99
+
+Table: Data List
+x,y
+1,2
+8,4
+-901,1
+4,3
+1,2
+99,5
+8,4
+])
+AT_CLEANUP
+
+
+AT_SETUP([AUTORECODE with /BLANK without specifier])
+
+AT_DATA([autorecode.sps], [data list notable list /x (a18).
+begin data
+one
+two
+three
+end data.
+
+* /BLANK should be either =MISSING or =VALID
+autorecode x /into y
+ /blank
+
+execute.
+])
+
+AT_CHECK([pspp -O format=csv autorecode.sps], [1], [ignore])
+
+AT_CLEANUP

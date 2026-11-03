@@ -1,0 +1,399 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([LOOP])
+
+m4_define([LOOP_DATA], [dnl
+data list notable /x 1 y 2 z 3.
+begin data.
+121
+252
+393
+404
+end data.
+])
+
+AT_SETUP([LOOP with index])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+loop #i=x to y by z.
+print /#i.
+end loop.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+2.00 @&t@
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+3.00 @&t@
+6.00 @&t@
+9.00 @&t@
+--------
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with IF condition])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+compute #j=x.
+loop if #j <= y.
+print /#j.
+compute #j = #j + z.
+end loop.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+2.00 @&t@
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+3.00 @&t@
+6.00 @&t@
+9.00 @&t@
+--------
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with END IF condition])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+compute #k=x.
+loop.
+print /#k.
+compute #k = #k + z.
+end loop if #k > y.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+2.00 @&t@
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+3.00 @&t@
+6.00 @&t@
+9.00 @&t@
+--------
+4.00 @&t@
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with index and IF based on index])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+loop #m=x to y by z if #m < 4.
+print /#m.
+end loop.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+2.00 @&t@
+--------
+2.00 @&t@
+--------
+3.00 @&t@
+--------
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with index and END IF based on index])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+loop #n=x to y by z.
+print /#n.
+end loop if #n >= 4.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+2.00 @&t@
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+3.00 @&t@
+6.00 @&t@
+--------
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with index and IF and END IF based on index])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+loop #o=x to y by z if mod(#o,2) = 0.
+print /#o.
+end loop if #o >= 4.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+--------
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with no conditions containing BREAK])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+compute #p = x.
+loop.
+print /#p.
+compute #p = #p + z.
+do if #p >= y.
+break.
+end if.
+end loop.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1.00 @&t@
+--------
+2.00 @&t@
+4.00 @&t@
+--------
+3.00 @&t@
+6.00 @&t@
+--------
+4.00 @&t@
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with no conditions that ends due to MXLOOPS])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+set mxloops=2.
+loop.
+compute #p = #p + 1.
+print /x #p.
+end loop.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1     1.00 @&t@
+1     2.00 @&t@
+--------
+2     3.00 @&t@
+2     4.00 @&t@
+--------
+3     5.00 @&t@
+3     6.00 @&t@
+--------
+4     7.00 @&t@
+4     8.00 @&t@
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP with IF condition that ends due to MXLOOPS])
+AT_DATA([loop.sps], [dnl
+LOOP_DATA
+set mxloops=3.
+compute #p = x.
+loop.
+print /x #p.
+compute #p = #p + 1.
+end loop if #p >= 6.
+print/'--------'.
+execute.
+])
+AT_CHECK([pspp -o pspp.csv loop.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+1     1.00 @&t@
+1     2.00 @&t@
+1     3.00 @&t@
+--------
+2     2.00 @&t@
+2     3.00 @&t@
+2     4.00 @&t@
+--------
+3     3.00 @&t@
+3     4.00 @&t@
+3     5.00 @&t@
+--------
+4     4.00 @&t@
+4     5.00 @&t@
+--------
+])
+AT_CLEANUP
+
+AT_SETUP([LOOP negative])
+AT_DATA([loop.sps], [dnl
+DATA LIST NOTABLE /x 1.
+BREAK.
+END LOOP.
+
+LOOP A=1 TO 5 B=1 TO 5.
+END LOOP.
+LOOP 5.
+END LOOP.
+LOOP B !.
+END LOOP.
+LOOP B=!.
+END LOOP.
+LOOP A=1 TO !.
+END LOOP.
+LOOP A=1 BY !.
+END LOOP.
+LOOP A=1 TO 5 BY 5 TO !.
+END LOOP.
+LOOP A=1 BY 5 TO 10 BY !.
+END LOOP.
+LOOP A=1.
+END LOOP.
+LOOP !.
+END LOOP.
+
+LOOP IF 1 IF 0.
+END LOOP.
+
+LOOP IF !.
+END LOOP.
+
+LOOP.
+END LOOP IF !.
+
+LOOP.
+END LOOP !.
+
+LOOP.
+])
+AT_CHECK([pspp loop.sps], 1, [dnl
+loop.sps:2.1-2.5: error: BREAK: This command cannot appear outside LOOP...END
+LOOP.
+    2 | BREAK.
+      | ^~~~~
+
+loop.sps:3.1-3.8: error: END LOOP: This command cannot appear outside
+LOOP...END LOOP.
+    3 | END LOOP.
+      | ^~~~~~~~
+
+loop.sps:5.15: error: LOOP: Only one index clause may be specified.
+    5 | LOOP A=1 TO 5 B=1 TO 5.
+      |               ^
+
+loop.sps:7.6: error: LOOP: Syntax error expecting identifier.
+    7 | LOOP 5.
+      |      ^
+
+loop.sps:9.8: error: LOOP: Syntax error expecting `='.
+    9 | LOOP B !.
+      |        ^
+
+loop.sps:11.8: error: LOOP: Syntax error parsing expression.
+   11 | LOOP B=!.
+      |        ^
+
+loop.sps:13.13: error: LOOP: Syntax error parsing expression.
+   13 | LOOP A=1 TO !.
+      |             ^
+
+loop.sps:15.13: error: LOOP: Syntax error parsing expression.
+   15 | LOOP A=1 BY !.
+      |             ^
+
+loop.sps:17.20-17.21: error: LOOP: Subcommand TO may only be specified once.
+   17 | LOOP A=1 TO 5 BY 5 TO !.
+      |                    ^~
+
+loop.sps:19.21-19.22: error: LOOP: Subcommand BY may only be specified once.
+   19 | LOOP A=1 BY 5 TO 10 BY !.
+      |                     ^~
+
+loop.sps:21.1-21.9: error: LOOP: Required subcommand TO was not specified.
+   21 | LOOP A=1.
+      | ^~~~~~~~~
+
+loop.sps:23.6: error: LOOP: Syntax error expecting identifier.
+   23 | LOOP !.
+      |      ^
+
+loop.sps:26.11-26.12: error: LOOP: Subcommand IF may only be specified once.
+   26 | LOOP IF 1 IF 0.
+      |           ^~
+
+loop.sps:29.9: error: LOOP: Syntax error parsing expression.
+   29 | LOOP IF !.
+      |         ^
+
+loop.sps:33.13: error: LOOP: Syntax error parsing expression.
+   33 | END LOOP IF !.
+      |             ^
+
+loop.sps:36.10: error: LOOP: Syntax error expecting end of command.
+   36 | END LOOP !.
+      |          ^
+
+error: LOOP: At end of input: Syntax error expecting END LOOP.
+])
+AT_CLEANUP
+
+
+AT_SETUP([LOOP without end])
+
+AT_DATA([xloop.sps], [dnl
+DATA LIST FREE / a.
+LOOP b
+BEGINefghi jk
+NEW FILE.
+VALUE LABELS p.
+])
+
+AT_CHECK([pspp -O format=csv xloop.sps],[1],
+["xloop.sps:3.1-3.10: error: LOOP: Syntax error expecting `='.
+    3 | BEGINefghi jk
+      | ^~~~~~~~~~"
+
+"xloop.sps:5.14: error: VALUE LABELS: p is not a variable name.
+    5 | VALUE LABELS p.
+      |              ^"
+
+error: LOOP: At end of input: Syntax error expecting END LOOP.
+])
+
+AT_CLEANUP

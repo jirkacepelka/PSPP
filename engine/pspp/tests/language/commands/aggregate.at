@@ -1,0 +1,531 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([AGGREGATE procedure])
+
+dnl CHECK_AGGREGATE(OUTFILE, SORT, MISSING)
+dnl
+dnl Checks the AGGREGATE procedure with the specified combination of:
+dnl
+dnl - OUTFILE: One of "dataset", "active", or "external" according to
+dnl   where AGGREGATE's output should be directed.
+dnl
+dnl - SORT: Either "presorted" or "unsorted" according to whether
+dnl   AGGREGATE should received presorted input.
+dnl
+dnl - MISSING: Either "itemwise" or "columnwise" according to the basis
+dnl   on which missing values should be eliminated.
+dnl
+m4_define([CHECK_AGGREGATE], [
+  AT_SETUP([AGGREGATE $2 data to $1 file, $3 missing])
+  AT_DATA([aggregate.data],
+  [2 42
+1001
+4 41
+3112
+1112
+2661
+1221
+2771
+1331
+1441
+2881
+1551
+])
+  AT_DATA([aggregate.sps],
+    [DATA LIST NOTABLE FILE='aggregate.data' /G N 1-2 S 3(a) W 4.
+WEIGHT BY w.
+MISSING VALUES n(4) s('4').
+m4_if([$1], [dataset], [DATASET DECLARE aggregate.])
+m4_if([$2], [presorted], [SORT CASES BY g.])
+AGGREGATE dnl
+m4_if([$1], [active], [OUTFILE=*],
+      [$1], [external], [OUTFILE='aggregate.sys'],
+      [outfile=aggregate]) dnl
+m4_if([$3], [columnwise], [/MISSING=COLUMNWISE])
+m4_if([$2], [presorted], [/PRESORTED]) dnl
+        /DOCUMENT
+        /BREAK=g
+        /N = n
+        /NI = n./
+        NU = nu
+        /NUI = nu./
+        NFGT2 = fgt(n, 2)
+        /NFGT2I = fgt.(n, 2)
+        /SFGT2 = fgt(s, '2')
+        /SFGT2I = fgt.(s, '2')
+        /NFIN23 = fin(n, 2, 3)
+        /NFIN23I = fin.(n, 2, 3)
+        /SFIN23 = fin(s, '2', '3')
+        /SFIN23I = fin.(s, '2', '3')
+        /NFLT2 = flt(n, 2)
+        /NFLT2I = flt.(n, 2)
+        /SFLT2 = flt(s, '2')
+        /SFLT2I = flt.(s, '2')
+        /NFIRST = first(n)
+        /NFIRSTI = first.(n)
+        /SFIRST = first(s)
+        /SFIRSTI = first.(s)
+        /NFOUT23 = fout(n, 3, 2)
+        /NFOUT23I = fout.(n, 3, 2)
+        /SFOUT23 = fout(s, '3', '2')
+        /SFOUT23I = fout.(s, '3', '2')
+        /NLAST = last(n)
+        /NLASTI = last.(n)
+        /SLAST = last(s)
+        /SLASTI = last.(s)
+        /NMAX = max(n)
+        /NMAXI = max.(n)
+        /SMAX = max(s)
+        /SMAXI = max.(s)
+        /NMEAN = mean(n)
+        /NMEANI = mean.(n)
+        /NMIN = min(n)
+        /NMINI = min.(n)
+        /SMIN = min(s)
+        /SMINI = min.(s)
+        /NN = n(n)
+        /NNI = n.(n)
+        /SN = n(s)
+        /SNI = n.(s)
+        /NNMISS = nmiss(n)
+        /NNMISSI = nmiss.(n)
+        /SNMISS = nmiss(s)
+        /SNMISSI = nmiss.(s)
+        /NNU = nu(n)
+        /NNUI = nu.(n)
+        /SNU = nu(s)
+        /SNUI = nu.(s)
+        /NNUMISS = numiss(n)
+        /NNUMISSI = numiss.(n)
+        /SNUMISS = numiss(s)
+        /SNUMISSI = numiss.(s)
+        /NPGT2 = pgt(n, 2)
+        /NPGT2I = pgt.(n, 2)
+        /SPGT2 = pgt(s, '2')
+        /SPGT2I = pgt.(s, '2')
+        /NPIN23 = pin(n, 2, 3)
+        /NPIN23I = pin.(n, 2, 3)
+        /SPIN23 = pin(s, '2', '3')
+        /SPIN23I = pin.(s, '2', '3')
+        /NPLT2 = plt(n, 2)
+        /NPLT2I = plt.(n, 2)
+        /SPLT2 = plt(s, '2')
+        /SPLT2I = plt.(s, '2')
+        /NPOUT23 = pout(n, 2, 3)
+        /NPOUT23I = pout.(n, 2, 3)
+        /SPOUT23 = pout(s, '2', '3')
+        /SPOUT23I = pout.(s, '2', '3')
+        /NMEDIAN = median(n)
+        /NMEDIANI = median.(n)
+        /NSD = sd(n)
+        /NSDI = sd.(n)
+        /NSUM = sum(n)
+        /NSUMI = sum.(n).
+m4_if([$1], [external], [GET FILE='aggregate.sys'.],
+      [$1], [dataset], [DATASET ACTIVATE aggregate.])
+LIST.
+])
+  AT_CHECK([pspp -O format=csv aggregate.sps], [0],
+    [m4_if([$3], [itemwise], [dnl
+"aggregate.sps:29.28-29.31: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   29 |         /NFOUT23 = fout(n, 3, 2)
+      |                            ^~~~"
+
+"aggregate.sps:30.30-30.33: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   30 |         /NFOUT23I = fout.(n, 3, 2)
+      |                              ^~~~"
+
+"aggregate.sps:31.28-31.35: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   31 |         /SFOUT23 = fout(s, '3', '2')
+      |                            ^~~~~~~~"
+
+"aggregate.sps:32.30-32.37: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   32 |         /SFOUT23I = fout.(s, '3', '2')
+      |                              ^~~~~~~~"
+
+Table: Data List
+G,N,NI,NU,NUI,NFGT2,NFGT2I,SFGT2,SFGT2I,NFIN23,NFIN23I,SFIN23,SFIN23I,NFLT2,NFLT2I,SFLT2,SFLT2I,NFIRST,NFIRSTI,SFIRST,SFIRSTI,NFOUT23,NFOUT23I,SFOUT23,SFOUT23I,NLAST,NLASTI,SLAST,SLASTI,NMAX,NMAXI,SMAX,SMAXI,NMEAN,NMEANI,NMIN,NMINI,SMIN,SMINI,NN,NNI,SN,SNI,NNMISS,NNMISSI,SNMISS,SNMISSI,NNU,NNUI,SNU,SNUI,NNUMISS,NNUMISSI,SNUMISS,SNUMISSI,NPGT2,NPGT2I,SPGT2,SPGT2I,NPIN23,NPIN23I,SPIN23,SPIN23I,NPLT2,NPLT2I,SPLT2,SPLT2I,NPOUT23,NPOUT23I,SPOUT23,SPOUT23I,NMEDIAN,NMEDIANI,NSD,NSDI,NSUM,NSUMI
+1,7.00,7.00,6,6,.333,.429,.333,.429,.333,.286,.333,.286,.500,.429,.500,.429,0,0,0,0,.667,.714,.667,.714,5,5,5,5,5,5,5,5,2.00,2.29,0,0,0,0,6.00,7.00,6.00,7.00,1.00,.00,1.00,.00,5,6,5,6,1,0,1,0,33.3,42.9,33.3,42.9,33.3,28.6,33.3,28.6,50.0,42.9,50.0,42.9,66.7,71.4,66.7,71.4,1.50,2.00,1.79,1.80,12.00,16.00
+2,5.00,5.00,4,4,1.000,1.000,1.000,1.000,.000,.000,.000,.000,.000,.000,.000,.000,6,6,6,4,1.000,1.000,1.000,1.000,8,8,8,8,8,8,8,8,7.00,7.00,6,6,6,4,3.00,3.00,3.00,5.00,2.00,2.00,2.00,.00,3,3,3,4,1,1,1,0,100.0,100.0,100.0,100.0,.0,.0,.0,.0,.0,.0,.0,.0,100.0,100.0,100.0,100.0,7.00,7.00,1.00,1.00,21.00,21.00
+3,2.00,2.00,1,1,.000,.000,.000,.000,.000,.000,.000,.000,1.000,1.000,1.000,1.000,1,1,1,1,1.000,1.000,1.000,1.000,1,1,1,1,1,1,1,1,1.00,1.00,1,1,1,1,2.00,2.00,2.00,2.00,.00,.00,.00,.00,1,1,1,1,0,0,0,0,.0,.0,.0,.0,.0,.0,.0,.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,1.00,1.00,.00,.00,2.00,2.00
+4,1.00,1.00,1,1,.   ,.   ,.   ,1.000,.   ,.   ,.   ,.000,.   ,.   ,.   ,.000,.,.,,4,.   ,.   ,.   ,1.000,.,.,,4,.,.,,4,.  ,.  ,.,.,,4,.00,.00,.00,1.00,1.00,1.00,1.00,.00,0,0,0,1,1,1,1,0,. ,. ,. ,100.0,. ,. ,. ,.0,. ,. ,. ,.0,. ,. ,. ,100.0,.  ,.  ,.  ,.  ,.  ,.  @&t@
+],
+      [dnl
+"aggregate.sps:29.28-29.31: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   29 |         /NFOUT23 = fout(n, 3, 2)
+      |                            ^~~~"
+
+"aggregate.sps:30.30-30.33: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   30 |         /NFOUT23I = fout.(n, 3, 2)
+      |                              ^~~~"
+
+"aggregate.sps:31.28-31.35: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   31 |         /SFOUT23 = fout(s, '3', '2')
+      |                            ^~~~~~~~"
+
+"aggregate.sps:32.30-32.37: warning: AGGREGATE: The value arguments passed to the FOUT function are out of order.  They will be treated as if they had been specified in the correct order.
+   32 |         /SFOUT23I = fout.(s, '3', '2')
+      |                              ^~~~~~~~"
+
+Table: Data List
+G,N,NI,NU,NUI,NFGT2,NFGT2I,SFGT2,SFGT2I,NFIN23,NFIN23I,SFIN23,SFIN23I,NFLT2,NFLT2I,SFLT2,SFLT2I,NFIRST,NFIRSTI,SFIRST,SFIRSTI,NFOUT23,NFOUT23I,SFOUT23,SFOUT23I,NLAST,NLASTI,SLAST,SLASTI,NMAX,NMAXI,SMAX,SMAXI,NMEAN,NMEANI,NMIN,NMINI,SMIN,SMINI,NN,NNI,SN,SNI,NNMISS,NNMISSI,SNMISS,SNMISSI,NNU,NNUI,SNU,SNUI,NNUMISS,NNUMISSI,SNUMISS,SNUMISSI,NPGT2,NPGT2I,SPGT2,SPGT2I,NPIN23,NPIN23I,SPIN23,SPIN23I,NPLT2,NPLT2I,SPLT2,SPLT2I,NPOUT23,NPOUT23I,SPOUT23,SPOUT23I,NMEDIAN,NMEDIANI,NSD,NSDI,NSUM,NSUMI
+1,7.00,7.00,6,6,.   ,.429,.   ,.429,.   ,.286,.   ,.286,.   ,.429,.   ,.429,.,0,,0,.   ,.714,.   ,.714,.,5,,5,.,5,,5,.  ,2.29,.,0,,0,6.00,7.00,6.00,7.00,1.00,.00,1.00,.00,5,6,5,6,1,0,1,0,. ,42.9,. ,42.9,. ,28.6,. ,28.6,. ,42.9,. ,42.9,. ,71.4,. ,71.4,.  ,2.00,.  ,1.80,.  ,16.00
+2,5.00,5.00,4,4,.   ,.   ,.   ,1.000,.   ,.   ,.   ,.000,.   ,.   ,.   ,.000,.,.,,4,.   ,.   ,.   ,1.000,.,.,,8,.,.,,8,.  ,.  ,.,.,,4,3.00,3.00,3.00,5.00,2.00,2.00,2.00,.00,3,3,3,4,1,1,1,0,. ,. ,. ,100.0,. ,. ,. ,.0,. ,. ,. ,.0,. ,. ,. ,100.0,.  ,.  ,.  ,.  ,.  ,.  @&t@
+3,2.00,2.00,1,1,.000,.000,.000,.000,.000,.000,.000,.000,1.000,1.000,1.000,1.000,1,1,1,1,1.000,1.000,1.000,1.000,1,1,1,1,1,1,1,1,1.00,1.00,1,1,1,1,2.00,2.00,2.00,2.00,.00,.00,.00,.00,1,1,1,1,0,0,0,0,.0,.0,.0,.0,.0,.0,.0,.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,1.00,1.00,.00,.00,2.00,2.00
+4,1.00,1.00,1,1,.   ,.   ,.   ,1.000,.   ,.   ,.   ,.000,.   ,.   ,.   ,.000,.,.,,4,.   ,.   ,.   ,1.000,.,.,,4,.,.,,4,.  ,.  ,.,.,,4,.00,.00,.00,1.00,1.00,1.00,1.00,.00,0,0,0,1,1,1,1,0,. ,. ,. ,100.0,. ,. ,. ,.0,. ,. ,. ,.0,. ,. ,. ,100.0,.  ,.  ,.  ,.  ,.  ,.  @&t@
+])])
+  AT_CLEANUP])
+
+CHECK_AGGREGATE([dataset], [presorted], [itemwise])
+CHECK_AGGREGATE([dataset], [presorted], [columnwise])
+CHECK_AGGREGATE([dataset], [unsorted], [itemwise])
+CHECK_AGGREGATE([dataset], [unsorted], [columnwise])
+CHECK_AGGREGATE([active], [presorted], [itemwise])
+CHECK_AGGREGATE([active], [presorted], [columnwise])
+CHECK_AGGREGATE([active], [unsorted], [itemwise])
+CHECK_AGGREGATE([active], [unsorted], [columnwise])
+CHECK_AGGREGATE([external], [presorted], [itemwise])
+CHECK_AGGREGATE([external], [presorted], [columnwise])
+CHECK_AGGREGATE([external], [unsorted], [itemwise])
+CHECK_AGGREGATE([external], [unsorted], [columnwise])
+
+AT_SETUP([AGGREGATE crash with MAX function])
+AT_DATA([aggregate.sps],
+  [DATA LIST LIST /X (F8.2) Y (a25).
+
+BEGIN DATA.
+87.50 foo
+87.34 bar
+1 bar
+END DATA.
+
+AGGREGATE OUTFILE=* /BREAK=y /X=MAX(x).
+LIST /x y.
+])
+AT_CHECK([pspp -O format=csv aggregate.sps], [0],
+  [Table: Reading free-form data from INLINE.
+Variable,Format
+X,F8.2
+Y,A25
+
+Table: Data List
+X,Y
+87.34,bar
+87.50,foo
+])
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE crash with invalid syntax])
+AT_DATA([aggregate.sps],
+  [INPUT PROGRAM.
+LOOP c=1 TO 20.
+  COMPUTE x=UNIFORM(10)
+  END CASE.
+END LOOP.
+END FILE.
+END INPUT PROGRAM.
+
+AGGREGATE /BREAK=x .
+])
+AT_CHECK([pspp -O format=csv aggregate.sps], [1], [ignore], [])
+AT_CLEANUP
+
+
+AT_SETUP([AGGREGATE mode=addvariables])
+AT_DATA([addvariables.sps],
+  [data list notable list /x * cn * y *.
+begin data.
+1 1 2
+3 2 3
+3 3 4
+5 4 6
+7 5 8
+7 6 9
+7 7 20
+9 8 11
+end data.
+
+aggregate outfile=* mode=addvariables
+	/break = x
+	/sum = sum(y)
+	/mean = mean (y)
+	/median = median (y).
+
+list.
+])
+
+AT_CHECK([pspp -O format=csv addvariables.sps], [0],
+  [Table: Data List
+x,cn,y,sum,mean,median
+1.00,1.00,2.00,2.00,2.00,2.00
+3.00,2.00,3.00,7.00,3.50,3.50
+3.00,3.00,4.00,7.00,3.50,3.50
+5.00,4.00,6.00,6.00,6.00,6.00
+7.00,5.00,8.00,37.00,12.33,9.00
+7.00,6.00,9.00,37.00,12.33,9.00
+7.00,7.00,20.00,37.00,12.33,9.00
+9.00,8.00,11.00,11.00,11.00,11.00
+])
+
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE duplicate variable errors])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='aggregate.sps' ERROR=IGNORE.
+])
+AT_DATA([aggregate.sps], [dnl
+DATA LIST NOTABLE LIST /x.
+AGGREGATE OUTFILE=* /BREAK=x /x=N.
+AGGREGATE OUTFILE=* MODE=ADDVARIABLES /x=N.
+AGGREGATE OUTFILE=* MODE=ADDVARIABLES /y=N /y=N.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"aggregate.sps:2.31: error: AGGREGATE: Variable name x duplicates the name of a break variable.
+    2 | AGGREGATE OUTFILE=* /BREAK=x /x=N.
+      |                               ^"
+
+"aggregate.sps:3.40: error: AGGREGATE: Variable name x duplicates the name of a variable in the active file dictionary.
+    3 | AGGREGATE OUTFILE=* MODE=ADDVARIABLES /x=N.
+      |                                        ^"
+
+"aggregate.sps:4.45: error: AGGREGATE: Duplicate target variable name y.
+    4 | AGGREGATE OUTFILE=* MODE=ADDVARIABLES /y=N /y=N.
+      |                                             ^"
+])
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE presorted warnings])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='aggregate.sps' ERROR=IGNORE.
+])
+AT_DATA([aggregate.sps], [dnl
+DATA LIST NOTABLE LIST /x.
+AGGREGATE/PRESORTED/BREAK=x(A).
+AGGREGATE/BREAK=x(A).
+AGGREGATE/OUTFILE=* MODE=ADDVARIABLES/BREAK=x(A).
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"aggregate.sps:2.27-2.30: warning: AGGREGATE: When the input data is presorted, specifying sorting directions with (A) or (D) has no effect.  Output data will be sorted the same way as the input data.
+    2 | AGGREGATE/PRESORTED/BREAK=x(A).
+      |                           ^~~~"
+
+"aggregate.sps:2.11-2.19: note: AGGREGATE: The PRESORTED subcommand states that the input data is presorted.
+    2 | AGGREGATE/PRESORTED/BREAK=x(A).
+      |           ^~~~~~~~~"
+
+"aggregate.sps:2.31: error: AGGREGATE: Syntax error expecting `/'.
+    2 | AGGREGATE/PRESORTED/BREAK=x(A).
+      |                               ^"
+
+"aggregate.sps:3.17-3.20: warning: AGGREGATE: When the input data is presorted, specifying sorting directions with (A) or (D) has no effect.  Output data will be sorted the same way as the input data.
+    3 | AGGREGATE/BREAK=x(A).
+      |                 ^~~~"
+
+aggregate.sps:3: note: AGGREGATE: The input data must be presorted because the OUTFILE subcommand is not specified.
+
+"aggregate.sps:3.21: error: AGGREGATE: Syntax error expecting `/'.
+    3 | AGGREGATE/BREAK=x(A).
+      |                     ^"
+
+"aggregate.sps:4.45-4.48: warning: AGGREGATE: When the input data is presorted, specifying sorting directions with (A) or (D) has no effect.  Output data will be sorted the same way as the input data.
+    4 | AGGREGATE/OUTFILE=* MODE=ADDVARIABLES/BREAK=x(A).
+      |                                             ^~~~"
+
+"aggregate.sps:4.26-4.37: note: AGGREGATE: ADDVARIABLES implies that the input data is presorted.
+    4 | AGGREGATE/OUTFILE=* MODE=ADDVARIABLES/BREAK=x(A).
+      |                          ^~~~~~~~~~~~"
+
+"aggregate.sps:4.49: error: AGGREGATE: Syntax error expecting `/'.
+    4 | AGGREGATE/OUTFILE=* MODE=ADDVARIABLES/BREAK=x(A).
+      |                                                 ^"
+])
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE - subcommand syntax errors])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='aggregate.sps' ERROR=IGNORE.
+])
+AT_DATA([aggregate.sps], [dnl
+DATA LIST NOTABLE LIST /x.
+AGGREGATE OUTFILE=**.
+AGGREGATE OUTFILE=* MODE=**.
+AGGREGATE /MISSING=**.
+AGGREGATE /BREAK=**.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"aggregate.sps:2.19-2.20: error: AGGREGATE: Syntax error expecting a file name or handle name.
+    2 | AGGREGATE OUTFILE=**.
+      |                   ^~"
+
+"aggregate.sps:3.26-3.27: error: AGGREGATE: Syntax error expecting ADDVARIABLES or REPLACE.
+    3 | AGGREGATE OUTFILE=* MODE=**.
+      |                          ^~"
+
+"aggregate.sps:4.20-4.21: error: AGGREGATE: Syntax error expecting COLUMNWISE.
+    4 | AGGREGATE /MISSING=**.
+      |                    ^~"
+
+"aggregate.sps:5.18-5.19: error: AGGREGATE: Syntax error expecting variable name.
+    5 | AGGREGATE /BREAK=**.
+      |                  ^~"
+])
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE - aggregation function syntax errors])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='aggregate.sps' ERROR=IGNORE.
+])
+AT_DATA([aggregate.sps], [dnl
+DATA LIST NOTABLE LIST /x (f8.2) s (a8).
+AGGREGATE **.
+AGGREGATE / **.
+AGGREGATE /y.
+AGGREGATE /y=**.
+AGGREGATE /y=xyzzy.
+AGGREGATE /y=mean.
+AGGREGATE /y=mean(**).
+AGGREGATE /y=fgt(x **).
+AGGREGATE /y=fgt(x 'xyzzy').
+AGGREGATE /y=fgt(s 1).
+AGGREGATE /y=fgt(s x).
+AGGREGATE /y=sum(s).
+AGGREGATE /y=sum(x. /* )
+AGGREGATE /y=min(x, s).
+AGGREGATE /y t=min(x).
+AGGREGATE /y=pin(x, 2, 1).
+AGGREGATE /y=mean(x)**.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"aggregate.sps:2.11-2.12: error: AGGREGATE: Syntax error expecting `/'.
+    2 | AGGREGATE **.
+      |           ^~"
+
+"aggregate.sps:3.13-3.14: error: AGGREGATE: Syntax error expecting variable name.
+    3 | AGGREGATE / **.
+      |             ^~"
+
+"aggregate.sps:4.13: error: AGGREGATE: Syntax error expecting variable name.
+    4 | AGGREGATE /y.
+      |             ^"
+
+"aggregate.sps:5.14-5.15: error: AGGREGATE: Syntax error expecting aggregation function.
+    5 | AGGREGATE /y=**.
+      |              ^~"
+
+"aggregate.sps:6.14-6.18: error: AGGREGATE: Unknown aggregation function xyzzy.
+    6 | AGGREGATE /y=xyzzy.
+      |              ^~~~~"
+
+"aggregate.sps:7.18: error: AGGREGATE: Syntax error expecting `('.
+    7 | AGGREGATE /y=mean.
+      |                  ^"
+
+"aggregate.sps:8.19-8.20: error: AGGREGATE: Syntax error expecting variable name.
+    8 | AGGREGATE /y=mean(**).
+      |                   ^~"
+
+"aggregate.sps:9.20-9.21: error: AGGREGATE: Missing argument 1 to FGT.
+    9 | AGGREGATE /y=fgt(x **).
+      |                    ^~"
+
+aggregate.sps:10: error: AGGREGATE: Arguments to FGT must be of same type as source variables.
+
+"aggregate.sps:10.20-10.26: note: AGGREGATE: The argument is a string.
+   10 | AGGREGATE /y=fgt(x 'xyzzy').
+      |                    ^~~~~~~"
+
+"aggregate.sps:10.18: note: AGGREGATE: The variables are numeric.
+   10 | AGGREGATE /y=fgt(x 'xyzzy').
+      |                  ^"
+
+aggregate.sps:11: error: AGGREGATE: Arguments to FGT must be of same type as source variables.
+
+"aggregate.sps:11.20: note: AGGREGATE: The argument is numeric.
+   11 | AGGREGATE /y=fgt(s 1).
+      |                    ^"
+
+"aggregate.sps:11.18: note: AGGREGATE: The variables have string type.
+   11 | AGGREGATE /y=fgt(s 1).
+      |                  ^"
+
+"aggregate.sps:12.20: error: AGGREGATE: s and x are not the same type.  All variables in this variable list must be of the same type.  x will be omitted from the list.
+   12 | AGGREGATE /y=fgt(s x).
+      |                    ^"
+
+"aggregate.sps:12.21: error: AGGREGATE: Missing argument 1 to FGT.
+   12 | AGGREGATE /y=fgt(s x).
+      |                     ^"
+
+"aggregate.sps:13.18: warning: AGGREGATE: s is not a numeric variable.  It will not be included in the variable list.
+   13 | AGGREGATE /y=sum(s).
+      |                  ^"
+
+"aggregate.sps:14.19: error: AGGREGATE: Syntax error expecting `)'.
+   14 | AGGREGATE /y=sum(x. /* )
+      |                   ^"
+
+aggregate.sps:15: error: AGGREGATE: Number of source variables (2) does not match number of target variables (1).
+
+"aggregate.sps:15.18-15.21: note: AGGREGATE: These are the source variables.
+   15 | AGGREGATE /y=min(x, s).
+      |                  ^~~~"
+
+"aggregate.sps:15.12: note: AGGREGATE: These are the target variables.
+   15 | AGGREGATE /y=min(x, s).
+      |            ^"
+
+aggregate.sps:16: error: AGGREGATE: Number of source variables (1) does not match number of target variables (2).
+
+"aggregate.sps:16.20: note: AGGREGATE: These are the source variables.
+   16 | AGGREGATE /y t=min(x).
+      |                    ^"
+
+"aggregate.sps:16.12-16.14: note: AGGREGATE: These are the target variables.
+   16 | AGGREGATE /y t=min(x).
+      |            ^~~"
+
+"aggregate.sps:17.21-17.24: warning: AGGREGATE: The value arguments passed to the PIN function are out of order.  They will be treated as if they had been specified in the correct order.
+   17 | AGGREGATE /y=pin(x, 2, 1).
+      |                     ^~~~"
+
+"aggregate.sps:18.1-18.9: error: AGGREGATE: Syntax error expecting `BEGIN DATA'.
+   18 | AGGREGATE /y=mean(x)**.
+      | ^~~~~~~~~"
+
+"aggregate.sps:18.1-18.9: error: AGGREGATE: Syntax error expecting end of command.
+   18 | AGGREGATE /y=mean(x)**.
+      | ^~~~~~~~~"
+])
+AT_CLEANUP
+
+AT_SETUP([AGGREGATE - temporary transformations])
+AT_DATA([aggregate.sps], [dnl
+DATA LIST FREE /quakes (F2.0).
+BEGIN DATA
+1 2 3 4 5 6 7 8 9 10
+END DATA.
+TEMPORARY.
+SELECT IF quakes GT 5.
+AGGREGATE OUTFILE = *  /nrecs=NU.
+LIST.
+])
+AT_CHECK([pspp -O format=csv aggregate.sps], [0], [dnl
+Table: Data List
+nrecs
+5
+])
+AT_CLEANUP

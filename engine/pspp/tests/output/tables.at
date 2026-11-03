@@ -1,0 +1,103 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([output -- tables])
+
+AT_SETUP([OUTPUT precision])
+
+AT_DATA([prec.sps], [[
+data list notable list /A * B *.
+begin data.
+2.0 3.0
+1.0 2.0
+2.0 4.5
+2.0 4.5
+3.0 6.0
+end data.
+
+OUTPUT MODIFY
+       /SELECT TABLES
+       /TABLECELLS  SELECT = [ SIGNIFICANCE ]
+       	    FORMAT = F.3.
+
+t-test /PAIRS a with b (PAIRED).
+
+OUTPUT MODIFY
+       /SELECT TABLES
+       /TABLECELLS  SELECT = [ SIGNIFICANCE ]
+       	    FORMAT = F12.5.
+
+t-test /PAIRS a with b (PAIRED).
+
+]])
+
+AT_CHECK([pspp -O format=csv prec.sps], [0], [dnl
+Table: Paired Sample Statistics
+,,N,Mean,Std. Deviation,S.E. Mean
+Pair 1,A,5,2.00,.71,.32
+,B,5,4.00,1.54,.69
+
+Table: Paired Samples Correlations
+,,N,Correlation,Sig.
+Pair 1,A & B,5,.918,.028
+
+Table: Paired Samples Test
+,,Paired Differences,,,,,t,df,Sig. (2-tailed)
+,,Mean,Std. Deviation,S.E. Mean,95% Confidence Interval of the Difference,,,,
+,,,,,Lower,Upper,,,
+Pair 1,A - B,-2.00,.94,.42,-3.16,-.84,-4.78,4,.009
+
+Table: Paired Sample Statistics
+,,N,Mean,Std. Deviation,S.E. Mean
+Pair 1,A,5,2.00,.71,.32
+,B,5,4.00,1.54,.69
+
+Table: Paired Samples Correlations
+,,N,Correlation,Sig.
+Pair 1,A & B,5,.918,.02801
+
+Table: Paired Samples Test
+,,Paired Differences,,,,,t,df,Sig. (2-tailed)
+,,Mean,Std. Deviation,S.E. Mean,95% Confidence Interval of the Difference,,,,
+,,,,,Lower,Upper,,,
+Pair 1,A - B,-2.00,.94,.42,-3.16,-.84,-4.78,4,.00877
+])
+
+AT_CLEANUP
+
+
+
+
+AT_SETUP([OUTPUT crash])
+
+AT_DATA([prec.sps], [[
+data list notable list /A * B *.
+begin data.
+2.0 3.0
+1.0 2.0
+end data.
+
+OUTPUT MODIFY
+       /SELECT TABLES
+       /TABLECELLS  SELECT = [ SIGNIFICANCE ]
+       "FORMAT = F/1.
+
+t-test /PAIRS a with b (PAIRED).
+]])
+
+AT_CHECK([pspp -O format=csv prec.sps], [1], [ignore])
+
+AT_CLEANUP

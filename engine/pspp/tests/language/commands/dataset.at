@@ -1,0 +1,396 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([DATASET commands])
+
+AT_SETUP([DATASET COPY])
+AT_DATA([dataset.pspp], [dnl
+DATASET NAME initial.
+DATA LIST NOTABLE /x 1.
+COMPUTE x = x + 1.
+DATASET COPY clone.
+BEGIN DATA.
+1
+2
+3
+4
+5
+END DATA.
+
+NEW FILE.
+DATA LIST NOTABLE /y 1.
+BEGIN DATA.
+6
+7
+8
+END DATA.
+LIST.
+DATASET DISPLAY.
+
+DATASET ACTIVATE clone.
+DATASET DISPLAY.
+LIST.
+
+DATASET ACTIVATE initial.
+DATASET DISPLAY.
+LIST.
+
+COMPUTE z=y.
+DATASET COPY clone.
+
+DATASET ACTIVATE clone.
+LIST.
+DATASET COPY clone.
+DATASET DISPLAY.
+
+DATASET CLOSE initial.
+DATASET DISPLAY.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [0], [dnl
+Table: Data List
+y
+6
+7
+8
+
+Table: Datasets
+clone
+initial (active dataset)
+
+Table: Datasets
+clone (active dataset)
+initial
+
+Table: Data List
+x
+2
+3
+4
+5
+6
+
+Table: Datasets
+clone
+initial (active dataset)
+
+Table: Data List
+y
+6
+7
+8
+
+Table: Data List
+y,z
+6,6.00
+7,7.00
+8,8.00
+
+Table: Datasets
+unnamed dataset (active dataset)
+initial
+
+Table: Datasets
+unnamed dataset (active dataset)
+])
+AT_CLEANUP
+
+AT_SETUP([DATASET DECLARE])
+AT_DATA([dataset.pspp], [dnl
+DATASET DECLARE second.
+DATASET DISPLAY.
+DATA LIST NOTABLE/x 1.
+BEGIN DATA.
+1
+END DATA.
+LIST.
+DATASET ACTIVATE second.
+DATASET DISPLAY.
+LIST.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [1], [dnl
+Table: Datasets
+unnamed dataset (active dataset)
+second
+
+Table: Data List
+x
+1
+
+Table: Datasets
+second (active dataset)
+
+"dataset.pspp:10.1-10.4: error: LIST: LIST is allowed only after the active dataset has been defined.
+   10 | LIST.
+      | ^~~~"
+])
+AT_CLEANUP
+
+AT_SETUP([DATASET NAME deletes duplicate name])
+AT_DATA([dataset.pspp], [dnl
+DATASET NAME a.
+DATASET DECLARE b.
+DATASET DECLARE c.
+DATASET DISPLAY.
+
+DATASET NAME b.
+DATASET NAME c.
+DATASET DISPLAY.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [0], [dnl
+Table: Datasets
+a (active dataset)
+b
+c
+
+Table: Datasets
+c (active dataset)
+])
+AT_CLEANUP
+
+AT_SETUP([DATASET ACTIVATE deletes unnamed dataset])
+AT_DATA([dataset.pspp], [dnl
+DATASET DECLARE x.
+DATASET DISPLAY.
+
+DATASET ACTIVATE x.
+DATASET DISPLAY.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [0], [dnl
+Table: Datasets
+unnamed dataset (active dataset)
+x
+
+Table: Datasets
+x (active dataset)
+])
+AT_CLEANUP
+
+AT_SETUP([DATASET ACTIVATE executes pending transformations])
+AT_DATA([dataset.pspp], [dnl
+DATASET NAME one.
+DATASET DECLARE another.
+DATASET DISPLAY.
+
+DATA LIST NOTABLE /x 1.
+PRINT/x.
+DATASET ACTIVATE another.
+BEGIN DATA.
+1
+2
+3
+4
+5
+END DATA.
+
+LIST.
+
+DATASET ACTIVATE one.
+LIST.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [1], [dnl
+Table: Datasets
+another
+one (active dataset)
+
+1 @&t@
+
+2 @&t@
+
+3 @&t@
+
+4 @&t@
+
+5 @&t@
+
+"dataset.pspp:16.1-16.4: error: LIST: LIST is allowed only after the active dataset has been defined.
+   16 | LIST.
+      | ^~~~"
+
+Table: Data List
+x
+1
+2
+3
+4
+5
+])
+AT_CLEANUP
+
+AT_SETUP([DATASET CLOSE])
+AT_DATA([dataset.pspp], [dnl
+DATASET DISPLAY
+DATASET CLOSE *.
+DATASET DISPLAY.
+
+DATASET NAME this.
+DATASET DISPLAY.
+DATASET CLOSE this.
+DATASET DISPLAY.
+
+DATASET NAME this.
+DATASET DISPLAY.
+DATASET CLOSE *.
+DATASET DISPLAY.
+
+DATASET DECLARE that.
+DATASET DECLARE theother.
+DATASET DECLARE yetanother.
+DATASET DISPLAY.
+DATASET CLOSE ALL.
+DATASET DISPLAY.
+
+DATASET NAME this.
+DATASET DECLARE that.
+DATASET DECLARE theother.
+DATASET DECLARE yetanother.
+DATASET DISPLAY.
+DATASET CLOSE ALL.
+DATASET DISPLAY.
+])
+AT_CHECK([pspp -O format=csv dataset.pspp], [0], [dnl
+Table: Datasets
+unnamed dataset (active dataset)
+
+Table: Datasets
+unnamed dataset (active dataset)
+
+Table: Datasets
+this (active dataset)
+
+Table: Datasets
+unnamed dataset (active dataset)
+
+Table: Datasets
+this (active dataset)
+
+Table: Datasets
+unnamed dataset (active dataset)
+
+Table: Datasets
+unnamed dataset (active dataset)
+that
+theother
+yetanother
+
+Table: Datasets
+unnamed dataset (active dataset)
+
+Table: Datasets
+that
+theother
+this (active dataset)
+yetanother
+
+Table: Datasets
+unnamed dataset (active dataset)
+])
+AT_CLEANUP
+
+
+
+dnl The bug for which the following test checks, is apparent only
+dnl when compiled with -fsanitize=address or run under valgrind
+AT_SETUP([DATASET heap overflow])
+AT_DATA([dataset.pspp], [dnl
+DATASET DECLARE initial.
+DATA LIST /x 1.
+
+DATASET COPY subsq.
+
+DATA LIST /y 2-4.
+BEGIN DATA.
+7
+END DATA.
+
+DATASET ACTIVATE subsq.
+
+LIST.
+])
+
+AT_CHECK([pspp -O format=csv dataset.pspp], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+x,1,1-1,F1.0
+
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+y,1,2-4,F3.0
+])
+
+AT_CLEANUP
+
+AT_SETUP([DATASET syntax errors])
+AT_DATA([dataset.sps], [dnl
+DATASET NAME **.
+DATASET NAME xyzzy WINDOW **.
+
+DATASET NAME xyzzy.
+DATASET ACTIVATE **.
+DATASET ACTIVATE xyzzy WINDOW **.
+
+DATASET COPY **.
+DATASET COPY quux WINDOW **.
+
+DATASET DECLARE **.
+DATASET DECLARE foo WINDOW **.
+
+DATASET CLOSE **.
+])
+AT_CHECK([pspp dataset.sps], [1], [dnl
+dataset.sps:1.14-1.15: error: DATASET NAME: Syntax error expecting identifier.
+    1 | DATASET NAME **.
+      |              ^~
+
+dataset.sps:2.27-2.28: error: DATASET NAME: Syntax error expecting ASIS or
+FRONT.
+    2 | DATASET NAME xyzzy WINDOW **.
+      |                           ^~
+
+dataset.sps:5.18-5.19: error: DATASET ACTIVATE: Syntax error expecting
+identifier.
+    5 | DATASET ACTIVATE **.
+      |                  ^~
+
+dataset.sps:6.31-6.32: error: DATASET ACTIVATE: Syntax error expecting ASIS or
+FRONT.
+    6 | DATASET ACTIVATE xyzzy WINDOW **.
+      |                               ^~
+
+dataset.sps:8.14-8.15: error: DATASET COPY: Syntax error expecting identifier.
+    8 | DATASET COPY **.
+      |              ^~
+
+dataset.sps:9.26-9.27: error: DATASET COPY: Syntax error expecting MINIMIZED,
+FRONT, or HIDDEN.
+    9 | DATASET COPY quux WINDOW **.
+      |                          ^~
+
+dataset.sps:11.17-11.18: error: DATASET DECLARE: Syntax error expecting
+identifier.
+   11 | DATASET DECLARE **.
+      |                 ^~
+
+dataset.sps:12.28-12.29: error: DATASET DECLARE: Syntax error expecting
+MINIMIZED, FRONT, or HIDDEN.
+   12 | DATASET DECLARE foo WINDOW **.
+      |                            ^~
+
+dataset.sps:14.15-14.16: error: DATASET CLOSE: Syntax error expecting
+identifier.
+   14 | DATASET CLOSE **.
+      |               ^~
+])
+AT_CLEANUP

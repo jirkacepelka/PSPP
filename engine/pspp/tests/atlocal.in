@@ -1,0 +1,94 @@
+# -*- shell-script -*-
+
+# PSPP - a program for statistical analysis.
+# Copyright (C) 2017 Free Software Foundation, Inc.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+# Variables used internally by the testsuite.
+EXEEXT='@EXEEXT@'
+PERL='@PERL@'
+PYTHON3='@PYTHON3@'
+TEX='@TEX@'
+GWC='@GWC@'
+WITH_PERL_MODULE='@WITH_PERL_MODULE@'
+host='@host@'
+PACKAGE_STRING='@PACKAGE_STRING@'
+PACKAGE_BUGREPORT='@PACKAGE_BUGREPORT@'
+
+XMLLINT='@XMLLINT@'
+if echo | $XMLLINT - >/dev/null 2>&1; then
+    HAVE_XMLLINT=no
+else
+    HAVE_XMLLINT=yes
+fi
+
+PSQL_SUPPORT='@PSQL_SUPPORT@'
+if test "$PSQL_SUPPORT" = yes; then
+    : ${PG_CONFIG:='@PG_CONFIG@'}
+    : ${PG_DBASE:=pspptest}
+    : ${PG_PORT:=6543}
+    : ${PG_PATH:=`$PG_CONFIG --bindir`}
+
+    # PSQL_SUPPORT indicates that PSPP was built against the PostgreSQL client
+    # library, but it does not mean that the PostgreSQL utilities are
+    # installed.  So check for them and turn off PSQL_SUPPORT if they are not
+    # available.
+    if (PATH=$PG_PATH:$PATH; export PATH; initdb --version) >/dev/null 2>&1
+    then
+	:
+    else
+	PSQL_SUPPORT=no
+    fi
+fi
+
+# Variables used by programs invoked by the testsuite.
+CHARSETALIASDIR="$abs_top_builddir/gl"
+export CHARSETALIASDIR
+
+GZIP=
+export GZIP
+
+WINEPREFIX=$HOME/.wine    # Work around the following kludge to keep wine happy
+export WINEPREFIX
+
+# Make PSPP ignore $HOME/.pspprc.
+alias pspp='pspp --no-statrc'
+
+# Avoids error messages during tests if $TERM is set to an unknown terminal.
+TERM=; unset TERM
+
+pspp_diff=`command -v diff`
+if test X"$RUNNER" = Xwine; then
+    diff () {
+        $pspp_diff -w  "$@"
+    }
+fi
+
+case $host in
+    *-*-mingw*) MINGW=: ;;
+    *) MINGW=false ;;
+esac
+
+# Enable leak suppressions for Address Sanitizer/Leak Sanitizer.
+LSAN_OPTIONS="suppressions=$abs_top_srcdir/tests/lsan.supp print_suppressions=0"
+export LSAN_OPTIONS
+
+# Avoid complaints if the system doesn't have a configured paper size.
+export PAPERSIZE=a4
+
+# Make PSPP ignore whether stdin is a tty.
+export PSPP_INTERACTIVE=0

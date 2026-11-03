@@ -1,0 +1,3 @@
+GET FILE='nhtsa.sav'.
+CTABLES /TABLE freqOfDriving.
+CTABLES /TABLE freqOfDriving /CATEGORIES VARIABLES=freqOfDriving MISSING=INCLUDE.

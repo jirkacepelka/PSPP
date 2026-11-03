@@ -1,0 +1,53 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([output -- paper sizes])
+
+AT_SETUP([letter default paper size])
+AT_DATA([paper-size.sps], [dnl
+debug paper size ''.
+])
+AT_CHECK([PAPERSIZE=letter pspp --testing-mode -O format=csv paper-size.sps],
+  [0], ["" => 8.5 x 11.0 in, 216 x 279 mm
+])
+AT_CLEANUP
+
+AT_SETUP([a4 default paper size])
+AT_DATA([paper-size.sps], [dnl
+debug paper size ''.
+])
+AT_CHECK([PAPERSIZE=a4 pspp --testing-mode -O format=csv paper-size.sps],
+  [0], ["" => 8.3 x 11.7 in, 210 x 297 mm
+])
+AT_CLEANUP
+
+AT_SETUP([specific paper sizes])
+AT_KEYWORDS([paper size])
+AT_DATA([paper-size.sps], [dnl
+debug paper size 'a4'.
+debug paper size 'letter'.
+debug paper size '10x14in'.
+debug paper size '210x297mm'.
+])
+AT_CHECK([PAPERSIZE=a4 pspp --testing-mode -O format=csv paper-size.sps],
+  [0], [dnl
+"a4" => 8.3 x 11.7 in, 210 x 297 mm
+"letter" => 8.5 x 11.0 in, 216 x 279 mm
+"10x14in" => 10.0 x 14.0 in, 254 x 356 mm
+"210x297mm" => 8.3 x 11.7 in, 210 x 297 mm
+])
+AT_CLEANUP
+

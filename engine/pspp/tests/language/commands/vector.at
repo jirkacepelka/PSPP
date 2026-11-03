@@ -1,0 +1,200 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([VECTOR])
+
+AT_SETUP([VECTOR short form])
+AT_DATA([vector.sps], [dnl
+data list notable/x 1.
+vector v(4).
+display vector.
+])
+AT_CHECK([pspp -o pspp.csv vector.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Vectors
+Vector and Position,,Variable,Print Format
+v,1,v1,F8.2
+,2,v2,F8.2
+,3,v3,F8.2
+,4,v4,F8.2
+])
+AT_CLEANUP
+
+AT_SETUP([VECTOR short form with format specification])
+AT_DATA([vector.sps], [dnl
+data list notable/x 1.
+vector #vec(4, comma10.2)
+      /#svec(3, a8).
+display vector.
+])
+AT_CHECK([pspp -o pspp.csv vector.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Vectors
+Vector and Position,,Variable,Print Format
+#vec,1,#vec1,COMMA10.2
+,2,#vec2,COMMA10.2
+,3,#vec3,COMMA10.2
+,4,#vec4,COMMA10.2
+#svec,1,#svec1,A8
+,2,#svec2,A8
+,3,#svec3,A8
+])
+AT_CLEANUP
+
+AT_SETUP([VECTOR short form in INPUT PROGRAM])
+AT_DATA([vector.sps], [dnl
+input program.
+vector x(5).
+data list notable/x5 x2 x3 x1 x4 1-5.
+end input program.
+display vector.
+])
+AT_CHECK([pspp -o pspp.csv vector.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Vectors
+Vector and Position,,Variable,Print Format
+x,1,x1,F8.2
+,2,x2,F8.2
+,3,x3,F8.2
+,4,x4,F8.2
+,5,x5,F8.2
+])
+AT_CLEANUP
+
+AT_SETUP([VECTOR long form])
+AT_DATA([vector.sps], [dnl
+data list notable/u w x y z 1-5.
+vector a=u to y.
+vector b=x to z.
+vector c=all.
+display vector.
+])
+AT_CHECK([pspp -o pspp.csv vector.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Vectors
+Vector and Position,,Variable,Print Format
+a,1,u,F1.0
+,2,w,F1.0
+,3,x,F1.0
+,4,y,F1.0
+b,1,x,F1.0
+,2,y,F1.0
+,3,z,F1.0
+c,1,u,F1.0
+,2,w,F1.0
+,3,x,F1.0
+,4,y,F1.0
+,5,z,F1.0
+])
+AT_CLEANUP
+
+AT_SETUP([VECTOR syntax errors])
+AT_DATA([vector.sps], [dnl
+DATA LIST LIST NOTABLE/x y z.
+VECTOR **.
+VECTOR aslkdfjaklsdjfklasdjfklasjdfklasjdfkajsdlkfajsdkfjaksdjfaklsdkasdjfklasdjfklasjdfkldkl.
+VECTOR dup=x y z.
+VECTOR dup.
+VECTOR v v.
+VECTOR u v=x y z.
+VECTOR v(1, 2).
+VECTOR v(0).
+VECTOR v(F8.2, F8.2).
+VECTOR v(asdf).
+VECTOR v(**).
+VECTOR v(F8.2).
+VECTOR xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx(5).
+VECTOR v **.
+VECTOR v v1 (123).
+])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='vector.sps' ERROR=IGNORE.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"vector.sps:2.8-2.9: error: VECTOR: Syntax error expecting identifier.
+    2 | VECTOR **.
+      |        ^~"
+
+"vector.sps:3.8-3.93: error: VECTOR: Identifier `aslkdfjaklsdjfklasdjfklasjdfklasjdfkajsdlkfajsdkfjaksdjfaklsdkasdjfklasdjfklasjdfkldkl' exceeds 64-byte limit.
+    3 | VECTOR aslkdfjaklsdjfklasdjfklasjdfklasjdfkajsdlkfajsdkfjaksdjfaklsdkasdjfklasdjfklasjdfkldkl.
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+"vector.sps:5.8-5.10: error: VECTOR: A vector named dup already exists.
+    5 | VECTOR dup.
+      |        ^~~"
+
+"vector.sps:6.8-6.10: error: VECTOR: Vector name v is given twice.
+    6 | VECTOR v v.
+      |        ^~~"
+
+"vector.sps:7.8-7.11: error: VECTOR: Only a single vector name may be specified when a list of variables is given.
+    7 | VECTOR u v=x y z.
+      |        ^~~~"
+
+"vector.sps:8.9-8.13: error: VECTOR: Vector length may only be specified once.
+    8 | VECTOR v(1, 2).
+      |         ^~~~~"
+
+"vector.sps:9.10: error: VECTOR: Syntax error expecting positive integer.
+    9 | VECTOR v(0).
+      |          ^"
+
+"vector.sps:10.9-10.19: error: VECTOR: Only one format may be specified.
+   10 | VECTOR v(F8.2, F8.2).
+      |         ^~~~~~~~~~~"
+
+"vector.sps:11.10-11.13: error: VECTOR: Unknown format type `asdf'.
+   11 | VECTOR v(asdf).
+      |          ^~~~"
+
+"vector.sps:12.10-12.11: error: VECTOR: Syntax error expecting vector length or format.
+   12 | VECTOR v(**).
+      |          ^~"
+
+"vector.sps:13.9-13.14: error: VECTOR: Vector length is required.
+   13 | VECTOR v(F8.2).
+      |         ^~~~~~"
+
+"vector.sps:14.8-14.74: error: VECTOR: Identifier `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1' exceeds 64-byte limit.
+   14 | VECTOR xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx(5).
+      |        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+"vector.sps:15.10-15.11: error: VECTOR: Syntax error expecting `=' or `@{:@'.
+   15 | VECTOR v **.
+      |          ^~"
+
+"vector.sps:16.8-16.17: error: VECTOR: Two different vectors add variable v11.
+   16 | VECTOR v v1 (123).
+      |        ^~~~~~~~~~"
+])
+AT_CLEANUP
+
+
+AT_SETUP([VECTOR - names differing only in case])
+
+AT_DATA([vector.sps], [dnl
+data list /fxx 1-11
+vec E2 e(22)
+display vectors.
+])
+
+AT_CHECK([pspp -o pspp.csv vector.sps], [1], [dnl
+vector.sps:2.5-2.12: error: VECTOR: Two different vectors add variable e21.
+    2 | vec E2 e(22)
+      |     ^~~~~~~~
+vector.sps:3: note: DISPLAY: No vectors defined.
+])
+AT_CLEANUP

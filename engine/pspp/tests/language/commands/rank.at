@@ -1,0 +1,659 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([RANK])
+
+AT_SETUP([RANK simple case with defaults])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /x (f8).
+BEGIN DATA.
+-1
+0
+1
+2
+2
+4
+5
+END DATA.
+
+RANK x.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,Rx,RANK
+
+Table: Data List
+x,Rx
+-1,1.000
+0,2.000
+1,3.000
+2,4.500
+2,4.500
+4,6.000
+5,7.000
+])
+AT_CLEANUP
+
+# This checks for regression against a crash reported as bug #38482
+# that occurred when multiple variables were specified without any
+# rank specifications.
+AT_SETUP([RANK multiple variables with defaults])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /x * y * z *.
+BEGIN DATA.
+    1.00     2.00     3.00
+    4.00     5.00     6.00
+END DATA.
+
+RANK ALL.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,Rx,RANK
+y,Ry,RANK
+z,Rz,RANK
+
+Table: Data List
+x,y,z,Rx,Ry,Rz
+1.00,2.00,3.00,1.000,1.000,1.000
+4.00,5.00,6.00,2.000,2.000,2.000
+])
+AT_CLEANUP
+
+AT_SETUP([RANK with RANK, RFRACTION, N])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /a * b *.
+BEGIN DATA.
+0 24
+1 32
+2 31
+2 32
+4 30
+5 29
+6 1
+7 43
+8 .
+9 45
+END DATA.
+
+RANK a b (D)
+   /PRINT=YES
+   /RANK
+   /TIES=HIGH
+   /RFRACTION
+   /N INTO count
+   .
+
+DISPLAY DICTIONARY.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+a,Ra,RANK
+b,Rb,RANK
+a,RFR001,RFRACTION
+b,RFR002,RFRACTION
+a,count,N
+b,Nb,N
+
+Table: Variables
+Name,Position,Label,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+a,1,,Nominal,Input,8,Right,F8.2,F8.2
+b,2,,Nominal,Input,8,Right,F8.2,F8.2
+Ra,3,RANK of a,Ordinal,Input,8,Right,F9.3,F9.3
+RFR001,4,RFRACTION of a,Ordinal,Input,8,Right,F6.4,F6.4
+count,5,N of a,Scale,Input,8,Right,F6.0,F6.0
+Rb,6,RANK of b,Ordinal,Input,8,Right,F9.3,F9.3
+RFR002,7,RFRACTION of b,Ordinal,Input,8,Right,F6.4,F6.4
+Nb,8,N of b,Scale,Input,8,Right,F6.0,F6.0
+
+Table: Data List
+a,b,Ra,RFR001,count,Rb,RFR002,Nb
+.00,24.00,10.000,1.0000,10,8.000,.8889,9
+1.00,32.00,9.000,.9000,10,4.000,.4444,9
+2.00,31.00,8.000,.8000,10,5.000,.5556,9
+2.00,32.00,8.000,.8000,10,4.000,.4444,9
+4.00,30.00,6.000,.6000,10,6.000,.6667,9
+5.00,29.00,5.000,.5000,10,7.000,.7778,9
+6.00,1.00,4.000,.4000,10,9.000,1.0000,9
+7.00,43.00,3.000,.3000,10,2.000,.2222,9
+8.00,.  ,2.000,.2000,10,.   ,.    ,.
+9.00,45.00,1.000,.1000,10,1.000,.1111,9
+])
+AT_CLEANUP
+
+AT_SETUP([RANK with SAVAGE, PERCENT, PROPORTION, NTILES])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /a * b *.
+BEGIN DATA.
+0 24
+1 32
+2 31
+2 32
+4 30
+5 29
+6 1
+7 43
+8 8
+9 45
+END DATA.
+
+RANK a
+  /PRINT=YES
+  /TIES=CONDENSE
+  /SAVAGE
+  /PERCENT
+  /PROPORTION
+  /NTILES(4)
+  /NORMAL
+.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function,Fraction
+a,Sa,SAVAGE,
+a,Pa,PERCENT,
+a,PRO001,PROPORTION,BLOM
+a,Na,NTILES,
+a,NOR001,NORMAL,BLOM
+
+Table: Data List
+a,b,Sa,Pa,PRO001,Na,NOR001
+.00,24.00,-.9000,10.00,.0610,1,-1.547
+1.00,32.00,-.7889,20.00,.1585,1,-1.000
+2.00,31.00,-.5925,30.00,.2561,2,-.6554
+2.00,32.00,-.5925,30.00,.2561,2,-.6554
+4.00,30.00,-.3544,40.00,.3537,2,-.3755
+5.00,29.00,-.1544,50.00,.4512,2,-.1226
+6.00,1.00,.0956,60.00,.5488,3,.1226
+7.00,43.00,.4290,70.00,.6463,3,.3755
+8.00,8.00,.9290,80.00,.7439,3,.6554
+9.00,45.00,1.9290,90.00,.8415,4,1.0005
+])
+AT_CLEANUP
+
+AT_SETUP([RANK with SPLIT FILE])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /a * g1 g2 *.
+BEGIN DATA.
+2 1 2
+2 1 2
+3 1 2
+4 1 2
+5 1 2
+1 0 2
+2 0 2
+3 0 2
+4 0 2
+5 0 2
+6 0 2
+7 0 2
+8 0 2
+6 1 2
+7 1 2
+7 1 2
+8 1 2
+9 1 1
+END DATA.
+
+RANK a (D) BY g2 g1
+  /PRINT=YES
+  /TIES=LOW
+  /MISSING=INCLUDE
+  /FRACTION=RANKIT
+  /RANK
+  /NORMAL
+  .
+
+SPLIT FILE BY g1.
+
+RANK a (D) BY g2
+  /PRINT=YES
+  /TIES=LOW
+  /MISSING=INCLUDE
+  /FRACTION=RANKIT
+  /RANK
+  /NORMAL
+  .
+
+SPLIT FILE OFF.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function,Fraction,Grouping Variables
+a,Ra,RANK,,g2 g1
+a,Na,NORMAL,RANKIT,g2 g1
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function,Fraction,Grouping Variables
+a,RAN001,RANK,,g2
+a,NOR001,NORMAL,RANKIT,g2
+
+Table: Data List
+a,g1,g2,Ra,Na,RAN001,NOR001
+2.00,1.00,2.00,8.000,.9674,4.000,.5244
+2.00,1.00,2.00,8.000,.9674,4.000,.5244
+3.00,1.00,2.00,7.000,.5895,3.000,.0000
+4.00,1.00,2.00,6.000,.2822,2.000,-.5244
+5.00,1.00,2.00,5.000,.0000,1.000,-1.282
+1.00,.00,2.00,8.000,1.5341,8.000,1.5341
+2.00,.00,2.00,7.000,.8871,7.000,.8871
+3.00,.00,2.00,6.000,.4888,6.000,.4888
+4.00,.00,2.00,5.000,.1573,5.000,.1573
+5.00,.00,2.00,4.000,-.1573,4.000,-.1573
+6.00,.00,2.00,3.000,-.4888,3.000,-.4888
+7.00,.00,2.00,2.000,-.8871,2.000,-.8871
+8.00,.00,2.00,1.000,-1.534,1.000,-1.534
+6.00,1.00,2.00,4.000,-.2822,4.000,1.1503
+7.00,1.00,2.00,2.000,-.9674,2.000,-.3186
+7.00,1.00,2.00,2.000,-.9674,2.000,-.3186
+8.00,1.00,2.00,1.000,-1.593,1.000,-1.150
+9.00,1.00,1.00,1.000,.0000,1.000,.0000
+])
+AT_CLEANUP
+
+# Also tests small ranks for special case of SAVAGE ranks.
+AT_SETUP([RANK with fractional ranks])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE  /a *  w * .
+BEGIN DATA.
+1 1.5
+2 0.2
+3 0.1
+4 1
+5 1
+6 1
+7 1
+8 1
+END DATA.
+
+WEIGHT BY w.
+
+RANK a
+  /FRACTION=TUKEY
+  /PROPORTION
+  /SAVAGE
+.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function,Fraction
+a,Pa,PROPORTION,TUKEY
+a,Sa,SAVAGE,
+
+Table: Data List
+a,w,Pa,Sa
+1.00,1.50,.1285,-.8016
+2.00,.20,.1776,-.6905
+3.00,.10,.1986,-.6905
+4.00,1.00,.3458,-.5305
+5.00,1.00,.4860,-.2905
+6.00,1.00,.6262,.0262
+7.00,1.00,.7664,.4929
+8.00,1.00,.9065,1.3929
+])
+AT_CLEANUP
+
+AT_SETUP([RANK all-ties due to tiny weights])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /x * w *.
+BEGIN DATA.
+1 0.1
+2 0.1
+3 0.1
+4 0.2
+5 0.1
+6 0.1
+7 0.1
+8 0.1
+END DATA.
+
+WEIGHT BY w.
+
+RANK x
+ /TIES=low
+ /RANK into xl.
+
+
+RANK x
+ /TIES=high
+ /RANK into xh.
+
+RANK x
+ /TIES=condense
+ /RANK into xc.
+
+
+* Test VW fraction
+
+RANK x
+ /FRACTION=VW
+ /NORMAL.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,xl,RANK
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,xh,RANK
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,xc,RANK
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function,Fraction
+x,Nx,NORMAL,VW
+
+Table: Data List
+x,w,xl,xh,xc,Nx
+1.00,.10,.000,.100,1.000,-1.938
+2.00,.10,.100,.200,2.000,-1.412
+3.00,.10,.200,.300,3.000,-1.119
+4.00,.20,.300,.500,4.000,-.8046
+5.00,.10,.500,.600,5.000,-.5549
+6.00,.10,.600,.700,6.000,-.4067
+7.00,.10,.700,.800,7.000,-.2670
+8.00,.10,.800,.900,8.000,-.1323
+])
+AT_CLEANUP
+
+AT_SETUP([RANK and TEMPORARY])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /age (f2) gender (a1).
+BEGIN DATA.
+44 m
+32 f
+43 m
+49 m
+33 f
+35 f
+29 f
+50 m
+42 m
+33 f
+48 m
+END DATA.
+
+TEMPORARY.
+SELECT IF gender = 'm'.
+RANK age /RANK INTO Rm.
+
+TEMPORARY.
+SELECT IF gender = 'f'.
+RANK age /RANK INTO Rf.
+
+LIST.
+])
+AT_CHECK([pspp -O format=csv rank.sps], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+age,Rm,RANK
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+age,Rf,RANK
+
+Table: Data List
+age,gender,Rm,Rf
+44,m,3.000,.   @&t@
+32,f,.   ,2.000
+43,m,2.000,.   @&t@
+49,m,5.000,.   @&t@
+33,f,.   ,3.500
+35,f,.   ,5.000
+29,f,.   ,1.000
+50,m,6.000,.   @&t@
+42,m,1.000,.   @&t@
+33,f,.   ,3.500
+48,m,4.000,.   @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([RANK variable name fallback])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /foo * rfoo * ran003 *.
+BEGIN DATA.
+0 3 2
+1 3 2
+2 3 2
+2 3 2
+4 3 2
+5 3 2
+6 3 2
+7 3 2
+8 3 2
+9 3 2
+END DATA.
+
+RANK foo.
+
+
+DISPLAY DICTIONARY.
+])
+AT_CHECK([pspp -o pspp.csv rank.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+foo,RAN001,RANK
+
+Table: Variables
+Name,Position,Label,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+foo,1,,Nominal,Input,8,Right,F8.2,F8.2
+rfoo,2,,Nominal,Input,8,Right,F8.2,F8.2
+ran003,3,,Nominal,Input,8,Right,F8.2,F8.2
+RAN001,4,RANK of foo,Ordinal,Input,8,Right,F9.3,F9.3
+])
+AT_CLEANUP
+
+AT_SETUP([RANK robust variable name creation])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST notable /x * rx * ran001 TO ran999.
+BEGIN DATA.
+1
+2
+3
+4
+5
+6
+7
+END DATA.
+
+RANK x.
+
+DELETE VAR ran001 TO ran999.
+
+LIST.
+])
+AT_CHECK([pspp -O format=csv rank.sps], [0], [dnl
+"rank.sps:3: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:4: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:5: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:6: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:7: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:8: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+"rank.sps:9: warning: Missing value(s) for all variables from rx onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,RNKRA01,RANK
+
+Table: Data List
+x,rx,RNKRA01
+1.00,.  ,1.000
+2.00,.  ,2.000
+3.00,.  ,3.000
+4.00,.  ,4.000
+5.00,.  ,5.000
+6.00,.  ,6.000
+7.00,.  ,7.000
+])
+AT_CLEANUP
+
+dnl Test for proper behaviour in the face of invalid input.
+AT_SETUP([RANK handling of invalid input])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /x * a (a2).
+BEGIN DATA.
+-1 s
+0  s
+1  s
+2  s
+2  s
+4  s
+5  s
+END DATA.
+
+DEBUG XFORM FAIL.
+
+RANK x.
+])
+AT_CHECK([pspp -O format=csv --testing-mode rank.sps], [1], [dnl
+Table: Variables Created by RANK
+Existing Variable,New Variable,Function
+x,Rx,RANK
+
+rank.sps:14: error: RANK: DEBUG XFORM FAIL transformation executed
+])
+AT_CLEANUP
+
+AT_SETUP([RANK syntax errors])
+AT_DATA([rank.sps], [dnl
+DATA LIST LIST NOTABLE /x y z * a b c (a2).
+RANK VARIABLES **.
+RANK **.
+RANK x BY **.
+RANK x/TIES **.
+RANK x/TIES=**.
+RANK x/FRACTION **.
+RANK x/FRACTIO=**.
+RANK x/PRINT **.
+RANK x/PRINT=**.
+RANK x/MISSING **.
+RANK x/MISSING=**.
+RANK x/NTILES **.
+RANK x/NTILES(**).
+RANK x/NTILES(5 **).
+RANK x/ **.
+RANK x/N INTO v w.
+RANK x/N INTO y.
+RANK x y/N INTO v v.
+])
+AT_CHECK([pspp -O format=csv rank.sps], [1], [dnl
+"rank.sps:2.16-2.17: error: RANK: Syntax error expecting `='.
+    2 | RANK VARIABLES **.
+      |                ^~"
+
+"rank.sps:3.6-3.7: error: RANK: Syntax error expecting variable name.
+    3 | RANK **.
+      |      ^~"
+
+"rank.sps:4.11-4.12: error: RANK: Syntax error expecting variable name.
+    4 | RANK x BY **.
+      |           ^~"
+
+"rank.sps:5.13-5.14: error: RANK: Syntax error expecting `='.
+    5 | RANK x/TIES **.
+      |             ^~"
+
+"rank.sps:6.13-6.14: error: RANK: Syntax error expecting MEAN, LOW, HIGH, or CONDENSE.
+    6 | RANK x/TIES=**.
+      |             ^~"
+
+"rank.sps:7.17-7.18: error: RANK: Syntax error expecting `='.
+    7 | RANK x/FRACTION **.
+      |                 ^~"
+
+"rank.sps:8.16-8.17: error: RANK: Syntax error expecting BLOM, TUKEY, VW, or RANKIT.
+    8 | RANK x/FRACTIO=**.
+      |                ^~"
+
+"rank.sps:9.14-9.15: error: RANK: Syntax error expecting `='.
+    9 | RANK x/PRINT **.
+      |              ^~"
+
+"rank.sps:10.14-10.15: error: RANK: Syntax error expecting YES or NO.
+   10 | RANK x/PRINT=**.
+      |              ^~"
+
+"rank.sps:11.16-11.17: error: RANK: Syntax error expecting `='.
+   11 | RANK x/MISSING **.
+      |                ^~"
+
+"rank.sps:12.16-12.17: error: RANK: Syntax error expecting INCLUDE or EXCLUDE.
+   12 | RANK x/MISSING=**.
+      |                ^~"
+
+"rank.sps:13.15-13.16: error: RANK: Syntax error expecting `('.
+   13 | RANK x/NTILES **.
+      |               ^~"
+
+"rank.sps:14.15-14.16: error: RANK: Syntax error expecting positive integer for NTILES.
+   14 | RANK x/NTILES(**).
+      |               ^~"
+
+"rank.sps:15.17-15.18: error: RANK: Syntax error expecting `)'.
+   15 | RANK x/NTILES(5 **).
+      |                 ^~"
+
+"rank.sps:16.9-16.10: error: RANK: Syntax error expecting RANK, NORMAL, RFRACTION, N, SAVAGE, PERCENT, PROPORTION, or NTILES.
+   16 | RANK x/ **.
+      |         ^~"
+
+"rank.sps:17.15-17.17: error: RANK: Too many variables in INTO clause.
+   17 | RANK x/N INTO v w.
+      |               ^~~"
+
+"rank.sps:18.15: error: RANK: Variable y already exists.
+   18 | RANK x/N INTO y.
+      |               ^"
+
+"rank.sps:19.19: error: RANK: Duplicate variable name v.
+   19 | RANK x y/N INTO v v.
+      |                   ^"
+])
+AT_CLEANUP

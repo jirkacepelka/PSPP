@@ -1,0 +1,22 @@
+#! /bin/sh
+
+# Convert svg file to png with a target width and height
+# width and height are derived from the directory name
+# of the target. Width and height must be equal
+
+# Arg1: Source svg file
+# Arg2: Filename for copyright notice
+# Arg3: Target png file
+
+# Extract the icon width from the target path e.g.
+# src/ui/gui/icons/48x48/actions/file-save.png
+# should result in a width of 48
+stripprefix=${3#src*icons\/}
+width=${stripprefix%%x*}
+
+comment=`cat $2`
+case $width in
+    [0-9][0-9] | [0-9][0-9][0-9]) widthoption="--width=$width --height=$width" ;;
+    *) widthoption= ;;
+esac
+rsvg-convert $widthoption "$1" | ${PYTHON3:-python3} build-aux/png-add-comment Comment "$comment" > "$3"

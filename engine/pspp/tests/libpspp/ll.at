@@ -1,0 +1,54 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([doubly linked list (ll) library])
+
+m4_define([CHECK_LL],
+  [AT_SETUP([ll -- $1])
+   AT_KEYWORDS([$2])
+   AT_CHECK([ll-test $1])
+   AT_CLEANUP])
+
+CHECK_LL([push-pop])
+CHECK_LL([insert-remove])
+CHECK_LL([swap])
+CHECK_LL([swap-range])
+CHECK_LL([remove-range])
+CHECK_LL([remove-equal])
+CHECK_LL([remove-if])
+CHECK_LL([moved])
+CHECK_LL([find-equal])
+CHECK_LL([find-if])
+CHECK_LL([find-adjacent-equal])
+CHECK_LL([count-range])
+CHECK_LL([count-equal])
+CHECK_LL([count-if])
+CHECK_LL([min-max])
+CHECK_LL([lexicographical-compare-3way])
+CHECK_LL([apply])
+CHECK_LL([reverse])
+CHECK_LL([permutations-no-dups])
+CHECK_LL([permutations-with-dups])
+CHECK_LL([merge-no-dups], [slow])
+CHECK_LL([merge-with-dups], [slow])
+CHECK_LL([sort-exhaustive])
+CHECK_LL([sort-stable])
+CHECK_LL([sort-subset])
+CHECK_LL([sort-big])
+CHECK_LL([unique])
+CHECK_LL([sort-unique])
+CHECK_LL([insert-ordered])
+CHECK_LL([partition])

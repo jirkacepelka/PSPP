@@ -1,0 +1,162 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([VALUE LABELS])
+
+AT_SETUP([VALUE LABELS date formats])
+AT_DATA([value-labels.sps], [dnl
+DATA LIST LIST NOTABLE /ad (adate10) dt (datetime20).
+VALUE LABELS ad 'july 10, 1982' 'label 1'
+                '1-2-93' 'label 2'
+                '5-4-2003' 'label 3'
+            /dt '12 Apr 2011 06:09:56' 'label 4'.
+DISPLAY DICTIONARY.
+])
+AT_CHECK([pspp -O format=csv value-labels.sps], [0], [dnl
+Table: Variables
+Name,Position,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+ad,1,Unknown,Input,8,Right,ADATE10,ADATE10
+dt,2,Unknown,Input,8,Right,DATETIME20.0,DATETIME20.0
+
+Table: Value Labels
+Variable Value,,Label
+ad,07/10/1982,label 1
+,01/02/1993,label 2
+,05/04/2003,label 3
+dt,12-APR-2011 06:09:56,label 4
+])
+AT_CLEANUP
+
+AT_SETUP([VALUE LABELS with new-line])
+AT_DATA([value-labels.sps], [dnl
+DATA LIST LIST NOTABLE /x.
+VALUE LABELS x 1 'one' 2 'first line\nsecond line' 3 'three'.
+BEGIN DATA.
+1
+2
+3
+END DATA.
+DISPLAY DICTIONARY.
+FREQUENCIES x/STAT=NONE.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt value-labels.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables
+Name,Position,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+x,1,Nominal,Input,8,Right,F8.2,F8.2
+
+Table: Value Labels
+Variable Value,,Label
+x,1.00,one
+,2.00,first line\nsecond line
+,3.00,three
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,one,1,33.3%,33.3%,33.3%
+,"first line
+second line",1,33.3%,33.3%,66.7%
+,three,1,33.3%,33.3%,100.0%
+Total,,3,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([VALUE LABELS with new-line in system file])
+AT_DATA([save.sps], [dnl
+DATA LIST LIST NOTABLE /x.
+VALUE LABELS x 1 'one' 2 'first line\nsecond line' 3 'three'.
+BEGIN DATA.
+1
+2
+3
+END DATA.
+SAVE OUTFILE='value-labels.sav'.
+])
+AT_CHECK([pspp -O format=csv save.sps])
+AT_DATA([get.sps], [dnl
+GET FILE='value-labels.sav'.
+DISPLAY DICTIONARY.
+FREQUENCIES x/STAT=NONE.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt get.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables
+Name,Position,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+x,1,Nominal,Input,8,Right,F8.2,F8.2
+
+Table: Value Labels
+Variable Value,,Label
+x,1.00,one
+,2.00,first line\nsecond line
+,3.00,three
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,one,1,33.3%,33.3%,33.3%
+,"first line
+second line",1,33.3%,33.3%,66.7%
+,three,1,33.3%,33.3%,100.0%
+Total,,3,100.0%,,
+])
+AT_CLEANUP
+
+dnl Tests for a bug which caused VALUE LABELS to
+dnl crash when given invalid syntax.
+AT_SETUP([VALUE LABELS invalid syntax bug])
+AT_DATA([value-labels.sps], [dnl
+DATA LIST LIST NOTABLE /a * pref * .
+BEGIN DATA.
+    1.00     1.00
+    1.00     2.00
+    2.00     1.00
+    2.00     2.00
+END DATA.
+
+VALUE LABELS /var=a 'label for a'.
+])
+AT_CHECK([pspp -O format=csv value-labels.sps], [1], [dnl
+"value-labels.sps:9.15-9.17: error: VALUE LABELS: var is not a variable name.
+    9 | VALUE LABELS /var=a 'label for a'.
+      |               ^~~"
+])
+AT_CLEANUP
+
+# Tests for a bug which caused a crash if VALUE LABELS had a trailing /.
+AT_SETUP([VALUE LABELS trailing `/' bug])
+AT_DATA([value-labels.sps], [dnl
+DATA LIST LIST NOTABLE /X * .
+BEGIN DATA.
+1
+2
+3
+4
+END DATA.
+
+
+VALUE LABELS X 1 'one' 2 'two' 3 'three'/
+
+
+LIST VARIABLES=X.
+])
+AT_CHECK([pspp -O format=csv value-labels.sps], [0], [dnl
+Table: Data List
+X
+1.00
+2.00
+3.00
+4.00
+])
+AT_CLEANUP

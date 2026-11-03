@@ -1,0 +1,34 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([SYNTAX GENERATOR])
+
+AT_SETUP([Syntax Generation - printf like])
+
+AT_CHECK(["$abs_top_builddir/tests/ui/syntax-gen-test"],[0],[dnl
+A simple string: Hello worldEND
+A syntax string: "Hello world"END
+A syntax string containing ": 'here"is the quote'END
+A syntax string containing non-printables: X'41204374726C4C0C63686172'END
+An integer: 98765END
+A floating point number: 3.142END
+A floating point number with default precision: 1.234000END
+A floating point number with given precision: 1.23399999999999998579END
+A literal %
+and finally a "concatination" of 6 different 20.309000 examples 23.09 of 100% conversions.
+])
+
+AT_CLEANUP

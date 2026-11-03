@@ -1,0 +1,52 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([SHOW])
+
+AT_SETUP([SHOW N])
+AT_DATA([show.sps], [dnl
+DATA LIST LIST NOTABLE /x.
+BEGIN DATA.
+1
+2
+3
+END DATA.
+
+SHOW N.
+])
+AT_CHECK([pspp -O format=csv show.sps], [0], [dnl
+Table: Settings
+N,3
+])
+AT_CLEANUP
+
+
+AT_SETUP([SHOW N empty])
+AT_DATA([shown-empty.sps], [dnl
+SHOW N.
+])
+AT_CHECK([pspp -O format=csv shown-empty.sps], [0], [dnl
+Table: Settings
+N,Unknown
+])
+AT_CLEANUP
+
+AT_SETUP([SHOW ENVIRONMENT])
+AT_DATA([show.sps], [dnl
+SHOW ENVIRONMENT.
+])
+AT_CHECK([pspp -O format=csv show.sps], [0], [ignore])
+AT_CLEANUP

@@ -1,0 +1,382 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([LIST])
+
+AT_SETUP([LIST plain cases])
+AT_DATA([data.txt], [dnl
+   18    1
+   19    7
+   20   26
+   21   76
+   22   57
+   23   58
+   24   38
+   25   38
+   26   30
+   27   21
+   28   23
+])
+AT_DATA([list.sps], [dnl
+DATA LIST FILE='data.txt'/avar 1-5 bvar 6-10.
+WEIGHT BY bvar.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading 1 record from `data.txt'.
+Variable,Record,Columns,Format
+avar,1,1-5,F5.0
+bvar,1,6-10,F5.0
+
+Table: Data List
+avar,bvar
+18,1
+19,7
+20,26
+21,76
+22,57
+23,58
+24,38
+25,38
+26,30
+27,21
+28,23
+])
+AT_CLEANUP
+
+AT_SETUP([LIST numbered cases])
+AT_DATA([data.txt], [dnl
+   18    1
+   19    7
+   20   26
+   21   76
+   22   57
+   23   58
+   24   38
+   25   38
+   26   30
+   27   21
+   28   23
+])
+AT_DATA([list.sps], [dnl
+DATA LIST FILE='data.txt'/avar 1-5 bvar 6-10.
+WEIGHT BY bvar.
+LIST/FORMAT NUMBERED.
+LIST/FORMAT NUMBERED/CASES FROM 2 TO 9 BY 2.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading 1 record from `data.txt'.
+Variable,Record,Columns,Format
+avar,1,1-5,F5.0
+bvar,1,6-10,F5.0
+
+Table: Data List
+Case Number,avar,bvar
+1,18,1
+2,19,7
+3,20,26
+4,21,76
+5,22,57
+6,23,58
+7,24,38
+8,25,38
+9,26,30
+10,27,21
+11,28,23
+
+Table: Data List
+Case Number,avar,bvar
+2,19,7
+4,21,76
+6,23,58
+8,25,38
+])
+AT_CLEANUP
+
+# Checks for a crash when LIST did not include the variables from SPLIT
+# FILE in the same positions (bug #30684).
+AT_SETUP([LIST with split file])
+AT_DATA([data.txt], [dnl
+a 1
+a 2
+a 3
+b 1
+c 4
+c 5
+])
+AT_DATA([list.sps], [dnl
+DATA LIST LIST NOTABLE FILE='data.txt'/s (a1) n.
+SPLIT FILE BY s.
+LIST n.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Split Values
+Variable,Value
+s,a
+
+Table: Data List
+n
+1.00
+2.00
+3.00
+
+Table: Split Values
+Variable,Value
+s,b
+
+Table: Data List
+n
+1.00
+
+Table: Split Values
+Variable,Value
+s,c
+
+Table: Data List
+n
+4.00
+5.00
+])
+AT_CLEANUP
+
+AT_SETUP([LIST lots of variables])
+AT_DATA([data.txt], [dnl
+767532466348513789073483106409
+888693089424177542378334186760
+492611507909187152726427852242
+819848892023195875879332001491
+452777898709563729845541516650
+239961967077732760663525115073
+])
+AT_DATA([list.sps], [dnl
+DATA LIST FILE='data.txt' NOTABLE/x01 to x30 1-30.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+x01,x02,x03,x04,x05,x06,x07,x08,x09,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20,x21,x22,x23,x24,x25,x26,x27,x28,x29,x30
+7,6,7,5,3,2,4,6,6,3,4,8,5,1,3,7,8,9,0,7,3,4,8,3,1,0,6,4,0,9
+8,8,8,6,9,3,0,8,9,4,2,4,1,7,7,5,4,2,3,7,8,3,3,4,1,8,6,7,6,0
+4,9,2,6,1,1,5,0,7,9,0,9,1,8,7,1,5,2,7,2,6,4,2,7,8,5,2,2,4,2
+8,1,9,8,4,8,8,9,2,0,2,3,1,9,5,8,7,5,8,7,9,3,3,2,0,0,1,4,9,1
+4,5,2,7,7,7,8,9,8,7,0,9,5,6,3,7,2,9,8,4,5,5,4,1,5,1,6,6,5,0
+2,3,9,9,6,1,9,6,7,0,7,7,7,3,2,7,6,0,6,6,3,5,2,5,1,1,5,0,7,3
+])
+AT_CLEANUP
+
+AT_SETUP([LIST selected cases])
+AT_DATA([data.txt], [dnl
+7675324663
+8886930894
+4926115079
+8198488920
+4527778987
+2399619670
+1667799691
+1623914684
+3681393233
+6418731145
+2284534083
+6617637452
+9865713582
+1163234537
+9981663637
+6821567746
+0952774952
+1641790193
+3763182871
+2046820753
+7970620091
+4841176017
+6949973797
+1396285996
+0700489524
+])
+AT_DATA([list.sps], [dnl
+DATA LIST FILE='data.txt' NOTABLE/x0 to x9 1-10.
+LIST /CASES=FROM 6 TO 20 BY 5.
+LIST /CASES=4.
+LIST /CASES=BY 10.
+LIST /CASES=FROM 25.
+LIST /CASES=FROM 26.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+x0,x1,x2,x3,x4,x5,x6,x7,x8,x9
+2,3,9,9,6,1,9,6,7,0
+2,2,8,4,5,3,4,0,8,3
+6,8,2,1,5,6,7,7,4,6
+
+Table: Data List
+x0,x1,x2,x3,x4,x5,x6,x7,x8,x9
+7,6,7,5,3,2,4,6,6,3
+8,8,8,6,9,3,0,8,9,4
+4,9,2,6,1,1,5,0,7,9
+8,1,9,8,4,8,8,9,2,0
+
+Table: Data List
+x0,x1,x2,x3,x4,x5,x6,x7,x8,x9
+7,6,7,5,3,2,4,6,6,3
+2,2,8,4,5,3,4,0,8,3
+7,9,7,0,6,2,0,0,9,1
+
+Table: Data List
+x0,x1,x2,x3,x4,x5,x6,x7,x8,x9
+0,7,0,0,4,8,9,5,2,4
+
+Table: Data List
+x0,x1,x2,x3,x4,x5,x6,x7,x8,x9
+])
+AT_CLEANUP
+
+dnl This program tests for a bug which caused a buffer overflow
+dnl when the list command attempted to write very long strings.
+AT_SETUP([LIST very long string])
+AT_DATA([list.sps], [dnl
+INPUT PROGRAM.
+STRING foo (a2000).
++ COMPUTE foo=CONCAT(RPAD('A',1999, 'x'), 'Z').
+END CASE.
+END FILE.
+END INPUT PROGRAM.
+
+EXECUTE.
+
+DISPLAY VARIABLES.
+
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Variables
+Name,Position,Print Format,Write Format
+foo,1,A2000,A2000
+
+Table: Data List
+foo
+AxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxZ
+])
+AT_CLEANUP
+
+
+
+AT_SETUP([LIST crash on invalid input])
+
+AT_DATA([list.sps], [dnl
+DATA LIST LIST /`$b.
+BEGIN DATA.
+1 3
+4 6
+7 9
+END DATA.
+
+LIST.
+])
+
+AT_CHECK([pspp -o pspp.csv list.sps], [1], [ignore])
+
+AT_CLEANUP
+
+dnl This is an example from doc/tutorial.texi
+dnl So if the results of this have to be changed in any way,
+dnl make sure to update that file.
+AT_SETUP([LIST tutorial example])
+AT_DATA([list.sps], [dnl
+data list list /forename (A12) height.
+begin data.
+Ahmed 188
+Bertram 167
+Catherine 134.231
+David 109.1
+end data
+
+list /format=numbered.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt list.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+forename,A12
+height,F8.0
+
+Table: Data List
+Case Number,forename,height
+1,Ahmed,188.00
+2,Bertram,167.00
+3,Catherine,134.23
+4,David,109.10
+])
+AT_CLEANUP
+
+AT_SETUP([LIST syntax errors])
+AT_DATA([list.sps], [dnl
+DATA LIST LIST NOTABLE /x.
+LIST VARIABLES=**.
+LIST FORMAT=**.
+LIST CASES=FROM -1.
+LIST CASES=FROM 5 TO 4.
+LIST CASES=BY 0.
+LIST **.
+])
+AT_CHECK([pspp -O format=csv list.sps], [1], [dnl
+"list.sps:2.16-2.17: error: LIST: Syntax error expecting variable name.
+    2 | LIST VARIABLES=**.
+      |                ^~"
+
+"list.sps:3.13-3.14: error: LIST: Syntax error expecting NUMBERED or UNNUMBERED.
+    3 | LIST FORMAT=**.
+      |             ^~"
+
+"list.sps:4.17-4.18: error: LIST: Syntax error expecting positive integer for FROM.
+    4 | LIST CASES=FROM -1.
+      |                 ^~"
+
+"list.sps:5.22: error: LIST: Syntax error expecting integer 5 or greater for TO.
+    5 | LIST CASES=FROM 5 TO 4.
+      |                      ^"
+
+"list.sps:6.15: error: LIST: Syntax error expecting positive integer for TO.
+    6 | LIST CASES=BY 0.
+      |               ^"
+
+"list.sps:7.6-7.7: error: LIST: Syntax error expecting variable name.
+    7 | LIST **.
+      |      ^~"
+])
+AT_CLEANUP
+
+dnl Checks for regression against a crash
+AT_SETUP([LIST duplicate variables])
+AT_DATA([list.sps], [dnl
+DATA LIST LIST NOTABLE /v r1 Se oRe o.
+BEGIN DATA.
+2
+END DATA.
+LIST o o.
+])
+AT_CHECK([pspp -O format=csv list.sps], [0], [dnl
+"list.sps:3: warning: Missing value(s) for all variables from r1 onward.  These will be filled with the system-missing value or blanks, as appropriate."
+
+Table: Data List
+o,o
+.  ,.  @&t@
+])
+AT_CLEANUP

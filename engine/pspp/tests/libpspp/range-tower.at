@@ -1,0 +1,32 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([range tower library])
+
+m4_define([CHECK_RANGE_TOWER],
+  [AT_SETUP([range-tower -- $1])
+   AT_KEYWORDS([slow])
+   AT_CHECK([range-tower-test $1])
+   AT_CLEANUP])
+
+CHECK_RANGE_TOWER([set1])
+CHECK_RANGE_TOWER([set0])
+CHECK_RANGE_TOWER([insert0])
+CHECK_RANGE_TOWER([insert1])
+CHECK_RANGE_TOWER([delete])
+CHECK_RANGE_TOWER([move])
+CHECK_RANGE_TOWER([pool])
+CHECK_RANGE_TOWER([destroy-null])

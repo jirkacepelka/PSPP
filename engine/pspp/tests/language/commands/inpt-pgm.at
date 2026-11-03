@@ -1,0 +1,440 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([INPUT PROGRAM])
+
+dnl Tests for a bug which caused a crash when
+dnl reading invalid INPUT PROGRAM syntax.
+AT_SETUP([INPUT PROGRAM invalid syntax crash])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+DATA LIST NOTABLE /a 1-9.
+BEGIN DATA
+123456789
+END DATA.
+END INPUT PROGRAM.
+])
+AT_CHECK([pspp -O format=csv input-program.sps], [1], [dnl
+"input-program.sps:3.1-3.10: error: BEGIN DATA: BEGIN DATA is not allowed inside INPUT PROGRAM.
+    3 | BEGIN DATA
+      | ^~~~~~~~~~"
+])
+AT_CLEANUP
+
+dnl Tests for bug #21108, a crash when
+dnl reading invalid INPUT PROGRAM syntax.
+AT_SETUP([INPUT PROGRAM invalid syntax crash])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+DATA LIST LIST NOTABLE /x.
+END FILE.
+END INPUT PROGRAM.
+
+DESCRIPTIVES x.
+])
+AT_CHECK([pspp -O format=csv input-program.sps], [1], [dnl
+error: DESCRIPTIVES: At end of input: Syntax error expecting `BEGIN DATA'.
+])
+AT_CLEANUP
+
+dnl Tests for bug #38782, an infinite loop processing an empty input program.
+AT_SETUP([INPUT PROGRAM infinite loop])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+STRING firstname lastname (a24) / address (a80).
+END INPUT PROGRAM.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv input-program.sps], [1], [dnl
+"input-program.sps:1.1-3.17: error: INPUT PROGRAM: Input program does not contain DATA LIST or END FILE.
+    1 | INPUT PROGRAM.
+    2 | STRING firstname lastname (a24) / address (a80).
+    3 | END INPUT PROGRAM."
+
+"input-program.sps:4.1-4.7: error: EXECUTE: EXECUTE is allowed only after the active dataset has been defined.
+    4 | EXECUTE.
+      | ^~~~~~~"
+])
+AT_CLEANUP
+
+dnl Tests for bug #39097, a bug when an INPUT PROGRAM used VECTOR, was
+dnl followed immediately by a call to proc_execute() (here via DATASET
+dnl COPY), and then the input was actually used.
+AT_SETUP([INPUT PROGRAM with VECTOR and EXECUTE])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+VECTOR vec(5).
+LOOP #c = 1 to 10.
+ LOOP #v = 1 to 5.
+  COMPUTE vec(#v) = #v.
+ END LOOP.
+ END CASE.
+END LOOP.
+END FILE.
+END INPUT PROGRAM.
+DATASET COPY x.
+LIST.
+])
+AT_CHECK([pspp -O format=csv input-program.sps], [0], [dnl
+Table: Data List
+vec1,vec2,vec3,vec4,vec5
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+1.00,2.00,3.00,4.00,5.00
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM taking shorter of two files])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+    DATA LIST NOTABLE FILE='a.txt'/X 1-10.
+    DATA LIST NOTABLE FILE='b.txt'/Y 1-10.
+END INPUT PROGRAM.
+LIST.
+])
+AT_DATA([short.txt], [dnl
+1
+2
+3
+])
+AT_DATA([long.txt], [dnl
+4
+5
+6
+7
+])
+
+cp short.txt a.txt
+cp long.txt b.txt
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X,Y
+1,4
+2,5
+3,6
+])
+
+cp short.txt b.txt
+cp long.txt a.txt
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X,Y
+4,1
+5,2
+6,3
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM taking longer of two files])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+    NUMERIC #A #B.
+
+    DO IF NOT #A.
+        DATA LIST NOTABLE END=#A FILE='a.txt'/X 1-10.
+    END IF.
+    DO IF NOT #B.
+        DATA LIST NOTABLE END=#B FILE='b.txt'/Y 1-10.
+    END IF.
+    DO IF #A AND #B.
+        END FILE.
+    END IF.
+    END CASE.
+END INPUT PROGRAM.
+LIST.
+])
+AT_DATA([short.txt], [dnl
+1
+2
+3
+])
+AT_DATA([long.txt], [dnl
+4
+5
+6
+7
+8
+])
+
+cp short.txt a.txt
+cp long.txt b.txt
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X,Y
+1,4
+2,5
+3,6
+.,7
+.,8
+])
+
+cp short.txt b.txt
+cp long.txt a.txt
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X,Y
+4,1
+5,2
+6,3
+7,.
+8,.
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM concatenating two files - version 1])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+    NUMERIC #A #B.
+
+    DO IF #A.
+        DATA LIST NOTABLE END=#B FILE='b.txt'/X 1-10.
+        DO IF #B.
+            END FILE.
+        ELSE.
+            END CASE.
+        END IF.
+    ELSE.
+        DATA LIST NOTABLE END=#A FILE='a.txt'/X 1-10.
+        DO IF NOT #A.
+            END CASE.
+        END IF.
+    END IF.
+END INPUT PROGRAM.
+LIST.
+])
+AT_DATA([a.txt], [dnl
+1
+2
+3
+])
+AT_DATA([b.txt], [dnl
+4
+5
+6
+7
+8
+])
+
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X
+1
+2
+3
+4
+5
+6
+7
+8
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM concatenating two files - version 2])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+    NUMERIC #EOF.
+
+    LOOP IF NOT #EOF.
+        DATA LIST NOTABLE END=#EOF FILE='a.txt'/X 1-10.
+        DO IF NOT #EOF.
+            END CASE.
+        END IF.
+    END LOOP.
+
+    COMPUTE #EOF = 0.
+    LOOP IF NOT #EOF.
+        DATA LIST NOTABLE END=#EOF FILE='b.txt'/X 1-10.
+        DO IF NOT #EOF.
+            END CASE.
+        END IF.
+    END LOOP.
+
+    END FILE.
+END INPUT PROGRAM.
+LIST.
+])
+AT_DATA([a.txt], [dnl
+1
+2
+3
+])
+AT_DATA([b.txt], [dnl
+4
+5
+6
+7
+8
+])
+
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X
+1
+2
+3
+4
+5
+6
+7
+8
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM generating data])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+    LOOP #I=1 TO 10.
+        COMPUTE X=#I.
+        END CASE.
+    END LOOP.
+    END FILE.
+END INPUT PROGRAM.
+FORMAT X(F2).
+LIST.
+])
+AT_CHECK([pspp -O format=csv input-program.sps], 0, [dnl
+Table: Data List
+X
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM unexpected end of file])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+])
+AT_CHECK([pspp input-program.sps], 1, [dnl
+error: INPUT PROGRAM: Unexpected end-of-file within INPUT PROGRAM.
+])
+AT_CLEANUP
+
+
+AT_SETUP([INPUT PROGRAM no variables])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+END FILE.
+END INPUT PROGRAM.
+])
+AT_CHECK([pspp input-program.sps], 1, [dnl
+input-program.sps:1.1-3.17: error: INPUT PROGRAM: Input program did not create
+any variables.
+    1 | INPUT PROGRAM.
+    2 | END FILE.
+    3 | END INPUT PROGRAM.
+])
+AT_CLEANUP
+
+AT_SETUP([INPUT PROGRAM and LEAVE variables])
+AT_DATA([input-program.sps], [dnl
+INPUT PROGRAM.
+LOOP x=0 TO 2.
+  LEAVE x.
+  LOOP y=0 TO 2.
+    END CASE.
+    END CASE.
+  END LOOP.
+END LOOP.
+END FILE.
+END INPUT PROGRAM.
+LIST.
+])
+AT_CHECK([pspp input-program.sps -O format=csv], 0, [dnl
+Table: Data List
+x,y
+.00,.00
+.00,.  @&t@
+.00,1.00
+.00,.  @&t@
+.00,2.00
+.00,.  @&t@
+1.00,.00
+1.00,.  @&t@
+1.00,1.00
+1.00,.  @&t@
+1.00,2.00
+1.00,.  @&t@
+2.00,.00
+2.00,.  @&t@
+2.00,1.00
+2.00,.  @&t@
+2.00,2.00
+2.00,.  @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([REREAD syntax errors])
+AT_DATA([reread.sps], [dnl
+INPUT PROGRAM.
+REREAD COLUMN=1 COLUMN=**.
+END INPUT PROGRAM.
+
+INPUT PROGRAM.
+REREAD COLUMN=**.
+END INPUT PROGRAM.
+
+INPUT PROGRAM.
+REREAD FILE=**.
+END INPUT PROGRAM.
+
+INPUT PROGRAM.
+REREAD ENCODING=**.
+END INPUT PROGRAM.
+
+INPUT PROGRAM.
+REREAD **.
+END INPUT PROGRAM.
+])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='reread.sps' ERROR=IGNORE.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"reread.sps:2.17-2.22: error: REREAD: Subcommand COLUMN may only be specified once.
+    2 | REREAD COLUMN=1 COLUMN=**.
+      |                 ^~~~~~"
+
+"reread.sps:6.15-6.16: error: REREAD: Syntax error parsing expression.
+    6 | REREAD COLUMN=**.
+      |               ^~"
+
+"reread.sps:10.13-10.14: error: REREAD: Syntax error expecting a file name or handle name.
+   10 | REREAD FILE=**.
+      |             ^~"
+
+"reread.sps:14.17-14.18: error: REREAD: Syntax error expecting string.
+   14 | REREAD ENCODING=**.
+      |                 ^~"
+
+"reread.sps:18.8-18.9: error: REREAD: Syntax error expecting COLUMN, FILE, or ENCODING.
+   18 | REREAD **.
+      |        ^~"
+])
+AT_CLEANUP

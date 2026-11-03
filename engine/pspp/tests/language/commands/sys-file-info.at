@@ -1,0 +1,146 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([SYSFILE INFO])
+
+AT_SETUP([SYSFILE INFO])
+AT_DATA([sysfile-info.sps], [dnl
+DATA LIST LIST /x * name (a10) .
+BEGIN DATA
+1 one
+2 two
+3 three
+END DATA.
+DOCUMENT A document.
+SAVE OUTFILE='pro.sav'.
+
+sysfile info file='pro.sav'.
+])
+AT_CHECK([pspp -o pspp.csv sysfile-info.sps])
+AT_CHECK(
+  [sed -e '/^Created,/d' \
+       -e '/^Endian,/d' \
+       -e '/^Integer Format,/d' \
+       -e '/^Real Format,/d' \
+       -e '/^Encoding,/d' \
+       -e 's/(Entered.*)/(Entered <date>)/' pspp.csv],
+  [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+x,F8.0
+name,A10
+
+Table: File Information
+File,pro.sav
+Variables,2
+Cases,3
+Type,SPSS System File
+Weight,Not weighted
+Compression,SAV
+Documents,"DOCUMENT A document.
+   (Entered <date>)"
+
+Table: Variables
+Name,Position,Measurement Level,Role,Width,Alignment,Print Format,Write Format
+x,1,Nominal,Input,8,Right,F8.2,F8.2
+name,2,Nominal,Input,10,Left,A10,A10
+])
+AT_CLEANUP
+
+AT_BANNER([DISPLAY])
+
+dnl DISPLAY DOCUMENTS is tested with commands for documents.
+
+AT_SETUP([DISPLAY FILE LABEL])
+AT_DATA([display.sps], [dnl
+DATA LIST LIST NOTABLE /x * name (a10) .
+
+DISPLAY FILE LABEL.
+
+FILE LABEL 'foo bar baz quux'.
+DISPLAY FILE LABEL.
+])
+AT_CHECK([pspp -O format=csv display.sps], [0], [dnl
+Table: File Label
+Label,(none)
+
+Table: File Label
+Label,foo bar baz quux
+])
+AT_CLEANUP
+
+dnl DISPLAY VECTORS is tested with commands for vectors.
+
+dnl DISPLAY ATTRIBUTES and @ATTRIBUTES are tested with commands for attributes.
+
+AT_SETUP([DISPLAY SCRATCH])
+AT_DATA([sysfile-info.sps], [dnl
+DATA LIST LIST NOTABLE /x * name (a10) .
+DISPLAY SCRATCH.
+COMPUTE #x=0.
+DISPLAY SCRATCH.
+])
+AT_CHECK([pspp -O format=csv sysfile-info.sps], [0], [dnl
+sysfile-info.sps:2: note: DISPLAY: No variables to display.
+
+Table: Variables
+Name
+#x
+])
+AT_CLEANUP
+
+AT_SETUP([DISPLAY INDEX])
+AT_DATA([sysfile-info.sps], [dnl
+DATA LIST LIST NOTABLE /x * name (a10) .
+DISPLAY INDEX.
+])
+AT_CHECK([pspp -O format=csv sysfile-info.sps], [0], [dnl
+Table: Variables
+Name,Position
+x,1
+name,2
+])
+AT_CLEANUP
+
+AT_SETUP([DISPLAY NAMES])
+AT_DATA([sysfile-info.sps], [dnl
+DATA LIST LIST NOTABLE /x * name (a10) .
+DISPLAY NAMES.
+])
+AT_CHECK([pspp -O format=csv sysfile-info.sps], [0], [dnl
+Table: Variables
+Name
+x
+name
+])
+AT_CLEANUP
+
+AT_SETUP([DISPLAY LABELS])
+AT_DATA([sysfile-info.sps], [dnl
+DATA LIST LIST NOTABLE /x * name (a10) .
+VARIABLE LABEL x 'variable one' name 'variable two'.
+VALUE LABEL x 1 'asdf' 2 'jkl;'.
+DISPLAY LABELS.
+])
+AT_CHECK([pspp -O format=csv sysfile-info.sps], [0], [dnl
+Table: Variables
+Name,Position,Label
+x,1,variable one
+name,2,variable two
+])
+AT_CLEANUP
+
+dnl DISPLAY VARIABLES Is tested in multiple places.

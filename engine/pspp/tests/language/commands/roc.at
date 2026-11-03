@@ -1,0 +1,390 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([ROC])
+
+AT_SETUP([ROC free distribution])
+AT_DATA([roc.sps], [dnl
+set format F10.3.
+data list notable list /x * y * w * a *.
+begin data.
+1 1 2  1
+1 2 28 0
+2 3 4  1
+2 4 14 0
+3 5 10 1
+. . 1  0
+3 1 5  0
+4 2 14 1
+4 3 2  0
+5 4 20 1
+5 4 20 .
+5 5 1  0
+end data.
+
+weight by w.
+
+roc x by a (1)
+	/plot = none
+	/print = se coordinates
+	/criteria = testpos(large) distribution(free) ci(99)
+	/missing = exclude .
+])
+AT_CHECK([pspp -o pspp.csv roc.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Case Summary
+a,Valid N (listwise),
+,Unweighted,Weighted
+Positive,5,50.000
+Negative,5,50.000
+
+Table: Area Under the Curve
+Variable under test,Area,Std. Error,Asymptotic Sig.,Asymp. 99% Confidence Interval,
+,,,,Lower Bound,Upper Bound
+x,.910,.030,.000,.832,.988
+
+Table: Coordinates of the Curve
+Test variable,Positive if greater than or equal to,Sensitivity,1 - Specificity
+x,.000,1.000,1.000
+,1.500,.960,.440
+,2.500,.880,.160
+,3.500,.680,.060
+,4.500,.400,.020
+,6.000,.000,.000
+])
+AT_CLEANUP
+
+AT_SETUP([ROC negative exponential distribution])
+AT_DATA([roc.sps], [dnl
+set format F10.3.
+data list notable list /x * y * w * a *.
+begin data.
+1 1 2  1
+1 2 28 0
+2 3 4  1
+2 4 14 0
+3 5 10 1
+. . 1  0
+3 1 5  0
+4 2 14 1
+4 3 2  0
+5 4 20 1
+5 4 20 .
+5 5 1  0
+end data.
+
+weight by w.
+
+roc x y by a (1)
+	/plot = curve(reference)
+        /print = se coordinates
+	/criteria = testpos(large) distribution(negexpo) ci(95)
+	/missing = exclude .
+])
+AT_CHECK([pspp -o pspp.csv roc.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Case Summary
+a,Valid N (listwise),
+,Unweighted,Weighted
+Positive,5,50.000
+Negative,5,50.000
+
+Table: Area Under the Curve
+Variable under test,Area,Std. Error,Asymptotic Sig.,Asymp. 95% Confidence Interval,
+,,,,Lower Bound,Upper Bound
+x,.910,.030,.000,.850,.970
+y,.697,.052,.001,.594,.800
+
+Table: Coordinates of the Curve
+Test variable,Positive if greater than or equal to,Sensitivity,1 - Specificity
+x,.000,1.000,1.000
+,1.500,.960,.440
+,2.500,.880,.160
+,3.500,.680,.060
+,4.500,.400,.020
+,6.000,.000,.000
+y,.000,1.000,1.000
+,1.500,.960,.900
+,2.500,.680,.340
+,3.000,.600,.340
+,3.500,.600,.300
+,4.500,.200,.020
+,6.000,.000,.000
+])
+AT_CLEANUP
+
+AT_SETUP([ROC with anomaly])
+AT_DATA([roc.sps], [dnl
+set format F10.3.
+data list notable list /x * a * comment (a20).
+begin data.
+0  1 ""
+0  0 ""
+1  1 ""
+1  0 ""
+2  1 ""
+2  0 ""
+5  1 ""
+5  0 ""
+10 1 ""
+10 0 ""
+15 1 ""
+15 0 ""
+20 1 ""
+20 1 ""
+22 0 "here and"
+22 0 "here is the anomaly"
+25 1 ""
+25 0 ""
+30 1 ""
+30 0 ""
+35 1 ""
+35 0 ""
+38 1 ""
+38 0 ""
+39 1 ""
+39 0 ""
+40 1 ""
+40 0 ""
+end data.
+
+roc x by a (1)
+	/plot = none
+	print = se
+	.
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt roc.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Case Summary
+a,Valid N (listwise),
+,Unweighted,Weighted
+Positive,14,14.000
+Negative,14,14.000
+
+Table: Area Under the Curve
+Variable under test,Area,Std. Error,Asymptotic Sig.,Asymp. 95% Confidence Interval,
+,,,,Lower Bound,Upper Bound
+x,.490,.111,.927,.272,.708
+])
+AT_CLEANUP
+
+
+
+
+AT_SETUP([ROC crash on no state variable])
+AT_DATA([roc.sps], [dnl
+data list notable list /x * y * w * a *.
+begin data.
+5 5 1  0
+end data.
+
+
+roc x y By(a (1)
+ .
+])
+
+AT_CHECK([pspp -o pspp.csv roc.sps], [1], [ignore])
+
+AT_CLEANUP
+
+
+AT_SETUP([ROC crash on invalid syntax])
+AT_DATA([roc.sps], [dnl
+data list notable list /x * y * a *.
+bggin data.
+1 1 2
+1 2 28
+end data.
+
+
+roc x y by a (1)
+	/criteria = ci(y5)
+])
+
+AT_CHECK([pspp -O format=csv roc.sps], [1], [ignore])
+
+AT_CLEANUP
+
+AT_SETUP([ROC syntax errors])
+AT_DATA([roc.sps], [dnl
+DATA LIST LIST NOTABLE/x y z.
+ROC **.
+ROC x **.
+ROC x BY **.
+ROC x BY y **.
+ROC x BY y(**).
+ROC x BY y(5 **).
+ROC x BY y(5)/MISSING=**.
+ROC x BY y(5)/PLOT=CURVE(**).
+ROC x BY y(5)/PLOT=CURVE(REFERENCE **).
+ROC x BY y(5)/PLOT=**.
+ROC x BY y(5)/PRINT=**.
+ROC x BY y(5)/CRITERIA=CUTOFF **.
+ROC x BY y(5)/CRITERIA=CUTOFF(**).
+ROC x BY y(5)/CRITERIA=CUTOFF(INCLUDE **).
+ROC x BY y(5)/CRITERIA=TESTPOS **.
+ROC x BY y(5)/CRITERIA=TESTPOS(**).
+ROC x BY y(5)/CRITERIA=TESTPOS(LARGE **).
+ROC x BY y(5)/CRITERIA=CI **.
+ROC x BY y(5)/CRITERIA=CI(**).
+ROC x BY y(5)/CRITERIA=CI(5 **).
+ROC x BY y(5)/CRITERIA=DISTRIBUTION **.
+ROC x BY y(5)/CRITERIA=DISTRIBUTION(**).
+ROC x BY y(5)/CRITERIA=DISTRIBUTION(FREE **).
+ROC x BY y(5)/CRITERIA=**.
+ROC x BY y(5)/ **.
+])
+AT_CHECK([pspp -O format=csv roc.sps], [1], [dnl
+"roc.sps:2.5-2.6: error: ROC: Syntax error expecting variable name.
+    2 | ROC **.
+      |     ^~"
+
+"roc.sps:3.7-3.8: error: ROC: Syntax error expecting `BY'.
+    3 | ROC x **.
+      |       ^~"
+
+"roc.sps:4.10-4.11: error: ROC: Syntax error expecting variable name.
+    4 | ROC x BY **.
+      |          ^~"
+
+"roc.sps:5.12-5.13: error: ROC: Syntax error expecting `('.
+    5 | ROC x BY y **.
+      |            ^~"
+
+"roc.sps:6.12-6.13: error: ROC: Syntax error expecting number.
+    6 | ROC x BY y(**).
+      |            ^~"
+
+"roc.sps:7.14-7.15: error: ROC: Syntax error expecting `)'.
+    7 | ROC x BY y(5 **).
+      |              ^~"
+
+"roc.sps:8.23-8.24: error: ROC: Syntax error expecting INCLUDE or EXCLUDE.
+    8 | ROC x BY y(5)/MISSING=**.
+      |                       ^~"
+
+"roc.sps:9.26-9.27: error: ROC: Syntax error expecting REFERENCE.
+    9 | ROC x BY y(5)/PLOT=CURVE(**).
+      |                          ^~"
+
+"roc.sps:10.36-10.37: error: ROC: Syntax error expecting `@:}@'.
+   10 | ROC x BY y(5)/PLOT=CURVE(REFERENCE **).
+      |                                    ^~"
+
+"roc.sps:11.20-11.21: error: ROC: Syntax error expecting CURVE or NONE.
+   11 | ROC x BY y(5)/PLOT=**.
+      |                    ^~"
+
+"roc.sps:12.21-12.22: error: ROC: Syntax error expecting SE or COORDINATES.
+   12 | ROC x BY y(5)/PRINT=**.
+      |                     ^~"
+
+"roc.sps:13.31-13.32: error: ROC: Syntax error expecting `('.
+   13 | ROC x BY y(5)/CRITERIA=CUTOFF **.
+      |                               ^~"
+
+"roc.sps:14.31-14.32: error: ROC: Syntax error expecting INCLUDE or EXCLUDE.
+   14 | ROC x BY y(5)/CRITERIA=CUTOFF(**).
+      |                               ^~"
+
+"roc.sps:15.39-15.40: error: ROC: Syntax error expecting `)'.
+   15 | ROC x BY y(5)/CRITERIA=CUTOFF(INCLUDE **).
+      |                                       ^~"
+
+"roc.sps:16.32-16.33: error: ROC: Syntax error expecting `('.
+   16 | ROC x BY y(5)/CRITERIA=TESTPOS **.
+      |                                ^~"
+
+"roc.sps:17.32-17.33: error: ROC: Syntax error expecting LARGE or SMALL.
+   17 | ROC x BY y(5)/CRITERIA=TESTPOS(**).
+      |                                ^~"
+
+"roc.sps:18.38-18.39: error: ROC: Syntax error expecting `)'.
+   18 | ROC x BY y(5)/CRITERIA=TESTPOS(LARGE **).
+      |                                      ^~"
+
+"roc.sps:19.27-19.28: error: ROC: Syntax error expecting `('.
+   19 | ROC x BY y(5)/CRITERIA=CI **.
+      |                           ^~"
+
+"roc.sps:20.27-20.28: error: ROC: Syntax error expecting number.
+   20 | ROC x BY y(5)/CRITERIA=CI(**).
+      |                           ^~"
+
+"roc.sps:21.29-21.30: error: ROC: Syntax error expecting `)'.
+   21 | ROC x BY y(5)/CRITERIA=CI(5 **).
+      |                             ^~"
+
+"roc.sps:22.37-22.38: error: ROC: Syntax error expecting `('.
+   22 | ROC x BY y(5)/CRITERIA=DISTRIBUTION **.
+      |                                     ^~"
+
+"roc.sps:23.37-23.38: error: ROC: Syntax error expecting FREE or NEGEXPO.
+   23 | ROC x BY y(5)/CRITERIA=DISTRIBUTION(**).
+      |                                     ^~"
+
+"roc.sps:24.42-24.43: error: ROC: Syntax error expecting `)'.
+   24 | ROC x BY y(5)/CRITERIA=DISTRIBUTION(FREE **).
+      |                                          ^~"
+
+"roc.sps:25.24-25.25: error: ROC: Syntax error expecting CUTOFF, TESTPOS, CI, or DISTRIBUTION.
+   25 | ROC x BY y(5)/CRITERIA=**.
+      |                        ^~"
+
+"roc.sps:26.16-26.17: error: ROC: Syntax error expecting MISSING, PLOT, PRINT, or CRITERIA.
+   26 | ROC x BY y(5)/ **.
+      |                ^~"
+])
+AT_CLEANUP
+
+dnl Test supplied by Johannes Weingartner at
+dnl https://lists.gnu.org/archive/html/bug-gnu-pspp/2026-10/msg00003.html
+AT_SETUP([ROC confidence interval])
+AT_DATA([roc.sps], [dnl
+DATA LIST LIST /score (F8.0) diag (A8).
+BEGIN DATA
+3 yes
+5 yes
+7 yes
+8 yes
+9 yes
+2 no
+4 no
+5 no
+6 no
+3 no
+END DATA.
+ROC score BY diag ('yes') /PLOT=NONE /PRINT=SE /CRITERIA=CI(95).
+])
+AT_CHECK([pspp -o pspp.csv roc.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+score,F8.0
+diag,A8
+
+Table: Case Summary
+diag,Valid N (listwise),
+,Unweighted,Weighted
+Positive,5,5.00
+Negative,5,5.00
+
+Table: Area Under the Curve
+Variable under test,Area,Std. Error,Asymptotic Sig.,Asymp. 95% Confidence Interval,
+,,,,Lower Bound,Upper Bound
+score,.80,.15,.117,.51,1.09
+])
+AT_CLEANUP

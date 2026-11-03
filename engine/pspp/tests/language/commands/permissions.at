@@ -1,0 +1,75 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([PERMISSIONS])
+
+AT_SETUP([PERMISSIONS])
+AT_DATA([foobar], [Hello
+])
+
+chmod 666 foobar
+AT_CHECK([ls -l foobar], [0], [stdout])
+AT_CHECK([sed 's/^\(..........\).*/\1/' stdout], [0], [-rw-rw-rw-
+])
+
+AT_DATA([permissions.sps], [PERMISSIONS /FILE='foobar' PERMISSIONS=READONLY.
+])
+AT_CHECK([pspp -O format=csv permissions.sps])
+AT_CHECK([ls -l foobar], [0], [stdout])
+AT_CHECK([sed 's/^\(..........\).*/\1/' stdout], [0], [-r--r--r--
+])
+
+AT_DATA([permissions.sps], [PERMISSIONS /FILE='foobar' PERMISSIONS=WRITEABLE.
+])
+AT_CHECK([pspp -O format=csv permissions.sps])
+AT_CHECK([ls -l foobar], [0], [stdout])
+AT_CHECK([sed 's/^\(..........\).*/\1/' stdout], [0], [-rw-r--r--
+])
+AT_CLEANUP
+
+
+dnl The PERMISSIONS command should be unavailable when --safer is given
+AT_SETUP([PERMISSIONS - safer mode])
+AT_DATA([a-file], [Hello
+])
+
+chmod 444 a-file
+AT_CHECK([ls -l a-file], [0], [stdout])
+AT_CHECK([sed 's/^\(..........\).*/\1/' stdout], [0], [-r--r--r--
+])
+
+AT_DATA([permissions.sps], [PERMISSIONS /FILE='a-file' PERMISSIONS=WRITEABLE.
+])
+AT_CHECK([pspp -O format=csv permissions.sps --safer], [1], [dnl
+"permissions.sps:1.1-1.11: error: PERMISSIONS: This command not allowed when the SAFER option is set.
+    1 | PERMISSIONS /FILE='a-file' PERMISSIONS=WRITEABLE.
+      | ^~~~~~~~~~~"
+])
+AT_CHECK([ls -l a-file], [0], [stdout])
+AT_CHECK([sed 's/^\(..........\).*/\1/' stdout], [0], [-r--r--r--
+])
+AT_CLEANUP
+
+AT_SETUP([PERMISSIONS - bad syntax])
+AT_DATA([pe.sps], [[PERMI|SIONS /FILE='foobar' PERMISSIONS=WRITEABLE.
+]])
+
+AT_CHECK([pspp -O format=csv pe.sps], [1], [dnl
+"pe.sps:1.6: error: PERMISSIONS: Syntax error expecting STRING.
+    1 | PERMI|SIONS /FILE='foobar' PERMISSIONS=WRITEABLE.
+      |      ^"
+])
+AT_CLEANUP

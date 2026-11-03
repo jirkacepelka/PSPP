@@ -1,0 +1,153 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([PRINT SPACE])
+
+AT_SETUP([PRINT SPACE without arguments])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE/x 1.
+BEGIN DATA.
+1
+2
+END DATA.
+PRINT/x.
+PRINT SPACE.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv print-space.sps], [0], [dnl
+1 @&t@
+
+2 @&t@
+
+])
+AT_CLEANUP
+
+AT_SETUP([PRINT SPACE with number])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE/x 1.
+BEGIN DATA.
+1
+2
+END DATA.
+PRINT/x.
+PRINT SPACE 2.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv print-space.sps], [0], [dnl
+1 @&t@
+
+
+2 @&t@
+
+
+])
+AT_CLEANUP
+
+AT_SETUP([PRINT SPACE to file])
+AT_CAPTURE_FILE([output.txt])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE/x 1.
+BEGIN DATA.
+1
+2
+END DATA.
+PRINT OUTFILE='output.txt'/x.
+PRINT SPACE OUTFILE='output.txt'.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv print-space.sps])
+AT_CHECK([cat output.txt], [0], [dnl
+ 1 @&t@
+ @&t@
+ 2 @&t@
+ @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([PRINT SPACE to file with number])
+AT_CAPTURE_FILE([output.txt])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE/x 1.
+BEGIN DATA.
+1
+2
+END DATA.
+PRINT OUTFILE='output.txt'/x.
+PRINT SPACE OUTFILE='output.txt' 2.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv print-space.sps])
+AT_CHECK([cat output.txt], [0], [dnl
+ 1 @&t@
+ @&t@
+ @&t@
+ 2 @&t@
+ @&t@
+ @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([PRINT SPACE syntax errors])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE /x 1.
+PRINT SPACE OUTFILE=**.
+PRINT SPACE OUTFILE='out.txt' ENCODING=**.
+PRINT SPACE **.
+PRINT SPACE 1 'xyzzy'.
+])
+AT_CHECK([pspp -O format=csv print-space.sps], [1], [dnl
+"print-space.sps:2.21-2.22: error: PRINT SPACE: Syntax error expecting a file name or handle name.
+    2 | PRINT SPACE OUTFILE=**.
+      |                     ^~"
+
+"print-space.sps:3.40-3.41: error: PRINT SPACE: Syntax error expecting string.
+    3 | PRINT SPACE OUTFILE='out.txt' ENCODING=**.
+      |                                        ^~"
+
+"print-space.sps:4.13-4.14: error: PRINT SPACE: Syntax error parsing expression.
+    4 | PRINT SPACE **.
+      |             ^~"
+
+"print-space.sps:5.15-5.21: error: PRINT SPACE: Syntax error expecting end of command.
+    5 | PRINT SPACE 1 'xyzzy'.
+      |               ^~~~~~~"
+])
+AT_CLEANUP
+
+AT_SETUP([PRINT SPACE evaluation errors])
+AT_DATA([print-space.sps], [dnl
+DATA LIST NOTABLE /x 1.
+BEGIN DATA.
+1
+END DATA.
+PRINT SPACE $SYSMIS.
+PRINT SPACE -1.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv print-space.sps], [0], [dnl
+"print-space.sps:5.13-5.19: warning: EXECUTE: The expression on PRINT SPACE evaluated to the system-missing value.
+    5 | PRINT SPACE $SYSMIS.
+      |             ^~~~~~~"
+
+
+
+"print-space.sps:6.13-6.14: warning: EXECUTE: The expression on PRINT SPACE evaluated to -1.
+    6 | PRINT SPACE -1.
+      |             ^~"
+
+
+])
+AT_CLEANUP

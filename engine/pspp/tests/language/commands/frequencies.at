@@ -1,0 +1,1262 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([FREQUENCIES procedure])
+
+AT_SETUP([FREQUENCIES string variable])
+AT_DATA([frequencies.sps],
+  [DATA LIST FREE/
+   name  (A8) value * quantity .
+BEGIN DATA.
+foo 1 5
+bar 2 6
+baz 1 9
+quux 3 1
+bar 1 2
+baz 4 3
+baz 1 4
+baz 1 1
+foo 6 0
+quux 5 8
+END DATA.
+EXECUTE.
+
+FREQUENCIES /VAR = name/ORDER=ANALYSIS.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: name
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,bar,2,20.0%,20.0%,20.0%
+,baz,4,40.0%,40.0%,60.0%
+,foo,2,20.0%,20.0%,80.0%
+,quux,2,20.0%,20.0%,100.0%
+Total,,10,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES with SPLIT FILE - LAYERED])
+AT_DATA([frequencies.sps], [dnl
+DATA LIST LIST NOTABLE/name (A8) value quantity.
+BEGIN DATA.
+foo 1 5
+bar 2 6
+baz 1 9
+quux 3 1
+bar 1 2
+baz 4 3
+baz 1 4
+baz 1 1
+foo 6 0
+quux 5 8
+END DATA.
+EXECUTE.
+
+SORT CASES BY name.
+SPLIT FILE BY name.
+FREQUENCIES /VARIABLES=value quantity /FORMAT NOTABLE.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,name,,,,,,,
+,,bar,,baz,,foo,,quux,
+,,value,quantity,value,quantity,value,quantity,value,quantity
+N,Valid,2,2,4,4,2,2,2,2
+,Missing,0,0,0,0,0,0,0,0
+Mean,,1.50,4.00,1.75,4.25,3.50,2.50,4.00,4.50
+Std Dev,,.71,2.83,1.50,3.40,3.54,3.54,1.41,4.95
+Minimum,,1.00,2.00,1.00,1.00,1.00,.00,3.00,1.00
+Maximum,,2.00,6.00,4.00,9.00,6.00,5.00,5.00,8.00
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES with SPLIT FILE - SEPARATE])
+AT_DATA([frequencies.sps], [dnl
+DATA LIST LIST NOTABLE/name (A8) value quantity.
+BEGIN DATA.
+foo 1 5
+bar 2 6
+baz 1 9
+quux 3 1
+bar 1 2
+baz 4 3
+baz 1 4
+baz 1 1
+foo 6 0
+quux 5 8
+END DATA.
+EXECUTE.
+
+SORT CASES BY name.
+SPLIT FILE SEPARATE BY name.
+FREQUENCIES /VARIABLES=value quantity /FORMAT NOTABLE.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Split Values
+Variable,Value
+name,bar
+
+Table: Statistics
+,,value,quantity
+N,Valid,2,2
+,Missing,0,0
+Mean,,1.50,4.00
+Std Dev,,.71,2.83
+Minimum,,1.00,2.00
+Maximum,,2.00,6.00
+
+Table: Split Values
+Variable,Value
+name,baz
+
+Table: Statistics
+,,value,quantity
+N,Valid,4,4
+,Missing,0,0
+Mean,,1.75,4.25
+Std Dev,,1.50,3.40
+Minimum,,1.00,1.00
+Maximum,,4.00,9.00
+
+Table: Split Values
+Variable,Value
+name,foo
+
+Table: Statistics
+,,value,quantity
+N,Valid,2,2
+,Missing,0,0
+Mean,,3.50,2.50
+Std Dev,,3.54,3.54
+Minimum,,1.00,.00
+Maximum,,6.00,5.00
+
+Table: Split Values
+Variable,Value
+name,quux
+
+Table: Statistics
+,,value,quantity
+N,Valid,2,2
+,Missing,0,0
+Mean,,4.00,4.50
+Std Dev,,1.41,4.95
+Minimum,,3.00,1.00
+Maximum,,5.00,8.00
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES with SPLIT FILE - LAYERED - unsorted data])
+AT_DATA([frequencies.sps], [dnl
+DATA LIST LIST NOTABLE/name (A8) value quantity.
+BEGIN DATA.
+foo 1 5
+bar 2 6
+baz 1 9
+quux 3 1
+baz 4 3
+bar 1 2
+baz 1 1
+foo 6 0
+baz 1 4
+quux 5 8
+END DATA.
+EXECUTE.
+
+SPLIT FILE BY name.
+FREQUENCIES /VARIABLES=value quantity /FORMAT NOTABLE.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+"frequencies.sps:17: warning: FREQUENCIES: When SPLIT FILE is in effect, the input data must be sorted by the split variables (for example, using SORT CASES), but multiple runs of cases with the same split values were found separated by cases with different values.  Each run will be analyzed separately.  The duplicate split values are: name = baz     "
+
+"frequencies.sps:17: warning: FREQUENCIES: When SPLIT FILE is in effect, the input data must be sorted by the split variables (for example, using SORT CASES), but multiple runs of cases with the same split values were found separated by cases with different values.  Each run will be analyzed separately.  The duplicate split values are: name = bar     "
+
+"frequencies.sps:17: warning: FREQUENCIES: When SPLIT FILE is in effect, the input data must be sorted by the split variables (for example, using SORT CASES), but multiple runs of cases with the same split values were found separated by cases with different values.  Each run will be analyzed separately.  The duplicate split values are: name = baz     "
+
+"frequencies.sps:17: warning: FREQUENCIES: When SPLIT FILE is in effect, the input data must be sorted by the split variables (for example, using SORT CASES), but multiple runs of cases with the same split values were found separated by cases with different values.  Each run will be analyzed separately.  The duplicate split values are: name = foo     "
+
+"frequencies.sps:17: warning: FREQUENCIES: When SPLIT FILE is in effect, the input data must be sorted by the split variables (for example, using SORT CASES), but multiple runs of cases with the same split values were found separated by cases with different values.  Each run will be analyzed separately.  The duplicate split values are: name = baz     "
+
+Table: Statistics
+,,name,,,,,,,,,,,,,,,,,,,
+,,foo,,bar,,baz,,quux,,baz,,bar,,baz,,foo,,baz,,quux,
+,,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity,value,quantity
+N,Valid,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+,Missing,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Mean,,1.00,5.00,2.00,6.00,1.00,9.00,3.00,1.00,4.00,3.00,1.00,2.00,1.00,1.00,6.00,.00,1.00,4.00,5.00,8.00
+Std Dev,,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+Minimum,,1.00,5.00,2.00,6.00,1.00,9.00,3.00,1.00,4.00,3.00,1.00,2.00,1.00,1.00,6.00,.00,1.00,4.00,5.00,8.00
+Maximum,,1.00,5.00,2.00,6.00,1.00,9.00,3.00,1.00,4.00,3.00,1.00,2.00,1.00,1.00,6.00,.00,1.00,4.00,5.00,8.00
+
+frequencies.sps:17: warning: FREQUENCIES: Suppressed 1 additional warning about duplicate split values.
+])
+AT_CLEANUP
+
+# Tests for a bug where pspp would crash if two FREQUENCIES commands
+# existed in an input file.
+AT_SETUP([FREQUENCIES two runs crash])
+AT_DATA([frequencies.sps],
+  [data list free /v1 v2.
+begin data.
+0 1
+2 3
+4 5
+3 4
+end data.
+
+frequencies v1 v2/statistics=none/ORDER=VARIABLE.
+frequencies v1 v2/statistics=none.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: v1
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,.00,1,25.0%,25.0%,25.0%
+,2.00,1,25.0%,25.0%,50.0%
+,3.00,1,25.0%,25.0%,75.0%
+,4.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+
+Table: v2
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,25.0%,25.0%,25.0%
+,3.00,1,25.0%,25.0%,50.0%
+,4.00,1,25.0%,25.0%,75.0%
+,5.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+
+Table: v1
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,.00,1,25.0%,25.0%,25.0%
+,2.00,1,25.0%,25.0%,50.0%
+,3.00,1,25.0%,25.0%,75.0%
+,4.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+
+Table: v2
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,25.0%,25.0%,25.0%
+,3.00,1,25.0%,25.0%,50.0%
+,4.00,1,25.0%,25.0%,75.0%
+,5.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+])
+AT_CLEANUP
+
+# Test that the LIMIT specification works.
+AT_SETUP([FREQUENCIES with LIMIT])
+AT_DATA([frequencies.sps],
+  [data list free /v1 v2.
+begin data.
+0 1
+2 5
+4 3
+3 5
+end data.
+
+frequencies v1 v2/statistics=none/FORMAT=LIMIT(3).
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: v2
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,25.0%,25.0%,25.0%
+,3.00,1,25.0%,25.0%,50.0%
+,5.00,2,50.0%,50.0%,100.0%
+Total,,4,100.0%,,
+])
+AT_CLEANUP
+
+# Tests for a bug where PSPP would crash when a FREQUENCIES command
+# was used with the HTML output driver.
+AT_SETUP([FREQUENCIES HTML output crash])
+AT_DATA([frequencies.sps],
+  [data list free /v1 v2.
+begin data.
+0 1
+2 3
+4 5
+3 4
+end data.
+
+list.
+
+frequencies v1/statistics=none.
+])
+AT_CHECK([pspp -o - -O format=csv -o pspp.html frequencies.sps], [0],
+  [Table: Data List
+v1,v2
+.00,1.00
+2.00,3.00
+4.00,5.00
+3.00,4.00
+
+Table: v1
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,.00,1,25.0%,25.0%,25.0%
+,2.00,1,25.0%,25.0%,50.0%
+,3.00,1,25.0%,25.0%,75.0%
+,4.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+])
+AT_CHECK([test -s pspp.html])
+AT_CLEANUP
+
+# Tests for a bug which crashed PSPP when a piechart with too many
+# segments was requested.
+AT_SETUP([FREQUENCIES pie chart crash])
+AT_DATA([frequencies.sps],
+  [data list list /x * w *.
+begin data.
+1  4
+34 10
+-9 15
+232 6
+11  4
+134 1
+9  5
+32 16
+-2 6
+2  16
+20  6
+end data.
+
+weight by w.
+
+frequencies /x /format=notable /statistics=none
+	/piechart.
+])
+# Cannot use the CSV driver for this because it does not output charts
+# at all.
+AT_CHECK([pspp frequencies.sps], [0], [dnl
+Reading free-form data from INLINE.
++--------+------+
+|Variable|Format|
++--------+------+
+|x       |F8.0  |
+|w       |F8.0  |
++--------+------+
+])
+AT_CLEANUP
+
+dnl Check that histogram subcommand runs wihout crashing
+AT_SETUP([FREQUENCIES histogram crash])
+AT_DATA([frequencies.sps],
+  [data list notable list /x * w *.
+begin data.
+1  4
+34 10
+-9 15
+232 6
+11  4
+134 1
+9  5
+32 16
+-2 6
+2  16
+20  6
+end data.
+
+weight by w.
+
+frequencies /x
+	    /format=notable
+	    /statistics=none
+	    /histogram=minimum(0) maximum(50) percent(5) normal.
+])
+# Cannot use the CSV driver for this because it does not output charts
+# at all.
+AT_CHECK([pspp -O format=pdf frequencies.sps], [0], [ignore], [ignore])
+AT_CLEANUP
+
+# Tests for a bug which crashed PSPP when the median and a histogram
+# were both requested.
+AT_SETUP([FREQUENCIES median with histogram crash])
+AT_DATA([frequencies.sps], [dnl
+data list list notable /x.
+begin data.
+1
+end data.
+
+frequencies /x /histogram /STATISTICS=median.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [ignore])
+dnl Ignore output - No crash test.
+AT_CLEANUP
+
+# Tests for a bug which caused FREQUENCIES following TEMPORARY to
+# crash (bug #11492).
+AT_SETUP([FREQUENCIES crash after TEMPORARY])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST /SEX (A1) X *.
+BEGIN DATA.
+M 31
+F 21
+M 41
+F 31
+M 13
+F 12
+M 14
+F 13
+END DATA.
+
+
+TEMPORARY
+SELECT IF SEX EQ 'F'
+FREQUENCIES /X .
+
+FINISH
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt frequencies.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+SEX,A1
+X,F8.0
+
+Table: Statistics
+,,X
+N,Valid,4
+,Missing,0
+Mean,,19.25
+Std Dev,,8.81
+Minimum,,12.00
+Maximum,,31.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,12.00,1,25.0%,25.0%,25.0%
+,13.00,1,25.0%,25.0%,50.0%
+,21.00,1,25.0%,25.0%,75.0%
+,31.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+])
+AT_CLEANUP
+
+m4_define([FREQUENCIES_NTILES_OUTPUT], [dnl
+Table: Statistics
+,,x,y
+N,Valid,5,5
+,Missing,0,0
+Mean,,3.00,30.00
+Std Dev,,1.58,15.81
+Minimum,,1.00,10.00
+Maximum,,5.00,50.00
+Percentiles,0,1.00,10.00
+,25,2.00,20.00
+,33,2.33,23.33
+,50,3.00,30.00
+,67,3.67,36.67
+,75,4.00,40.00
+,100,5.00,50.00
+])
+AT_SETUP([FREQUENCIES basic percentiles])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /x y.
+BEGIN DATA.
+1 10
+2 20
+3 30
+4 40
+5 50
+END DATA.
+
+FREQUENCIES
+	VAR=x y
+	/FORMAT=NOTABLE
+	/PERCENTILES = 0 25 33.333 50 66.666 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0],
+  [FREQUENCIES_NTILES_OUTPUT])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES basic n-tiles])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /x y.
+BEGIN DATA.
+1 10
+2 20
+3 30
+4 40
+5 50
+END DATA.
+
+FREQUENCIES
+	VAR=x y
+	/FORMAT=NOTABLE
+	/NTILES = 3
+	/NTILES = 4.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0],
+  [FREQUENCIES_NTILES_OUTPUT])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES compatibility percentiles])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * .
+BEGIN DATA.
+1
+2
+3
+4
+5
+END DATA.
+
+FREQUENCIES
+	VAR=x
+	/ALGORITHM=COMPATIBLE
+	/PERCENTILES = 0 25 50 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,5
+,Missing,0
+Mean,,3.00
+Std Dev,,1.58
+Minimum,,1.00
+Maximum,,5.00
+Percentiles,0,1.00
+,25,1.50
+,50,3.00
+,75,4.50
+,100,5.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,20.0%,20.0%,20.0%
+,2.00,1,20.0%,20.0%,40.0%
+,3.00,1,20.0%,20.0%,60.0%
+,4.00,1,20.0%,20.0%,80.0%
+,5.00,1,20.0%,20.0%,100.0%
+Total,,5,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES enhanced percentiles])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * .
+BEGIN DATA.
+1
+2
+3
+4
+5
+END DATA.
+
+FREQUENCIES
+	VAR=x
+	/PERCENTILES = 0 25 50 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,5
+,Missing,0
+Mean,,3.00
+Std Dev,,1.58
+Minimum,,1.00
+Maximum,,5.00
+Percentiles,0,1.00
+,25,2.00
+,50,3.00
+,75,4.00
+,100,5.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,20.0%,20.0%,20.0%
+,2.00,1,20.0%,20.0%,40.0%
+,3.00,1,20.0%,20.0%,60.0%
+,4.00,1,20.0%,20.0%,80.0%
+,5.00,1,20.0%,20.0%,100.0%
+Total,,5,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES enhanced percentiles, weighted])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * F *.
+BEGIN DATA.
+1 2
+2 2
+3 2
+4 1
+4 1
+5 1
+5 1
+END DATA.
+
+WEIGHT BY f.
+
+FREQUENCIES
+	VAR=x
+	/PERCENTILES = 0 25 50 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,10.00
+,Missing,.00
+Mean,,3.00
+Std Dev,,1.49
+Minimum,,1.00
+Maximum,,5.00
+Percentiles,0,1.00
+,25,2.00
+,50,3.00
+,75,4.00
+,100,5.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,2.00,20.0%,20.0%,20.0%
+,2.00,2.00,20.0%,20.0%,40.0%
+,3.00,2.00,20.0%,20.0%,60.0%
+,4.00,2.00,20.0%,20.0%,80.0%
+,5.00,2.00,20.0%,20.0%,100.0%
+Total,,10.00,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES enhanced percentiles, weighted (2)])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * F *.
+BEGIN DATA.
+1 1
+3 2
+4 1
+5 1
+5 1
+END DATA.
+
+WEIGHT BY f.
+
+FREQUENCIES
+	VAR=x
+	/PERCENTILES = 0 25 50 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,6.00
+,Missing,.00
+Mean,,3.50
+Std Dev,,1.52
+Minimum,,1.00
+Maximum,,5.00
+Percentiles,0,1.00
+,25,3.00
+,50,3.50
+,75,4.75
+,100,5.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1.00,16.7%,16.7%,16.7%
+,3.00,2.00,33.3%,33.3%,50.0%
+,4.00,1.00,16.7%,16.7%,66.7%
+,5.00,2.00,33.3%,33.3%,100.0%
+Total,,6.00,100.0%,,
+])
+AT_CLEANUP
+
+dnl Data for this test case from Fabio Bordignon <bordignon@demos.it>.
+AT_SETUP([FREQUENCIES enhanced percentiles, weighted (3)])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * F *.
+BEGIN DATA.
+1 7
+2 16
+3 12
+4 5
+END DATA.
+
+WEIGHT BY f.
+
+FREQUENCIES
+	VAR=x
+	/PERCENTILES = 0 25 50 75 100.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,40.00
+,Missing,.00
+Mean,,2.38
+Std Dev,,.93
+Minimum,,1.00
+Maximum,,4.00
+Percentiles,0,1.00
+,25,2.00
+,50,2.00
+,75,3.00
+,100,4.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,7.00,17.5%,17.5%,17.5%
+,2.00,16.00,40.0%,40.0%,57.5%
+,3.00,12.00,30.0%,30.0%,87.5%
+,4.00,5.00,12.5%,12.5%,100.0%
+Total,,40.00,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES enhanced percentiles, weighted, missing values])
+AT_DATA([frequencies.sps],
+  [DATA LIST LIST notable /X * F *.
+BEGIN DATA.
+1 1
+3 2
+4 1
+5 1
+5 1
+99 4
+END DATA.
+
+MISSING VALUE x (99.0) .
+WEIGHT BY f.
+
+FREQUENCIES
+	VAR=x
+	/PERCENTILES = 0 25 50 75 100.
+])
+
+AT_CHECK([pspp -O format=csv frequencies.sps], [0], [dnl
+Table: Statistics
+,,X
+N,Valid,6.00
+,Missing,4.00
+Mean,,3.50
+Std Dev,,1.52
+Minimum,,1.00
+Maximum,,5.00
+Percentiles,0,1.00
+,25,3.00
+,50,3.50
+,75,4.75
+,100,5.00
+
+Table: X
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1.00,10.0%,16.7%,16.7%
+,3.00,2.00,20.0%,33.3%,50.0%
+,4.00,1.00,10.0%,16.7%,66.7%
+,5.00,2.00,20.0%,33.3%,100.0%
+Missing,99.00,4.00,40.0%,,
+Total,,10.00,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES dichotomous histogram])
+AT_DATA([frequencies.sps], [dnl
+data list notable list /d4 *.
+begin data.
+0
+0
+0
+1
+0
+0
+0
+0
+1
+0
+0
+0
+0
+0
+1
+2
+0
+end data.
+
+FREQUENCIES
+	/VARIABLES = d4
+	/FORMAT=AVALUE TABLE
+	/HISTOGRAM=NORMAL
+	.
+])
+
+AT_CHECK([pspp frequencies.sps], [0],  [ignore])
+AT_CLEANUP
+
+
+AT_SETUP([FREQUENCIES median])
+AT_DATA([median.sps], [dnl
+data list notable list /x *.
+begin data.
+1
+2
+3000000
+end data.
+
+FREQUENCIES
+	/VARIABLES = x
+	/STATISTICS = MEDIAN
+	.
+])
+
+AT_CHECK([pspp median.sps -O format=csv], [0], [dnl
+Table: Statistics
+,,x
+N,Valid,3
+,Missing,0
+Median,,2.00
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,1,33.3%,33.3%,33.3%
+,2.00,1,33.3%,33.3%,66.7%
+,3000000,1,33.3%,33.3%,100.0%
+Total,,3,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES variance])
+AT_DATA([variance.sps], [dnl
+data list notable list /forename (A12) height.
+begin data.
+Ahmed 188
+bertram 167
+Catherine 134
+David 109
+end data.
+
+FREQUENCIES
+   /VARIABLES = height
+   /STATISTICS = VARIANCE.
+])
+
+AT_CHECK([pspp variance.sps -O format=csv], [0], [dnl
+Table: Statistics
+,,height
+N,Valid,4
+,Missing,0
+Variance,,1223.00
+
+Table: height
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,109.00,1,25.0%,25.0%,25.0%
+,134.00,1,25.0%,25.0%,50.0%
+,167.00,1,25.0%,25.0%,75.0%
+,188.00,1,25.0%,25.0%,100.0%
+Total,,4,100.0%,,
+])
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES default statistics])
+AT_DATA([median.sps], [dnl
+data list notable list /x *.
+begin data.
+10
+20
+3000000
+end data.
+
+FREQUENCIES
+	/VARIABLES = x
+	/STATISTICS
+	.
+
+FREQUENCIES
+	/VARIABLES = x
+	/STATISTICS = DEFAULT
+	.
+])
+
+AT_CHECK([pspp median.sps -o pspp.csv -o pspp.txt])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Statistics
+,,x
+N,Valid,3
+,Missing,0
+Mean,,1000010
+Std Dev,,1732042
+Minimum,,10.00
+Maximum,,3000000
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,10.00,1,33.3%,33.3%,33.3%
+,20.00,1,33.3%,33.3%,66.7%
+,3000000,1,33.3%,33.3%,100.0%
+Total,,3,100.0%,,
+
+Table: Statistics
+,,x
+N,Valid,3
+,Missing,0
+Mean,,1000010
+Std Dev,,1732042
+Minimum,,10.00
+Maximum,,3000000
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,10.00,1,33.3%,33.3%,33.3%
+,20.00,1,33.3%,33.3%,66.7%
+,3000000,1,33.3%,33.3%,100.0%
+Total,,3,100.0%,,
+])
+AT_CLEANUP
+
+
+
+AT_SETUP([FREQUENCIES no valid data])
+AT_DATA([empty.sps], [dnl
+data list notable list /x *.
+begin data.
+.
+.
+.
+end data.
+
+FREQUENCIES
+	/VARIABLES = x
+	/STATISTICS = ALL
+	.
+])
+
+AT_CHECK([pspp empty.sps -O format=csv], [0],  [dnl
+Table: Statistics
+,,x
+N,Valid,0
+,Missing,3
+Mean,,.  @&t@
+S.E. Mean,,.  @&t@
+Median,,.  @&t@
+Mode,,.  @&t@
+Std Dev,,.  @&t@
+Variance,,.  @&t@
+Kurtosis,,.  @&t@
+S.E. Kurt,,.  @&t@
+Skewness,,.  @&t@
+S.E. Skew,,.  @&t@
+Range,,.  @&t@
+Minimum,,.  @&t@
+Maximum,,.  @&t@
+Sum,,.  @&t@
+
+Table: x
+,,Frequency,Percent
+Missing,.  ,3,100.0%
+Total,,3,.0%
+])
+
+AT_CLEANUP
+
+
+AT_SETUP([FREQUENCIES histogram no valid cases])
+AT_DATA([empty.sps], [dnl
+data list notable list /x w *.
+begin data.
+1 .
+2 .
+3 .
+end data.
+
+weight by w.
+
+FREQUENCIES
+	/VARIABLES = x
+	/histogram
+	.
+])
+
+AT_CHECK([pspp empty.sps -O format=csv], [0],  [ignore])
+
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES percentiles + histogram bug#48128])
+AT_DATA([bug.sps], [dnl
+SET FORMAT=F8.0.
+
+INPUT PROGRAM.
+	LOOP I=1 TO 10.
+		COMPUTE SCORE=EXP(NORMAL(1)).
+		END CASE.
+	END LOOP.
+	END FILE.
+END INPUT PROGRAM.
+
+FREQUENCIES VARIABLES=SCORE
+/FORMAT=NOTABLE
+/STATISTICS=ALL
+/PERCENTILES=1 10 20 30 40 50 60 70 80 90 99
+/HISTOGRAM.
+
+])
+
+AT_CHECK([pspp bug.sps], [0],  [ignore])
+
+AT_CLEANUP
+
+
+AT_SETUP([FREQUENCIES vs. missing weights])
+AT_DATA([warn.sps], [dnl
+data list notable list /x w .
+begin data.
+1 1
+2 1
+1 1
+3 1
+3 .
+4 .
+end data.
+
+weight by w.
+
+frequencies /variables=x.
+])
+
+AT_CHECK([pspp warn.sps -O format=csv], [0],  [dnl
+"warn.sps:13: warning: FREQUENCIES: At least one case in the data file had a weight value that was user-missing, system-missing, zero, or negative.  These case(s) were ignored."
+
+Table: Statistics
+,,x
+N,Valid,4.00
+,Missing,.00
+Mean,,1.75
+Std Dev,,.96
+Minimum,,1.00
+Maximum,,4.00
+
+Table: x
+,,Frequency,Percent,Valid Percent,Cumulative Percent
+Valid,1.00,2.00,50.0%,50.0%,50.0%
+,2.00,1.00,25.0%,25.0%,75.0%
+,3.00,1.00,25.0%,25.0%,100.0%
+,4.00,.00,.0%,.0%,100.0%
+Total,,4.00,100.0%,,
+])
+
+AT_CLEANUP
+
+AT_SETUP([FREQUENCIES syntax errors])
+AT_DATA([frequencies.sps], [dnl
+DATA LIST LIST NOTABLE /x y z.
+FREQUENCIES VARIABLES **.
+FREQUENCIES **.
+FREQUENCIES x/STATISTICS **.
+FREQUENCIES x/PERCENTILES **.
+FREQUENCIES x/FORMAT LIMIT **.
+FREQUENCIES x/FORMAT LIMIT(**).
+FREQUENCIES x/FORMAT LIMIT(5 **).
+FREQUENCIES x/FORMAT **.
+FREQUENCIES x/NTILES **.
+FREQUENCIES x/ALGORITHM **.
+FREQUENCIES x/HISTOGRAM FREQ(**).
+FREQUENCIES x/HISTOGRAM FREQ(5 **).
+FREQUENCIES x/HISTOGRAM PERCENT(**).
+FREQUENCIES x/HISTOGRAM PERCENT(5 **).
+FREQUENCIES x/HISTOGRAM MINIMUM(**).
+FREQUENCIES x/HISTOGRAM MINIMUM(5 **).
+FREQUENCIES x/HISTOGRAM MAXIMUM(**).
+FREQUENCIES x/HISTOGRAM MAXIMUM(5 **).
+FREQUENCIES x/HISTOGRAM MINIMUM(5) MAXIMUM(1).
+FREQUENCIES x/HISTOGRAM MAXIMUM(5) MINIMUM(10).
+FREQUENCIES x/HISTOGRAM **.
+FREQUENCIES x/PIECHART MINIMUM(**).
+FREQUENCIES x/PIECHART MINIMUM(5 **).
+FREQUENCIES x/PIECHART MAXIMUM(**).
+FREQUENCIES x/PIECHART MAXIMUM(5 **).
+FREQUENCIES x/PIECHART MINIMUM(5) MAXIMUM(1).
+FREQUENCIES x/PIECHART MAXIMUM(5) MINIMUM(10).
+FREQUENCIES x/PIECHART **.
+FREQUENCIES x/BARCHART FREQ(**).
+FREQUENCIES x/BARCHART FREQ(5 **).
+FREQUENCIES x/BARCHART PERCENT(**).
+FREQUENCIES x/BARCHART PERCENT(5 **).
+FREQUENCIES x/BARCHART MINIMUM(**).
+FREQUENCIES x/BARCHART MINIMUM(5 **).
+FREQUENCIES x/BARCHART MAXIMUM(**).
+FREQUENCIES x/BARCHART MAXIMUM(5 **).
+FREQUENCIES x/BARCHART MINIMUM(5) MAXIMUM(1).
+FREQUENCIES x/BARCHART MAXIMUM(5) MINIMUM(10).
+FREQUENCIES x/BARCHART **.
+FREQUENCIES x/MISSING **.
+FREQUENCIES x/ORDER **.
+FREQUENCIES x/ **.
+])
+AT_CHECK([pspp -O format=csv frequencies.sps], [1], [dnl
+"frequencies.sps:2.23-2.24: error: FREQUENCIES: Syntax error expecting `='.
+    2 | FREQUENCIES VARIABLES **.
+      |                       ^~"
+
+"frequencies.sps:3.13-3.14: error: FREQUENCIES: Syntax error expecting variable name.
+    3 | FREQUENCIES **.
+      |             ^~"
+
+"frequencies.sps:4.26-4.27: error: FREQUENCIES: Syntax error expecting one of the following: MEAN, SEMEAN, MEDIAN, MODE, STDDEV, VARIANCE, KURTOSIS, SEKURTOSIS, SKEWNESS, SESKEWNESS, RANGE, MINIMUM, MAXIMUM, SUM, DEFAULT, ALL, NONE.
+    4 | FREQUENCIES x/STATISTICS **.
+      |                          ^~"
+
+"frequencies.sps:5.27-5.28: error: FREQUENCIES: Syntax error expecting number between 0 and 100 for PERCENTILES.
+    5 | FREQUENCIES x/PERCENTILES **.
+      |                           ^~"
+
+"frequencies.sps:6.28-6.29: error: FREQUENCIES: Syntax error expecting `('.
+    6 | FREQUENCIES x/FORMAT LIMIT **.
+      |                            ^~"
+
+"frequencies.sps:7.28-7.29: error: FREQUENCIES: Syntax error expecting non-negative integer for LIMIT.
+    7 | FREQUENCIES x/FORMAT LIMIT(**).
+      |                            ^~"
+
+"frequencies.sps:8.30-8.31: error: FREQUENCIES: Syntax error expecting `)'.
+    8 | FREQUENCIES x/FORMAT LIMIT(5 **).
+      |                              ^~"
+
+"frequencies.sps:9.22-9.23: error: FREQUENCIES: Syntax error expecting TABLE, NOTABLE, LIMIT, AVALUE, DVALUE, AFREQ, or DFREQ.
+    9 | FREQUENCIES x/FORMAT **.
+      |                      ^~"
+
+"frequencies.sps:10.22-10.23: error: FREQUENCIES: Syntax error expecting non-negative integer for NTILES.
+   10 | FREQUENCIES x/NTILES **.
+      |                      ^~"
+
+"frequencies.sps:11.25-11.26: error: FREQUENCIES: Syntax error expecting COMPATIBLE or ENHANCED.
+   11 | FREQUENCIES x/ALGORITHM **.
+      |                         ^~"
+
+"frequencies.sps:12.30-12.31: error: FREQUENCIES: Syntax error expecting positive integer for FREQ.
+   12 | FREQUENCIES x/HISTOGRAM FREQ(**).
+      |                              ^~"
+
+"frequencies.sps:13.32-13.33: error: FREQUENCIES: Syntax error expecting `)'.
+   13 | FREQUENCIES x/HISTOGRAM FREQ(5 **).
+      |                                ^~"
+
+"frequencies.sps:14.33-14.34: error: FREQUENCIES: Syntax error expecting positive integer for PERCENT.
+   14 | FREQUENCIES x/HISTOGRAM PERCENT(**).
+      |                                 ^~"
+
+"frequencies.sps:15.35-15.36: error: FREQUENCIES: Syntax error expecting `)'.
+   15 | FREQUENCIES x/HISTOGRAM PERCENT(5 **).
+      |                                   ^~"
+
+"frequencies.sps:16.33-16.34: error: FREQUENCIES: Syntax error expecting number for MINIMUM.
+   16 | FREQUENCIES x/HISTOGRAM MINIMUM(**).
+      |                                 ^~"
+
+"frequencies.sps:17.35-17.36: error: FREQUENCIES: Syntax error expecting `)'.
+   17 | FREQUENCIES x/HISTOGRAM MINIMUM(5 **).
+      |                                   ^~"
+
+"frequencies.sps:18.33-18.34: error: FREQUENCIES: Syntax error expecting number for MAXIMUM.
+   18 | FREQUENCIES x/HISTOGRAM MAXIMUM(**).
+      |                                 ^~"
+
+"frequencies.sps:19.35-19.36: error: FREQUENCIES: Syntax error expecting `)'.
+   19 | FREQUENCIES x/HISTOGRAM MAXIMUM(5 **).
+      |                                   ^~"
+
+"frequencies.sps:20.44: error: FREQUENCIES: Syntax error expecting number 5 or greater for MAXIMUM.
+   20 | FREQUENCIES x/HISTOGRAM MINIMUM(5) MAXIMUM(1).
+      |                                            ^"
+
+"frequencies.sps:21.44-21.45: error: FREQUENCIES: Syntax error expecting number less than or equal to 5 for MINIMUM.
+   21 | FREQUENCIES x/HISTOGRAM MAXIMUM(5) MINIMUM(10).
+      |                                            ^~"
+
+"frequencies.sps:22.25-22.26: error: FREQUENCIES: Syntax error expecting NORMAL, NONORMAL, FREQ, PERCENT, MINIMUM, or MAXIMUM.
+   22 | FREQUENCIES x/HISTOGRAM **.
+      |                         ^~"
+
+"frequencies.sps:23.32-23.33: error: FREQUENCIES: Syntax error expecting number for MINIMUM.
+   23 | FREQUENCIES x/PIECHART MINIMUM(**).
+      |                                ^~"
+
+"frequencies.sps:24.34-24.35: error: FREQUENCIES: Syntax error expecting `)'.
+   24 | FREQUENCIES x/PIECHART MINIMUM(5 **).
+      |                                  ^~"
+
+"frequencies.sps:25.32-25.33: error: FREQUENCIES: Syntax error expecting number for MAXIMUM.
+   25 | FREQUENCIES x/PIECHART MAXIMUM(**).
+      |                                ^~"
+
+"frequencies.sps:26.34-26.35: error: FREQUENCIES: Syntax error expecting `)'.
+   26 | FREQUENCIES x/PIECHART MAXIMUM(5 **).
+      |                                  ^~"
+
+"frequencies.sps:27.43: error: FREQUENCIES: Syntax error expecting number 5 or greater for MAXIMUM.
+   27 | FREQUENCIES x/PIECHART MINIMUM(5) MAXIMUM(1).
+      |                                           ^"
+
+"frequencies.sps:28.43-28.44: error: FREQUENCIES: Syntax error expecting number less than or equal to 5 for MINIMUM.
+   28 | FREQUENCIES x/PIECHART MAXIMUM(5) MINIMUM(10).
+      |                                           ^~"
+
+"frequencies.sps:29.24-29.25: error: FREQUENCIES: Syntax error expecting MINIMUM, MAXIMUM, MISSING, or NOMISSING.
+   29 | FREQUENCIES x/PIECHART **.
+      |                        ^~"
+
+"frequencies.sps:30.29-30.30: error: FREQUENCIES: Syntax error expecting positive number for FREQ.
+   30 | FREQUENCIES x/BARCHART FREQ(**).
+      |                             ^~"
+
+"frequencies.sps:31.31-31.32: error: FREQUENCIES: Syntax error expecting `)'.
+   31 | FREQUENCIES x/BARCHART FREQ(5 **).
+      |                               ^~"
+
+"frequencies.sps:32.32-32.33: error: FREQUENCIES: Syntax error expecting positive number for PERCENT.
+   32 | FREQUENCIES x/BARCHART PERCENT(**).
+      |                                ^~"
+
+"frequencies.sps:33.34-33.35: error: FREQUENCIES: Syntax error expecting `)'.
+   33 | FREQUENCIES x/BARCHART PERCENT(5 **).
+      |                                  ^~"
+
+"frequencies.sps:34.32-34.33: error: FREQUENCIES: Syntax error expecting number for MINIMUM.
+   34 | FREQUENCIES x/BARCHART MINIMUM(**).
+      |                                ^~"
+
+"frequencies.sps:35.34-35.35: error: FREQUENCIES: Syntax error expecting `)'.
+   35 | FREQUENCIES x/BARCHART MINIMUM(5 **).
+      |                                  ^~"
+
+"frequencies.sps:36.32-36.33: error: FREQUENCIES: Syntax error expecting number for MAXIMUM.
+   36 | FREQUENCIES x/BARCHART MAXIMUM(**).
+      |                                ^~"
+
+"frequencies.sps:37.34-37.35: error: FREQUENCIES: Syntax error expecting `)'.
+   37 | FREQUENCIES x/BARCHART MAXIMUM(5 **).
+      |                                  ^~"
+
+"frequencies.sps:38.43: error: FREQUENCIES: Syntax error expecting number 5 or greater for MAXIMUM.
+   38 | FREQUENCIES x/BARCHART MINIMUM(5) MAXIMUM(1).
+      |                                           ^"
+
+"frequencies.sps:39.43-39.44: error: FREQUENCIES: Syntax error expecting number less than or equal to 5 for MINIMUM.
+   39 | FREQUENCIES x/BARCHART MAXIMUM(5) MINIMUM(10).
+      |                                           ^~"
+
+"frequencies.sps:40.24-40.25: error: FREQUENCIES: Syntax error expecting MINIMUM, MAXIMUM, FREQ, or PERCENT.
+   40 | FREQUENCIES x/BARCHART **.
+      |                        ^~"
+
+"frequencies.sps:41.23-41.24: error: FREQUENCIES: Syntax error expecting EXCLUDE or INCLUDE.
+   41 | FREQUENCIES x/MISSING **.
+      |                       ^~"
+
+"frequencies.sps:42.21-42.22: error: FREQUENCIES: Syntax error expecting ANALYSIS or VARIABLE.
+   42 | FREQUENCIES x/ORDER **.
+      |                     ^~"
+
+"frequencies.sps:43.16-43.17: error: FREQUENCIES: Syntax error expecting one of the following: STATISTICS, PERCENTILES, FORMAT, NTILES, ALGORITHM, HISTOGRAM, PIECHART, BARCHART, MISSING, ORDER.
+   43 | FREQUENCIES x/ **.
+      |                ^~"
+])
+AT_CLEANUP

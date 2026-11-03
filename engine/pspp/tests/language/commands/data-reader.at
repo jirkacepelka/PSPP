@@ -1,0 +1,269 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([BEGIN DATA])
+
+# BEGIN DATA can run as a command in itself, or it can appear as part
+# of the first procedure.  First, test it after a procedure.
+AT_SETUP([BEGIN DATA as part of a procedure])
+AT_DATA([begin-data.sps], [dnl
+TITLE 'Test BEGIN DATA ... END DATA'.
+
+DATA LIST /a b 1-2.
+LIST.
+BEGIN DATA.
+12
+34
+56
+78
+90
+END DATA.
+])
+AT_CHECK([pspp -O format=csv begin-data.sps], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+a,1,1-1,F1.0
+b,1,2-2,F1.0
+
+Table: Data List
+a,b
+1,2
+3,4
+5,6
+7,8
+9,0
+])
+AT_CLEANUP
+
+# Also test BEGIN DATA as an independent command.
+AT_SETUP([BEGIN DATA as an independent command])
+AT_DATA([begin-data.sps], [dnl
+data list /A B 1-2.
+begin data.
+09
+87
+65
+43
+21
+end data.
+list.
+])
+AT_CHECK([pspp -O format=csv begin-data.sps], [0], [dnl
+Table: Reading 1 record from INLINE.
+Variable,Record,Columns,Format
+A,1,1-1,F1.0
+B,1,2-2,F1.0
+
+Table: Data List
+A,B
+0,9
+8,7
+6,5
+4,3
+2,1
+])
+AT_CLEANUP
+
+m4_define([DATA_READER_BINARY],
+  [AT_SETUP([read and write files with $1])
+$3
+   AT_DATA([input.txt], [dnl
+07-22-2007
+10-06-2007
+321
+07-14-1789
+08-26-1789
+4
+01-01-1972
+12-31-1999
+682
+])
+   AT_DATA([make-binary.py], [[
+#! /usr/bin/python3
+
+import struct
+import sys
+
+# This random number generator and the test for it below are drawn
+# from Park and Miller, "Random Number Generators: Good Ones are Hard
+# to Come By", Communications of the ACM 31:10 (October 1988).  It is
+# documented to function properly on systems with a 46-bit or longer
+# real significand, which includes systems that have 64-bit IEEE reals
+# (with 53-bit significand).  The test should catch any systems for
+# which this is not true, in any case.
+def my_rand(modulus):
+    global seed
+    a = 16807
+    m = 2147483647
+    tmp = a * seed
+    seed = tmp - m * (tmp // m)
+    return seed % modulus
+
+# Test the random number generator for reproducibility,
+# then reset the seed
+seed = 1
+for i in range(10000):
+    my_rand(1)
+assert seed == 1043618065
+seed = 1
+
+# ASCII to EBCDIC translation table
+ascii2ebcdic = (
+    0x00, 0x01, 0x02, 0x03, 0x37, 0x2d, 0x2e, 0x2f,
+    0x16, 0x05, 0x25, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    0x10, 0x11, 0x12, 0x13, 0x3c, 0x3d, 0x32, 0x26,
+    0x18, 0x19, 0x3f, 0x27, 0x1c, 0x1d, 0x1e, 0x1f,
+    0x40, 0x5a, 0x7f, 0x7b, 0x5b, 0x6c, 0x50, 0x7d,
+    0x4d, 0x5d, 0x5c, 0x4e, 0x6b, 0x60, 0x4b, 0x61,
+    0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7,
+    0xf8, 0xf9, 0x7a, 0x5e, 0x4c, 0x7e, 0x6e, 0x6f,
+    0x7c, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
+    0xc8, 0xc9, 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6,
+    0xd7, 0xd8, 0xd9, 0xe2, 0xe3, 0xe4, 0xe5, 0xe6,
+    0xe7, 0xe8, 0xe9, 0xad, 0xe0, 0xbd, 0x9a, 0x6d,
+    0x79, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87,
+    0x88, 0x89, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96,
+    0x97, 0x98, 0x99, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6,
+    0xa7, 0xa8, 0xa9, 0xc0, 0x4f, 0xd0, 0x5f, 0x07,
+    0x20, 0x21, 0x22, 0x23, 0x24, 0x15, 0x06, 0x17,
+    0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x09, 0x0a, 0x1b,
+    0x30, 0x31, 0x1a, 0x33, 0x34, 0x35, 0x36, 0x08,
+    0x38, 0x39, 0x3a, 0x3b, 0x04, 0x14, 0x3e, 0xe1,
+    0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+    0x49, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
+    0x58, 0x59, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67,
+    0x68, 0x69, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75,
+    0x76, 0x77, 0x78, 0x80, 0x8a, 0x8b, 0x8c, 0x8d,
+    0x8e, 0x8f, 0x90, 0x6a, 0x9b, 0x9c, 0x9d, 0x9e,
+    0x9f, 0xa0, 0xaa, 0xab, 0xac, 0x4a, 0xae, 0xaf,
+    0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5, 0xb6, 0xb7,
+    0xb8, 0xb9, 0xba, 0xbb, 0xbc, 0xa1, 0xbe, 0xbf,
+    0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xda, 0xdb,
+    0xdc, 0xdd, 0xde, 0xdf, 0xea, 0xeb, 0xec, 0xed,
+    0xee, 0xef, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff)
+assert len(ascii2ebcdic) == 256
+
+def a2e(s):
+    return bytearray((ascii2ebcdic[ord(c)] for c in s))
+
+def dump_records(out, records):
+    while records:
+        n = min(my_rand(5) + 1, len(records))
+        r = records[:n]
+        records[:n] = []
+
+        count = sum((len(rec) for rec in r))
+        out.buffer.write(struct.pack(">H xx", count + 4))
+        for rec in r:
+            out.buffer.write(rec)
+
+data = []
+for line in open('input.txt', 'r'):
+    data += [line.rstrip('\r\n')]
+
+# MODE=BINARY
+out = open('binary.bin', 'w')
+for item in data:
+    reclen = struct.pack("<I", len(item))
+    out.buffer.write(reclen)
+    out.buffer.write(bytearray([ord(c) for c in item]))
+    out.buffer.write(reclen)
+out.close()
+
+# MODE=360 /RECFORM=FIXED /LRECL=32
+out = open('fixed.bin', 'w')
+lrecl = 32
+for item in data:
+    s = item[:lrecl]
+    s += ' ' * (lrecl - len(s))
+    assert len(s) == 32
+    out.buffer.write(a2e(s))
+out.close()
+
+# MODE=360 /RECFORM=VARIABLE
+out = open('variable.bin', 'w')
+records = []
+for item in data:
+    records += [struct.pack('>H xx', len(item) + 4) + a2e(item)]
+dump_records(out, records)
+out.close()
+
+# MODE=360 /RECFORM=SPANNED
+out = open('spanned.bin', 'w')
+records = []
+for line in data:
+    r = []
+    while line:
+        n = min(my_rand(5), len(line))
+        r += [line[:n]]
+        line = line[n:]
+    for i, s in enumerate(r):
+        scc = (0 if len(r) == 1
+               else 1 if i == 0
+               else 2 if i == len(r) - 1
+               else 3)
+        records += [struct.pack('>H B x', len(s) + 4, scc) + a2e(s)]
+dump_records(out, records)
+out.close()
+]])
+   AT_CHECK([$PYTHON3 make-binary.py])
+   AT_DATA([data-reader.sps], [dnl
+FILE HANDLE input/NAME='$2'/$1.
+DATA LIST FIXED FILE=input NOTABLE
+	/1 start 1-10 (ADATE)
+	/2 end 1-10 (ADATE)
+	/3 count 1-3.
+LIST.
+
+* Output the data to a new file in the same format.
+FILE HANDLE OUTPUT/NAME='output.bin'/$1.
+COMPUTE count=count + 1.
+PRINT OUTFILE=output/start end count.
+EXECUTE.
+])
+   AT_CHECK([pspp -O format=csv data-reader.sps], [0], [dnl
+Table: Data List
+start,end,count
+07/22/2007,10/06/2007,321
+07/14/1789,08/26/1789,4
+01/01/1972,12/31/1999,682
+])
+   AT_CHECK([test -s output.bin])
+   AT_DATA([data-reader-2.sps], [dnl
+* Re-read the new data and list it, to verify that it was written correctly.
+FILE HANDLE OUTPUT/NAME='output.bin'/$1.
+DATA LIST FIXED FILE=output NOTABLE/
+	start 2-11 (ADATE)
+	end 13-22 (ADATE)
+	count 24-26.
+LIST.
+])
+   AT_CHECK([pspp -O format=csv data-reader-2.sps], [0], [dnl
+Table: Data List
+start,end,count
+07/22/2007,10/06/2007,322
+07/14/1789,08/26/1789,5
+01/01/1972,12/31/1999,683
+])
+   AT_CLEANUP])
+
+DATA_READER_BINARY([MODE=BINARY], [binary.bin])
+DATA_READER_BINARY([MODE=360 /RECFORM=FIXED /LRECL=32], [fixed.bin],
+  [AT_CHECK([i18n-test supports_encodings EBCDIC-US])])
+DATA_READER_BINARY([MODE=360 /RECFORM=VARIABLE], [variable.bin],
+  [AT_CHECK([i18n-test supports_encodings EBCDIC-US])])
+DATA_READER_BINARY([MODE=360 /RECFORM=SPANNED], [spanned.bin],
+  [AT_CHECK([i18n-test supports_encodings EBCDIC-US])])

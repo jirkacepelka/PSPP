@@ -1,0 +1,151 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([lexer])
+
+AT_SETUP([lexer ignores initial @%:@! line])
+AT_DATA([lexer.sps], [dnl
+#! /usr/local/bin/pspp
+DATA LIST LIST NOTABLE /a.
+BEGIN DATA.
+1
+2
+END DATA.
+LIST.
+])
+AT_CHECK([pspp -o pspp.csv lexer.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+a
+1.00
+2.00
+])
+AT_CLEANUP
+
+AT_SETUP([lexer properly reports scan errors])
+AT_DATA([lexer.sps], [dnl
+x'123'
+x'1x'
+u''
+u'012345678'
+u'd800'
+u'110000'
+'foo
+'very long unterminated string that be ellipsized in its error message
+1e .x
+^
+�
+])
+AT_CHECK([pspp -O format=csv lexer.sps], [1], [dnl
+"lexer.sps:1.1-1.6: error: String of hex digits has 3 characters, which is not a multiple of 2.
+    1 | x'123'
+      | ^~~~~~"
+
+"lexer.sps:2.1-2.5: error: `x' is not a valid hex digit.
+    2 | x'1x'
+      | ^~~~~"
+
+"lexer.sps:3.1-3.3: error: Unicode string contains 0 bytes, which is not in the valid range of 1 to 8 bytes.
+    3 | u''
+      | ^~~"
+
+"lexer.sps:4.1-4.12: error: Unicode string contains 9 bytes, which is not in the valid range of 1 to 8 bytes.
+    4 | u'012345678'
+      | ^~~~~~~~~~~~"
+
+"lexer.sps:5.1-5.7: error: U+D800 is not a valid Unicode code point.
+    5 | u'd800'
+      | ^~~~~~~"
+
+"lexer.sps:6.1-6.9: error: U+110000 is not a valid Unicode code point.
+    6 | u'110000'
+      | ^~~~~~~~~"
+
+"lexer.sps:7.1-7.4: error: Unterminated string constant.
+    7 | 'foo
+      | ^~~~"
+
+"lexer.sps:8.1-8.70: error: Unterminated string constant.
+    8 | 'very long unterminated string that be ellipsized in its error message
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+"lexer.sps:9.1-9.2: error: Missing exponent following `1e'.
+    9 | 1e .x
+      | ^~"
+
+"lexer.sps:9.4: error: Syntax error expecting command name.
+    9 | 1e .x
+      |    ^"
+
+"lexer.sps:10.1: error: Bad character `^' in input.
+   10 | ^
+      | ^"
+
+"lexer.sps:11.1-11.2: error: Bad character U+FFFD in input.
+   11 | �
+      | ^~"
+])
+AT_CLEANUP
+
+# Bug #47602.
+AT_SETUP([lexer crash due to null byte])
+# Intentionally leave out the new-line and add a null byte:
+printf "datA dist list notable file='input.txt'/a b c.
+lis|.\0" > lexer.sps
+
+AT_CHECK([pspp -O format=csv lexer.sps], [1], [dnl
+"lexer.sps:1.1-1.9: error: Unknown command `datA dist'.
+    1 | datA dist list notable file='input.txt'/a b c.
+      | ^~~~~~~~~"
+
+"lexer.sps:2.1-2.3: error: LIST: LIST is allowed only after the active dataset has been defined.
+    2 | lis|."
+
+"lexer.sps:2.6: error: LIST: Bad character U+0000 in input.
+    2 | lis|."
+])
+AT_CLEANUP
+
+
+
+
+# Bug #54684
+AT_SETUP([lexer crash due to overflow])
+printf "DATA LIST/5555555555555555." > lexer.sps
+
+AT_CHECK([pspp -O format=csv lexer.sps], [1], [dnl
+"lexer.sps:1.11-1.26: error: DATA LIST: Syntax error expecting integer between 1 and 2147483647.
+    1 | DATA LIST/5555555555555555.
+      |           ^~~~~~~~~~~~~~~~"
+])
+
+AT_CLEANUP
+
+AT_SETUP([lexer crash due to reentrancy in error processing])
+dnl ^ is an invalid character in input that triggers an error message.
+dnl 100 of them, as shown below, exceeds the 100-error limit.  The
+dnl minus sign causes the lexer to look ahead for a number, and then
+dnl the ^ encountered afterward causes an error too, and then the
+dnl message emission handler might reenter the lexer looking for a
+dnl location, which can then cause the lexer to try to get a token
+dnl again.  It's a whole mess and the new way of avoiding reentrancy
+dnl by keeping a collection of messages to emit until we've almost
+dnl returned to the top level is much less prone to error.
+AT_DATA([lexer.sps], [dnl
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-^
+])
+AT_CHECK([pspp lexer.sps], [1], [ignore])
+AT_CLEANUP

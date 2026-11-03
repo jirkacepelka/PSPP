@@ -1,0 +1,75 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([FILTER])
+
+AT_SETUP([FILTER])
+AT_DATA([filter.sps], [dnl
+data list notable /X 1-2.
+begin data.
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+end data.
+compute FILTER_$ = mod(x,2).
+
+filter by filter_$.
+list.
+filter off.
+list.
+compute filter_$ = 1 - filter_$.
+filter by filter_$.
+list.
+])
+AT_CHECK([pspp -o pspp.csv filter.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Table: Data List
+X,FILTER_$
+1,1.00
+3,1.00
+5,1.00
+7,1.00
+9,1.00
+
+Table: Data List
+X,FILTER_$
+1,1.00
+2,.00
+3,1.00
+4,.00
+5,1.00
+6,.00
+7,1.00
+8,.00
+9,1.00
+10,.00
+
+Table: Data List
+X,FILTER_$
+2,1.00
+4,1.00
+6,1.00
+8,1.00
+10,1.00
+])
+AT_CLEANUP

@@ -1,0 +1,171 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([SORT CASES])
+
+m4_divert_push([PREPARE_TESTS])
+[sort_cases_gen_data () {
+  cat > gen-data.py <<'EOF'
+#! /usr/bin/python3
+
+import random
+import sys
+
+data = []
+for i in range(int(sys.argv[1])):
+    data += [i] * int(sys.argv[2])
+random.shuffle(data)
+
+data_txt = open('data.txt', 'w')
+for i, item in enumerate(data):
+    data_txt.write('%s %s\n' % (item, i))
+data_txt.close()
+
+shuffled = ((item, i) for i, item in enumerate(data))
+expout = open('expout', 'w')
+for item, i in sorted(shuffled):
+    expout.write(' %8d %8d \n' % (item, i))
+expout.close()
+EOF
+  $PYTHON3 gen-data.py "$@"]
+}
+m4_divert_pop([PREPARE_TESTS])
+
+m4_define([SORT_CASES_TEST],
+  [AT_SETUP([sort m4_eval([$1 * $2]) cases[]m4_if([$2], [1], [], [ ($1 unique)])[]m4_if([$3], [], [], [ with $3 buffers])])
+   AT_KEYWORDS([SORT CASES $4])
+   AT_CHECK([sort_cases_gen_data $1 $2 $3])
+   AT_CAPTURE_FILE([data.txt])
+   AT_CAPTURE_FILE([output.txt])
+   AT_CAPTURE_FILE([sort-cases.sps])
+   AT_DATA([sort-cases.sps], [dnl
+DATA LIST LIST NOTABLE FILE='data.txt'/x y (F8).
+SORT CASES BY x[]m4_if([$3], [], [], [/BUFFERS=$3]).
+PRINT OUTFILE='output.txt'/x y.
+EXECUTE.
+])
+   AT_CHECK([pspp --testing-mode -o pspp.csv sort-cases.sps])
+   AT_CHECK([cat output.txt], [0], [expout])
+   AT_CLEANUP])
+
+SORT_CASES_TEST(100, 5, 2)
+SORT_CASES_TEST(100, 5, 3)
+SORT_CASES_TEST(100, 5, 4)
+SORT_CASES_TEST(100, 5, 5)
+SORT_CASES_TEST(100, 5, 10)
+SORT_CASES_TEST(100, 5, 50)
+SORT_CASES_TEST(100, 5, 100)
+SORT_CASES_TEST(100, 5)
+
+SORT_CASES_TEST(100, 10, 2)
+SORT_CASES_TEST(100, 10, 3)
+SORT_CASES_TEST(100, 10, 5)
+SORT_CASES_TEST(100, 10)
+
+SORT_CASES_TEST(1000, 5, 5, slow)
+SORT_CASES_TEST(1000, 5, 50, slow)
+SORT_CASES_TEST(1000, 5, [], slow)
+
+SORT_CASES_TEST(100, 100, 3, slow)
+SORT_CASES_TEST(100, 100, 5, slow)
+SORT_CASES_TEST(100, 100, [], slow)
+
+SORT_CASES_TEST(10000, 5, 500, slow)
+
+SORT_CASES_TEST(50000, 1, [], slow)
+
+dnl Bug #33089 caused SORT CASES to delete filtered cases permanently.
+AT_SETUP([SORT CASES preserves filtered cases])
+AT_DATA([sort-cases.sps], [dnl
+DATA LIST FREE /x.
+BEGIN DATA.
+5 4 3 2 1 0
+END DATA.
+COMPUTE mod2 = MOD(x, 2).
+LIST.
+FILTER BY mod2.
+LIST.
+SORT CASES BY x.
+LIST.
+FILTER OFF.
+LIST.
+])
+AT_CHECK([pspp -O format=csv sort-cases.sps], [0], [dnl
+Table: Data List
+x,mod2
+5.00,1.00
+4.00,.00
+3.00,1.00
+2.00,.00
+1.00,1.00
+.00,.00
+
+Table: Data List
+x,mod2
+5.00,1.00
+3.00,1.00
+1.00,1.00
+
+Table: Data List
+x,mod2
+1.00,1.00
+3.00,1.00
+5.00,1.00
+
+Table: Data List
+x,mod2
+.00,.00
+1.00,1.00
+2.00,.00
+3.00,1.00
+4.00,.00
+5.00,1.00
+])
+AT_CLEANUP
+
+AT_SETUP([SORT CASES syntax errors])
+AT_DATA([sort-cases.sps], [dnl
+DATA LIST LIST NOTABLE/x y z.
+SORT CASES BY **.
+SORT CASES BY x(**).
+SORT CASES BY x(D**).
+SORT CASES BY x(A) x(D) y(**).
+])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='sort-cases.sps' ERROR=IGNORE.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"sort-cases.sps:2.15-2.16: error: SORT CASES: Syntax error expecting variable name.
+    2 | SORT CASES BY **.
+      |               ^~"
+
+"sort-cases.sps:3.17-3.18: error: SORT CASES: Syntax error expecting A or D.
+    3 | SORT CASES BY x(**).
+      |                 ^~"
+
+"sort-cases.sps:4.18-4.19: error: SORT CASES: Syntax error expecting `)'.
+    4 | SORT CASES BY x(D**).
+      |                  ^~"
+
+"sort-cases.sps:5.15-5.23: warning: SORT CASES: Variable x specified twice in sort criteria.
+    5 | SORT CASES BY x(A) x(D) y(**).
+      |               ^~~~~~~~~"
+
+"sort-cases.sps:5.27-5.28: error: SORT CASES: Syntax error expecting A or D.
+    5 | SORT CASES BY x(A) x(D) y(**).
+      |                           ^~"
+])
+AT_CLEANUP

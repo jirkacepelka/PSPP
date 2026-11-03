@@ -1,0 +1,104 @@
+\input texinfo @c -*- texinfo -*-
+@c PSPP - a program for statistical analysis.
+@c Copyright (C) 2017, 2020 Free Software Foundation, Inc.
+@c Permission is granted to copy, distribute and/or modify this document
+@c under the terms of the GNU Free Documentation License, Version 1.3
+@c or any later version published by the Free Software Foundation;
+@c with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+@c A copy of the license is included in the section entitled "GNU
+@c Free Documentation License".
+
+@c %**start of header
+@setfilename pspp-dev.info
+@settitle PSPP
+@c For double-sided printing, uncomment:
+@c @setchapternewpage odd
+@c %**end of header
+
+@include version-dev.texi
+
+@macro cmd{CMDNAME}
+\CMDNAME\
+@end macro
+@macro struct{TAG}
+@code{struct \TAG\}
+@end macro
+@macro union{TAG}
+@code{union \TAG\}
+@end macro
+@macro enum{TAG}
+@code{enum \TAG\}
+@end macro
+@macro func{NAME}
+@code{\NAME\}
+@end macro
+
+@iftex
+@finalout
+@end iftex
+
+@dircategory Math
+@direntry
+* PSPP Developers Guide: (pspp-dev). Reference for PSPP developers.
+@end direntry
+
+@copying
+This manual is for GNU PSPP version @value{VERSION},
+software for statistical analysis.
+
+Copyright @copyright{} 1997, 1998, 2004, 2005, 2007, 2010, 2014, 2015, 2016, 2020 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled "GNU
+Free Documentation License".
+@end quotation
+@end copying
+
+@titlepage
+@title PSPP Developers Guide
+@subtitle GNU PSPP Statistical Analysis Software
+@subtitle Release @value{VERSION}
+@author Ben Pfaff
+@author John Darrington
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+
+@ifnottex
+@node Top
+@top GNU PSPP Developers Guide
+
+@insertcopying
+@end ifnottex
+
+This manual describes the file formats that PSPP supports.
+
+@menu
+* System File Format::          Format of PSPP system files.
+* SPSS Viewer File Format::     Format of SPSS Viewer (SPV) files.
+* SPSS TableLook File Formats:: Formats of .stt and .tlo files.
+* Encrypted File Wrappers::     Common wrapper for encrypted SPSS files.
+* Portable File Format::        Format of PSPP portable files.
+* SPSS/PC+ System File Format:: Format of SPSS/PC+ system files.
+
+* GNU Free Documentation License:: License for copying this manual.
+@end menu
+
+@include dev/system-file-format.texi
+@include dev/spv-file-format.texi
+@include dev/tlo-file-format.texi
+@include dev/encrypted-file-wrappers.texi
+@include dev/portable-file-format.texi
+@include dev/pc+-file-format.texi
+
+@include fdl.texi
+
+@bye

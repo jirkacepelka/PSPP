@@ -1,0 +1,625 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([data input (data-in)])
+
+AT_SETUP([numeric input formats])
+AT_KEYWORDS([data-in slow])
+data_in_prng
+AT_DATA([num-in.py],
+[[#! /usr/bin/python3
+
+import math
+import re
+
+# This random number generator and the test for it below are drawn
+# from Park and Miller, "Random Number Generators: Good Ones are Hard
+# to Come By", Communications of the ACM 31:10 (October 1988).  It is
+# documented to function properly on systems with a 46-bit or longer
+# real significand, which includes systems that have 64-bit IEEE reals
+# (with 53-bit significand).  The test should catch any systems for
+# which this is not true, in any case.
+def my_rand(modulus):
+    global seed
+    a = 16807
+    m = 2147483647
+    tmp = a * seed
+    seed = tmp - m * (tmp // m)
+    return seed % modulus
+
+# Test the random number generator for reproducibility,
+# then reset the seed
+seed = 1
+for i in range(10000):
+    my_rand(1)
+assert seed == 1043618065
+seed = 1
+
+def permute_zeros(fraction, exponent):
+    frac_rep = "%f" % fraction
+    leading_zeros = len(frac_rep) - len(frac_rep.lstrip('0'))
+    trailing_zeros = len(re.search(r'(\.?0*)$', frac_rep).group(1))
+    for i in range(leading_zeros + 1):
+        for j in range(trailing_zeros + 1):
+            trimmed = frac_rep[i:len(frac_rep) - j]
+            if trimmed == '.' or not trimmed:
+                continue
+
+            permute_commas(trimmed, exponent)
+
+def permute_commas(frac_rep, exponent):
+    permute_dot_comma(frac_rep, exponent)
+    pos = my_rand(len(frac_rep) + 1)
+    frac_rep = "%s,%s" % (frac_rep[:pos], frac_rep[pos:])
+    permute_dot_comma(frac_rep, exponent)
+
+def permute_dot_comma(frac_rep, exponent):
+    permute_exponent_syntax(frac_rep, exponent)
+    if ',' in frac_rep or '.' in frac_rep:
+        frac_rep = frac_rep.translate(str.maketrans('.,', ',.'))
+        permute_exponent_syntax(frac_rep, exponent)
+
+def permute_exponent_syntax(frac_rep, exponent):
+    if exponent == 0:
+        e = pick(('', 'e0', 'e-0', 'e+0', '-0', '+0'))
+    elif exponent > 0:
+        e = pick(("e%s" % exponent, "e+%s" % exponent, "+%s" % exponent))
+    else:
+        abs_exp = -exponent
+        e = pick(("e-%s" % abs_exp, "e-%s" % abs_exp, "-%s" % abs_exp))
+    permute_sign_and_affix(frac_rep, e)
+
+def permute_sign_and_affix(frac_rep, exp_rep):
+    for prefix in (pick(('', '$')),
+                   pick(('-', '-$', '$-', '$-$')),
+                   pick(('+', '+$', '$+', '$+$'))):
+        for suffix in ('', '%'):
+            permute_spaces(prefix + frac_rep + exp_rep + suffix)
+
+def permute_spaces(s):
+    fields = re.sub(r'([-+\$e%])', r' \1 ', s).split()
+    print(''.join(fields))
+
+    if len(fields) > 1:
+        pos = my_rand(len(fields) - 1) + 1
+        print("%s %s" % (''.join(fields[:pos]),
+                         ''.join(fields[pos:])))
+
+def pick(choices):
+    return choices[my_rand(len(choices))]
+
+for number in (0, 1, .5, .015625, 123):
+    base_exp = math.floor(math.log10(number)) if number else 0
+    for offset in range(-3, 4):
+        exponent = base_exp + offset
+        fraction = number / 10**offset
+
+        permute_zeros(fraction, exponent)
+
+]])
+AT_CHECK([$PYTHON3 num-in.py > num-in.data])
+AT_DATA([num-in.sps], [dnl
+SET ERRORS=NONE.
+SET MXERRS=10000000.
+SET MXWARNS=10000000.
+DATA LIST FILE='num-in.data' NOTABLE/
+	f 1-40 (f)
+	comma 1-40 (comma)
+	dot 1-40 (dot)
+	dollar 1-40 (dollar)
+	pct 1-40 (pct)
+	e 1-40 (e).
+PRINT OUTFILE='num-in.out'/all (6f10.4).
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv num-in.sps])
+AT_CHECK([gzip -cd < $top_srcdir/tests/data/num-in.expected.gz > expout])
+AT_CHECK([cat num-in.out], [0], [expout])
+AT_CLEANUP
+
+dnl Some very old version of PSPP crashed reading big numbers,
+dnl so this checks for regressions.
+AT_SETUP([reading big numbers])
+AT_KEYWORDS([data-in])
+AT_DATA([bignum.txt], [dnl
+0
+0.1
+0.5
+0.8
+0.9
+0.999
+1
+2
+3
+4
+5
+12
+123
+1234
+12345
+123456
+1234567
+12345678
+123456789
+1234567890
+19999999999
+199999999999
+1234567890123
+19999999999999
+199999999999999
+1234567890123456
+19999999999999999
+123456789012345678
+1999999999999999999
+12345678901234567890
+199999999999999999999
+1234567890123456789012
+19999999999999999999999
+123456789012345678901234
+1999999999999999999999999
+12345678901234567890123456
+199999999999999999999999999
+1234567890123456789012345678
+19999999999999999999999999999
+123456789012345678901234567890
+1999999999999999999999999999999
+12345678901234567890123456789012
+199999999999999999999999999999999
+1234567890123456789012345678901234
+19999999999999999999999999999999999
+123456789012345678901234567890123456
+1999999999999999999999999999999999999
+12345678901234567890123456789012345678
+199999999999999999999999999999999999999
+1234567890123456789012345678901234567890
+1999999999999999999999999999999999999999
+1e40
+1.1e40
+1.5e40
+1e41
+1e50
+1e100
+1e150
+1e200
+1e250
+1e300
+1.79641e308
+wizzah
+])
+AT_DATA([bignum.sps], [dnl
+title 'Test use of big numbers'.
+
+*** Do the portable output.
+data list file='bignum.txt'/BIGNUM 1-40.
+list.
+
+*** Do the nonportable output for fun.
+descriptives BIGNUM.
+])
+AT_CHECK([pspp -o pspp.csv bignum.sps], [0], [ignore])
+AT_CLEANUP
+
+AT_SETUP([DATE input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py date d-m-y])
+AT_FAIL_IF([test ! -s date.sps || test ! -s date.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv date.sps])
+AT_CHECK([cat date.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([ADATE input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py adate m-d-y])
+AT_FAIL_IF([test ! -s adate.sps || test ! -s adate.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv adate.sps])
+AT_CHECK([cat adate.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([EDATE input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py edate d-m-y])
+AT_FAIL_IF([test ! -s edate.sps || test ! -s edate.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv edate.sps])
+AT_CHECK([cat edate.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([JDATE input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py jdate j])
+AT_FAIL_IF([test ! -s jdate.sps || test ! -s jdate.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv jdate.sps])
+AT_CHECK([cat jdate.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([SDATE input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py sdate y-m-d])
+AT_FAIL_IF([test ! -s sdate.sps || test ! -s sdate.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv sdate.sps])
+AT_CHECK([cat sdate.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([QYR input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py qyr qQy])
+AT_FAIL_IF([test ! -s qyr.sps || test ! -s qyr.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv qyr.sps])
+AT_CHECK([cat qyr.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([MOYR input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py moyr m-y])
+AT_FAIL_IF([test ! -s moyr.sps || test ! -s moyr.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv moyr.sps])
+AT_CHECK([cat moyr.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([WKYR input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py wkyr wWy])
+AT_FAIL_IF([test ! -s wkyr.sps || test ! -s wkyr.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv wkyr.sps])
+AT_CHECK([cat wkyr.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([DATETIME input format])
+AT_KEYWORDS([data-in slow])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py datetime "d-m-y +H:M" "d-m-y +H:M:S"])
+AT_FAIL_IF([test ! -s datetime.sps || test ! -s datetime.input || \
+            test ! -s expout])
+AT_CHECK([pspp -O format=csv datetime.sps])
+AT_CHECK([cat datetime.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([YMDHMS input format])
+AT_KEYWORDS([data-in slow])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-date-input.py ymdhms "y-m-d +H:M" "y-m-d +H:M:S"])
+AT_FAIL_IF([test ! -s ymdhms.sps || test ! -s ymdhms.input || \
+            test ! -s expout])
+AT_CHECK([pspp -O format=csv ymdhms.sps])
+AT_CHECK([cat ymdhms.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([MTIME input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-time-input.py mtime +M:S])
+AT_FAIL_IF([test ! -s mtime.sps || test ! -s mtime.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv mtime.sps])
+AT_CHECK([cat mtime.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([TIME input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-time-input.py time +H:M +H:M:S])
+AT_FAIL_IF([test ! -s time.sps || test ! -s time.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv time.sps])
+AT_CHECK([cat time.output], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([DTIME input format])
+AT_KEYWORDS([data-in])
+AT_CHECK([$PYTHON3 $top_srcdir/tests/data/test-time-input.py dtime  '+D H:M' '+D H:M:S'])
+AT_FAIL_IF([test ! -s dtime.sps || test ! -s dtime.input || test ! -s expout])
+AT_CHECK([pspp -O format=csv dtime.sps])
+AT_CHECK([cat dtime.output], [0], [expout])
+AT_CLEANUP
+
+m4_divert_push([PREPARE_TESTS])
+[number_lines_in_hex () {
+  $PYTHON3 -c '
+import sys
+for i, line in enumerate(sys.stdin):
+    sys.stdout.write(" %04X %s" % (i, line))
+'
+}]
+m4_divert_pop([PREPARE_TESTS])
+
+
+AT_SETUP([binary and hexadecimal input (IB, PIB, and PIBHEX formats)])
+AT_KEYWORDS([slow])
+AT_CHECK([$PYTHON3 -c '
+import struct
+import sys
+for i in range(65536):
+    sys.stdout.buffer.write(struct.pack(">H", i))' > binhex-in.data])
+AT_CHECK([[wc -c < binhex-in.data | sed 's/[ 	]//g']], [0], [131072
+])
+AT_DATA([binhex-in.sps], [dnl
+SET RIB=MSBFIRST.
+SET ERRORS=NONE.
+SET MXWARNS=10000000.
+SET MXERRS=10000000.
+FILE HANDLE data/NAME='binhex-in.data'/MODE=IMAGE/LRECL=2.
+DATA LIST FILE=data NOTABLE/ib 1-2 (IB) pib 1-2 (PIB) pibhex 1-2 (PIBHEX).
+COMPUTE x=$CASENUM - 1.
+PRINT OUTFILE='binhex-in.out'/x (PIBHEX4) ' ' ib pib pibhex.
+EXECUTE.
+])
+AT_CHECK([gzip -cd < $top_srcdir/tests/data/binhex-in.expected.cmp.gz | \
+            number_lines_in_hex > expout])
+AT_CHECK([pspp -O format=csv binhex-in.sps], [0])
+AT_CHECK([cat binhex-in.out], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([BCD input (P and PK formats)])
+AT_KEYWORDS([slow])
+AT_CHECK([$PYTHON3 -c '
+import struct
+import sys
+for i in range(65536):
+    sys.stdout.buffer.write(struct.pack(">H", i))' > bcd-in.data])
+AT_CHECK([[wc -c < bcd-in.data | sed 's/[ 	]//g']], [0], [131072
+])
+AT_DATA([bcd-in.sps], [dnl
+SET ERRORS=NONE.
+SET MXWARNS=10000000.
+SET MXERRS=10000000.
+FILE HANDLE data/NAME='bcd-in.data'/MODE=IMAGE/LRECL=2.
+DATA LIST FILE=data NOTABLE/p 1-2 (P) pk 1-2 (PK).
+COMPUTE x=$CASENUM - 1.
+PRINT OUTFILE='bcd-in.out'/x (PIBHEX4) ' ' P PK.
+EXECUTE.
+])
+AT_CHECK([gzip -cd < $top_srcdir/tests/data/bcd-in.expected.cmp.gz | \
+            number_lines_in_hex > expout])
+AT_CHECK([pspp -O format=csv bcd-in.sps])
+AT_CHECK([cat bcd-in.out], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([legacy input (N and Z formats)])
+AT_KEYWORDS([slow])
+AT_CHECK([$PYTHON3 -c '
+import struct
+import sys
+for i in range(65536):
+    sys.stdout.buffer.write(struct.pack(">H", i))' > legacy-in.data])
+AT_CHECK([[wc -c < legacy-in.data | sed 's/[ 	]//g']], [0], [131072
+])
+AT_DATA([legacy-in.sps], [dnl
+SET ERRORS=NONE.
+SET MXWARNS=10000000.
+SET MXERRS=10000000.
+FILE HANDLE data/NAME='legacy-in.data'/MODE=IMAGE/LRECL=2.
+DATA LIST NOTABLE FILE=data/n 1-2 (N) z 1-2 (z).
+COMPUTE x=$CASENUM - 1.
+PRINT OUTFILE='legacy-in.out'/x (PIBHEX4) ' ' N Z.
+EXECUTE.
+])
+AT_CHECK([gzip -cd < $top_srcdir/tests/data/legacy-in.expected.cmp.gz | \
+            number_lines_in_hex > expout])
+AT_CHECK([pspp -O format=csv legacy-in.sps])
+AT_CHECK([cat legacy-in.out], [0], [expout])
+AT_CLEANUP
+
+AT_SETUP([WKDAY input format])
+AT_DATA([wkday.sps], [dnl
+DATA LIST NOTABLE /wkday2 1-2 (wkday)
+		   wkday3 1-3 (wkday)
+		   wkday4 1-4 (wkday)
+		   wkday5 1-5 (wkday)
+		   wkday6 1-6 (wkday)
+		   wkday7 1-7 (wkday)
+		   wkday8 1-8 (wkday)
+		   wkday9 1-9 (wkday)
+		   wkday10 1-10 (wkday).
+BEGIN DATA.
+
+.
+monady
+tuseday
+WEDENSDAY
+Thurdsay
+fRidya
+SAturady
+sudnay
+sturday
+END DATA.
+FORMATS ALL (WKDAY2).
+PRINT OUTFILE='wkday.out'/ALL.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv wkday.sps], [0], [dnl
+wkday.sps:20.1-20.2: warning: Data for variable wkday2 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.3: warning: Data for variable wkday3 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.4: warning: Data for variable wkday4 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.5: warning: Data for variable wkday5 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.6: warning: Data for variable wkday6 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.7: warning: Data for variable wkday7 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.8: warning: Data for variable wkday8 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.9: warning: Data for variable wkday9 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+
+wkday.sps:20.1-20.10: warning: Data for variable wkday10 is not valid as format WKDAY: Unrecognized weekday name.  At least the first two letters of an English weekday name must be specified.
+])
+AT_CHECK([cat wkday.out], [0], [dnl
+  .  .  .  .  .  .  .  .  . @&t@
+  .  .  .  .  .  .  .  .  . @&t@
+ MO MO MO MO MO MO MO MO MO @&t@
+ TU TU TU TU TU TU TU TU TU @&t@
+ WE WE WE WE WE WE WE WE WE @&t@
+ TH TH TH TH TH TH TH TH TH @&t@
+ FR FR FR FR FR FR FR FR FR @&t@
+ SA SA SA SA SA SA SA SA SA @&t@
+ SU SU SU SU SU SU SU SU SU @&t@
+  .  .  .  .  .  .  .  .  . @&t@
+])
+AT_CLEANUP
+
+AT_SETUP([MONTH input format])
+AT_DATA([month.sps], [dnl
+DATA LIST NOTABLE /month3 1-3 (MONTH)
+		   month4 1-4 (MONTH)
+		   month5 1-5 (MONTH)
+		   month6 1-6 (MONTH)
+		   month7 1-7 (MONTH)
+		   month8 1-8 (MONTH)
+		   month9 1-9 (MONTH)
+		   month10 1-10 (MONTH).
+BEGIN DATA.
+
+.
+i
+ii
+iii
+iiii
+iv
+v
+vi
+vii
+viii
+ix
+viiii
+x
+xi
+xii
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+january
+JANAURY
+February
+fEbraury
+MArch
+marhc
+apRIL
+may
+june
+july
+august
+september
+october
+november
+decmeber
+december
+END DATA.
+FORMATS ALL (MONTH3).
+PRINT OUTFILE='month.out'/ALL.
+EXECUTE.
+])
+AT_CHECK([pspp -O format=csv month.sps], [0], [dnl
+month.sps:15.1-15.4: warning: Data for variable month4 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.5: warning: Data for variable month5 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.6: warning: Data for variable month6 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.7: warning: Data for variable month7 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.8: warning: Data for variable month8 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.9: warning: Data for variable month9 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:15.1-15.10: warning: Data for variable month10 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.3: warning: Data for variable month3 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.4: warning: Data for variable month4 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.5: warning: Data for variable month5 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.6: warning: Data for variable month6 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.7: warning: Data for variable month7 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.8: warning: Data for variable month8 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.9: warning: Data for variable month9 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:26.1-26.10: warning: Data for variable month10 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.3: warning: Data for variable month3 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.4: warning: Data for variable month4 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.5: warning: Data for variable month5 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.6: warning: Data for variable month6 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.7: warning: Data for variable month7 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.8: warning: Data for variable month8 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.9: warning: Data for variable month9 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+
+month.sps:39.1-39.10: warning: Data for variable month10 is not valid as format MONTH: Unrecognized month format.  Months may be specified as Arabic or Roman numerals or as at least 3 letters of their English names.
+])
+AT_CHECK([cat month.out], [0], [dnl
+   .   .   .   .   .   .   .   . @&t@
+   .   .   .   .   .   .   .   . @&t@
+ JAN JAN JAN JAN JAN JAN JAN JAN @&t@
+ FEB FEB FEB FEB FEB FEB FEB FEB @&t@
+ MAR MAR MAR MAR MAR MAR MAR MAR @&t@
+ MAR   .   .   .   .   .   .   . @&t@
+ APR APR APR APR APR APR APR APR @&t@
+ MAY MAY MAY MAY MAY MAY MAY MAY @&t@
+ JUN JUN JUN JUN JUN JUN JUN JUN @&t@
+ JUL JUL JUL JUL JUL JUL JUL JUL @&t@
+ JUL AUG AUG AUG AUG AUG AUG AUG @&t@
+ SEP SEP SEP SEP SEP SEP SEP SEP @&t@
+ JUL AUG AUG AUG AUG AUG AUG AUG @&t@
+ OCT OCT OCT OCT OCT OCT OCT OCT @&t@
+ NOV NOV NOV NOV NOV NOV NOV NOV @&t@
+ DEC DEC DEC DEC DEC DEC DEC DEC @&t@
+   .   .   .   .   .   .   .   . @&t@
+ JAN JAN JAN JAN JAN JAN JAN JAN @&t@
+ FEB FEB FEB FEB FEB FEB FEB FEB @&t@
+ MAR MAR MAR MAR MAR MAR MAR MAR @&t@
+ APR APR APR APR APR APR APR APR @&t@
+ MAY MAY MAY MAY MAY MAY MAY MAY @&t@
+ JUN JUN JUN JUN JUN JUN JUN JUN @&t@
+ JUL JUL JUL JUL JUL JUL JUL JUL @&t@
+ AUG AUG AUG AUG AUG AUG AUG AUG @&t@
+ SEP SEP SEP SEP SEP SEP SEP SEP @&t@
+ OCT OCT OCT OCT OCT OCT OCT OCT @&t@
+ NOV NOV NOV NOV NOV NOV NOV NOV @&t@
+ DEC DEC DEC DEC DEC DEC DEC DEC @&t@
+   .   .   .   .   .   .   .   . @&t@
+ JAN JAN JAN JAN JAN JAN JAN JAN @&t@
+ JAN JAN JAN JAN JAN JAN JAN JAN @&t@
+ FEB FEB FEB FEB FEB FEB FEB FEB @&t@
+ FEB FEB FEB FEB FEB FEB FEB FEB @&t@
+ MAR MAR MAR MAR MAR MAR MAR MAR @&t@
+ MAR MAR MAR MAR MAR MAR MAR MAR @&t@
+ APR APR APR APR APR APR APR APR @&t@
+ MAY MAY MAY MAY MAY MAY MAY MAY @&t@
+ JUN JUN JUN JUN JUN JUN JUN JUN @&t@
+ JUL JUL JUL JUL JUL JUL JUL JUL @&t@
+ AUG AUG AUG AUG AUG AUG AUG AUG @&t@
+ SEP SEP SEP SEP SEP SEP SEP SEP @&t@
+ OCT OCT OCT OCT OCT OCT OCT OCT @&t@
+ NOV NOV NOV NOV NOV NOV NOV NOV @&t@
+ DEC DEC DEC DEC DEC DEC DEC DEC @&t@
+ DEC DEC DEC DEC DEC DEC DEC DEC @&t@
+])
+AT_CLEANUP

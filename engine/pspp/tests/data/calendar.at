@@ -1,0 +1,346 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([calendar])
+
+AT_SETUP([epoch])
+AT_DATA([epoch.sps],
+  [SET MXERR 1000.
+SET MXWARN 1000.
+
+SET EPOCH 1900.
+DEBUG EVALUATE/YRMODA(0,1,1) = YRMODA(1900,1,1).
+DEBUG EVALUATE/YRMODA(1,1,1) = YRMODA(1901,1,1).
+DEBUG EVALUATE/YRMODA(12,1,1) = YRMODA(1912,1,1).
+DEBUG EVALUATE/YRMODA(70,1,1) = YRMODA(1970,1,1).
+DEBUG EVALUATE/YRMODA(87,1,1) = YRMODA(1987,1,1).
+DEBUG EVALUATE/YRMODA(99,1,1) = YRMODA(1999,1,1).
+DEBUG EVALUATE/YRMODA(100,1,1).
+DEBUG EVALUATE/DATE.DMY(1,1,0) = DATE.DMY(1,1,1900).
+DEBUG EVALUATE/DATE.DMY(1,1,1) = DATE.DMY(1,1,1901).
+DEBUG EVALUATE/DATE.DMY(1,1,12) = DATE.DMY(1,1,1912).
+DEBUG EVALUATE/DATE.DMY(1,1,70) = DATE.DMY(1,1,1970).
+DEBUG EVALUATE/DATE.DMY(1,1,87) = DATE.DMY(1,1,1987).
+DEBUG EVALUATE/DATE.DMY(1,1,99) = DATE.DMY(1,1,1999).
+DEBUG EVALUATE/DATE.DMY(1,1,100).
+
+SET EPOCH 1901.
+DEBUG EVALUATE/YRMODA(0,1,1) = YRMODA(1900,1,1).
+DEBUG EVALUATE/YRMODA(1,1,1) = YRMODA(1901,1,1).
+DEBUG EVALUATE/YRMODA(12,1,1) = YRMODA(1912,1,1).
+DEBUG EVALUATE/YRMODA(70,1,1) = YRMODA(1970,1,1).
+DEBUG EVALUATE/YRMODA(87,1,1) = YRMODA(1987,1,1).
+DEBUG EVALUATE/YRMODA(99,1,1) = YRMODA(1999,1,1).
+DEBUG EVALUATE/YRMODA(100,1,1).
+DEBUG EVALUATE/DATE.DMY(1,1,0) = DATE.DMY(1,1,2000).
+DEBUG EVALUATE/DATE.DMY(1,1,1) = DATE.DMY(1,1,1901).
+DEBUG EVALUATE/DATE.DMY(1,1,12) = DATE.DMY(1,1,1912).
+DEBUG EVALUATE/DATE.DMY(1,1,70) = DATE.DMY(1,1,1970).
+DEBUG EVALUATE/DATE.DMY(1,1,87) = DATE.DMY(1,1,1987).
+DEBUG EVALUATE/DATE.DMY(1,1,99) = DATE.DMY(1,1,1999).
+DEBUG EVALUATE/DATE.DMY(1,1,100).
+
+SET EPOCH 1911.
+DEBUG EVALUATE/YRMODA(0,1,1) = YRMODA(1900,1,1).
+DEBUG EVALUATE/YRMODA(1,1,1) = YRMODA(1901,1,1).
+DEBUG EVALUATE/YRMODA(12,1,1) = YRMODA(1912,1,1).
+DEBUG EVALUATE/YRMODA(70,1,1) = YRMODA(1970,1,1).
+DEBUG EVALUATE/YRMODA(87,1,1) = YRMODA(1987,1,1).
+DEBUG EVALUATE/YRMODA(99,1,1) = YRMODA(1999,1,1).
+DEBUG EVALUATE/YRMODA(100,1,1).
+DEBUG EVALUATE/DATE.DMY(1,1,0) = DATE.DMY(1,1,2000).
+DEBUG EVALUATE/DATE.DMY(1,1,1) = DATE.DMY(1,1,2001).
+DEBUG EVALUATE/DATE.DMY(1,1,12) = DATE.DMY(1,1,1912).
+DEBUG EVALUATE/DATE.DMY(1,1,70) = DATE.DMY(1,1,1970).
+DEBUG EVALUATE/DATE.DMY(1,1,87) = DATE.DMY(1,1,1987).
+DEBUG EVALUATE/DATE.DMY(1,1,99) = DATE.DMY(1,1,1999).
+DEBUG EVALUATE/DATE.DMY(1,1,100).
+
+SET EPOCH 1912.
+DEBUG EVALUATE/YRMODA(0,1,1) = YRMODA(1900,1,1).
+DEBUG EVALUATE/YRMODA(1,1,1) = YRMODA(1901,1,1).
+DEBUG EVALUATE/YRMODA(12,1,1) = YRMODA(1912,1,1).
+DEBUG EVALUATE/YRMODA(70,1,1) = YRMODA(1970,1,1).
+DEBUG EVALUATE/YRMODA(87,1,1) = YRMODA(1987,1,1).
+DEBUG EVALUATE/YRMODA(99,1,1) = YRMODA(1999,1,1).
+DEBUG EVALUATE/YRMODA(100,1,1).
+DEBUG EVALUATE/DATE.DMY(1,1,0) = DATE.DMY(1,1,2000).
+DEBUG EVALUATE/DATE.DMY(1,1,1) = DATE.DMY(1,1,2001).
+DEBUG EVALUATE/DATE.DMY(1,1,12) = DATE.DMY(1,1,1912).
+DEBUG EVALUATE/DATE.DMY(1,1,70) = DATE.DMY(1,1,1970).
+DEBUG EVALUATE/DATE.DMY(1,1,87) = DATE.DMY(1,1,1987).
+DEBUG EVALUATE/DATE.DMY(1,1,99) = DATE.DMY(1,1,1999).
+DEBUG EVALUATE/DATE.DMY(1,1,100).
+
+SET EPOCH 2012.
+DEBUG EVALUATE/YRMODA(0,1,1) = YRMODA(1900,1,1).
+DEBUG EVALUATE/YRMODA(1,1,1) = YRMODA(1901,1,1).
+DEBUG EVALUATE/YRMODA(12,1,1) = YRMODA(1912,1,1).
+DEBUG EVALUATE/YRMODA(70,1,1) = YRMODA(1970,1,1).
+DEBUG EVALUATE/YRMODA(87,1,1) = YRMODA(1987,1,1).
+DEBUG EVALUATE/YRMODA(99,1,1) = YRMODA(1999,1,1).
+DEBUG EVALUATE/YRMODA(100,1,1).
+DEBUG EVALUATE/DATE.DMY(1,1,0) = DATE.DMY(1,1,2100).
+DEBUG EVALUATE/DATE.DMY(1,1,1) = DATE.DMY(1,1,2101).
+DEBUG EVALUATE/DATE.DMY(1,1,12) = DATE.DMY(1,1,2012).
+DEBUG EVALUATE/DATE.DMY(1,1,70) = DATE.DMY(1,1,2070).
+DEBUG EVALUATE/DATE.DMY(1,1,87) = DATE.DMY(1,1,2087).
+DEBUG EVALUATE/DATE.DMY(1,1,99) = DATE.DMY(1,1,2099).
+DEBUG EVALUATE/DATE.DMY(1,1,100).
+])
+
+AT_CHECK([pspp --testing-mode epoch.sps], [1], [dnl
+YRMODA(0,1,1) = YRMODA(1900,1,1) => true
+
+YRMODA(1,1,1) = YRMODA(1901,1,1) => true
+
+YRMODA(12,1,1) = YRMODA(1912,1,1) => true
+
+YRMODA(70,1,1) = YRMODA(1970,1,1) => true
+
+YRMODA(87,1,1) = YRMODA(1987,1,1) => true
+
+YRMODA(99,1,1) = YRMODA(1999,1,1) => true
+
+epoch.sps:11.16-11.30: error: DEBUG EVALUATE: Invalid arguments to YRMODA
+function.
+   11 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                ^~~~~~~~~~~~~~~
+
+epoch.sps:11.23-11.25: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   11 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                       ^~~
+
+YRMODA(100,1,1) => sysmis
+
+DATE.DMY(1,1,0) = DATE.DMY(1,1,1900) => true
+
+DATE.DMY(1,1,1) = DATE.DMY(1,1,1901) => true
+
+DATE.DMY(1,1,12) = DATE.DMY(1,1,1912) => true
+
+DATE.DMY(1,1,70) = DATE.DMY(1,1,1970) => true
+
+DATE.DMY(1,1,87) = DATE.DMY(1,1,1987) => true
+
+DATE.DMY(1,1,99) = DATE.DMY(1,1,1999) => true
+
+epoch.sps:18.16-18.32: error: DEBUG EVALUATE: Invalid arguments to DATE.DMY
+function.
+   18 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                ^~~~~~~~~~~~~~~~~
+
+epoch.sps:18.29-18.31: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   18 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                             ^~~
+
+DATE.DMY(1,1,100) => sysmis
+
+YRMODA(0,1,1) = YRMODA(1900,1,1) => true
+
+YRMODA(1,1,1) = YRMODA(1901,1,1) => true
+
+YRMODA(12,1,1) = YRMODA(1912,1,1) => true
+
+YRMODA(70,1,1) = YRMODA(1970,1,1) => true
+
+YRMODA(87,1,1) = YRMODA(1987,1,1) => true
+
+YRMODA(99,1,1) = YRMODA(1999,1,1) => true
+
+epoch.sps:27.16-27.30: error: DEBUG EVALUATE: Invalid arguments to YRMODA
+function.
+   27 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                ^~~~~~~~~~~~~~~
+
+epoch.sps:27.23-27.25: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   27 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                       ^~~
+
+YRMODA(100,1,1) => sysmis
+
+DATE.DMY(1,1,0) = DATE.DMY(1,1,2000) => true
+
+DATE.DMY(1,1,1) = DATE.DMY(1,1,1901) => true
+
+DATE.DMY(1,1,12) = DATE.DMY(1,1,1912) => true
+
+DATE.DMY(1,1,70) = DATE.DMY(1,1,1970) => true
+
+DATE.DMY(1,1,87) = DATE.DMY(1,1,1987) => true
+
+DATE.DMY(1,1,99) = DATE.DMY(1,1,1999) => true
+
+epoch.sps:34.16-34.32: error: DEBUG EVALUATE: Invalid arguments to DATE.DMY
+function.
+   34 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                ^~~~~~~~~~~~~~~~~
+
+epoch.sps:34.29-34.31: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   34 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                             ^~~
+
+DATE.DMY(1,1,100) => sysmis
+
+YRMODA(0,1,1) = YRMODA(1900,1,1) => true
+
+YRMODA(1,1,1) = YRMODA(1901,1,1) => true
+
+YRMODA(12,1,1) = YRMODA(1912,1,1) => true
+
+YRMODA(70,1,1) = YRMODA(1970,1,1) => true
+
+YRMODA(87,1,1) = YRMODA(1987,1,1) => true
+
+YRMODA(99,1,1) = YRMODA(1999,1,1) => true
+
+epoch.sps:43.16-43.30: error: DEBUG EVALUATE: Invalid arguments to YRMODA
+function.
+   43 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                ^~~~~~~~~~~~~~~
+
+epoch.sps:43.23-43.25: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   43 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                       ^~~
+
+YRMODA(100,1,1) => sysmis
+
+DATE.DMY(1,1,0) = DATE.DMY(1,1,2000) => true
+
+DATE.DMY(1,1,1) = DATE.DMY(1,1,2001) => true
+
+DATE.DMY(1,1,12) = DATE.DMY(1,1,1912) => true
+
+DATE.DMY(1,1,70) = DATE.DMY(1,1,1970) => true
+
+DATE.DMY(1,1,87) = DATE.DMY(1,1,1987) => true
+
+DATE.DMY(1,1,99) = DATE.DMY(1,1,1999) => true
+
+epoch.sps:50.16-50.32: error: DEBUG EVALUATE: Invalid arguments to DATE.DMY
+function.
+   50 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                ^~~~~~~~~~~~~~~~~
+
+epoch.sps:50.29-50.31: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   50 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                             ^~~
+
+DATE.DMY(1,1,100) => sysmis
+
+YRMODA(0,1,1) = YRMODA(1900,1,1) => true
+
+YRMODA(1,1,1) = YRMODA(1901,1,1) => true
+
+YRMODA(12,1,1) = YRMODA(1912,1,1) => true
+
+YRMODA(70,1,1) = YRMODA(1970,1,1) => true
+
+YRMODA(87,1,1) = YRMODA(1987,1,1) => true
+
+YRMODA(99,1,1) = YRMODA(1999,1,1) => true
+
+epoch.sps:59.16-59.30: error: DEBUG EVALUATE: Invalid arguments to YRMODA
+function.
+   59 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                ^~~~~~~~~~~~~~~
+
+epoch.sps:59.23-59.25: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   59 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                       ^~~
+
+YRMODA(100,1,1) => sysmis
+
+DATE.DMY(1,1,0) = DATE.DMY(1,1,2000) => true
+
+DATE.DMY(1,1,1) = DATE.DMY(1,1,2001) => true
+
+DATE.DMY(1,1,12) = DATE.DMY(1,1,1912) => true
+
+DATE.DMY(1,1,70) = DATE.DMY(1,1,1970) => true
+
+DATE.DMY(1,1,87) = DATE.DMY(1,1,1987) => true
+
+DATE.DMY(1,1,99) = DATE.DMY(1,1,1999) => true
+
+epoch.sps:66.16-66.32: error: DEBUG EVALUATE: Invalid arguments to DATE.DMY
+function.
+   66 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                ^~~~~~~~~~~~~~~~~
+
+epoch.sps:66.29-66.31: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   66 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                             ^~~
+
+DATE.DMY(1,1,100) => sysmis
+
+YRMODA(0,1,1) = YRMODA(1900,1,1) => true
+
+YRMODA(1,1,1) = YRMODA(1901,1,1) => true
+
+YRMODA(12,1,1) = YRMODA(1912,1,1) => true
+
+YRMODA(70,1,1) = YRMODA(1970,1,1) => true
+
+YRMODA(87,1,1) = YRMODA(1987,1,1) => true
+
+YRMODA(99,1,1) = YRMODA(1999,1,1) => true
+
+epoch.sps:75.16-75.30: error: DEBUG EVALUATE: Invalid arguments to YRMODA
+function.
+   75 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                ^~~~~~~~~~~~~~~
+
+epoch.sps:75.23-75.25: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   75 | DEBUG EVALUATE/YRMODA(100,1,1).
+      |                       ^~~
+
+YRMODA(100,1,1) => sysmis
+
+DATE.DMY(1,1,0) = DATE.DMY(1,1,2100) => true
+
+DATE.DMY(1,1,1) = DATE.DMY(1,1,2101) => true
+
+DATE.DMY(1,1,12) = DATE.DMY(1,1,2012) => true
+
+DATE.DMY(1,1,70) = DATE.DMY(1,1,2070) => true
+
+DATE.DMY(1,1,87) = DATE.DMY(1,1,2087) => true
+
+DATE.DMY(1,1,99) = DATE.DMY(1,1,2099) => true
+
+epoch.sps:82.16-82.32: error: DEBUG EVALUATE: Invalid arguments to DATE.DMY
+function.
+   82 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                ^~~~~~~~~~~~~~~~~
+
+epoch.sps:82.29-82.31: note: DEBUG EVALUATE: Date 0100-1-1 is before the
+earliest supported date 1582-10-15.
+   82 | DEBUG EVALUATE/DATE.DMY(1,1,100).
+      |                             ^~~
+
+DATE.DMY(1,1,100) => sysmis
+])
+AT_CLEANUP

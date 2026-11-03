@@ -1,0 +1,192 @@
+.\" -*- nroff -*-
+.\" Copyright (C) 2020  Free Software Foundation
+
+.\" This program is free software: you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation, either version 3 of the License, or
+.\" (at your option) any later version.
+
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>.
+.de IQ
+.  br
+.  ns
+.  IP "\\$1"
+..
+.TH pspp\-convert 1 "October 2013" "PSPP" "PSPP Manual"
+.
+.SH NAME
+pspp\-convert \- convert SPSS data files to other formats
+.
+.SH SYNOPSIS
+\fBpspp\-convert\fR [\fIoptions\fR] \fIinput\fR \fIoutput\fR
+.br
+\fBpspp\-convert \-\-help\fR | \fB\-h\fR
+.br
+\fBpspp\-convert \-\-version\fR | \fB\-v\fR
+.
+.SH DESCRIPTION
+The \fBpspp\-convert\fR program reads \fIinput\fR, which may be an
+SPSS system file, an SPSS/PC+ system file, an SPSS portable file,
+or an encrypted SPSS syntax file,
+and writes it to \fIoutput\fR, performing format conversion as
+necessary.
+.PP
+The format of \fIinput\fR is automatically detected, when possible.
+The character encoding of old SPSS system files cannot always be
+guessed correctly, and SPSS/PC+ system files do not include any
+indication of their encoding.  Use \fB\-e \fIencoding\fR to specify
+the encoding in this case.
+.PP
+By default, the intended format for \fIoutput\fR is inferred from its
+extension:
+.
+.IP \fBcsv\fR
+.IQ \fBtxt\fR
+Comma-separated value.  Each value is formatted according to its
+variable's print format.  The first line in the file contains variable
+names.
+.
+.IP \fBsav\fR
+.IQ \fBsys\fR
+SPSS system file.
+.
+.IP \fBpor\fR
+SPSS portable file.
+.
+.IP \fBsps\fR
+SPSS syntax file.  (Only encrypted syntax files may be converted to
+this format.)
+.
+.PP
+Use \fB\-O \fIextension\fR to override the inferred format or to
+specify the format for unrecognized extensions.
+.
+.PP
+\fBpspp\-convert\fR can convert most input formats to most output
+formats.  Encrypted SPSS file formats are exceptions: if the input
+file is in an encrypted format, then the output file will be the same
+format (decrypted).  Options for the output format are ignored in this
+case.
+.
+.SH "OPTIONS"
+.SS "General Options"
+.
+.IP "\fB\-O format\fR"
+.IQ "\fB\-\-output\-format=\fIformat\fR"
+Specifies the desired output format.  \fIformat\fR must be one of the
+extensions listed above, e.g. \fB\-O csv\fR requests comma-separated
+value output.
+.
+.IP "\fB\-c \fImaxcases\fR"
+.IQ "\fB\-\-cases=\fImaxcases\fR"
+By default, all cases are copied from \fIinput\fR to \fIoutput\fR.
+Specifying this option to limit the number of cases written to
+\fIoutput\fR to \fImaxcases\fR.
+.
+.IP "\fB\-e \fIcharset\fR"
+.IQ "\fB\-\-encoding=\fIcharset\fR"
+Overrides the encoding in which character strings in \fIinput\fR are
+interpreted.  This option is necessary because old SPSS system files
+do not self-identify their encoding.
+.
+.IP "\fB\-k \fIvar\fR..."
+.IQ "\fB\-\-keep=\fIvar\fR..."
+Drops all variables except those listed as \fIvar\fR, and reorders the
+remaining variables into the specified order.
+.
+.IP "\fB\-d \fIvar\fR..."
+.IQ "\fB\-\-drop=\fIvar\fR..."
+Drops each \fIvar\fR listed from the output.
+.
+.SS "CSV Output Options"
+.PP
+These options affect only output to \fB.csv\fR and \fB.txt\fR files.
+.IP "\fB\-\-labels\fR"
+By default, \fBpspp\-convert\fR writes variables' values to the output.
+With this option, \fBpspp\-convert\fR writes value labels.
+.IP "\fB\-\-no\-var\-names\fR"
+By default, \fRpspp\-convert\fR\fR writes the variable names as the
+first line of output.  With this option, \fBpspp\-convert\fR omits
+this line.
+.IP "\fB\-\-recode\fR"
+By default, \fBpspp\-convert\fR writes user-missing values as their
+regular values.  With this option, \fBpspp\-convert\fR recodes them to
+system-missing values (which are written as a single space).
+
+.IP "\fB\-\-print\-formats\fR"
+By default, \fBpspp\-convert\fR writes numeric variables as plain
+numbers.  This option makes \fBpspp\-convert\fR honor variables'
+print formats.
+
+.IP "\fB\-\-decimal=\fIdecimal\fR"
+This option sets the character used as a decimal point in output.  The
+default is a period (\fB.\fR).
+
+.IP "\fB\-\-delimiter=\fIdelimiter\fR"
+This option sets the character used to separate fields in output.  The
+default is a comma (\fB,\fR), unless the decimal point is a comma, in
+which case a semicolon (\fB;\fR) is used.
+
+.IP "\fB\-\-qualifier=\fIqualifier\fR"
+The option sets the character used to quote fields that contain the
+delimiter.  The default is a double quote (\fB\(dq\fR).
+.
+.SS "Password Options"
+When the input file is encrypted, \fBpspp\-convert\fR needs to obtain
+a password to decrypt it.  To do so, the user may specify the password
+with \fB\-p\fR (or \fB\-\-password\fR), or the name of a file containing a
+list of possible passwords with \fB\-\-password\-list\fR, or an
+alphabet of possible passwords to try along with a maximum length with
+\fB\-a\fR (or \fB\-\-password\-alphabet\fR) and \fB\-l\fR (or
+\-\-password\-length\fR).  If none of these options is used,
+\fBpspp\-convert\fR prompts for the password.  The password options
+are:
+.
+.IP "\fB\-p \fIpassword\fR"
+.IQ "\fB\-\-password=\fIpassword\fR"
+Specifies the password to use to decrypt the input file.
+.
+.IP
+On multiuser systems, this option may not be safe because other users
+may be able to see the password in process listings.
+.
+.IP "\fB\-a \fIalphabet \fB\-l \fImax-length\fR"
+.IQ "\fB\-\-password-alphabet=\fIalphabet\ \fB\-\-password-length=\fImax-length\fR"
+These options are an alternative to \fB\-p\fR or \fB\-\-password\fR.
+They direct \fBpspp\-convert\fR to search for the correct password
+from the set of all passwords of symbols from \fIalphabet\fR (which
+may contain character ranges specified with \fB-\fR) and no more than
+\fImax-length\fR symbols long.  For example, \fB\-a a-z \-l 5\fR
+checks all possible lowercase alphabetic passwords no more than 5
+characters long.
+.IP
+When these options are used, \fB\-p\fR may additionally specify a
+starting point for the search.
+.
+.IP "\fB\-\-password\-list=\fIfile\fR"
+Specifies a file to read containing a list of passwords to try, one
+per line.  If \fIfile\fR is \fB\-\fR, reads from stdin.
+.
+.SS "Other Options"
+.IP "\fB\-h\fR"
+.IQ "\fB\-\-help\fR"
+Prints a usage message on stdout and exits.
+.
+.IP "\fB\-v\fR"
+.IQ "\fB\-\-version\fR"
+Prints version information on stdout and exits.
+.
+.SH "AUTHORS"
+Ben Pfaff.
+.
+.SH "SEE ALSO"
+.
+.BR pspp\-output (1),
+.BR pspp (1),
+.BR psppire (1).

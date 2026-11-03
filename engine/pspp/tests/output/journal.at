@@ -1,0 +1,30 @@
+AT_BANNER([journal])
+
+AT_SETUP([enable and disable journal])
+AT_DATA([journal.sps], [dnl
+set journal='pspp.jnl' on.
+data list notable /x y 1-2.
+begin data.
+12
+end data.
+set journal=off.
+
+print.
+
+execute.
+set journal=on.
+])
+
+AT_CHECK([pspp journal.sps])
+AT_CHECK([sed 's/ at.*/./' pspp.jnl], [0], [dnl
+* New session.
+set journal='pspp.jnl' on.
+data list notable /x y 1-2.
+begin data.
+12
+end data.
+
+* New session.
+set journal=on.
+])
+AT_CLEANUP

@@ -1,0 +1,985 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([syntax scanning])
+m4_define([PSPP_CHECK_SCAN],
+  [sed 's/^-//' < expout-base > expout
+   AT_CHECK([scan-test $1 input], [0], [expout])
+
+   sed '/^-/d' < expout-base > expout
+   AT_CHECK([scan-test -s $1 input], [0], [expout])])
+
+AT_SETUP([identifiers])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+a aB i5 $x @efg @@. !abcd !* !*a #.# .x _z.
+abcd. abcd.
+QRSTUV./* end of line comment */
+QrStUv./* end of line comment */ @&t@
+WXYZ. /* unterminated end of line comment
+�. /* U+FFFD is not valid in an identifier
+])
+AT_DATA([expout-base], [dnl
+ID "a"
+ID "aB"
+ID "i5"
+ID "$x"
+ID "@efg"
+ID "@@."
+MACRO_ID "!abcd"
+MACRO_ID "!*"
+MACRO_ID "!*"
+ID "a"
+ID "#.#"
+MACRO_PUNCT "."
+ID "x"
+MACRO_PUNCT "_"
+ID "z"
+ENDCMD
+ID "abcd."
+ID "abcd"
+ENDCMD
+ID "QRSTUV"
+ENDCMD
+ID "QrStUv"
+ENDCMD
+ID "WXYZ"
+ENDCMD
+STOP "Bad character U+FFFD in input."
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([reserved words])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+and or not eq ge gt le lt ne all by to with
+AND OR NOT EQ GE GT LE LT NE ALL BY TO WITH
+andx orx notx eqx gex gtx lex ltx nex allx byx tox withx
+and. with.
+])
+AT_DATA([expout-base], [dnl
+AND
+OR
+NOT
+EQ
+GE
+GT
+LE
+LT
+NE
+ALL
+BY
+TO
+WITH
+AND
+OR
+NOT
+EQ
+GE
+GT
+LE
+LT
+NE
+ALL
+BY
+TO
+WITH
+ID "andx"
+ID "orx"
+ID "notx"
+ID "eqx"
+ID "gex"
+ID "gtx"
+ID "lex"
+ID "ltx"
+ID "nex"
+ID "allx"
+ID "byx"
+ID "tox"
+ID "withx"
+ID "and."
+WITH
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([punctuation])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+~ & | = >= > <= < ~= <> ( ) , - + * / [[ ]] **
+~&|=>=><=<~=<>(),-+*/[[]]**
+% : ; ? _ ` { } ~
+])
+AT_DATA([expout-base], [dnl
+NOT
+AND
+OR
+EQUALS
+GE
+GT
+LE
+LT
+NE
+NE
+LPAREN
+RPAREN
+COMMA
+DASH
+PLUS
+ASTERISK
+SLASH
+LBRACK
+RBRACK
+EXP
+NOT
+AND
+OR
+EQUALS
+GE
+GT
+LE
+LT
+NE
+NE
+LPAREN
+RPAREN
+COMMA
+DASH
+PLUS
+ASTERISK
+SLASH
+LBRACK
+RBRACK
+EXP
+MACRO_PUNCT "%"
+COLON
+SEMICOLON
+MACRO_PUNCT "?"
+MACRO_PUNCT "_"
+MACRO_PUNCT "`"
+LCURLY
+RCURLY
+NOT
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([positive numbers])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+0 1 01 001. 1.
+123. /* comment 1 */ /* comment 2 */
+.1 0.1 00.1 00.10
+5e1 6E-1 7e+1 6E+01 6e-03
+.3E1 .4e-1 .5E+1 .6e+01 .7E-03
+1.23e1 45.6E-1 78.9e+1 99.9E+01 11.2e-03
+. 1e e1 1e+ 1e-
+])
+AT_DATA([expout-base], [dnl
+POS_NUM
+POS_NUM 1
+POS_NUM 1
+POS_NUM 1
+POS_NUM 1
+ENDCMD
+POS_NUM 123
+ENDCMD
+ENDCMD
+POS_NUM 1
+POS_NUM 0.1
+POS_NUM 0.1
+POS_NUM 0.1
+POS_NUM 50
+POS_NUM 0.6
+POS_NUM 70
+POS_NUM 60
+POS_NUM 0.006
+ENDCMD
+POS_NUM 30
+POS_NUM 0.04
+POS_NUM 5
+POS_NUM 6
+POS_NUM 0.0007
+POS_NUM 12.3
+POS_NUM 4.56
+POS_NUM 789
+POS_NUM 999
+POS_NUM 0.0112
+ENDCMD
+STOP "Missing exponent following `1e'."
+ID "e1"
+STOP "Missing exponent following `1e+'."
+STOP "Missing exponent following `1e-'."
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([negative numbers])
+AT_KEYWORDS([scan])
+AT_DATA([input-base], [dnl
+ -0 -1 -01 -001. -1.
+ -123. /* comment 1 */ /* comment 2 */
+ -.1 -0.1 -00.1 -00.10
+ -5e1 -6E-1 -7e+1 -6E+01 -6e-03
+ -.3E1 -.4e-1 -.5E+1 -.6e+01 -.7E-03
+ -1.23e1 -45.6E-1 -78.9e+1 -99.9E+01 -11.2e-03
+ -/**/1
+ -. -1e -e1 -1e+ -1e- -1.
+])
+AT_DATA([expout-base0], [dnl
+NEG_NUM
+NEG_NUM -1
+NEG_NUM -1
+NEG_NUM -1
+NEG_NUM -1
+ENDCMD
+NEG_NUM -123
+ENDCMD
+NEG_NUM -0.1
+NEG_NUM -0.1
+NEG_NUM -0.1
+NEG_NUM -0.1
+NEG_NUM -50
+NEG_NUM -0.6
+NEG_NUM -70
+NEG_NUM -60
+NEG_NUM -0.006
+NEG_NUM -3
+NEG_NUM -0.04
+NEG_NUM -5
+NEG_NUM -6
+NEG_NUM -0.0007
+NEG_NUM -12.3
+NEG_NUM -4.56
+NEG_NUM -789
+NEG_NUM -999
+NEG_NUM -0.0112
+NEG_NUM -1
+DASH
+MACRO_PUNCT "."
+STOP "Missing exponent following `-1e'."
+DASH
+ID "e1"
+STOP "Missing exponent following `-1e+'."
+STOP "Missing exponent following `-1e-'."
+NEG_NUM -1
+ENDCMD
+STOP
+])
+
+cp input-base input
+cp expout-base0 expout-base
+PSPP_CHECK_SCAN([-i])
+
+sed 's/ -/ - /g' < input-base > input
+sed 's/following `-/following `- /' < expout-base0 > expout-base
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([strings])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+'x' "y" 'abc'
+'Don''t' "Can't" 'Won''t'
+"""quoted""" '"quoted"'
+'' "" '''' """"
+'missing end quote
+"missing double quote
+'x' + "y"
++ 'z' +
+'a' /* abc */ + "b" /*
++ 'c' +/* */"d"/* */+'e'
+'foo'
++          /* special case: + in column 0 would ordinarily start a new command
+'bar'
+'foo'
+ +
+'bar'
+'foo'
++
+
+'bar'
+
++
+x"4142"+'5152'
+"4142"+
+x'5152'
+x"4142"
++u'304a'
+"�あいうえお"
+"abc"+U"FFFD"+u'3048'+"xyz"
+])
+AT_DATA([expout-base], [dnl
+STRING "x"
+STRING "y"
+STRING "abc"
+STRING "Don't"
+STRING "Can't"
+STRING "Won't"
+STRING ""quoted""
+STRING ""quoted""
+STRING ""
+STRING ""
+STRING "'"
+STRING """
+STOP "Unterminated string constant."
+STOP "Unterminated string constant."
+STRING "xyzabcde"
+STRING "foobar"
+STRING "foobar"
+STRING "foo"
+PLUS
+ENDCMD
+STRING "bar"
+ENDCMD
+PLUS
+STRING "AB5152"
+STRING "4142QR"
+STRING "ABお"
+STRING "�あいうえお"
+STRING "abc�えxyz"
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([@%:@! construct])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+#! /usr/bin/pspp
+#! /usr/bin/pspp
+])
+AT_DATA([expout-base], [dnl
+ID "#"
+MACRO_ID "!"
+SLASH
+ID "usr"
+SLASH
+ID "bin"
+SLASH
+ID "pspp"
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([* and COMMENT commands])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+* Comment commands "don't
+have to contain valid tokens.
+
+** Check ambiguity with ** token.
+****************.
+
+comment keyword works too.
+COMM also.
+com is ambiguous with COMPUTE.
+
+   * Comment need not start at left margin.
+
+* Comment ends with blank line
+
+next command.
+
+])
+AT_DATA([expout-base], [dnl
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ID "com"
+ID "is"
+ID "ambiguous"
+WITH
+ID "COMPUTE"
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ENDCMD
+ID "next"
+ID "command"
+ENDCMD
+-ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DOCUMENT command])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+DOCUMENT one line.
+DOC more
+    than
+        one
+            line.
+docu
+first.paragraph
+isn't parsed as tokens
+
+second paragraph.
+])
+AT_DATA([expout-base], [dnl
+ID "DOCUMENT"
+STRING "DOCUMENT one line."
+ENDCMD
+ENDCMD
+ID "DOCUMENT"
+STRING "DOC more"
+STRING "    than"
+STRING "        one"
+STRING "            line."
+ENDCMD
+ENDCMD
+ID "DOCUMENT"
+STRING "docu"
+STRING "first.paragraph"
+STRING "isn't parsed as tokens"
+STRING ""
+STRING "second paragraph."
+-ENDCMD
+-ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([FILE LABEL commands])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+FIL label isn't quoted.
+FILE
+  lab 'is quoted'.
+FILE /*
+/**/  lab not quoted here either
+
+])
+AT_DATA([expout-base], [dnl
+ID "FIL"
+ID "label"
+STRING "isn't quoted"
+ENDCMD
+ID "FILE"
+ID "lab"
+STRING "is quoted"
+ENDCMD
+ID "FILE"
+ID "lab"
+STRING "not quoted here either"
+-ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([BEGIN DATA command])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+begin data.
+123
+xxx
+end data.
+
+BEG /**/ DAT /*
+5 6 7 /* x
+
+end  data
+end data
+.
+])
+AT_DATA([expout-base], [dnl
+ID "begin"
+ID "data"
+ENDCMD
+STRING "123"
+STRING "xxx"
+ID "end"
+ID "data"
+ENDCMD
+ENDCMD
+ID "BEG"
+ID "DAT"
+STRING "5 6 7 /* x"
+STRING ""
+STRING "end  data"
+ID "end"
+ID "data"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DO REPEAT command])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+do repeat x=a b c
+          y=d e f.
+  do repeat a=1 thru 5.
+another command.
+second command
++ third command.
+end /* x */ /* y */ repeat print.
+end
+ repeat.
+])
+AT_DATA([expout-base], [dnl
+ID "do"
+ID "repeat"
+ID "x"
+EQUALS
+ID "a"
+ID "b"
+ID "c"
+ID "y"
+EQUALS
+ID "d"
+ID "e"
+ID "f"
+ENDCMD
+STRING "  do repeat a=1 thru 5."
+STRING "another command."
+STRING "second command"
+STRING "+ third command."
+STRING "end /* x */ /* y */ repeat print."
+ID "end"
+ID "repeat"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DO REPEAT command in batch mode])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+do repeat x=a b c
+          y=d e f
+do repeat a=1 thru 5
+another command
+second command
++ third command
+end /* x */ /* y */ repeat print
+end
+ repeat
+do
+  repeat #a=1
+
+  inner command
+end repeat
+])
+AT_DATA([expout-base], [dnl
+ID "do"
+ID "repeat"
+ID "x"
+EQUALS
+ID "a"
+ID "b"
+ID "c"
+ID "y"
+EQUALS
+ID "d"
+ID "e"
+ID "f"
+ENDCMD
+STRING "do repeat a=1 thru 5"
+STRING "another command"
+STRING "second command"
+STRING "+ third command"
+STRING "end /* x */ /* y */ repeat print"
+ID "end"
+ID "repeat"
+ENDCMD
+ID "do"
+ID "repeat"
+ID "#a"
+EQUALS
+POS_NUM 1
+ENDCMD
+STRING "  inner command"
+ID "end"
+ID "repeat"
+STOP
+])
+PSPP_CHECK_SCAN([-b])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - simple])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1()
+var1 var2 var3
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING "var1 var2 var3"
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - no newline after parentheses])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1() var1 var2 var3
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING " var1 var2 var3"
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - no newline before !ENDDEFINE])
+AT_KEYWORDS([scan ENDDEFINE])
+AT_DATA([input], [dnl
+define !macro1()
+var1 var2 var3!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING "var1 var2 var3"
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - all on one line])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1()var1 var2 var3!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING "var1 var2 var3"
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - empty])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1()
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - blank lines])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1()
+
+
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING ""
+STRING ""
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - arguments])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1(a(), b(), c())
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+ID "a"
+LPAREN
+RPAREN
+COMMA
+ID "b"
+LPAREN
+RPAREN
+COMMA
+ID "c"
+LPAREN
+RPAREN
+RPAREN
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - multiline arguments])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1(
+  a(), b(
+  ),
+  c()
+)
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+ID "a"
+LPAREN
+RPAREN
+COMMA
+ID "b"
+LPAREN
+RPAREN
+COMMA
+ID "c"
+LPAREN
+RPAREN
+RPAREN
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - arguments start on second line])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1
+(x,y,z
+)
+content 1
+content 2
+!enddefine.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+ID "x"
+COMMA
+ID "y"
+COMMA
+ID "z"
+RPAREN
+STRING "content 1"
+STRING "content 2"
+MACRO_ID "!enddefine"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 1])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1.
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+ENDCMD
+ID "data"
+ID "list"
+SLASH
+ID "x"
+POS_NUM 1
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 2])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1
+x.
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+ID "x"
+ENDCMD
+ID "data"
+ID "list"
+SLASH
+ID "x"
+POS_NUM 1
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 3])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1(.
+x.
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+ENDCMD
+ID "x"
+ENDCMD
+ID "data"
+ID "list"
+SLASH
+ID "x"
+POS_NUM 1
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - early end of command 4])
+AT_KEYWORDS([segment])
+AT_DATA([input], [dnl
+dnl Notice the command terminator at the end of the DEFINE command,
+dnl which should not be there and ends it early.
+define !macro1.
+data list /x 1.
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+ENDCMD
+ID "data"
+ID "list"
+SLASH
+ID "x"
+POS_NUM 1
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([DEFINE command - missing !ENDDEFINE])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+define !macro1()
+content line 1
+content line 2
+])
+AT_DATA([expout-base], [dnl
+ID "define"
+STRING "!macro1"
+LPAREN
+RPAREN
+STRING "content line 1"
+STRING "content line 2"
+STOP
+])
+PSPP_CHECK_SCAN([-i])
+AT_CLEANUP
+
+AT_SETUP([batch mode])
+AT_KEYWORDS([scan])
+AT_DATA([input], [dnl
+first command
+     another line of first command
++  second command
+third command
+
+fourth command.
+   fifth command.
+])
+AT_DATA([expout-base], [dnl
+ID "first"
+ID "command"
+ID "another"
+ID "line"
+ID "of"
+ID "first"
+ID "command"
+ENDCMD
+ID "second"
+ID "command"
+ENDCMD
+ID "third"
+ID "command"
+ENDCMD
+ID "fourth"
+ID "command"
+ENDCMD
+ID "fifth"
+ID "command"
+ENDCMD
+STOP
+])
+PSPP_CHECK_SCAN([-b])
+AT_CLEANUP

@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2020 Free Software Foundation -->
+<component type="desktop">
+  <id>org.gnu.pspp</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>GNU PSPP</name>
+  <name xml:lang="uk">GNU PSPP</name>
+  <name xml:lang="th">GNU PSPP</name>
+  <name xml:lang="ta">ஞு PSPP</name>
+  <name xml:lang="sv">GNU PSPP</name>
+  <name xml:lang="ru">GNU PSPP</name>
+  <name xml:lang="ro">GNU PSPP</name>
+  <name xml:lang="nl">GNU PSPP</name>
+  <name xml:lang="lt">GNU PSPP</name>
+  <name xml:lang="hu">GNU PSPP</name>
+  <name xml:lang="fr">GNU PSPP</name>
+  <name xml:lang="es">GNU PSPP</name>
+  <name xml:lang="el">GNU PSPP</name>
+  <name xml:lang="de">GNU PSPP</name>
+  <name xml:lang="ca">GNU PSPP</name>
+  <name xml:lang="ar">GNU PSPP</name>
+  <summary>GNU PSPP is a program for statistical analysis of sampled data</summary>
+  <summary xml:lang="uk">GNU PSPP — програма для статистичного аналізу даних вибірок</summary>
+  <summary xml:lang="th">GNU PSPP เป็นโปรแกรมสำหรับวิเคราะห์ทางสถิติกับข้อมูลที่ได้จากการเก็บตัวอย่าง</summary>
+  <summary xml:lang="ta">ஞு PSPP என்பது பதக்கூறாக்கப்பட்ட தரவுகளில் புள்ளியியல் பகுப்பாய்வு செய்ய பயன்படும் ஒரு நிரலாகும்</summary>
+  <summary xml:lang="sv">GNU PSPP är ett program för statistisk analys av insamlad data</summary>
+  <summary xml:lang="ru">GNU PSPP — программа для статистического анализа данных выборок</summary>
+  <summary xml:lang="ro">GNU PSPP este un program pentru analiza statistică a datelor eșantionate</summary>
+  <summary xml:lang="nl">GNU PSPP is een programma voor statistische analyse van steekproefgegevens</summary>
+  <summary xml:lang="lt">GNU PSPP programa skirta imties duomenų analizavimui</summary>
+  <summary xml:lang="hu">A GNU PSPP egy mintaadatok statisztikai elemzésére szolgáló program</summary>
+  <summary xml:lang="fr">GNU PSPP est un logiciel d'analyse statistique données échantillonnées</summary>
+  <summary xml:lang="es">GNU PPSP es un programa para el análisis de datos de muestreo</summary>
+  <summary xml:lang="el">Το GNU PSPP είναι ένα πρόγραμμα στατιστικής ανάλυσης δειγμάτων δεδομένων</summary>
+  <summary xml:lang="de">GNU PSPP ist ein Programm zur statistischen Analyse von Stichproben</summary>
+  <summary xml:lang="ca">GNU PSPP és un programa per a l'anàlisi estadística de dades de mostreig</summary>
+  <summary xml:lang="ar">GNU PSPP هو برنامج للتحليل الإحصائي لبيانات العينة</summary>
+  <description>
+    <p>GNU PSPP is a program for the statistical analysis of sampled data. It is a Free replacement for the proprietary program SPSS, and appears very similar to it with a few exceptions. The most important of these exceptions are, that there are no “time bombs”; your copy of PSPP will not “expire” or deliberately stop working in the future. Neither are there any artificial limits on the number of cases or variables which you can use. There are no additional packages to purchase in order to get “advanced” functions; all functionality that PSPP currently supports is in the core package.</p>
+    <p xml:lang="uk">GNU PSPP — програма для статистичного аналізу даних вибірок. Це вільна заміна пропрієтарної програми SPSS. Вона дуже подібна до SPSS за деякими винятками. Найважливішими з цих винятків є відсутність «часових бомб» — термін дії вашої копії PSPP ніколи не буде «вичерпано», програма не зможе раптом припинити працювати у майбутньому. У ній не накладається штучних обмежень на кількість спостережень або змінних, якими ви можете скористатися. Немає ніяких додаткових пакунків, які вам доведеться придбати для отримання доступу до «додаткових» можливостей — усі підтримувані PSPP функціональні можливості є частиною основного пакунка.</p>
+    <p xml:lang="th">GNU PSPP เป็นโปรแกรมสำหรับวิเคราะห์ทางสถิติกับข้อมูลที่ได้จากการเก็บตัวอย่าง เป็นโปรแกรมเสรีที่ทดแทนโปรแกรมสงวนสิทธิ์ SPSS โดยมีหน้าตาคล้ายกัน ยกเว้นบางประการ สิ่งที่ต่างกันที่สำคัญที่สุดคือไม่มี “ระเบิดเวลา” PSPP ที่คุณได้รับจะไม่ “หมดอายุ” หรือถูกกำหนดไว้ล่วงหน้าให้หยุดทำงานในอนาคต ทั้งไม่มีข้อจำกัดปลอมๆ สำหรับจำนวนตัวอย่างหรือจำนวนตัวแปรที่คุณจะสามารถใช้ได้ ไม่มีแพกเกจเพิ่มเติมที่คุณต้องซื้อเพื่อให้ได้ฟังก์ชันการใช้งาน “ขั้นสูง” ความสามารถต่างๆ ที่ PSPP รองรับมีมาครบในตัวแล้วในแพกเกจแกนหลัก</p>
+    <p xml:lang="ta">ஞு PSPP என்பது பதக்கூறாக்கப்பட்ட தரவுகளின் புள்ளியியல் பகுப்பாய்வு செய்ய பயன்படும் ஒரு நிரலாகும். இது தனியுரிம மென்பொருளான SPSS க்கான கட்டற்ற மாற்றாகும், மேலும் சில விதிவிலக்குகளுடன் அதனுடன் இது மிகவும் ஒத்ததாக தோன்றுகிறது. இந்த விதிவிலக்குகளில் மிக முக்கியமானவை, "நேர வரம்புகள்" இல்லாமை; உங்கள் PSPP நகல் "காலாவதியாகாது", எதிர்காலத்தில் வேலை செய்வதை வேண்டுமென்றே நிறுத்தாது. நீங்கள் பயன்படுத்தக்கூடிய வழக்குகள் அல்லது மாறிகளின் எண்ணிக்கையில் செயற்கை வரம்புகள் எதுவும் இல்லை. "மேம்பட்ட" செயலாற்றிகளை பெறுவதற்கு கூடுதல் தொகுப்புகள் வாங்க வேண்டிய தேவை எதுவும் இல்லை; PSPP இப்போது ஆதரிக்கும் அனைத்து செயலாற்றிகளும் மைய தொகுப்பில் உள்ளன".</p>
+    <p xml:lang="sv">GNU PSPP är ett program för statistisk analys av insamlad data. Det är en fri ersättning för det proprietära programmet SPSS och liknar det i stora drag, men med ett par undantag. Det viktigaste av dessa är att det inte finns några ”tickande bomber”; ditt exemplar av PSPP kommer inte att ”gå ut” eller avsiktligt sluta fungera i framtiden. Det finns heller inga godtyckliga gränser för hur många fall eller variabler som du får använda. Det finns inga ytterligare paket att köpa till för att få ”avancerade” funktioner; all funktionalitet som PSPP stödjer idag finns i grundpaketet.</p>
+    <p xml:lang="ru">GNU PSPP — программа для статистического анализа данных выборок. Это свободная замена проприетарной программы SPSS, очень похожая на нее за некоторыми исключениями. Важнейшим из этих исключений является отсутствие «бомб замедленного действия» — срок действия вашей копии PSPP никогда не «истечет», программа не сможет вдруг прекратить работу в будущем. Не накладывается искусственных ограничений на количество наблюдений или переменных, которыми вы можете воспользоваться. Нет никаких дополнительных пакетов, которые вам придется приобрести для получения доступа к «дополнительным» возможностям — все поддерживаемые PSPP функциональные возможности предоставляются основным пакетом.</p>
+    <p xml:lang="ro">GNU PSPP este un program pentru analiza statistică a datelor eșantionate. Este un înlocuitor liber pentru programul proprietar SPSS și pare foarte similar cu acesta, cu câteva excepții. Cele mai importante dintre aceste excepții sunt că nu există „bombe cu ceas”; copia dvs. de PSPP nu va „expira” sau nu va înceta în mod deliberat să funcționeze în viitor. Nu există nici limite artificiale privind numărul de cazuri sau variabile pe care le puteți utiliza. Nu există pachete suplimentare pe care să le achiziționați pentru a obține funcții „avansate”; toate funcționalitățile pe care PSPP le oferă în prezent sunt incluse în pachetul de bază.</p>
+    <p xml:lang="nl">GNU PSPP is een programma voor de statistische analyse van steekproefgegevens. Het is een gratis vervanging voor het auteursrechtelijk beschermde programma SPSS. Het lijkt er sterk op, maar er zijn enkele uitzonderingen. De belangrijkste uitzondering is dat er geen 'tijdbommen' zijn; uw exemplaar van PSPP zal in de toekomst niet 'verlopen' of met opzet ophouden te werken. Er zijn evenmin kunstmatige grenzen aan de aantallen observaties of variabelen die u kunt gebruiken. Er zijn geen uitbreidingspakketten die u moet aanschaffen om de beschikking te krijgen over 'geavanceerde' functies; alle functionaliteit die PSPP momenteel ondersteunt, zit in het kernpakket.</p>
+    <p xml:lang="lt">GNU PSPP programa skirta statistinei imties duomenų analizei. Tai nemokamas nuosavybinės SPSS programos pakaitalas ir yra labai į ją panaši, tačiau turi ir išskirtinumų. Svarbiausi išskirtinumai: nėra jokio uždelsto veikimo; jūsų PSPP diegimo galiojimo laikas nesibaigs ir planuotai nenustos veikti ateityje. Taip pat nėra jokių dirbtinių atvejų ar kintamųjų, kuriuos galite naudoti, skaičiaus apribojimų. Nėra jokių papildomų paketų, kuriuos reikia įsigyti, kad gautumėte „išplėstines“ funkcijas; visos funkcijos, kurias šiuo metu palaiko PSPP, yra pagrindiniame pakete.</p>
+    <p xml:lang="hu">A GNU PSPP egy mintaadatok statisztikai elemzésére szolgáló program. Szabad helyettesítője a zárt SPSS programnak, és néhány kivételtől eltekintve nagyon hasonlóan is néz ki. A legfontosabb ezen kivételek közül az, hogy nincsenek „időzített bombák”; a PSPP példánya nem „jár le” és szándékosan nem szűnik meg működni a jövőben. Nincsenek mesterséges korlátok sem a használható mintaszámra vagy változókra. Nincsenek további megvehető csomagok, hogy „haladó” funkciókat kapjon; a PSPP által támogatott minden funkció megtalálható a központi csomagban.</p>
+    <p xml:lang="fr">GNU PSPP est un programme d'analyse statistique de données échantillonnées. C'est une alternative libre et très similaire à peu d'exceptions près du programme prorpiètaire SPSS. Les exceptions majeures sont : pas de "bombe à retardement", pas d'expiration ou d'obsolescence programmée, pas de limite artificielle du nombre d'observations ou de variables, toutes les fonctionnalités sont incluses sans extensions payantes.</p>
+    <p xml:lang="es">GNU PSPP es un programa para el análisis estadístico de datos de muestra. Es una alternativa libre del programa propietario SPSS, y tiene una apariencia similar al mismo con algunas excepciones. Las más importantes de estas excepciones son, que no hay ninguna “bomba de relojería; tu copia de PSPP no “caducará” ni dejará de funcionar deliberadamente en el futuro. Tampoco hay ninguna limitación artificial al número de casos o variables que puedes utilizar. No es preciso adquirir ningún paquete adicional para conseguir funciones "avanzadas"; toda la funcionalidad que actualmente ofrece PSPP está incluida en la instalación normal.</p>
+    <p xml:lang="el">Το GNU PSPP είναι ένα πρόγραμμα για τη στατιστική ανάλυση δειγματικών δεδομένων. Είναι μια δωρεάν αντικατάσταση για το ιδιόκτητο πρόγραμμα SPSS, κ φαίνεται πολύ παρόμοιο με αυτό με μερικές εξαιρέσεις. Οι σημαντικότερες από αυτές τις εξαιρέσεις είναι ότι δεν υπάρχει «χρονόμετρο». Το αντίγραφο του PSPP δεν θα "λήξει" ή θα σταματήσει να λειτουργεί στο μέλλον, επίτηδες. Ούτε υπάρχουν τεχνητά όρια στον αριθμό περιπτώσεων ή μεταβλητών που μπορείτε να χρησιμοποιήσετε. Δεν υπάρχουν πρόσθετα πακέτα για αγορά προκειμένου να λάβετε «προηγμένες» λειτουργίες. Όλες οι λειτουργίες που υποστηρίζει το PSPP είναι στο βασικό πακέτο.</p>
+    <p xml:lang="de">GNU PSPP ist ein Programm zur statistischen Analyse von Stichproben. Es ist ein freier Ersatz für das proprietäre Programm SPSS. Es verhält sich abgesehen von einigen Ausnahmen sehr ähnlich. Die wichtigste Ausnahme ist: Es enthält keine „Zeitbomben“. Diese Kopie von PSPP wird nicht „auslaufen“ oder irgendwann in der Zukunft aufhören zu funktionieren. Weiterhin gibt es keine künstlichen Grenzen bei der Anzahl der Fälle oder der Variablen. Es gibt keine zusätzlichen Pakete, die man zunächst erwerben muss um „fortgeschrittene“ Funktionen benutzen zu können. Die gesamte Funktionalität, die PSPP derzeit unterstützt, ist hier enthalten.</p>
+    <p xml:lang="ca">GNU PSPP és un programa per l'anàlisi estadística de dades mostrals. És una alternativa lliure del programa propietari SPSS, i té una aparença similar al mateix amb algunes excepcions. Les més importants d'aquestes excepcions son, que no hi ha cap “bomba de rellotgeria”; la teva copia de PSPP no “caducarà” ni deixarà de funcionar deliberadament en el futur. Tampoc no hi ha cap limitació artificial al nombre de casos o variables que pots utilitzar. No cal adquirir cap paquet addicional per aconseguir funcions "avançades"; tota la funcionalitat que actualment PSPP ofereix està inclosa a la instal·lació estàndard.</p>
+    <p xml:lang="ar">GNU PSPP هو برنامج للتحليل الإحصائي لبيانات العينة. إنه بديل مجاني لبرنامج الملكية SPSS ، ويبدو مشابهًا جدًا له مع استثناءات قليلة. وأهم هذه الاستثناءات هو عدم وجود "قنابل موقوتة". لن "تنتهي" نسختك من PSPP أو ستتوقف عن العمل عمدًا في المستقبل. لا توجد حدود مصطنعة لعدد الحالات أو المتغيرات التي يمكنك استخدامها. لا توجد حزم إضافية للشراء من أجل الحصول على دوال "متقدمة" ؛ جميع الدوال التي يدعمها PSPP حاليًا موجودة في الحزمة الأساسية.</p>
+    <p>PSPP is a stable and reliable application. It can perform descriptive statistics, T-tests, anova, linear and logistic regression, measures of association, cluster analysis, reliability and factor analysis, non-parametric tests and more. Its backend is designed to perform its analyses as fast as possible, regardless of the size of the input data. You can use PSPP with its graphical interface or the more traditional syntax commands.</p>
+    <p xml:lang="uk">PSPP є стабільною та надійною програмою. Ця програма здатна виконувати завдання з описової статистики, T-перевірки, дисперсійного аналізу, побудови лінійних і логістичних регресій, вимірювання зв'язаності, кластерного аналізу, аналізу надійності та факторного аналізу, непараметричних перевірок тощо. Модуль обробки даних побудовано таким чином, щоб забезпечити якомога швидше отримання результатів, незалежно від об'єму вхідних даних. Ви можете скористатися PSPP за допомогою графічного або традиційного командного інтерфейсу.</p>
+    <p xml:lang="th">PSPP เป็นโปรแกรมที่เสถียรและเชื่อถือได้ สามารถคำนวณสถิติเชิงพรรณนา, การทดสอบที (T-test), ANOVA, การถดถอยเชิงเส้นและลอจิสติก, การวัดความเกี่ยวพัน, การวิเคราะห์แบ่งกลุ่ม, การวิเคราะห์ความเชื่อถือได้, การวิเคราะห์ปัจจัย, การทดสอบไม่อิงพารามิเตอร์ และอื่นๆ การคำนวณเบื้องหลังถูกออกแบบให้วิเคราะห์อย่างรวดเร็วที่สุดเท่าที่เป็นไปได้ ไม่ว่าขนาดของข้อมูลเข้าจะเป็นเท่าใด คุณสามารถใช้ PSPP ผ่านการสั่งงานแบบกราฟิก หรือจะป้อนคำสั่งด้วยไวยากรณ์แบบดั้งเดิมก็ได้</p>
+    <p xml:lang="ta">PSPP ஒரு நிலையான மற்றும் நம்பகமான செயலியாகும். இதில் விளக்கமான புள்ளியியல், T சோதனைகள், பரவகலப் பகுப்பாய்வு, நேரியல் மற்றும் ஏரண தொடர்புப்போக்கு, தொடர்பின் அளவைகள், திரள் பகுப்பாய்வு, நம்பகத்தன்மை மற்றும் காரணி பகுப்பாய்வு, அளவுரு அல்லாத சோதனைகள் மற்றும் பலவற்றைச் செய்ய முடியும். உள்ளீட்டுத் தரவின் அளவைப் பொருட்படுத்தாமல், இதன் பின்தளமானது இதன் பகுப்பாய்வுகளை முடிந்தவரை விரைவாகச் செய்ய வடிவமைக்கப்பட்டுள்ளது. நீங்கள் PSPP ஐ இதன் வரைகலை இடைமுகம் அல்லது மரபியல்பு தொடரியல் கட்டளைகளுடன் பயன்படுத்தலாம்.</p>
+    <p xml:lang="sv">PSPP är ett stabilt och tillförlitligt program. Det kan utföra beskrivande statistik, t-test, ANOVA, linjär och logistisk regression, associationsmått, klusteranalys, reliabilitets- och faktoranalys, icke-parametriska test med mera. Dess bakände är utformad för att utföra analyserna så snabbt som möjligt, oavsett indatans storlek. Du kan använda PSPP med dess grafiska gränssnitt eller med mer traditionella syntaxkommandon.</p>
+    <p xml:lang="ru">PSPP — стабильное и надежное приложение. Оно позволяет выполнять задачи по описательной статистике, T-проверке, дисперсионному анализу, построению линейных и логистических регрессий, измерению связанности, кластерному анализу, анализу надежности и факторному анализу, непараметрической проверке и т.д. Модуль обработки данных обеспечивает максимально быстрое выполнение анализа независимо от объема входных данных. С PSPP можно работать с помощью графического или традиционного командного интерфейса.</p>
+    <p xml:lang="ro">PSPP este o aplicație stabilă și fiabilă. Aceasta poate efectua statistici descriptive, teste T, anova, regresie liniară și logistică, măsuri de asociere, analiză grupală, fiabilitate și analiză factorială, teste neparametrice și multe altele. Motorul său de execuție este conceput pentru a efectua analizele cât mai rapid posibil, indiferent de dimensiunea datelor de intrare. Puteți utiliza PSPP cu ajutorul interfeței sale grafice sau al comenzilor sintactice mai tradiționale.</p>
+    <p xml:lang="nl">PSPP is een stabiele en betrouwbare toepassing. Ze kan beschrijvende statistieken produceren, T-toetsen, anova, lineaire en logistische regressie uitvoeren, associatiematen en betrouwbaarheid berekenen, cluster- en factoranalyse, nonparametrische toetsen en meer uitvoeren. Het onderliggende systeem is ontworpen om analyses zo snel mogelijk uit te voeren, ongeacht de omvang van de invoergegevens. U kunt PSPP gebruiken via de grafische gebruikersomgeving of via de meer traditionele syntax-opdrachten.</p>
+    <p xml:lang="lt">PSPP yra stabili ir patikima programa. Ji gali skaičiuoti aprašomąją statistiką, T kriterijų, ANOVA, tiesinę ir logistinę regresiją, ryšių rodiklius, klasterinę analizę, patikimumo ir faktorinę analizę, neparametrinius kriterijus ir kt. Galinė sąsaja sukurta taip, kad galėtų analizę atlikti kuo greičiau, nepriklausomai nuo įvesties duomenų dydžio. Galite naudoti PSPP grafinę sąsają arba tradicinę komandinę sintaksę.</p>
+    <p xml:lang="hu">A PSPP egy stabil és megbízható alkalmazás. Képes leíróstatisztikákra, T-próbákra, ANOVA-ra, lineáris és logisztikus regresszióra, kapcsolatelemzésre, klaszteranalízisre, megbízhatósági és faktoranalízisre, nem paraméterek próbákra és még sok másra. A háttérszolgáltatása úgy lett tervezve, hogy a lehető leggyorsabban hajtsa végre az elemzéseket, a bemeneti adatok méretétől függetlenül. Használhatja a PSPP-t a grafikus felületén keresztül, vagy a hagyományosabb parancsértelmezője segítségével.</p>
+    <p xml:lang="fr">PSPP est stable et robuste. Il peut pratiquer divers formes d'analyses : statistique descriptive, tests T, analyse de la variance, régression linéaire et logistique, mesure d'association, analyse de cluster, fiabilité et analyse de facteur, tests non paramétriques, etc. Son noyau a été conçu pour une analyse performante et aussi indépendante que possible de la taille des données. Vous pouvez utiliser PSPP avec son interface graphique ou en ligne de commande.</p>
+    <p xml:lang="es">PSPP es una aplicación estable y confiable. Puede realizar estadística descriptiva, Test T, anova, regresiones lineales y logísticas, medidas de asociación, análisis de agrupaciones, análisis factorial y de fiabilidad, tests no-paramétricos y otros. El motor de ejecución ha sido diseñado para realizar los análisis lo más rápido posible, independientemente de la cantidad de datos introducidos. Puedes utilizar PSPP mediante su interfaz gráfica o la sintaxis de ordenes más tradicional.</p>
+    <p xml:lang="el">Το PSPP είναι μια σταθερή κ αξιόπιστη εφαρμογή. Μπορεί να εκτελέσει περιγραφικά στατιστικά στοιχεία, δοκιμές T, anova, γραμμική και λογιστική παλινδρόμηση, μέτρα συσχέτισης, ανάλυση συστάδων, αξιοπιστία κ ανάλυση παραγόντων, μη παραμετρικές δοκιμές κ άλλα. Το backend -"παρασκήνιο"- έχει σχεδιαστεί για να εκτελεί τις αναλύσεις όσο το δυνατόν γρηγορότερα, ανεξάρτητα από το μέγεθος των δεδομένων εισαγωγής. Μπορείτε να χρησιμοποιήσετε το PSPP με τη γραφική διεπαφή ή τις πιο παραδοσιακές εντολές σύνταξης.</p>
+    <p xml:lang="de">PSPP ist eine stabile und zuverlässige Applikation. Man kann deskriptive Statistiken, T-Tests, ANOVA, lineare und logistische Regression, Zusammenhangsfaktoren, Clusteranalysen, Verlässlichkeits- und Faktoranalysen, nicht-parametrische Tests und vieles mehr berechnen. Das backend wurde für eine hohe Rechengeschwindigkeit auch bei großen zu verarbeitenden Datenmengen ausgelegt. Sie können PSPP mit der graphischen Oberfläche oder traditionell mit Kommandos verwenden.</p>
+    <p xml:lang="ca">PSPP es una aplicació estable i confiable. Pot realitzar estadística descriptiva, Test T, anova, regressions lineals i logístiques, mesures d'associació, anàlisi d'agrupacions, anàlisi factorial i de fiabilitat, tests no-paramètrics i altres. El motor d'execució ha estat dissenyat per a realitzar les anàlisis el més ràpid possible, independentment de la quantitat de dades introduïdes. Pots utilitzar PSPP mitjançant la seva interfície gràfica o la sintaxi d'ordres més tradicional.</p>
+    <p xml:lang="ar">PSPP هو تطبيق مستقر وموثوق. يمكنه إجراء الإحصاء الوصفي واختبارات T و أنوفا والانحدار الخطي واللوجستي ومقاييس الارتباط والتحليل العنقودي والموثوقية وتحليل العوامل والاختبارات غير المعلمية والمزيد. تم تصميم الواجهة الخلفية الخاصة به لإجراء تحليلاته بأسرع ما يمكن ، بغض النظر عن حجم بيانات الإدخال. يمكنك استخدام PSPP مع واجهته الرسومية أو أوامر بناء الجملة الأكثر تقليدية.</p>
+    <p>A brief list of some of PSPP's features.</p>
+    <p xml:lang="uk">Короткий список деяких можливостей PSPP.</p>
+    <p xml:lang="th">บางส่วนของความสามารถของ PSPP โดยสังเขป</p>
+    <p xml:lang="ta">PSPP இன் தனிச்சிறப்புகளுள் சிலவற்றை கொண்டுள்ள சுருக்கமான பட்டியல்.</p>
+    <p xml:lang="sv">En kort lista över några av PSPPs funktioner.</p>
+    <p xml:lang="ru">Краткий перечень некоторых возможностей PSPP.</p>
+    <p xml:lang="ro">O scurtă listă a unora dintre caracteristicile PSPP.</p>
+    <p xml:lang="nl">Een korte lijst van enkele functies van PSPP.</p>
+    <p xml:lang="lt">Trumpa PSPP galimybių apžvalga.</p>
+    <p xml:lang="hu">Egy rövid lista a PSPP funkcióiról.</p>
+    <p xml:lang="fr">Quelques fonctionnalités de PSPP.</p>
+    <p xml:lang="es">Un breve listado de algunas de les características de PSPP. </p>
+    <p xml:lang="el">Μια σύντομη λίστα με ορισμένες από τις δυνατότητες του PSPP.</p>
+    <p xml:lang="de">Eine kurze Featureliste von PSPP.</p>
+    <p xml:lang="ca">Un breu llistat d'algunes de les característiques de PSPP.</p>
+    <p xml:lang="ar">قائمة مختصرة ببعض ميزات PSPP.</p>
+    <ul>
+      <li>Support for over 1 billion cases</li>
+      <li xml:lang="uk">Підтримка понад 1 мільярду спостережень</li>
+      <li xml:lang="th">รองรับตัวอย่างกว่า 1 พันล้านตัวอย่าง</li>
+      <li xml:lang="ta">௧ தொள்ளுண் வழக்குகளுக்கு மேல் ஆதரவு அளிக்கிறது</li>
+      <li xml:lang="sv">Stöd för över 1 miljard fall</li>
+      <li xml:lang="ru">Поддержка более 1 миллиарда наблюдений</li>
+      <li xml:lang="ro">Suport pentru peste 1 miliard de cazuri</li>
+      <li xml:lang="nl">Ondersteuning voor meer dan een miljard observaties</li>
+      <li xml:lang="lt">Palaiko virš milijardo atvejų</li>
+      <li xml:lang="hu">Több mint 1 milliárd eset támogatása</li>
+      <li xml:lang="fr">Accepte plus d'un milliard d'observations</li>
+      <li xml:lang="es">Soporte para hasta 1000 millones de casos</li>
+      <li xml:lang="el">Υποστήριξη για πάνω από 1 δισεκατομμύριο υποθέσεις</li>
+      <li xml:lang="de">Verarbeitung von mehr als einer Milliarde Fällen</li>
+      <li xml:lang="ca">Suport per a fins a 1000 milions de casos</li>
+      <li xml:lang="ar">دعم لأكثر من 1 مليار حالة</li>
+      <li>Support for over 1 billion variables</li>
+      <li xml:lang="uk">Підтримка понад 1 мільярду змінних</li>
+      <li xml:lang="th">รองรับตัวแปรกว่า 1 พันล้านตัว</li>
+      <li xml:lang="ta">க தொள்ளுண் மாறிகளுக்கு மேல் ஆதரவு அளிக்கிறது</li>
+      <li xml:lang="sv">Stöd för över 1 miljard variabler</li>
+      <li xml:lang="ru">Поддержка более 1 миллиарда переменных</li>
+      <li xml:lang="ro">Suport pentru peste 1 miliard de variabile</li>
+      <li xml:lang="nl">Ondersteuning voor meer dan een miljard variabelen</li>
+      <li xml:lang="lt">Palaiko virš milijardo kintamųjų</li>
+      <li xml:lang="hu">Több mint 1 milliárd változó támogatása</li>
+      <li xml:lang="fr">Accepte plus d'un milliard de variables</li>
+      <li xml:lang="es">Soporte para hasta 1000 millones de variables</li>
+      <li xml:lang="el">Υποστήριξη για πάνω από 1 δισεκατομμύριο μεταβλητές</li>
+      <li xml:lang="de">Verarbeitung von mehr als einer Milliarde Variablen</li>
+      <li xml:lang="ca">Suport per a fins 1000 milions de variables</li>
+      <li xml:lang="ar">دعم أكثر من 1 مليار متغير</li>
+      <li>Syntax and data files which are compatible with those of SPSS</li>
+      <li xml:lang="uk">Синтаксис і файли даних, які сумісні із SPSS</li>
+      <li xml:lang="th">แฟ้มไวยากรณ์และแฟ้มข้อมูลที่เข้ากันได้กับ SPSS</li>
+      <li xml:lang="ta">SPSS உடன் ஒத்துப்போகும் தொடரியல் மற்றும் தரவு கோப்புகள்</li>
+      <li xml:lang="sv">Syntax- och datafiler som är kompatibla med motsvarande hos SPSS</li>
+      <li xml:lang="ru">Синтаксис и файлы данных, совместимые с SPSS</li>
+      <li xml:lang="ro">Sintaxă și fișiere de date care sunt compatibile cu cele din SPSS</li>
+      <li xml:lang="nl">Syntax- en gegevensbestanden die uitwisselbaar zijn met die van SPSS</li>
+      <li xml:lang="lt">Su SPSS suderinam sintaksė ir duomenų rinkmenos</li>
+      <li xml:lang="hu">Az SPSS-el kompatibilis parancs- és adatfájlok</li>
+      <li xml:lang="fr">Syntaxe et fichiers de données compatibles avec SPSS</li>
+      <li xml:lang="es">Ficheros de datos y de sintaxis compatibles con los de SPSS</li>
+      <li xml:lang="el">Σύνταξη κ αρχεία δεδομένων που είναι συμβατά με αυτά του SPSS</li>
+      <li xml:lang="de">Syntax- und Datendateien sind kompatibel mit SPSS</li>
+      <li xml:lang="ca">Arxius de dades i de sintaxi compatibles amb els de SPSS</li>
+      <li xml:lang="ar">ملفات بناء الجملة والبيانات المتوافقة مع ملفات SPSS</li>
+      <li>A choice of terminal or graphical user interface</li>
+      <li xml:lang="uk">Вибір між терміналом та графічним інтерфейсом користувача</li>
+      <li xml:lang="th">มีส่วนติดต่อผู้ใช้แบบเทอร์มินัลหรือแบบกราฟิกให้เลือก</li>
+      <li xml:lang="ta">முனையம் மற்றும் வரைகலை பயன்முறை இவ்விரண்டிலும் பயன்படுத்தலாம்</li>
+      <li xml:lang="sv">Val mellan en terminal eller ett grafiskt gränssnitt</li>
+      <li xml:lang="ru">Выбор между терминалом и графическим интерфейсом пользователя</li>
+      <li xml:lang="ro">Opțiunea de interfață de terminal sau grafică cu utilizatorul</li>
+      <li xml:lang="nl">De keuze uit een terminal- of grafische gebruikersomgeving</li>
+      <li xml:lang="lt">Galite rinktis tiek darbą terminale, tiek grafinėje naudotojo sąsajoje</li>
+      <li xml:lang="hu">Grafikus és terminálos felhasználói felület</li>
+      <li xml:lang="fr">Choix entre IHM et ligne de commande</li>
+      <li xml:lang="es">Interfaces de usuario a elegir entre terminal o gráfica</li>
+      <li xml:lang="el">Δυνατότητα επιλογής χρήσης γραμμή εντολών ή γραφικού περιβάλλοντος από τον χρήστη</li>
+      <li xml:lang="de">Auswahl zwischen Terminal oder grafischer Benutzeroberfläche</li>
+      <li xml:lang="ca">Interfícies d'usuari a triar entre terminal o gràfica</li>
+      <li xml:lang="ar">اختيار واجهة المستخدم الطرفية أو الرسومية</li>
+      <li>A choice of text, postscript, pdf, opendocument, html or TeX output formats</li>
+      <li xml:lang="uk">Вибір між такими форматами виведення даних: текст, postscript, pdf, opendocument, html та TeX</li>
+      <li xml:lang="th">สามารถเลือกรูปแบบผลลัพธ์เป็นแบบข้อความ, โพสต์สคริปต์, PDF, OpenDocument, HTML หรือ TeX ได้</li>
+      <li xml:lang="ta">உரை, போஸ்ட் ஸ்கிரிப்ட், பிடிஎப், ஓப்பன் டாகுமேன்ட், எச்டிஎம்எல், டேக்ஸ் போன்ற பல்வேறு வெளியீடு வடிவமைப்புகளுள் ஒன்றை விரும்பி பயன்படுத்தலாம்</li>
+      <li xml:lang="sv">Val mellan utdataformaten text, postscript, pdf, opendocument, html och TeX</li>
+      <li xml:lang="ru">Выбор между следующими выходными форматами: текст, postscript, pdf, opendocument, html и TeX</li>
+      <li xml:lang="ro">O gamă largă de formate de ieșire: text, postscript, pdf, opendocument, html sau TeX</li>
+      <li xml:lang="nl">De keuze uit tekst-, Postscript-, PDF-, OpenDocument-, HTML- of TeX-indeling van de uitvoer</li>
+      <li xml:lang="lt">Įvairūs galimi išvedimo formatai: tekstinis, postskriptinis, PDF, OpenDocument, HTML ir TeX</li>
+      <li xml:lang="hu">Szöveges, PostScript, PDF, OpenDocument, HTML vagy TeX kimeneti formátumok</li>
+      <li xml:lang="fr">Formats de sortie : texte, PostScript, PDF, OpenDocument, HTML</li>
+      <li xml:lang="es">Opciones de exportación de resultados como texto, postscript, pdf, opendocument, html o TeX</li>
+      <li xml:lang="el">Μια επιλογή εξαγωγής μορφότυπου κειμένου, postscript, pdf, opendocument, html ή TeX</li>
+      <li xml:lang="de">Text, Postscript, pdf, opendocument, html oder TeX als Ausgabeformate</li>
+      <li xml:lang="ca">Opció d'exportació de resultats com a text, postscript, pdf, opendocument, TeX  or html</li>
+      <li xml:lang="ar">اختيار تنسيقات إخراج نص أو بوستسكريبت أو pdf أو مستند مفتوح أو html أو TeX</li>
+      <li>Inter-operability with: LibreOffice, Apache OpenOffice, Gnumeric and other free software</li>
+      <li xml:lang="uk">Інтеграція із LibreOffice, Apache OpenOffice, Gnumeric та іншим вільним програмним забезпеченням</li>
+      <li xml:lang="th">ทำงานร่วมกันได้กับ: LibreOffice, Apache OpenOffice, Gnumeric และซอฟต์แวร์เสรีอื่น</li>
+      <li xml:lang="ta">இவைகளுடன் இணைந்து செயல்படக்கூடியது: இலீப்ரே ஓப்பீஸ், அப்பாச்சி ஓப்பன் ஓப்பீஸ், ஞுமரிக் மற்றும் பல கட்டற்ற மென்பொருட்கள்</li>
+      <li xml:lang="sv">Interoperabilitet med: LibreOffice, Apache OpenOffice, Gnumeric och annan fri programvara</li>
+      <li xml:lang="ru">Возможность совместной работы с LibreOffice, Apache OpenOffice, Gnumeric и другим свободным программным обеспечением</li>
+      <li xml:lang="ro">Interoperabilitate cu: LibreOffice, Apache OpenOffice, Gnumeric și alte programe libere</li>
+      <li xml:lang="nl">Kan samenwerken met LibreOffice, Apache OpenOffice, Gnumeric en andere gratis software</li>
+      <li xml:lang="lt">Suderinama su LibreOffice, Apache OpenOffice, Gnumeric ir kita atvira programine įranga</li>
+      <li xml:lang="hu">Interoperabilitás a LibreOffice-szal, Apache OpenOffice-szal, Gnumericcel és más szabad szoftverekkel</li>
+      <li xml:lang="fr">Compatible avec LibreOffice, Apache OpenOffice, Gnumeric, etc</li>
+      <li xml:lang="es">Inter-operabilidad con: LibreOffice, Apache OpenOffice, Gnumeric y otro software libre</li>
+      <li xml:lang="el">Δια-λειτουργικότητα με: LibreOffice, Apache OpenOffice, Gnumeric κ άλλα δωρεάν -ανοικτού κώδικα- λογισμικά</li>
+      <li xml:lang="de">Interoperabel mit Libreoffice, Apache OpenOffice, Gnumeric und anderer freier Software</li>
+      <li xml:lang="ca">Inter-operabilitat amb: LibreOffice, Apache OpenOffice, Gnumeric i d'altre software lliure</li>
+      <li xml:lang="ar">إمكانية التشغيل البيني مع: LibreOffice و Apache OpenOffice و Gnumeric وغيرها من البرامج المجانية</li>
+      <li>Easy data import from spreadsheets, text files and database sources</li>
+      <li xml:lang="uk">Просте імпортування даних з електронних таблиць, текстових файлів та баз даних</li>
+      <li xml:lang="th">นำเข้าข้อมูลได้อย่างสะดวกจากตารางคำนวณ, แฟ้มข้อความ, และฐานข้อมูล</li>
+      <li xml:lang="ta">விரிதாள், உரை கோப்புகள் மற்றும் தரவக மூலங்களில் இருந்து எளிமையாக தரவுகளை இறக்குமதி செய்யலாம்</li>
+      <li xml:lang="sv">Enkel import av data från kalkylark, textfiler och databaskällor</li>
+      <li xml:lang="ru">Простой импорт данных из электронных таблиц, текстовых файлов и баз данных</li>
+      <li xml:lang="ro">Import ușor de date din foi de calcul, fișiere text și surse de baze de date</li>
+      <li xml:lang="nl">Gemakkelijk importeren van gegevens uit werkbladen, tekstbestanden en gegevensbanken</li>
+      <li xml:lang="lt">Paprasta importuoti duomenis iš skaičialenčių, tekstinių rinkmenų ir duomenų bazių</li>
+      <li xml:lang="hu">Könnyű adatimportálás táblázatokból, szöveges fájlokból és adatbázis-forrásokból</li>
+      <li xml:lang="fr">Import depuis des tableurs, fichiers textes ou bases de données</li>
+      <li xml:lang="es">Facilidad de importación de datos de hojas de cálculo, ficheros de texto y fuentes de bases de datos</li>
+      <li xml:lang="el">Εύκολη εισαγωγή δεδομένων από υπολογιστικά φύλλα, αρχεία κειμένου κ πηγές βάσης δεδομένων</li>
+      <li xml:lang="de">Einfacher Datenimport aus Tabellen, Textdateien und Datenbankquellen</li>
+      <li xml:lang="ca">Facilitat d'importació de dades de fulls de càlcul, arxius de text i fonts de bases de dades</li>
+      <li xml:lang="ar">سهولة استيراد البيانات من جداول البيانات والملفات النصية ومصادر قواعد البيانات</li>
+      <li>The capability to open, analyse and edit two or more datasets concurrently</li>
+      <li xml:lang="uk">Можливість паралельного відкриття, аналізу та редагування декількох наборів даних</li>
+      <li xml:lang="th">สามารถเปิด, วิเคราะห์, และแก้ไขชุดข้อมูลตั้งแต่สองชุดขึ้นไปพร้อมกันได้</li>
+      <li xml:lang="ta">இரண்டு அல்லது அதற்கு மேற்பட்ட தரவுத்தொகுதிகளை ஒரே நேரத்தில் திறந்து, பகுப்பாய்வு செயது, திருத்தியமைக்கும் ஆற்றல்</li>
+      <li xml:lang="sv">Förmågan att öppna, analysera och redigera två eller flera dataset samtidigt</li>
+      <li xml:lang="ru">Возможность параллельного открытия, анализа и редактирования нескольких баз данных</li>
+      <li xml:lang="ro">Capacitatea de a deschide, analiza și edita două sau mai multe seturi de date în același timp</li>
+      <li xml:lang="nl">Is in staat tot het tegelijkertijd openen, analyseren en bewerken van twee of meer gegevensverzamelingen</li>
+      <li xml:lang="lt">Galite atverti, analizuoti ir keisti kelis duomenų rinkinius vienu metu</li>
+      <li xml:lang="hu">Lehetőség egyszerre kettő vagy több adathalmaz párhuzamos megnyitására, elemzésére és szerkesztésére</li>
+      <li xml:lang="fr">Manipulation sumultanée de deux jeux de données (ouverture, analyse, modification)</li>
+      <li xml:lang="es">Capacidad para abrir, analizar y editar dos o más matrices de datos de forma simultánea</li>
+      <li xml:lang="el">Η δυνατότητα ανοίγματος, ανάλυσης κ επεξεργασίας δύο ή περισσότερων συνόλων δεδομένων ταυτόχρονα</li>
+      <li xml:lang="de">Möglichkeit zwei oder mehr Datensätze gleichzeitig zu öffnen und zu bearbeiten</li>
+      <li xml:lang="ca">Capacitat per a obrir, analitzar i editar dos o més matrius de dades de forma simultània</li>
+      <li xml:lang="ar">القدرة على فتح وتحليل وتحرير مجموعتين أو أكثر من مجموعات البيانات في وقت واحد</li>
+      <li>A user interface supporting all common character sets</li>
+      <li xml:lang="uk">Інтерфейс користувача із підтримкою усіх типових кодувань</li>
+      <li xml:lang="th">ส่วนติดต่อผู้ใช้ที่รองรับรหัสอักขระต่างๆ ที่พบบ่อย</li>
+      <li xml:lang="ta">எல்லா பொதுவான வரியுரு தொகுதிகளையும் ஆதரிக்கும் பயனர் இடைமுகம்</li>
+      <li xml:lang="sv">Ett användargränssnitt med stöd för alla vanliga teckenuppsättningar</li>
+      <li xml:lang="ru">Интерфейс пользователя с поддержкой всех распространенных кодировок</li>
+      <li xml:lang="ro">O interfață cu utilizatorul care acceptă toate seturile uzuale de caractere</li>
+      <li xml:lang="nl">Een gebruikersomgeving die alle veelvoorkomende tekenverzamelingen ondersteunt</li>
+      <li xml:lang="lt">Naudotojo sąsaja palaiko visas pagrindines rašmenų koduotes</li>
+      <li xml:lang="hu">Az összes gyakori karakterkészletet támogató felhasználó felület</li>
+      <li xml:lang="fr">Prise en charge des encodages de caractères principaux</li>
+      <li xml:lang="es">Una interfaz de usuario con soporte para todos los juegos de carácteres habituales</li>
+      <li xml:lang="el">Μια διεπαφή χρήστη που υποστηρίζει όλα τα κοινά σύνολα χαρακτήρων υπολογιστή</li>
+      <li xml:lang="de">Eine Benutzeroberfläche, die alle üblichen Zeichensätze unterstützt</li>
+      <li xml:lang="ca">Una interfície d'usuari amb suport per a tots els jocs de caràcters habituals</li>
+      <li xml:lang="ar">واجهة مستخدم تدعم جميع مجموعات الأحرف الشائعة</li>
+      <li>The user interface has been translated to multiple languages</li>
+      <li xml:lang="uk">Інтерфейс користувача перекладено декількома мовами</li>
+      <li xml:lang="th">ส่วนติดต่อผู้ใช้มีการแปลเป็นภาษาต่างๆ หลายภาษา</li>
+      <li xml:lang="ta">பயனர் இடைமுகங்கள் பல மொழிகளில் மொழிபெயர்க்கப்பட்டுள்ளது</li>
+      <li xml:lang="sv">Användargränssnittet har översatts till flera språk</li>
+      <li xml:lang="ru">Интерфейс пользователя переведен на несколько языков</li>
+      <li xml:lang="ro">Interfața cu utilizatorul a fost tradusă în mai multe limbi</li>
+      <li xml:lang="nl">De gebruikersomgeving is vertaald naar meerdere talen</li>
+      <li xml:lang="lt">Naudotojo sąsaja išversta į įvairias kalbas</li>
+      <li xml:lang="hu">Több nyelven elérhető felhasználó felület</li>
+      <li xml:lang="fr">L’interface utilisateur a été traduite en plusieurs langues</li>
+      <li xml:lang="es">Interfaz de usuario traducida a múltiples idiomas</li>
+      <li xml:lang="el">Η διεπαφή χρήστη έχει μεταφραστεί σε πολλές γλώσσες</li>
+      <li xml:lang="de">Übersetzt in mehrere Sprachen</li>
+      <li xml:lang="ca">Interfície d'usuari traduïda a múltiples idiomes</li>
+      <li xml:lang="ar">تمت ترجمة واجهة المستخدم إلى لغات متعددة</li>
+      <li>Very fast statistical procedures, even on very large data sets</li>
+      <li xml:lang="uk">Дуже швидка статистична обробка навіть для великих наборів даних</li>
+      <li xml:lang="th">กระบวนการคำนวณสถิติที่เร็วมาก แม้กับชุดข้อมูลขนาดใหญ่มากๆ</li>
+      <li xml:lang="ta">மிகப் பெரிய தரவுத் தொகுதிகளை கொண்டிருந்தால் கூட, மிக விரைவாக புள்ளியியல் செயல்முறைகளை செய்து முடித்துவிடும்</li>
+      <li xml:lang="sv">Väldigt snabba statistiska procedurer, även på väldigt stora dataset</li>
+      <li xml:lang="ru">Очень быстрые статистические процедуры, даже при работе с очень большими базами данных</li>
+      <li xml:lang="ro">Proceduri statistice foarte rapide, chiar și pe seturi de date foarte mari</li>
+      <li xml:lang="nl">Zeer snelle statistische procedures, zelfs met grote gegevensverzamelingen</li>
+      <li xml:lang="lt">Labai greita statistinės analizė net su labai dideliais duomenų rinkiniais.</li>
+      <li xml:lang="hu">Gyors statisztikai eljárások, még nagyon nagy adathalmazokon is</li>
+      <li xml:lang="fr">Traitement performant des données même sur de larges ensembles</li>
+      <li xml:lang="es">Procedimientos estadísticos muy rápidos, incluso en cas de grandes conjuntos de datos</li>
+      <li xml:lang="el">Πολύ γρήγορες εκτελέσεις στατιστικών διαδικασιών, ακόμη κ σε πολύ μεγάλα σύνολα δεδομένων</li>
+      <li xml:lang="de">Schnelle statistische Berechnung auch bei sehr großen Datensätzen</li>
+      <li xml:lang="ca">Procediments estadístics molt ràpids, fins i tot en cas de grans conjunts de edades</li>
+      <li xml:lang="ar">إجراءات إحصائية سريعة جدًا ، حتى في مجموعات البيانات الكبيرة جدًا</li>
+      <li>No license fees and no expiration period</li>
+      <li xml:lang="uk">Ніяких ліцензійних відрахувань та завершень термінів користування</li>
+      <li xml:lang="th">ไม่มีค่าใบอนุญาตใช้งานและไม่มีวันหมดอายุ</li>
+      <li xml:lang="ta">உரிம கட்டணம், பயன் அழிநேரம் என எதுவும் இல்லை</li>
+      <li xml:lang="sv">Inga licensavgifter och ingen tidsbegränsning</li>
+      <li xml:lang="ru">Нет лицензионных платежей и ограничения срока работы программы</li>
+      <li xml:lang="ro">Fără taxe de licență și fără perioadă de expirare</li>
+      <li xml:lang="nl">Geen licentiekosten en geen verloopperiode</li>
+      <li xml:lang="lt">Jokių licencijos mokesčių ir jokio galiojimo laikotarpio</li>
+      <li xml:lang="hu">Nincsenek licencköltségek és nincs lejárati idő</li>
+      <li xml:lang="fr">Pas de coût de licence ou de période d'expiration</li>
+      <li xml:lang="es">Ni pagos por licencia ni periodos de caducidad</li>
+      <li xml:lang="el">Χωρίς τέλη άδειας κατοχής προγράμματος κ περίοδο λήξης</li>
+      <li xml:lang="de">Keine Lizenzgebühren oder zeitliche Befristung</li>
+      <li xml:lang="ca">No pagament per llicencia i no període de caducitat</li>
+      <li xml:lang="ar">لا توجد رسوم ترخيص ولا فترة انتهاء الصلاحية</li>
+      <li>No unethical “end user license agreements”</li>
+      <li xml:lang="uk">Без позбавлених етики «ліцензійних угод із кінцевим користувачем»</li>
+      <li xml:lang="th">ไม่มี “สัญญาอนุญาตสำหรับผู้ใช้ปลายทาง” ที่ไม่มีจริยธรรม</li>
+      <li xml:lang="ta">நெறிக்கு எதிரான "இறுதி பயனர் உரிம ஒப்பந்தங்கள்" எதுவும் இல்லை</li>
+      <li xml:lang="sv">Inga oetiska ”slutanvändarlicensavtal”</li>
+      <li xml:lang="ru">Нет неэтичных «лицензионных соглашений с конечным пользователем»</li>
+      <li xml:lang="ro">Fără „acorduri de licență pentru utilizatorul final” lipsite de etică</li>
+      <li xml:lang="nl">Geen onethische 'eindgebruikersovereenkomsten'</li>
+      <li xml:lang="lt">Nėra neetiškų „galutinio vartotojo licencijos sutarčių“</li>
+      <li xml:lang="hu">Nincsenek etikátlan „felhasználó licencszerződések”</li>
+      <li xml:lang="fr">Aucun « contrat de licence utilisateur final » l'éthique douteuse</li>
+      <li xml:lang="es">Ningún “acuerdo de licencia de usuario final” poco ético</li>
+      <li xml:lang="el">Χωρίς ανήθικες "συμφωνίες άδειας τελικού χρήστη"</li>
+      <li xml:lang="de">Keine unethischen Lizenzvereinbarungen</li>
+      <li xml:lang="ca">Cap “acord de llicencia d'usuari final” poc ètic.</li>
+      <li xml:lang="ar">لا توجد "اتفاقيات ترخيص المستخدم النهائي" غير الأخلاقية</li>
+      <li>A fully indexed user manual</li>
+      <li xml:lang="uk">Повністю індексований підручник користувача</li>
+      <li xml:lang="th">คู่มือผู้ใช้ที่มีดัชนีครบถ้วน</li>
+      <li xml:lang="ta">முழுமையான உள்ளடக்கங்களை கொண்ட பயனர் கையேடு</li>
+      <li xml:lang="sv">En fullständigt indexerad användarhandbok</li>
+      <li xml:lang="ru">Полностью индексированное руководство пользователя</li>
+      <li xml:lang="ro">Un manual de utilizare complet indexat</li>
+      <li xml:lang="nl">Een volledig geïndexeerde gebruikershandleiding</li>
+      <li xml:lang="lt">Pilnai suindeksuotas naudotojo žinynas</li>
+      <li xml:lang="hu">Teljesen indexelt felhasználói kézikönyv</li>
+      <li xml:lang="fr">Guide utilisateur totalement indéxé</li>
+      <li xml:lang="es">Manual de usuario totalmente indexado</li>
+      <li xml:lang="el">Ένα εγχειρίδιο χρήστη με πλήρες ευρετήριο</li>
+      <li xml:lang="de">Ein voll indiziertes englisches Benutzerhandbuch</li>
+      <li xml:lang="ca">Manual d'usuari totalment indexat</li>
+      <li xml:lang="ar">دليل مستخدم مفهرس بالكامل</li>
+      <li>Freedom ensured; It is licensed under the GPLv3 or later</li>
+      <li xml:lang="uk">Забезпечена свобода — умови ліцензування GPLv3 або новіша версія</li>
+      <li xml:lang="th">ให้ความมั่นใจในเสรีภาพ ภายใต้สัญญาอนุญาต GPLv3 หรือรุ่นหลังจากนั้น</li>
+      <li xml:lang="ta">உறுதியான விடுதலை; இது GPLv3 அல்லது அதற்கு பிந்தைய உரிமத்தை கொண்டுள்ளது</li>
+      <li xml:lang="sv">Frihet garanteras; Det är licensierat under GPLv3 eller senare</li>
+      <li xml:lang="ru">Гарантированная свобода; программа доступна по лицензии GPLv3 или более поздней версии этой лицензии</li>
+      <li xml:lang="ro">Libertate asigurată; Este licențiat sub GPLv3 sau o versiune ulterioară</li>
+      <li xml:lang="nl">Vrijheid is verzekerd; PSPP is gelicentieerd onder GPLv3 of later</li>
+      <li xml:lang="lt">Užtikrinta laisvė; platinama pagal GPLv3 ar vėlesnę licenciją</li>
+      <li xml:lang="hu">Szabadság biztosítva; GPLv3 vagy újabb licenc alatt érhető el</li>
+      <li xml:lang="fr">Liberté assurée : licence GPL 3 ou supérieure</li>
+      <li xml:lang="es">Libertad asegurada; está licenciado bajo GPLv3 o posterior</li>
+      <li xml:lang="el">Διασφάλιση της ελευθερίας. Έχει άδεια βάσει της GPLv3 ή νεότερης έκδοσης</li>
+      <li xml:lang="de">Freiheit auch zukünftig gesichert. Lizensiert mit GPLv3 oder später</li>
+      <li xml:lang="ca">Llibertat assegurada; està llicenciat sota GPLv3 o posterior</li>
+      <li xml:lang="ar">الحرية مكفولة. تم ترخيصه بموجب GPLv3 أو أحدث</li>
+      <li>Portability; Runs on many different computers and many different operating systems</li>
+      <li xml:lang="uk">Портативність — працює на багатьох різних апаратних і програмних архітектурах, у різних операційних системах</li>
+      <li xml:lang="th">เคลื่อนย้ายสะดวก โดยทำงานได้บนคอมพิวเตอร์ชนิดต่างๆ และบนระบบปฏิบัติการที่หลากหลาย</li>
+      <li xml:lang="ta">நிகழ்தகவு; பல்வேறு கணினிகளிலும் இயங்குதளங்களிலும் இயங்கும்</li>
+      <li xml:lang="sv">Portabilitet; Fungerar på många olika datorer och operativsystem</li>
+      <li xml:lang="ru">Переносимость; программа работает на компьютерах с различной архитектурой и в различных операционных системах</li>
+      <li xml:lang="ro">Portabilitate; rulează pe multe calculatoare diferite și pe multe sisteme de operare diferite</li>
+      <li xml:lang="nl">Overzetbaar; werkt op veel verschillende computers en onder veel verschillende besturingssystemen</li>
+      <li xml:lang="lt">Daugiaplatformė; veikia įvairiausiuose kompiuteriuose ir įvairiose operacinėse sistemose</li>
+      <li xml:lang="hu">Hordozhatóság; számos különböző számítógépen, és sok különböző operációs rendszeren fut</li>
+      <li xml:lang="fr">Portabilité : prend en charge plusieurs matériels et systèmes d'exploitation</li>
+      <li xml:lang="es">Portabilidad; Funciona en muchos diferentes computadores y muy diversos sistemas operativos</li>
+      <li xml:lang="el">Φορητότητα; Τρέχει σε πολλούς διαφορετικούς υπολογιστές κ σε πολλά διαφορετικά λειτουργικά συστήματα</li>
+      <li xml:lang="de">Portabilität. Läuft auf vielen verschiedenen Computern und Betriebssystemen</li>
+      <li xml:lang="ca">Portabilitat; Funciona en moltes diferent computadors i molt diversos sistemes operatius</li>
+      <li xml:lang="ar">قابلية التنقل؛ يعمل على العديد من أجهزة الكمبيوتر المختلفة والعديد من أنظمة التشغيل المختلفة</li>
+    </ul>
+    <p>PSPP is particularly aimed at statisticians, social scientists and students requiring fast convenient analysis of sampled data.</p>
+    <p xml:lang="uk">PSPP призначено для статистиків, науковців у галузі соціальних наук та студентів, яким потрібен швидкий зручний аналіз даних спостережень.</p>
+    <p xml:lang="th">PSPP สร้างมาเพื่อนักสถิติ, นักสังคมศาสตร์ และนิสิตนักศึกษาที่ต้องการวิเคราะห์อย่างสะดวกรวดเร็วกับข้อมูลที่เก็บตัวอย่างมา</p>
+    <p xml:lang="ta">PSPP குறிப்பாக புள்ளியியல் வல்லுநர்கள், சமூக விஞ்ஞானிகள் மற்றும் மாதிரி தரவுகளின் விரைவான வசதியான பகுப்பாய்வு தேவைப்படும் மாணவர்களை இலக்காகக் கொண்டுள்ளது.</p>
+    <p xml:lang="sv">PSPP riktar sig särskilt till statistiker, samhällsvetare och studenter som behöver snabb och smidig analys av insamlad data.</p>
+    <p xml:lang="ru">Программа PSPP предназначается для статистиков и социологов, а также студентов, которым нужно быстрое и удобное средство анализа данных выборок.</p>
+    <p xml:lang="ro">PSPP se adresează în special statisticienilor, cercetătorilor în științe sociale și studenților care necesită o analiză rapidă și convenabilă a datelor eșantionate.</p>
+    <p xml:lang="nl">PSPP is vooral bedoeld voor statistici, sociaal wetenschappers en studenten die behoefte hebben aan snelle, toegankelijke analyse van steekproefgegevens.</p>
+    <p xml:lang="lt">PSPP ypač skirta statistikams, socialinių mokslų specialistams ir studentams, kuriems reikalinga greita ir patogi imties duomenų analizė.</p>
+    <p xml:lang="hu">A PSPP különösen a statisztikusokat, társadalomtudósokat és diákokat célozza, akiknek gyors és kényelmes mintaadat-elemzésre van szükségük.</p>
+    <p xml:lang="fr">PSPP a été conçu pour les statisticiens, les étudiants et les spécialistes des sciences sociales, qui ont besoin d'une analyse performante et pratique des données échantillonnées.</p>
+    <p xml:lang="es">PSPP está particularmente dirigido a estadísticos, científicos sociales y estudiantes que requieran de análisis convenientes de datos de muestreo.</p>
+    <p xml:lang="el">Το PSPP απευθύνεται ιδιαίτερα σε στατιστικολόγους, κοινωνικούς επιστήμονες κ μαθητές που απαιτούν γρήγορη κ βολική ανάλυση δεδομένων δειγματοληψίας.</p>
+    <p xml:lang="de">PSPP richtet sich insbesondere an Statistiker, Sozialforscher und Studenten, die eine schnelle und einfache Analyse von Stichprobendaten benötigen.</p>
+    <p xml:lang="ca">PSPP està particularment adreçat a estadístics, científics socials i estudiants que requereixin d'anàlisi convenient de dades de mostreig.</p>
+    <p xml:lang="ar">يستهدف PSPP بشكل خاص الإحصائيين وعلماء الاجتماع والطلاب الذين يحتاجون إلى تحليل سريع ومناسب لبيانات العينة.</p>
+    <p>The Flatpak for PSPP includes graphical and command-line interfaces.  To use the command-line interface, run: <code>flatpak run --command=pspp org.gnu.pspp</code>.</p>
+    <p xml:lang="uk">До Flatpak для PSPP включено графічний інтерфейс та інтерфейс командного рядка. Щоб скористатися інтерфейсом командного рядка, віддайте команду &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="th">Flatpak สำหรับ PSPP มีให้ทั้งส่วนติดต่อผู้ใช้แบบกราฟิกและแบบบรรทัดคำสั่ง การใช้งานแบบบรรทัดคำสั่งทำได้โดยเรียก: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;</p>
+    <p xml:lang="sv">Flatpak-paketet för PSPP inkluderar ett grafiskt gränssnitt och ett kommandoradsgränssnitt. För att använda kommandoradsgränssnittet, kör: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="ro">Software-ul Flatpak pentru PSPP include interfețe grafice și de linie de comandă. Pentru a utiliza interfața de linie de comandă, executați: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="nl">Het “Flatpak” voor PSPP bevat de grafische en de opdrachtregel-interface. Geef de volgende opdracht om te werken met de opdrachtregelinterface: &lt;code&gt;flatpak run -- command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="lt">PSPP programa Flatpak pakete turi grafinę ir komandinės eilutės sąsajas. Norėdami naudoti komandinės eilutės sąsają, įvykdykite: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="hu">A PSPP Flatpak csomagja grafikus és parancssoros felületeket tartalmaz. A parancssoros felület használatához futtassa a következőt: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="fr">Le logiciel en kit PSPP comprend des interfaces graphiques et de ligne de commande. Pour utiliser l’interface de ligne de commande, exécutez : &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="es">El paquete Flatpak para PSPP incluye interfaz gráfica e interfaz de línea de ordenes. Para usar la interfaz de líniea de órdenes, ejecutar: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="el">Το Flatpak για PSPP περιλαμβάνει διεπαφές γραφικών και γραμμής εντολών. Για να χρησιμοποιήσετε τη διεπαφή γραμμής εντολών, εκτελέστε: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="de">Das flatpak für PSPP enthält eine graphische und Kommandozeilenvariante. Die Kommandozeilenversion können Sie mit &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt; starten.</p>
+    <p xml:lang="ca">El Flatpak per a PSPP inclou interficies grafica y línia-d'ordres. Per a utilitzar la interficie línia-d'ordres, executar: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt;.</p>
+    <p xml:lang="ar">يتضمن Flatpak لـ PSPP واجهات رسومية وواجهات سطر أوامر. لاستخدام واجهة سطر الأوامر، قم بتشغيل: &lt;code&gt;flatpak run --command=pspp org.gnu.pspp&lt;/code&gt; .</p>
+  </description>
+  <launchable type="desktop-id">org.gnu.pspp.desktop</launchable>
+  <categories>
+    <category>Science</category>
+    <category>Math</category>
+    <category>NumericalAnalysis</category>
+    <category>GTK</category>
+  </categories>
+  <screenshots>
+    <screenshot type="default">
+      <caption>GNU PSPP Variable View</caption>
+      <caption xml:lang="uk">Панель змінних GNU PSPP</caption>
+      <caption xml:lang="th">มุมมองตัวแปรของ GNU PSPP</caption>
+      <caption xml:lang="ta">ஞு PSPP மாறி பார்வை</caption>
+      <caption xml:lang="sv">GNU PSPP Variabelvy</caption>
+      <caption xml:lang="ru">Панель просмотра переменных GNU PSPP</caption>
+      <caption xml:lang="ro">Vizualizarea variabilelor cu GNU PSPP</caption>
+      <caption xml:lang="nl">GNU PSPP variabelenweergave</caption>
+      <caption xml:lang="lt">GNU PSPP kintamųjų rodinys</caption>
+      <caption xml:lang="hu">GNU PSPP változónézet</caption>
+      <caption xml:lang="fr">GNU PSPP Visionneuse de variables</caption>
+      <caption xml:lang="es">GNU PSPP Vista de Variables</caption>
+      <caption xml:lang="el">Απεικόνιση Μεταβλητών GNU PSPP</caption>
+      <caption xml:lang="de">GNU PSPP Variablenansicht</caption>
+      <caption xml:lang="ca">GNU PSPP Vista de Variables</caption>
+      <caption xml:lang="ar">عرض متغيرات GNU PSPP</caption>
+      <image>https://www.gnu.org/software/pspp/images/variable-sheet.png</image>
+    </screenshot>
+  </screenshots>
+  <translation type="gettext">pspp</translation>
+  <url type="homepage">https://www.gnu.org/software/pspp/</url>
+  <url type="translate">https://translationproject.org/domain/pspp.html</url>
+  <url type="donation">https://my.fsf.org/donate</url>
+  <keywords>
+    <keyword>statistics</keyword>
+    <keyword xml:lang="uk">статистика</keyword>
+    <keyword xml:lang="th">สถิติ</keyword>
+    <keyword xml:lang="ta">புள்ளியியல்</keyword>
+    <keyword xml:lang="sv">statistik</keyword>
+    <keyword xml:lang="ro">statistici</keyword>
+    <keyword xml:lang="nl">statistische maten</keyword>
+    <keyword xml:lang="lt">statistika</keyword>
+    <keyword xml:lang="hu">statisztika</keyword>
+    <keyword xml:lang="fr">statistiques</keyword>
+    <keyword xml:lang="es">Estadísticos</keyword>
+    <keyword xml:lang="el">στατιστικά</keyword>
+    <keyword xml:lang="de">Statistiken</keyword>
+    <keyword xml:lang="ca">Estadístics</keyword>
+    <keyword xml:lang="ar">الإحصائيات</keyword>
+  </keywords>
+  <content_rating type="oars-1.0"/>
+  <update_contact>pspp-dev@gnu.org</update_contact>
+  <developer_name>Free Software Foundation</developer_name>
+  <developer_name xml:lang="uk">The Free Software Foundation (Фонд вільного програмного забезпечення)</developer_name>
+  <developer_name xml:lang="th">มูลนิธิซอฟต์แวร์เสรี</developer_name>
+  <developer_name xml:lang="ta">கட்டற்ற மென்பொருள் அறக்கட்டளை</developer_name>
+  <developer_name xml:lang="sv">Free Software Foundation</developer_name>
+  <developer_name xml:lang="ru">Фонд свободного ПО</developer_name>
+  <developer_name xml:lang="ro">Free Software Foundation</developer_name>
+  <developer_name xml:lang="nl">Free Software Foundation</developer_name>
+  <developer_name xml:lang="lt">Laisvosios programinės įrangos fondas</developer_name>
+  <developer_name xml:lang="hu">Free Software Foundation</developer_name>
+  <developer_name xml:lang="fr">Free Software Foundation</developer_name>
+  <developer_name xml:lang="es">Free Software Foundation</developer_name>
+  <developer_name xml:lang="el">Ίδρυμα Ελεύθερου Λογισμικού</developer_name>
+  <developer_name xml:lang="de">Free Software Foundation</developer_name>
+  <developer_name xml:lang="ca">Free Software Foundation</developer_name>
+  <developer_name xml:lang="ar">مؤسسة البرمجيات المجانية</developer_name>
+  <url type="bugtracker">https://savannah.gnu.org/bugs/?func=additem&amp;group=pspp</url>
+  <url type="help">https://www.gnu.org/software/pspp/manual/html_node/index.html</url>
+  <provides>
+    <binary>pspp</binary>
+    <binary>psppire</binary>
+  </provides>
+  <releases>
+    <release version="2.1.3" date="2026-10-23">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.1.3</url>
+    </release>
+    <release version="2.1.2" date="2026-09-19">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.1.2</url>
+    </release>
+    <release version="2.1.1" date="2026-03-06">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.1.1</url>
+    </release>
+    <release version="2.1.0" date="2026-03-04">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.1.0</url>
+    </release>
+    <release version="2.0.1" date="2024-03-21">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.0.1</url>
+    </release>
+    <release version="2.0.0" date="2023-12-31">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.0.0</url>
+    </release>
+    <!-- For pre-releases, use ~preN in version="..." to ensure proper version
+         comparisons with appstream (otherwise, flathub will reject it).  But
+         use -preN in the Savannah URLs because that's the tag name. -->
+    <release version="2.0.0~pre3" date="2023-11-02">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.0.0-pre3</url>
+    </release>
+    <release version="2.0.0~pre2" date="2023-10-31">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.0.0-pre2</url>
+    </release>
+    <release version="2.0.0~pre1" date="2023-05-06">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v2.0.0-pre1</url>
+    </release>
+    <release version="1.6.2" date="2022-07-01">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.6.2</url>
+    </release>
+    <release version="1.6.1" date="2022-06-24">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.6.1</url>
+    </release>
+    <release version="1.6.0" date="2022-05-30">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.6.0</url>
+    </release>
+    <release version="1.5.5" date="2022-04-10">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.5.5</url>
+    </release>
+    <release version="1.5.4" date="2022-03-31">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.5.4</url>
+    </release>
+    <release version="1.4.1" date="2020-09-05">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.4.1</url>
+    </release>
+    <release version="1.4.0" date="2020-08-15">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.4.0</url>
+    </release>
+    <release version="1.2.0" date="2018-11-06">
+      <url>https://git.savannah.gnu.org/cgit/pspp.git/tree/NEWS?h=v1.2.0</url>
+    </release>
+  </releases>
+</component>

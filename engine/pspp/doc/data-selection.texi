@@ -1,0 +1,376 @@
+@c PSPP - a program for statistical analysis.
+@c Copyright (C) 2017, 2020 Free Software Foundation, Inc.
+@c Permission is granted to copy, distribute and/or modify this document
+@c under the terms of the GNU Free Documentation License, Version 1.3
+@c or any later version published by the Free Software Foundation;
+@c with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+@c A copy of the license is included in the section entitled "GNU
+@c Free Documentation License".
+@c
+@node Data Selection
+@chapter Selecting data for analysis
+
+This chapter documents @pspp{} commands that temporarily or permanently
+select data records from the active dataset for analysis.
+
+@menu
+* FILTER::                      Exclude cases based on a variable.
+* N OF CASES::                  Limit the size of the active dataset.
+* SAMPLE::                      Select a specified proportion of cases.
+* SELECT IF::                   Permanently delete selected cases.
+* SPLIT FILE::                  Do multiple analyses with one command.
+* TEMPORARY::                   Make transformations' effects temporary.
+* WEIGHT::                      Weight cases by a variable.
+@end menu
+
+@node FILTER
+@section FILTER
+@vindex FILTER
+
+@display
+FILTER BY @var{var_name}.
+FILTER OFF.
+@end display
+
+@cmd{FILTER} allows a boolean-valued variable to be used to select
+cases from the data stream for processing.
+
+To set up filtering, specify @subcmd{BY} and a variable name.  Keyword
+BY is optional but recommended.  Cases which have a zero or system- or
+user-missing value are excluded from analysis, but not deleted from the
+data stream.  Cases with other values are analyzed.
+To filter based on a different condition, use
+transformations such as @cmd{COMPUTE} or @cmd{RECODE} to compute a
+filter variable of the required form, then specify that variable on
+@cmd{FILTER}.
+
+@code{FILTER OFF} turns off case filtering.
+
+Filtering takes place immediately before cases pass to a procedure for
+analysis.  Only one filter variable may be active at a time.  Normally,
+case filtering continues until it is explicitly turned off with @code{FILTER
+OFF}.  However, if @cmd{FILTER} is placed after @cmd{TEMPORARY}, it filters only
+the next procedure or procedure-like command.
+
+@node N OF CASES
+@section N OF CASES
+@vindex N OF CASES
+
+@display
+N [OF CASES] @var{num_of_cases} [ESTIMATED].
+@end display
+
+@cmd{N OF CASES} limits the number of cases processed by any
+procedures that follow it in the command stream.  @code{N OF CASES
+100}, for example, tells @pspp{} to disregard all cases after the first
+100.
+
+When @cmd{N OF CASES} is specified after @cmd{TEMPORARY}, it affects
+only the next procedure (@pxref{TEMPORARY}).  Otherwise, cases beyond
+the limit specified are not processed by any later procedure.
+
+If the limit specified on @cmd{N OF CASES} is greater than the number
+of cases in the active dataset, it has no effect.
+
+When @cmd{N OF CASES} is used along with @cmd{SAMPLE} or @cmd{SELECT
+IF}, the case limit is applied to the cases obtained after sampling or
+case selection, regardless of how @cmd{N OF CASES} is placed relative
+to @cmd{SAMPLE} or @cmd{SELECT IF} in the command file.  Thus, the
+commands @code{N OF CASES 100} and @code{SAMPLE .5} both randomly
+sample approximately half of the active dataset's cases, then select the
+first 100 of those sampled, regardless of their order in the command
+file.
+
+@cmd{N OF CASES} with the @code{ESTIMATED} keyword gives an estimated
+number of cases before @cmd{DATA LIST} or another command to read in
+data.  @code{ESTIMATED} never limits the number of cases processed by
+procedures.  @pspp{} currently does not make use of case count estimates.
+
+@node SAMPLE
+@section SAMPLE
+@vindex SAMPLE
+
+@display
+SAMPLE @var{num1} [FROM @var{num2}].
+@end display
+
+@cmd{SAMPLE} randomly samples a proportion of the cases in the active
+file.  Unless it follows @cmd{TEMPORARY}, it operates as a
+transformation, permanently removing cases from the active dataset.
+
+The proportion to sample can be expressed as a single number between 0
+and 1.  If @var{k} is the number specified, and @var{N} is the number
+of currently-selected cases in the active dataset, then after
+@subcmd{SAMPLE @var{k}.}, approximately @var{k}*@var{N} cases are
+selected.
+
+The proportion to sample can also be specified in the style @subcmd{SAMPLE
+@var{m} FROM @var{N}}.  With this style, cases are selected as follows:
+
+@enumerate
+@item
+If @var{N} is equal to the number of currently-selected cases in the
+active dataset, exactly @var{m} cases are selected.
+
+@item
+If @var{N} is greater than the number of currently-selected cases in the
+active dataset, an equivalent proportion of cases are selected.
+
+@item
+If @var{N} is less than the number of currently-selected cases in the
+active, exactly @var{m} cases are selected @emph{from the first
+@var{N} cases in the active dataset.}
+@end enumerate
+
+@cmd{SAMPLE} and @cmd{SELECT IF} are performed in
+the order specified by the syntax file.
+
+@cmd{SAMPLE} is always performed before @code{N OF CASES}, regardless
+of ordering in the syntax file (@pxref{N OF CASES}).
+
+The same values for @cmd{SAMPLE} may result in different samples.  To
+obtain the same sample, use the @code{SET} command to set the random
+number seed to the same value before each @cmd{SAMPLE}.  Different
+samples may still result when the file is processed on systems with
+differing endianness or floating-point formats.  By default, the
+random number seed is based on the system time.
+
+@node SELECT IF
+@section SELECT IF
+@vindex SELECT IF
+
+@display
+SELECT IF @var{expression}.
+@end display
+
+@cmd{SELECT IF} selects cases for analysis based on the value of
+@var{expression}.  Cases not selected are permanently eliminated
+from the active dataset, unless @cmd{TEMPORARY} is in effect
+(@pxref{TEMPORARY}).
+
+Specify a boolean expression (@pxref{Expressions}).  If the value of the
+expression is true for a particular case, the case is analyzed.  If
+the expression has a false or missing value, then the case is
+deleted from the data stream.
+
+Place @cmd{SELECT IF} as early in the command file as
+possible.  Cases that are deleted early can be processed more
+efficiently in time and space.
+Once cases have been deleted from the active dataset using @cmd{SELECT IF} they
+cannot be re-instated.
+If you want to be able to re-instate cases, then use @cmd{FILTER} (@pxref{FILTER})
+instead.
+
+When @cmd{SELECT IF} is specified following @cmd{TEMPORARY}
+(@pxref{TEMPORARY}), the @cmd{LAG} function may not be used
+(@pxref{LAG}).
+
+@subsection Example Select-If
+
+A shop steward is interested in the salaries of younger personnel in a firm.
+The file @file{personnel.sav} provides the salaries of all the workers and their
+dates of birth.  The syntax in @ref{select-if:ex} shows how @cmd{SELECT IF} can
+be used to limit analysis only to those persons born after December 31, 1999.
+
+@float Example, select-if:ex
+@psppsyntax {select-if.sps}
+@caption {Using @cmd{SELECT IF} to select persons born on or after a certain date.}
+@end float
+
+From @ref{select-if:res} one can see that there are 56 persons listed in the dataset,
+and 17 of them were born after December 31, 1999.
+
+@float Result, select-if:res
+@psppoutput {select-if}
+@caption {Salary descriptives before and after the @cmd{SELECT IF} transformation.}
+@end float
+
+Note that the @file{personnel.sav} file from which the data were read is unaffected.
+The transformation affects only the active file.
+
+@node SPLIT FILE
+@section SPLIT FILE
+@vindex SPLIT FILE
+
+@display
+SPLIT FILE [@{LAYERED, SEPARATE@}] BY @var{var_list}.
+SPLIT FILE OFF.
+@end display
+
+@cmd{SPLIT FILE} allows multiple sets of data present in one data
+file to be analyzed separately using single statistical procedure
+commands.
+
+Specify a list of variable names to analyze multiple sets of
+data separately.  Groups of adjacent cases having the same values for these
+variables are analyzed by statistical procedure commands as one group.
+An independent analysis is carried out for each group of cases, and the
+variable values for the group are printed along with the analysis.
+
+When a list of variable names is specified, one of the keywords
+@subcmd{LAYERED} or @subcmd{SEPARATE} may also be specified.  With
+@subcmd{LAYERED}, which is the default, the separate analyses for each
+group are presented together in a single table.  With
+@subcmd{SEPARATE}, each analysis is presented in a separate table.
+Not all procedures honor the distinction.
+
+Groups are formed only by @emph{adjacent} cases.  To create a split
+using a variable where like values are not adjacent in the working file,
+first sort the data by that variable (@pxref{SORT CASES}).
+
+Specify @subcmd{OFF} to disable @cmd{SPLIT FILE} and resume analysis of the
+entire active dataset as a single group of data.
+
+When @cmd{SPLIT FILE} is specified after @cmd{TEMPORARY}, it affects only
+the next procedure (@pxref{TEMPORARY}).
+
+@subsection Example Split
+
+The file @file{horticulture.sav} contains data describing the @exvar{yield}
+of a number of horticultural specimens which have been subjected to
+various @exvar{treatment}s.   If we wanted to investigate linear statistics
+of the @exvar{yeild}, one way to do this is using the @cmd{DESCRIPTIVES} (@pxref{DESCRIPTIVES}).
+However, it is reasonable to expect the mean to be different depending
+on the @exvar{treatment}.   So we might want to perform three separate
+procedures --- one for each treatment.
+@footnote{There are other, possibly better, ways to achieve a similar result
+using the @cmd{MEANS} or @cmd{EXAMINE} commands.}
+@ref{split:ex} shows how this can be done automatically using
+the @cmd{SPLIT FILE} command.
+
+@float Example, split:ex
+@psppsyntax {split.sps}
+@caption {Running @cmd{DESCRIPTIVES} on each value of @exvar{treatment}}
+@end float
+
+In @ref{split:res} you can see that the table of descriptive statistics
+appears 3 times --- once for each value of @exvar{treatment}.
+In this example @samp{N}, the number of observations are identical in
+all splits.  This is because that experiment was deliberately designed
+that way.  However in general one can expect a different @samp{N} for each
+split.
+
+@float Example, split:res
+@psppoutput {split}
+@caption {The results of running @cmd{DESCRIPTIVES} with an active split}
+@end float
+
+Unless @cmd{TEMPORARY} was used, after a split has been defined for
+a dataset it remains active until explicitly disabled.
+In the graphical user interface, the active split variable (if any) is
+displayed in the status bar (@pxref{split-status-bar:scr}.
+If a dataset is saved to a system file (@pxref{SAVE}) whilst a split
+is active, the split stastus is stored in the file and will be
+automatically loaded when that file is loaded.
+
+@float Screenshot, split-status-bar:scr
+@psppimage {split-status-bar}
+@caption {The status bar indicating that the data set is split using the @exvar{treatment} variable}
+@end float
+
+
+@node TEMPORARY
+@section TEMPORARY
+@vindex TEMPORARY
+
+@display
+TEMPORARY.
+@end display
+
+@cmd{TEMPORARY} is used to make the effects of transformations
+following its execution temporary.  These transformations
+affect only the execution of the next procedure or procedure-like
+command.  Their effects are not be saved to the active dataset.
+
+The only specification on @cmd{TEMPORARY} is the command name.
+
+@cmd{TEMPORARY} may not appear within a @cmd{DO IF} or @cmd{LOOP}
+construct.  It may appear only once between procedures and
+procedure-like commands.
+
+Scratch variables cannot be used following @cmd{TEMPORARY}.
+
+@subsection Example Temporary
+
+In @ref{temporary:ex} there are two @cmd{COMPUTE} transformation.  One
+of them immediatly follows a @cmd{TEMPORARY} command, and therefore has
+effect only for the next procedure, which in this case is the first
+@cmd{DESCRIPTIVES} command.
+
+@float Example, temporary:ex
+@psppsyntax {temporary.sps}
+@caption {Running a @cmd{COMPUTE} transformation after @cmd{TEMPORARY}}
+@end float
+
+The data read by the first @cmd{DESCRIPTIVES} procedure are 4, 5, 8,
+10.5, 13, 15.  The data read by the second @cmd{DESCRIPTIVES} procedure are 1, 2,
+5, 7.5, 10, 12.   This is because the second @cmd{COMPUTE} transformation
+has no effect on the second @cmd{DESCRIPTIVES} procedure.   You can check these
+figures in @ref{temporary:res}.
+
+@float Result, temporary:res
+@psppoutput {temporary}
+@caption {The results of running two consecutive @cmd{DESCRIPTIVES} commands after
+         a temporary transformation}
+@end float
+
+
+@node WEIGHT
+@section WEIGHT
+@vindex WEIGHT
+
+@display
+WEIGHT BY @var{var_name}.
+WEIGHT OFF.
+@end display
+
+@cmd{WEIGHT} assigns cases varying weights,
+changing the frequency distribution of the active dataset.  Execution of
+@cmd{WEIGHT} is delayed until data have been read.
+
+If a variable name is specified, @cmd{WEIGHT} causes the values of that
+variable to be used as weighting factors for subsequent statistical
+procedures.  Use of keyword @subcmd{BY} is optional but recommended.  Weighting
+variables must be numeric.  Scratch variables may not be used for
+weighting (@pxref{Scratch Variables}).
+
+When @subcmd{OFF} is specified, subsequent statistical procedures weight all
+cases equally.
+
+A positive integer weighting factor @var{w} on a case yields the
+same statistical output as would replicating the case @var{w} times.
+A weighting factor of 0 is treated for statistical purposes as if the
+case did not exist in the input.  Weighting values need not be
+integers, but negative and system-missing values for the weighting
+variable are interpreted as weighting factors of 0.  User-missing
+values are not treated specially.
+
+When @cmd{WEIGHT} is specified after @cmd{TEMPORARY}, it affects only
+the next procedure (@pxref{TEMPORARY}).
+
+@cmd{WEIGHT} does not cause cases in the active dataset to be
+replicated in memory.
+
+
+@subsection Example Weights
+
+One could define a  dataset containing an inventory of stock items.
+It would be reasonable to use a string variable for a description of the
+item, and a numeric variable for the number in stock, like in @ref{weight:ex}.
+
+@float Example, weight:ex
+@psppsyntax {weight.sps}
+@caption {Setting the weight on the variable @exvar{quantity}}
+@end float
+
+One analysis which most surely would be of interest is
+the relative amounts or each item in stock.
+However without setting a weight variable, @cmd{FREQUENCIES}
+(@pxref{FREQUENCIES}) does not tell us what we want to know, since
+there is only one case for each stock item. @ref{weight:res} shows the
+difference between the weighted and unweighted frequency tables.
+
+@float Example, weight:res
+@psppoutput {weight}
+@caption {Weighted and unweighted frequency tables of @exvar{items}}
+@end float

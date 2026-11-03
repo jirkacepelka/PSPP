@@ -1,0 +1,3 @@
+GET FILE='nhtsa.sav'.
+CTABLES /TABLE=membersOver16.
+CTABLES /TABLE=membersOver16 /CATEGORIES VARIABLES=membersOver16 EMPTY=EXCLUDE.

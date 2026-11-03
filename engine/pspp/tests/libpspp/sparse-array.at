@@ -1,0 +1,46 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([sparse array library])
+
+m4_define([CHECK_SPARSE_ARRAY],
+  [AT_SETUP([sparse array -- $1])
+   AT_KEYWORDS([sparse-array $2])
+   AT_CHECK([sparse-array-test $1])
+   AT_CLEANUP])
+
+CHECK_SPARSE_ARRAY([random-insert-delete], [slow])
+
+AT_SETUP([sparse array -- insert and delete with strides])
+AT_KEYWORDS([sparse-array slow])
+AT_CHECK([sparse-array-test insert-delete-strides], [0], [dnl
+1
+2
+4
+16
+64
+4096
+262144
+16777216
+3
+5
+17
+67
+4099
+262147
+16777259
+])
+AT_CLEANUP

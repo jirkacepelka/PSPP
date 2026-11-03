@@ -1,0 +1,703 @@
+@c PSPP - a program for statistical analysis.
+@c Copyright (C) 2017, 2020 Free Software Foundation, Inc.
+@c Permission is granted to copy, distribute and/or modify this document
+@c under the terms of the GNU Free Documentation License, Version 1.3
+@c or any later version published by the Free Software Foundation;
+@c with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+@c A copy of the license is included in the section entitled "GNU
+@c Free Documentation License".
+@c
+@alias prompt = sansserif
+
+@include tut.texi
+
+@node Using PSPP
+@chapter Using @pspp{}
+
+@pspp{} is a tool for the statistical analysis of sampled data.
+You can use it to discover patterns in the data,
+to explain differences in one subset of data in terms of another subset
+and to find out
+whether certain beliefs about the data are justified.
+This chapter does not attempt to introduce the theory behind the
+statistical analysis,
+but it shows how such analysis can be performed using @pspp{}.
+
+For the purposes of this tutorial, it is assumed that you are using @pspp{} in its
+interactive mode from the command line.
+However, the example commands can also be typed into a file and executed in
+a post-hoc mode by typing @samp{pspp @var{file-name}} at a shell prompt,
+where @var{file-name} is the name of the file containing the commands.
+Alternatively, from the graphical interface, you can select
+@clicksequence{File @click{} New @click{} Syntax} to open a new syntax window
+and use the @clicksequence{Run} menu when a syntax fragment is ready to be
+executed.
+Whichever method you choose, the syntax is identical.
+
+When using the interactive method, @pspp{} tells you that it's waiting for your
+data with a string like @prompt{PSPP>} or @prompt{data>}.
+In the examples of this chapter, whenever you see text like this, it
+indicates the prompt displayed by @pspp{}, @emph{not} something that you
+should type.
+
+Throughout this chapter reference is made to a number of sample data files.
+So that you can try the examples for yourself,
+you should have received these files along with your copy of @pspp{}.@c
+@footnote{These files contain purely fictitious data.  They should not be used
+for research purposes.}
+@note{Normally these files are installed in the directory
+@file{@value{example-dir}}.
+If however your system administrator or operating system vendor has
+chosen to install them in a different location, you will have to adjust
+the examples accordingly.}
+
+
+@menu
+* Preparation of Data Files::
+* Data Screening and Transformation::
+* Hypothesis Testing::
+@end menu
+
+@node Preparation of Data Files
+@section Preparation of Data Files
+
+
+Before analysis can commence,  the data must be loaded into @pspp{} and
+arranged such that both @pspp{} and humans can understand what
+the data represents.
+There are two aspects of data:
+
+@itemize @bullet
+@item The variables --- these are the parameters of a quantity
+ which has been measured or estimated in some way.
+ For example height, weight and geographic location are all variables.
+@item The observations (also called `cases') of the variables ---
+ each observation represents an instance when the variables were measured
+ or observed.
+@end itemize
+
+@noindent
+For example, a data set which has the variables @exvar{height}, @exvar{weight}, and
+@exvar{name}, might have the observations:
+@example
+1881 89.2 Ahmed
+1192 107.01 Frank
+1230 67 Julie
+@end example
+@noindent
+The following sections explain how to define a dataset.
+
+@menu
+* Defining Variables::
+* Listing the data::
+* Reading data from a text file::
+* Reading data from a pre-prepared PSPP file::
+* Saving data to a PSPP file.::
+* Reading data from other sources::
+* Exiting PSPP::
+@end menu
+
+@node Defining Variables
+@subsection Defining Variables
+@cindex variables
+
+Variables come in two basic types, @i{viz}: @dfn{numeric} and @dfn{string}.
+Variables such as age, height and satisfaction are numeric,
+whereas name is a string variable.
+String variables are best reserved for commentary data to assist the
+human observer.
+However they can also be used for nominal or categorical data.
+
+The following example defines two variables @exvar{forename} and @exvar{height},
+and reads data into them by manual input:
+
+@example
+@prompt{PSPP>} data list list /forename (A12) height.
+@prompt{PSPP>} begin data.
+@prompt{data>} Ahmed 188
+@prompt{data>} Bertram 167
+@prompt{data>} Catherine 134.231
+@prompt{data>} David 109.1
+@prompt{data>} end data
+@prompt{PSPP>}
+@end example
+
+There are several things to note about this example.
+
+@itemize @bullet
+@item
+The words @samp{data list list} are an example of the @cmd{DATA LIST}
+command. @xref{DATA LIST}.
+It tells @pspp{} to prepare for reading data.
+The word @samp{list} intentionally appears twice.
+The first occurrence is part of the @cmd{DATA LIST} call,
+whilst the second
+tells @pspp{} that the data is to be read as free format data with
+one record per line.
+
+@item
+The @samp{/} character is important. It marks the start of the list of
+variables which you wish to define.
+
+@item
+The text @samp{forename} is the name of the first variable,
+and @samp{(A12)} says that the variable @exvar{forename} is a string
+variable and that its maximum length is 12 bytes.
+The second variable's name is specified by the text @samp{height}.
+Since no format is given, this variable has the default format.
+Normally the default format expects numeric data, which should be
+entered in the locale of the operating system.
+Thus, the example is correct for English locales and other
+locales which use a period (@samp{.}) as the decimal separator.
+However if you are using a system with a locale which uses the comma (@samp{,})
+as the decimal separator, then you should in the subsequent lines substitute
+@samp{.} with @samp{,}.
+Alternatively, you could explicitly tell @pspp{} that the @exvar{height}
+variable is to be read using a period as its decimal separator by appending the
+text @samp{DOT8.3} after the word @samp{height}.
+For more information on data formats, @pxref{Input and Output Formats}.
+
+
+@item
+Normally, @pspp{} displays the  prompt @prompt{PSPP>} whenever it's
+expecting a command.
+However, when it's expecting data, the prompt changes to @prompt{data>}
+so that you know to enter data and not a command.
+
+@item
+At the end of every command there is a terminating @samp{.} which tells
+@pspp{} that the end of a command has been encountered.
+You should not enter @samp{.} when data is expected (@i{ie.} when
+the @prompt{data>} prompt is current) since it is appropriate only for
+terminating commands.
+@end itemize
+
+@node Listing the data
+@subsection Listing the data
+@vindex LIST
+
+Once the data has been entered,
+you could type
+@example
+@prompt{PSPP>} list /format=numbered.
+@end example
+@noindent
+to list the data.
+The optional text @samp{/format=numbered} requests the case numbers to be
+shown along with the data.
+It should show the following output:
+@psppoutput {tutorial1}
+@noindent
+Note that the numeric variable @exvar{height} is displayed to 2 decimal
+places, because the format for that variable is @samp{F8.2}.
+For a complete description of the @cmd{LIST} command, @pxref{LIST}.
+
+@node Reading data from a text file
+@subsection Reading data from a text file
+@cindex reading data
+
+The previous example showed how to define a set of variables and to
+manually enter the data for those variables.
+Manual entering of data is tedious work, and often
+a file containing the data will be have been previously
+prepared.
+Let us assume that you have a file called @file{mydata.dat} containing the
+ascii encoded data:
+@example
+Ahmed          188.00
+Bertram        167.00
+Catherine      134.23
+David          109.10
+@              .
+@              .
+@              .
+Zachariah      113.02
+@end example
+@noindent
+You can can tell the @cmd{DATA LIST} command to read the data directly from
+this file instead of by manual entry, with a command like:
+@example
+@prompt{PSPP>} data list file='mydata.dat' list /forename (A12) height.
+@end example
+@noindent
+Notice however, that it is still necessary to specify the names of the
+variables and their formats, since this information is not contained
+in the file.
+It is also possible to specify the file's character encoding and other
+parameters.
+For full details refer to @pxref{DATA LIST}.
+
+@node Reading data from a pre-prepared PSPP file
+@subsection Reading data from a pre-prepared @pspp{} file
+@cindex system files
+@vindex GET
+
+When working with other @pspp{} users, or users of other software which
+uses the @pspp{} data format, you may be given the data in
+a pre-prepared @pspp{} file.
+Such files contain not only the data, but the variable definitions,
+along with their formats, labels and other meta-data.
+Conventionally, these files (sometimes called ``system'' files)
+have the suffix @file{.sav}, but that is
+not mandatory.
+The following syntax loads a file called @file{my-file.sav}.
+@example
+@prompt{PSPP>} get file='my-file.sav'.
+@end example
+@noindent
+You will encounter several instances of this in future examples.
+
+
+@node Saving data to a PSPP file.
+@subsection Saving data to a @pspp{} file.
+@cindex saving
+@vindex SAVE
+
+If you want to save your data, along with the variable definitions so
+that you or other @pspp{} users can use it later, you can do this with
+the @cmd{SAVE} command.
+
+The following syntax will save the existing data and variables to a
+file called @file{my-new-file.sav}.
+@example
+@prompt{PSPP>} save outfile='my-new-file.sav'.
+@end example
+@noindent
+If @file{my-new-file.sav} already exists, then it will be overwritten.
+Otherwise it will be created.
+
+
+@node Reading data from other sources
+@subsection Reading data from other sources
+@cindex comma separated values
+@cindex spreadsheets
+@cindex databases
+
+Sometimes it's useful to be able to read data from comma
+separated text, from spreadsheets, databases or other sources.
+In these instances you should
+use the @cmd{GET DATA} command (@pxref{GET DATA}).
+
+@node Exiting PSPP
+@subsection Exiting PSPP
+
+Use the @cmd{FINISH} command to exit PSPP:
+@example
+@prompt{PSPP>} finish.
+@end example
+
+@node Data Screening and Transformation
+@section Data Screening and Transformation
+
+@cindex screening
+@cindex transformation
+
+Once data has been entered, it is often desirable, or even necessary,
+to transform it in some way before performing analysis upon it.
+At the very least, it's good practice to check for errors.
+
+@menu
+* Identifying incorrect data::
+* Dealing with suspicious data::
+* Inverting negatively coded variables::
+* Testing data consistency::
+* Testing for normality ::
+@end menu
+
+@node Identifying incorrect data
+@subsection Identifying incorrect data
+@cindex erroneous data
+@cindex errors, in data
+
+Data from real sources is rarely error free.
+@pspp{} has a number of procedures which can be used to help
+identify data which might be incorrect.
+
+The @cmd{DESCRIPTIVES} command (@pxref{DESCRIPTIVES}) is used to generate
+simple linear statistics for a dataset.  It is also useful for
+identifying potential problems in the data.
+The example file @file{physiology.sav} contains a number of physiological
+measurements of a sample of healthy adults selected at random.
+However, the data entry clerk made a number of mistakes when entering
+the data.
+The following example illustrates the use of @cmd{DESCRIPTIVES} to screen this
+data and identify the erroneous values:
+
+@example
+@prompt{PSPP>} get file='@value{example-dir}/physiology.sav'.
+@prompt{PSPP>} descriptives sex, weight, height.
+@end example
+
+@noindent For this example, PSPP produces the following output:
+@psppoutput {tutorial2a}
+
+The most interesting column in the output is the minimum value.
+The @exvar{weight} variable has a minimum value of less than zero,
+which is clearly erroneous.
+Similarly, the @exvar{height} variable's minimum value seems to be very low.
+In fact, it is more than 5 standard deviations from the mean, and is a
+seemingly bizarre height for an adult person.
+
+We can look deeper into these discrepancies by issuing an additional
+@cmd{EXAMINE} command:
+
+@example
+@prompt{PSPP>} examine height, weight /statistics=extreme(3).
+@end example
+
+@noindent This command produces the following additional output (in part):
+@psppoutput {tutorial2b}
+
+@noindent
+From this new output, you can see that the lowest value of @exvar{height} is
+179 (which we suspect to be erroneous), but the second lowest is 1598
+which
+we know from @cmd{DESCRIPTIVES}
+is within 1 standard deviation from the mean.
+Similarly, the lowest value of @exvar{weight} is
+negative, but its second lowest value is plausible.
+This suggests that the two extreme values are outliers and probably
+represent data entry errors.
+
+The output also identifies the case numbers for each extreme value,
+so we can see that
+cases 30 and 38 are the ones with the erroneous values.
+
+@node Dealing with suspicious data
+@subsection Dealing with suspicious data
+
+@cindex SYSMIS
+@cindex recoding data
+If possible, suspect data should be checked and re-measured.
+However, this may not always be feasible, in which case the researcher may
+decide to disregard these values.
+@pspp{} has a feature whereby data can assume the special value `SYSMIS', and
+will be disregarded in future analysis. @xref{Missing Observations}.
+You can set the two suspect values to the `SYSMIS' value using the @cmd{RECODE}
+command.
+@example
+@pspp{}> recode height (179 = SYSMIS).
+@pspp{}> recode weight (LOWEST THRU 0 = SYSMIS).
+@end example
+@noindent
+The first command says that for any observation which has a
+@exvar{height} value of 179, that value should be changed to the SYSMIS
+value.
+The second command says that any @exvar{weight} values of zero or less
+should be changed to SYSMIS.
+From now on, they will be ignored in analysis.
+For detailed information about the @cmd{RECODE} command @pxref{RECODE}.
+
+If you now re-run the @cmd{DESCRIPTIVES} or @cmd{EXAMINE} commands from
+the previous section,
+you will see a data summary with more plausible parameters.
+You will also notice that the data summaries indicate the two missing values.
+
+@node Inverting negatively coded variables
+@subsection Inverting negatively coded variables
+
+@cindex Likert scale
+@cindex Inverting data
+Data entry errors are not the only reason for wanting to recode data.
+The sample file @file{hotel.sav} comprises data gathered from a
+customer satisfaction survey of clients at a particular hotel.
+The following commands load the file and display its
+variables and associated data:
+
+@example
+@prompt{PSPP>} get file='@value{example-dir}/hotel.sav'.
+@prompt{PSPP>} display dictionary.
+@end example
+
+@noindent It yields the following output:
+
+@psppoutput {tutorial3}
+
+The output shows that all of the variables @exvar{v1} through @exvar{v5} are measured on a 5 point Likert scale,
+with 1 meaning ``Strongly disagree'' and 5 meaning ``Strongly agree''.
+However, some of the questions are positively worded (@exvar{v1}, @exvar{v2}, @exvar{v4}) and others are negatively worded (@exvar{v3}, @exvar{v5}).
+To perform meaningful analysis, we need to recode the variables so
+that they all measure in the same direction.
+We could use the @cmd{RECODE} command, with syntax such as:
+@example
+recode v3 (1 = 5) (2 = 4) (4 = 2) (5 = 1).
+@end example
+@noindent
+However an easier and more elegant way uses the @cmd{COMPUTE}
+command (@pxref{COMPUTE}).
+Since the variables are Likert variables in the range (1 @dots{} 5),
+subtracting their value  from 6 has the effect of inverting them:
+@example
+compute @var{var} = 6 - @var{var}.
+@end example
+@noindent
+The following section uses this technique to recode the variables
+@exvar{v3} and @exvar{v5}.
+After applying  @cmd{COMPUTE} for both variables,
+all subsequent commands will use the inverted values.
+
+
+@node Testing data consistency
+@subsection Testing data consistency
+
+@cindex reliability
+@cindex consistency
+
+A sensible check to perform on survey data is the calculation of
+reliability.
+This gives the statistician some confidence that the questionnaires have been
+completed thoughtfully.
+If you examine the labels of variables @exvar{v1},  @exvar{v3} and @exvar{v4},
+you will notice that they ask very similar questions.
+One would therefore expect the values of these variables (after recoding)
+to closely follow one another, and we can test that with the @cmd{RELIABILITY}
+command (@pxref{RELIABILITY}).
+The following example shows a @pspp{} session where the user recodes
+negatively scaled variables and then requests reliability statistics for
+@exvar{v1}, @exvar{v3}, and @exvar{v4}.
+
+@example
+@prompt{PSPP>} get file='@value{example-dir}/hotel.sav'.
+@prompt{PSPP>} compute v3 = 6 - v3.
+@prompt{PSPP>} compute v5 = 6 - v5.
+@prompt{PSPP>} reliability v1, v3, v4.
+@end example
+
+@noindent This yields the following output:
+@psppoutput {tutorial4}
+
+As a rule of thumb, many statisticians consider a value of Cronbach's Alpha of
+0.7 or higher to indicate reliable data.
+
+Here, the value is 0.81, which suggests a high degree of reliability
+among variables @exvar{v1}, @exvar{v3} and @exvar{v4}, so the data and
+the recoding that we performed are vindicated.
+
+
+@node Testing for normality
+@subsection Testing for normality
+@cindex normality, testing
+
+Many statistical tests rely upon certain properties of the data.
+One common property, upon which many linear tests depend, is that of
+normality --- the data must have been drawn from a normal distribution.
+It is necessary then to ensure normality before deciding upon the
+test procedure to use.  One way to do this uses the @cmd{EXAMINE} command.
+
+In the following example, a researcher was examining the failure rates
+of equipment produced by an engineering company.
+The file @file{repairs.sav} contains the mean time between
+failures (@exvar{mtbf}) of some items of equipment subject to the study.
+Before performing linear analysis on the data,
+the researcher wanted to ascertain that the data is normally distributed.
+
+@example
+@prompt{PSPP>} get file='@value{example-dir}/repairs.sav'.
+@prompt{PSPP>} examine mtbf
+                /statistics=descriptives.
+@end example
+
+@noindent This produces the following output:
+@psppoutput {tutorial5a}
+
+A normal distribution has a skewness and kurtosis of zero.
+The skewness of @exvar{mtbf} in the output above makes it clear
+that the mtbf figures have a lot of positive skew and are therefore
+not drawn from a normally distributed variable.
+Positive skew can often be compensated for by applying a logarithmic
+transformation, as in the following continuation of the example:
+
+@example
+@prompt{PSPP>} compute mtbf_ln = ln (mtbf).
+@prompt{PSPP>} examine mtbf_ln
+                /statistics=descriptives.
+@end example
+
+@noindent which produces the following additional output:
+@psppoutput {tutorial5b}
+
+The @cmd{COMPUTE} command in the first line above performs the
+logarithmic transformation:
+@example
+compute mtbf_ln = ln (mtbf).
+@end example
+@noindent
+Rather than redefining the existing variable, this use of @cmd{COMPUTE}
+defines a new variable @exvar{mtbf_ln} which is
+the natural logarithm of @exvar{mtbf}.
+The final command in this example calls @cmd{EXAMINE} on this new variable.
+The results show that both the skewness and
+kurtosis for @exvar{mtbf_ln} are very close to zero.
+This provides some confidence that the @exvar{mtbf_ln} variable is
+normally distributed and thus safe for linear analysis.
+In the event that no suitable transformation can be found,
+then it would be worth considering
+an appropriate non-parametric test instead of a linear one.
+@xref{NPAR TESTS}, for information about non-parametric tests.
+
+@node Hypothesis Testing
+@section Hypothesis Testing
+
+@cindex Hypothesis testing
+@cindex p-value
+@cindex null hypothesis
+
+One of the most fundamental purposes of statistical analysis
+is hypothesis testing.
+Researchers commonly need to test hypotheses about a set of data.
+For example, she might want to test whether one set of data comes from
+the same distribution as another,
+or
+whether the mean of a dataset significantly differs from a particular
+value.
+This section presents just some of the possible tests that @pspp{} offers.
+
+The researcher starts by making a @dfn{null hypothesis}.
+Often this is a hypothesis which he suspects to be false.
+For example, if he suspects that @var{A} is greater than @var{B} he will
+state the null hypothesis as @math{ @var{A} = @var{B}}.@c
+@footnote{This example assumes that it is already proven that @var{B} is
+not greater than @var{A}.}
+
+The @dfn{p-value} is a recurring concept in hypothesis testing.
+It is the highest acceptable probability that the evidence implying a
+null hypothesis is false, could have been obtained when the null
+hypothesis is in fact true.
+Note that this is not the same as ``the probability of making an
+error'' nor is it the same as ``the probability of rejecting a
+hypothesis when it is true''.
+
+
+
+@menu
+* Testing for differences of means::
+* Linear Regression::
+@end menu
+
+@node Testing for differences of means
+@subsection Testing for differences of means
+
+@cindex T-test
+@vindex T-TEST
+
+A common statistical test involves hypotheses about means.
+The @cmd{T-TEST} command is used to find out whether or not two separate
+subsets have the same mean.
+
+A researcher suspected that the heights and core body
+temperature of persons might be different depending upon their sex.
+To investigate this, he posed two null hypotheses based on the data
+from @file{physiology.sav} previously encountered:
+@itemize @bullet
+@item The mean heights of males and females in the population are equal.
+@item The mean body temperature of males and
+      females in the population are equal.
+@end itemize
+@noindent
+For the purposes of the investigation the researcher
+decided to use a  p-value of 0.05.
+
+In addition to the T-test, the @cmd{T-TEST} command also performs the
+Levene test for equal variances.
+If the variances are equal, then a more powerful form of the T-test can be used.
+However if it is unsafe to assume equal variances,
+then an alternative calculation is necessary.
+@pspp{} performs both calculations.
+
+For the @exvar{height} variable, the output shows the significance of the
+Levene test to be 0.33 which means there is a
+33% probability that the
+Levene test produces this outcome when the variances are equal.
+Had the significance been less than 0.05, then it would have been unsafe to assume that
+the variances were equal.
+However, because the value is higher than 0.05 the homogeneity of variances assumption
+is safe and the ``Equal Variances'' row (the more powerful test) can be used.
+Examining this row, the two tailed significance for the @exvar{height} t-test
+is less than 0.05, so it is safe to reject the null hypothesis and conclude
+that the mean heights of males and females are unequal.
+
+For the @exvar{temperature} variable, the significance of the Levene test
+is 0.58 so again, it is safe to use the row for equal variances.
+The equal variances row indicates that the two tailed significance for
+@exvar{temperature} is 0.20.  Since this is greater than 0.05 we must reject
+the null hypothesis and conclude that there is insufficient evidence to
+suggest that the body temperature of male and female persons are different.
+
+The syntax for this analysis is:
+@example
+@prompt{PSPP>} get file='@value{example-dir}/physiology.sav'.
+@prompt{PSPP>} recode height (179 = SYSMIS).
+@prompt{PSPP>} t-test group=sex(0,1) /variables = height temperature.
+@end example
+
+PSPP produces the following output for this syntax:
+@psppoutput {tutorial6}
+
+The @cmd{T-TEST} command tests for differences of means.
+Here, the @exvar{height} variable's two tailed significance is less than
+0.05, so the null hypothesis can be rejected.
+Thus, the evidence suggests there is a difference between the heights of
+male and female persons.
+However the significance of the test for the @exvar{temperature}
+variable is greater than 0.05 so the null hypothesis cannot be
+rejected, and there is insufficient evidence to suggest a difference
+in body temperature.
+
+@node Linear Regression
+@subsection Linear Regression
+@cindex linear regression
+@vindex REGRESSION
+
+Linear regression is a technique used to investigate if and how a variable
+is linearly related to others.
+If a variable is found to be linearly related, then this can be used to
+predict future values of that variable.
+
+In the following example, the service department of the company wanted to
+be able to predict the time to repair equipment, in order to improve
+the accuracy of their quotations.
+It was suggested that the time to repair might be related to the time
+between failures and the duty cycle of the equipment.
+The p-value of 0.1 was chosen for this investigation.
+In order to investigate this hypothesis, the @cmd{REGRESSION} command
+was used.
+This command not only tests if the variables are related, but also
+identifies the potential linear relationship. @xref{REGRESSION}.
+
+A first attempt includes @exvar{duty_cycle}:
+
+@example
+@prompt{PSPP>} get file='@value{example-dir}/repairs.sav'.
+@prompt{PSPP>} regression /variables = mtbf duty_cycle /dependent = mttr.
+@end example
+
+@noindent This attempt yields the following output (in part):
+@psppoutput {tutorial7a}
+
+The coefficients in the above table suggest that the formula
+@math{@var{mttr} = 9.81 + 3.1 \times @var{mtbf} + 1.09 \times @var{duty_cycle}}
+can be used to predict the time to repair.
+However, the significance value for the @var{duty_cycle} coefficient
+is very high, which would make this an unsafe predictor.
+For this reason, the test was repeated, but omitting the
+@exvar{duty_cycle} variable:
+
+@example
+@prompt{PSPP>} regression /variables = mtbf /dependent = mttr.
+@end example
+
+@noindent
+This second try produces the following output (in part):
+@psppoutput {tutorial7b}
+
+This time, the significance of all coefficients is no higher than 0.06,
+suggesting that at the 0.06 level, the formula
+@math{@var{mttr} = 10.5 + 3.11 \times @var{mtbf}} is a reliable
+predictor of the time to repair.
+
+
+@c  LocalWords:  PSPP dir itemize noindent var cindex dfn cartouche samp xref
+@c  LocalWords:  pxref ie sav Std Dev kilograms SYSMIS sansserif pre pspp emph
+@c  LocalWords:  Likert Cronbach's Cronbach mtbf npplot ln myfile cmd NPAR Sig
+@c  LocalWords:  vindex Levene Levene's df Diff clicksequence mydata dat ascii
+@c  LocalWords:  mttr outfile

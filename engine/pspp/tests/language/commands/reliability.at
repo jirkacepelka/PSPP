@@ -1,0 +1,739 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([RELIABILITY])
+
+AT_SETUP([RELIABILITY])
+AT_DATA([reliability.sps], [dnl
+data list notable list  /var1 *
+	var2  *
+	var6  *
+	var7  *
+	var8  *
+	var9  *
+	var11 *
+	var12 *
+	var15 *
+	var16 *
+	var17 *
+	var19 *
+	.
+
+begin data.
+6 7 7 5 7 7 7 7 7 7 6 6
+6 7 7 6 7 6 7 5 6 5 7 7
+6 6 7 6 5 3 6 4 5 6 4 5
+4 6 5 6 6 5 4 3 5 6 5 6
+5 6 5 5 6 5 4 4 6 6 5 5
+6 6 7 6 6 5 6 5 6 6 5 6
+5 6 6 5 6 5 5 4 6 5 5 5
+5 7 7 7 7 7 6 5 7 7 7 7
+6 6 6 5 5 7 6 5 6 6 5 6
+. . . . . . . . . . . .
+6 6 5 5 5 6 6 4 6 5 5 5
+7 7 7 6 7 6 7 6 6 6 7 6
+4 7 6 6 6 5 5 4 4 5 5 6
+5 6 3 5 4 1 4 6 2 3 3 2
+3 6 6 5 6 2 4 2 2 4 4 5
+6 6 7 5 6 5 7 6 5 6 6 5
+6 5 6 6 5 6 6 6 6 4 5 5
+5 7 7 . 6 6 6 5 6 6 6 6
+5 7 5 5 4 6 7 6 5 4 6 5
+7 7 7 6 7 7 7 6 7 7 7 6
+3 6 5 6 5 7 7 3 4 7 5 7
+6 7 7 6 5 6 5 5 6 6 6 6
+5 5 6 5 5 5 5 4 5 5 5 6
+6 6 7 4 5 6 6 6 6 5 5 6
+6 5 6 6 4 4 5 4 5 6 4 5
+5 6 7 6 6 7 7 5 6 6 6 5
+5 6 5 7 4 6 6 5 7 7 5 6
+. . . . . . . . . . . .
+7 6 6 5 6 6 7 6 6 5 5 6
+6 6 7 7 7 7 7 6 7 6 6 7
+7 5 5 . 5 . 7 3 5 4 5 3
+7 6 7 5 4 5 7 5 7 5 5 6
+6 5 6 6 6 5 5 5 5 6 5 6
+7 7 7 7 7 7 7 7 5 6 7 7
+. . . . . . . . . . . .
+5 5 6 7 5 6 6 4 6 6 6 5
+6 6 5 7 5 6 7 5 6 5 4 6
+7 6 7 6 7 5 6 7 7 6 6 6
+5 6 5 6 5 6 7 2 5 7 3 7
+6 6 5 6 5 6 6 6 6 6 5 6
+7 6 7 6 6 6 6 6 6 7 6 7
+7 7 6 5 6 6 7 7 7 4 6 5
+3 7 7 6 6 7 7 7 6 6 6 4
+3 5 3 4 3 3 3 3 3 3 3 5
+5 7 7 7 5 7 6 2 6 7 6 7
+7 7 7 7 7 7 7 6 7 7 7 6
+6 5 7 4 4 4 5 6 5 5 4 5
+4 7 7 4 4 3 6 3 5 3 4 5
+7 7 7 7 7 7 7 7 7 7 7 5
+3 6 5 5 4 5 4 4 5 5 3 5
+6 7 6 6 6 7 7 6 6 6 7 6
+2 5 4 6 3 2 2 2 2 7 2 2
+4 6 6 5 5 5 6 5 5 6 6 5
+5 7 4 5 6 6 6 5 6 6 5 6
+5 7 7 5 6 5 6 5 5 4 5 4
+4 5 6 5 6 4 5 5 5 4 5 5
+7 6 6 5 5 6 7 5 6 5 7 6
+5 6 6 5 4 5 5 3 4 5 5 5
+5 7 6 4 4 5 6 5 6 4 4 6
+6 6 6 6 5 7 7 6 5 5 6 6
+6 6 7 6 7 6 6 5 6 7 6 5
+7 6 7 6 7 6 7 7 5 5 6 6
+5 6 6 5 5 5 6 5 6 7 7 5
+5 6 6 5 6 5 6 6 6 6 6 6
+5 5 5 5 6 4 5 3 4 7 6 5
+5 7 7 6 6 6 6 5 6 7 6 7
+6 6 7 7 7 5 6 5 5 5 5 4
+2 7 5 4 6 5 5 2 5 6 4 6
+6 7 7 5 6 6 7 6 6 7 5 7
+5 6 7 6 6 3 5 7 6 6 5 6
+6 6 6 3 5 5 5 6 6 6 4 5
+4 7 7 4 7 4 5 5 5 7 4 4
+. . . . . . . . . . . .
+6 6 7 6 7 6 7 7 6 7 7 6
+. . . . . . . . . . . .
+5 6 5 7 6 5 6 6 5 6 4 6
+5 5 5 5 4 5 5 5 7 5 5 5
+6 6 6 4 5 4 6 6 6 4 5 4
+6 5 7 4 6 4 6 5 6 6 6 3
+5 7 6 5 5 5 5 5 6 7 6 6
+5 5 7 7 5 5 6 6 5 5 5 7
+5 6 7 6 7 5 6 4 6 7 6 7
+4 5 5 5 6 5 6 5 6 6 5 6
+6 5 5 5 6 3 4 5 5 4 5 3
+6 6 6 5 5 5 4 3 4 5 5 5
+6 7 7 6 2 3 6 6 6 5 7 7
+6 7 5 5 6 6 6 5 6 6 6 6
+6 7 7 6 7 7 7 5 5 6 6 6
+6 6 6 6 7 6 6 7 6 6 6 6
+5 6 6 6 3 5 6 6 5 5 4 6
+4 6 5 6 6 5 6 5 6 6 5 5
+6 4 6 5 4 6 7 4 5 6 5 5
+6 7 6 4 6 5 7 6 7 7 6 5
+6 7 7 6 7 6 7 7 7 6 6 6
+6 6 6 4 5 6 7 7 5 6 4 4
+3 3 5 3 3 1 5 6 3 2 3 3
+7 7 5 6 6 7 7 6 7 7 7 7
+5 6 6 6 7 5 4 5 4 7 6 7
+3 6 5 4 3 3 3 5 5 6 3 4
+5 7 6 4 6 5 5 6 6 7 5 6
+5 7 6 6 6 6 6 5 6 7 7 6
+7 7 5 6 7 7 7 7 6 5 7 7
+6 7 6 6 5 6 7 7 6 5 6 6
+6 7 7 7 7 6 6 7 6 7 7 7
+4 6 4 7 3 6 5 5 4 3 5 6
+5 5 7 5 4 6 7 5 4 6 6 5
+5 5 6 4 6 5 7 6 5 5 5 6
+. . . . . . . . . . . .
+. . . . . . . . . . . .
+5 7 7 5 6 6 7 7 6 6 6 7
+6 7 7 1 2 1 7 7 5 5 5 2
+. . . . . . . . . . . .
+3 7 4 6 4 7 4 6 4 7 4 7
+5 7 3 5 5 6 7 5 4 7 7 4
+4 7 7 5 4 6 7 7 6 5 4 4
+6 6 2 2 6 4 6 5 5 1 5 2
+5 5 6 4 5 4 6 5 5 6 5 5
+. . . . . . . . . . . .
+5 7 6 6 6 6 6 6 5 6 6 6
+6 6 6 5 6 6 6 6 7 5 6 7
+3 6 3 3 5 3 3 5 3 5 7 4
+4 4 6 3 3 3 4 3 4 2 3 6
+5 7 7 6 5 4 7 5 7 7 3 7
+4 5 4 4 4 4 3 3 3 4 3 3
+6 7 7 5 6 6 7 5 4 5 5 5
+3 5 3 3 1 3 4 3 4 7 6 7
+4 5 4 4 4 3 4 5 6 6 4 5
+5 6 3 4 5 3 5 3 4 5 6 4
+5 5 5 6 6 6 6 4 5 6 6 5
+6 7 7 2 2 6 7 7 7 7 5 7
+5 7 7 4 6 5 7 5 5 5 6 6
+6 6 7 7 5 5 5 7 6 7 7 7
+6 5 7 3 6 5 6 5 5 6 5 4
+5 7 6 5 6 6 6 5 6 5 5 6
+4 5 5 5 6 3 5 3 3 6 5 5
+. . . . . . . . . . . .
+5 6 6 4 4 4 5 3 5 5 2 6
+5 6 7 5 5 6 6 5 5 6 6 6
+6 7 7 6 4 7 7 6 7 5 6 7
+6 6 5 4 5 2 7 6 6 5 6 6
+2 2 2 2 2 2 3 2 3 1 1 2
+end data.
+
+RELIABILITY
+  /VARIABLES=var2 var8 var15 var17 var6
+  /SCALE('Everything') var6 var8 var15 var17
+  /MODEL=ALPHA.
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  /SCALE('Nothing') ALL
+  /MODEL=SPLIT(2)
+ .
+
+RELIABILITY
+  /VARIABLES=var2 var6 var8 var15 var17 var19
+  /SCALE('Totals') var6 var8 var15 var17
+  /SUMMARY = total
+  /STATISTICS = DESCRIPTIVES COVARIANCES
+ .
+
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  .
+])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt reliability.sps], [0], [dnl
+reliability.sps:174.4-174.40: warning: RELIABILITY: The STATISTICS subcommand is not yet implemented.  No statistics will be produced.
+  174 |   /STATISTICS = DESCRIPTIVES COVARIANCES
+      |    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Scale: Everything
+
+Table: Case Processing Summary
+Cases,N,Percent
+Valid,131,92.9%
+Excluded,10,7.1%
+Total,141,100.0%
+
+Table: Reliability Statistics
+Cronbach's Alpha,N of Items
+.75,4
+
+Scale: Nothing
+
+Table: Case Processing Summary
+Cases,N,Percent
+Valid,131,92.9%
+Excluded,10,7.1%
+Total,141,100.0%
+
+Table: Reliability Statistics
+Cronbach's Alpha,Part 1,Value,.55
+,,N of Items,2
+,Part 2,Value,.63
+,,N of Items,2
+,Total N of Items,,4
+Correlation Between Forms,,,.61
+Spearman-Brown Coefficient,Equal Length,,.75
+,Unequal Length,,.75
+Guttman Split-Half Coefficient,,,.75
+
+"reliability.sps:174.4-174.40: warning: RELIABILITY: The STATISTICS subcommand is not yet implemented.  No statistics will be produced.
+  174 |   /STATISTICS = DESCRIPTIVES COVARIANCES
+      |    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+Scale: Totals
+
+Table: Case Processing Summary
+Cases,N,Percent
+Valid,131,92.9%
+Excluded,10,7.1%
+Total,141,100.0%
+
+Table: Reliability Statistics
+Cronbach's Alpha,N of Items
+.75,4
+
+Table: Item-Total Statistics
+,Scale Mean if Item Deleted,Scale Variance if Item Deleted,Corrected Item-Total Correlation,Cronbach's Alpha if Item Deleted
+var6,15.97,8.43,.51,.71
+var8,16.56,7.86,.53,.70
+var15,16.47,8.45,.56,.68
+var17,16.60,8.00,.57,.67
+
+Scale: ANY
+
+Table: Case Processing Summary
+Cases,N,Percent
+Valid,131,92.9%
+Excluded,10,7.1%
+Total,141,100.0%
+
+Table: Reliability Statistics
+Cronbach's Alpha,N of Items
+.75,4
+])
+AT_CLEANUP
+
+
+AT_SETUP([RELIABILITY with one case])
+AT_DATA([reliability.sps], [dnl
+data list notable list  /var1 *
+	var2  *
+	var6  *
+	var7  *
+	var8  *
+	var9  *
+	var11 *
+	var12 *
+	var15 *
+	var16 *
+	var17 *
+	var19 *
+	.
+
+begin data.
+6 7 7 5 7 7 7 7 7 7 6 6
+end data.
+
+RELIABILITY
+  /VARIABLES=var2 var8 var15 var17 var6
+  /SCALE('Everything') var6 var8 var15 var17
+  /MODEL=ALPHA.
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  /SCALE('Nothing') ALL
+  /MODEL=SPLIT(2)
+ .
+
+RELIABILITY
+  /VARIABLES=var2 var6 var8 var15 var17 var19
+  /SCALE('Totals') var6 var8 var15 var17
+  /SUMMARY = total
+  /STATISTICS = DESCRIPTIVES COVARIANCES
+ .
+
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  .
+])
+AT_CHECK([pspp reliability.sps], [0], [dnl
+Scale: Everything
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |1| 100.0%|
+|Excluded|0|    .0%|
+|Total   |1| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+
+Scale: Nothing
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |1| 100.0%|
+|Excluded|0|    .0%|
+|Total   |1| 100.0%|
++--------+-+-------+
+
+             Reliability Statistics
++--------------------------------------------+-+
+|Cronbach's Alpha           Part 1 Value     |.|
+|                                  N of Items|2|
+|                          ------------------+-+
+|                           Part 2 Value     |.|
+|                                  N of Items|2|
+|                          ------------------+-+
+|                           Total N of Items |4|
++--------------------------------------------+-+
+|Correlation Between Forms                   |.|
++--------------------------------------------+-+
+|Spearman-Brown Coefficient Equal Length     |.|
+|                          ------------------+-+
+|                           Unequal Length   |.|
++--------------------------------------------+-+
+|Guttman Split-Half Coefficient              |.|
++--------------------------------------------+-+
+
+reliability.sps:34.4-34.40: warning: RELIABILITY: The STATISTICS subcommand is
+not yet implemented.  No statistics will be produced.
+   34 |   /STATISTICS = DESCRIPTIVES COVARIANCES
+      |    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Scale: Totals
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |1| 100.0%|
+|Excluded|0|    .0%|
+|Total   |1| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+
+                             Item-Total Statistics
++-----+--------------+-----------------+-------------------+------------------+
+|     | Scale Mean if|Scale Variance if|  Corrected Item-  | Cronbach's Alpha |
+|     | Item Deleted |   Item Deleted  | Total Correlation |  if Item Deleted |
++-----+--------------+-----------------+-------------------+------------------+
+|var6 |         20.00|                .|                  .|                 .|
+|var8 |         20.00|                .|                  .|                 .|
+|var15|         20.00|                .|                  .|                 .|
+|var17|         21.00|                .|                  .|                 .|
++-----+--------------+-----------------+-------------------+------------------+
+
+Scale: ANY
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |1| 100.0%|
+|Excluded|0|    .0%|
+|Total   |1| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+])
+AT_CLEANUP
+
+AT_SETUP([RELIABILITY with two cases])
+AT_DATA([reliability.sps], [dnl
+data list notable list  /var1 *
+	var2  *
+	var6  *
+	var7  *
+	var8  *
+	var9  *
+	var11 *
+	var12 *
+	var15 *
+	var16 *
+	var17 *
+	var19 *
+	.
+
+begin data.
+6 7 7 5 7 7 7 7 7 7 6 6
+6 7 7 6 7 6 7 5 6 5 7 7
+end data.
+
+RELIABILITY
+  /VARIABLES=var2 var8 var15 var17 var6
+  /SCALE('Everything') var6 var8 var15 var17
+  /MODEL=ALPHA.
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  /SCALE('Nothing') ALL
+  /MODEL=SPLIT(2)
+ .
+
+RELIABILITY
+  /VARIABLES=var2 var6 var8 var15 var17 var19
+  /SCALE('Totals') var6 var8 var15 var17
+  /SUMMARY = total
+  /STATISTICS = DESCRIPTIVES COVARIANCES
+ .
+
+
+RELIABILITY
+  /VARIABLES=var6 var8 var15 var17
+  .
+])
+AT_CHECK([pspp reliability.sps], [0], [dnl
+Scale: Everything
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |2| 100.0%|
+|Excluded|0|    .0%|
+|Total   |2| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+
+Scale: Nothing
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |2| 100.0%|
+|Excluded|0|    .0%|
+|Total   |2| 100.0%|
++--------+-+-------+
+
+             Reliability Statistics
++--------------------------------------------+-+
+|Cronbach's Alpha           Part 1 Value     |.|
+|                                  N of Items|2|
+|                          ------------------+-+
+|                           Part 2 Value     |.|
+|                                  N of Items|2|
+|                          ------------------+-+
+|                           Total N of Items |4|
++--------------------------------------------+-+
+|Correlation Between Forms                   |.|
++--------------------------------------------+-+
+|Spearman-Brown Coefficient Equal Length     |.|
+|                          ------------------+-+
+|                           Unequal Length   |.|
++--------------------------------------------+-+
+|Guttman Split-Half Coefficient              |.|
++--------------------------------------------+-+
+
+reliability.sps:35.4-35.40: warning: RELIABILITY: The STATISTICS subcommand is
+not yet implemented.  No statistics will be produced.
+   35 |   /STATISTICS = DESCRIPTIVES COVARIANCES
+      |    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Scale: Totals
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |2| 100.0%|
+|Excluded|0|    .0%|
+|Total   |2| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+
+                             Item-Total Statistics
++-----+--------------+-----------------+-------------------+------------------+
+|     | Scale Mean if|Scale Variance if|  Corrected Item-  | Cronbach's Alpha |
+|     | Item Deleted |   Item Deleted  | Total Correlation |  if Item Deleted |
++-----+--------------+-----------------+-------------------+------------------+
+|var6 |         20.00|              .00|                  .|                 .|
+|var8 |         20.00|              .00|                  .|                 .|
+|var15|         20.50|              .50|              -1.00|               .00|
+|var17|         20.50|              .50|              -1.00|               .00|
++-----+--------------+-----------------+-------------------+------------------+
+
+Scale: ANY
+
+Case Processing Summary
++--------+-+-------+
+|Cases   |N|Percent|
++--------+-+-------+
+|Valid   |2| 100.0%|
+|Excluded|0|    .0%|
+|Total   |2| 100.0%|
++--------+-+-------+
+
+    Reliability Statistics
++----------------+----------+
+|Cronbach's Alpha|N of Items|
++----------------+----------+
+|               .|         4|
++----------------+----------+
+])
+AT_CLEANUP
+
+
+dnl This was causing a AT.
+AT_SETUP([RELIABILITY bad syntax])
+AT_DATA([bad-syntax.sps], [dnl
+data list notable list /x * y *.
+begin data.
+1 10
+2 20
+3 30
+4 50
+5 50
+end data.
+
+* This syntax is incorrect
+reliability x y.
+])
+
+AT_CHECK([pspp -O format=csv bad-syntax.sps], [1], [ignore])
+
+AT_CLEANUP
+
+dnl Checks for a crash when bad syntax followed scale specification.
+AT_SETUP([RELIABILITY bad syntax 2])
+AT_DATA([bad-syntax.sps], [dnl
+new file.
+data list notable list /f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 *.
+begin data.
+end data.
+
+* This syntax is incorrect
+reliability variables=f01 to f10/asdfj.
+])
+AT_CHECK([pspp -O format=csv bad-syntax.sps], [1], [ignore])
+AT_CLEANUP
+
+
+dnl Checks for a crash when the active file was empty.  Bug #38660.
+AT_SETUP([RELIABILITY crash with no data])
+AT_DATA([reliability.sps], [dnl
+new file.
+data list notable list /f01 f02 f03 f04 f05 f06 f07 f08 f09 f10 *.
+begin data.
+end data.
+
+reliability variables=f01 to f10.
+])
+AT_CHECK([pspp -O format=csv reliability.sps], [0], [])
+AT_CLEANUP
+
+
+
+
+dnl This is an example from doc/tutorial.texi
+dnl So if the results of this have to be changed in any way,
+dnl make sure to update that file.
+AT_SETUP([RELIABILITY tutorial example])
+AT_DATA([tut-example.sps], [dnl
+get file='hotel.sav'.
+
+compute v3 = 6 - v3.
+compute v5 = 6 - v5.
+
+reliability variables = v1 v3 v4.
+])
+
+AT_CHECK([ln -s $top_srcdir/examples/hotel.sav .], [0])
+AT_CHECK([pspp -o pspp.csv -o pspp.txt tut-example.sps])
+AT_CHECK([cat pspp.csv], [0], [dnl
+Scale: ANY
+
+Table: Case Processing Summary
+Cases,N,Percent
+Valid,17,100.0%
+Excluded,0,.0%
+Total,17,100.0%
+
+Table: Reliability Statistics
+Cronbach's Alpha,N of Items
+.81,3
+])
+AT_CLEANUP
+
+AT_SETUP([RELIABILITY syntax errors])
+AT_DATA([reliability.sps], [dnl
+DATA LIST LIST NOTABLE/x y z.
+RELIABILITY **.
+RELIABILITY VARIABLES=**.
+RELIABILITY VARIABLES=x/ **.
+RELIABILITY VARIABLES=x y/SCALE **.
+RELIABILITY VARIABLES=x y/SCALE(**).
+RELIABILITY VARIABLES=x y/SCALE('a' **).
+RELIABILITY VARIABLES=x y/SCALE('a')=**.
+RELIABILITY VARIABLES=x y/MODEL SPLIT(**).
+RELIABILITY VARIABLES=x y/MODEL SPLIT(1 **).
+RELIABILITY VARIABLES=x y/MODEL **.
+RELIABILITY VARIABLES=x y/SUMMARY **.
+RELIABILITY VARIABLES=x y/MISSING=**.
+RELIABILITY VARIABLES=x y/STATISTICS=x y zz y/ **.
+RELIABILITY VARIABLES=x y/MODEL SPLIT(5).
+])
+AT_CHECK([pspp -O format=csv reliability.sps], [1], [dnl
+"reliability.sps:2.13-2.14: error: RELIABILITY: Syntax error expecting VARIABLES.
+    2 | RELIABILITY **.
+      |             ^~"
+
+"reliability.sps:3.23-3.24: error: RELIABILITY: Syntax error expecting variable name.
+    3 | RELIABILITY VARIABLES=**.
+      |                       ^~"
+
+"reliability.sps:4.23: warning: RELIABILITY: Reliability on a single variable is not useful.
+    4 | RELIABILITY VARIABLES=x/ **.
+      |                       ^"
+
+"reliability.sps:4.26-4.27: error: RELIABILITY: Syntax error expecting SCALE, MODEL, SUMMARY, MISSING, or STATISTICS.
+    4 | RELIABILITY VARIABLES=x/ **.
+      |                          ^~"
+
+"reliability.sps:5.33-5.34: error: RELIABILITY: Syntax error expecting `('.
+    5 | RELIABILITY VARIABLES=x y/SCALE **.
+      |                                 ^~"
+
+"reliability.sps:6.33-6.34: error: RELIABILITY: Syntax error expecting string.
+    6 | RELIABILITY VARIABLES=x y/SCALE(**).
+      |                                 ^~"
+
+"reliability.sps:7.37-7.38: error: RELIABILITY: Syntax error expecting `)'.
+    7 | RELIABILITY VARIABLES=x y/SCALE('a' **).
+      |                                     ^~"
+
+"reliability.sps:8.38-8.39: error: RELIABILITY: Syntax error expecting variable name.
+    8 | RELIABILITY VARIABLES=x y/SCALE('a')=**.
+      |                                      ^~"
+
+"reliability.sps:9.39-9.40: error: RELIABILITY: Syntax error expecting number.
+    9 | RELIABILITY VARIABLES=x y/MODEL SPLIT(**).
+      |                                       ^~"
+
+"reliability.sps:10.41-10.42: error: RELIABILITY: Syntax error expecting `@:}@'.
+   10 | RELIABILITY VARIABLES=x y/MODEL SPLIT(1 **).
+      |                                         ^~"
+
+"reliability.sps:11.33-11.34: error: RELIABILITY: Syntax error expecting ALPHA or SPLIT.
+   11 | RELIABILITY VARIABLES=x y/MODEL **.
+      |                                 ^~"
+
+"reliability.sps:12.35-12.36: error: RELIABILITY: Syntax error expecting TOTAL or ALL.
+   12 | RELIABILITY VARIABLES=x y/SUMMARY **.
+      |                                   ^~"
+
+"reliability.sps:13.35-13.36: error: RELIABILITY: Syntax error expecting INCLUDE or EXCLUDE.
+   13 | RELIABILITY VARIABLES=x y/MISSING=**.
+      |                                   ^~"
+
+"reliability.sps:14.27-14.45: warning: RELIABILITY: The STATISTICS subcommand is not yet implemented.  No statistics will be produced.
+   14 | RELIABILITY VARIABLES=x y/STATISTICS=x y zz y/ **.
+      |                           ^~~~~~~~~~~~~~~~~~~"
+
+"reliability.sps:14.48-14.49: error: RELIABILITY: Syntax error expecting SCALE, MODEL, SUMMARY, MISSING, or STATISTICS.
+   14 | RELIABILITY VARIABLES=x y/STATISTICS=x y zz y/ **.
+      |                                                ^~"
+
+"reliability.sps:15.39: error: RELIABILITY: The split point must be less than the number of variables.
+   15 | RELIABILITY VARIABLES=x y/MODEL SPLIT(5).
+      |                                       ^"
+
+"reliability.sps:15.23-15.25: note: RELIABILITY: There are 2 variables.
+   15 | RELIABILITY VARIABLES=x y/MODEL SPLIT(5).
+      |                       ^~~"
+])
+AT_CLEANUP

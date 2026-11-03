@@ -1,0 +1,111 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+AT_BANNER([FORMATS])
+
+AT_SETUP([FORMATS positive tests])
+AT_DATA([formats.sps], [dnl
+DATA LIST LIST /a b c * x (A1) y (A2) z (A3).
+DISPLAY VARIABLES.
+FORMATS /a (COMMA10) b (N4).
+DISPLAY VARIABLES.
+FORMATS c (E8.1) x (A1) /y (AHEX4) z (A3).
+DISPLAY VARIABLES.
+])
+AT_CHECK([pspp -o pspp.csv formats.sps])
+AT_CHECK([grep -E -v 'Measure|Display' pspp.csv], [0], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+a,F8.0
+b,F8.0
+c,F8.0
+x,A1
+y,A2
+z,A3
+
+Table: Variables
+Name,Position,Print Format,Write Format
+a,1,F8.2,F8.2
+b,2,F8.2,F8.2
+c,3,F8.2,F8.2
+x,4,A1,A1
+y,5,A2,A2
+z,6,A3,A3
+
+Table: Variables
+Name,Position,Print Format,Write Format
+a,1,COMMA10.0,COMMA10.0
+b,2,N4.0,N4.0
+c,3,F8.2,F8.2
+x,4,A1,A1
+y,5,A2,A2
+z,6,A3,A3
+
+Table: Variables
+Name,Position,Print Format,Write Format
+a,1,COMMA10.0,COMMA10.0
+b,2,N4.0,N4.0
+c,3,E8.1,E8.1
+x,4,A1,A1
+y,5,AHEX4,AHEX4
+z,6,A3,A3
+])
+AT_CLEANUP
+
+AT_SETUP([FORMATS negative tests])
+AT_DATA([formats.sps], [dnl
+DATA LIST LIST /a b c * x (A1) y (A2) z (A3).
+FORMATS a (E6.1).
+FORMATS a y (F4).
+FORMATS x (A2).
+FORMATS y (AHEX2).
+FORMATS x y (A2).
+])
+AT_CHECK([pspp -O format=csv formats.sps], [1], [dnl
+Table: Reading free-form data from INLINE.
+Variable,Format
+a,F8.0
+b,F8.0
+c,F8.0
+x,A1
+y,A2
+z,A3
+
+"formats.sps:2.12-2.15: error: FORMATS: Output format E6.1 specifies 1 decimal place, but width 6 does not allow for any decimals.
+    2 | FORMATS a (E6.1).
+      |            ^~~~"
+
+"formats.sps:3.11: error: FORMATS: a and y are not the same type.  All variables in this variable list must be of the same type.  y will be omitted from the list.
+    3 | FORMATS a y (F4).
+      |           ^"
+
+"formats.sps:4.12-4.13: error: FORMATS: String variable x with width 1 is not compatible with format A2.  Use format A1 instead.
+    4 | FORMATS x (A2).
+      |            ^~"
+
+"formats.sps:5.12-5.16: error: FORMATS: String variable y with width 2 is not compatible with format AHEX2.  Use format AHEX4 instead.
+    5 | FORMATS y (AHEX2).
+      |            ^~~~~"
+
+"formats.sps:6.11: error: FORMATS: x and y are string variables with different widths.  All variables in this variable list must have the same width.  y will be omitted from the list.
+    6 | FORMATS x y (A2).
+      |           ^"
+
+"formats.sps:6.14-6.15: error: FORMATS: String variable x with width 1 is not compatible with format A2.  Use format A1 instead.
+    6 | FORMATS x y (A2).
+      |              ^~"
+])
+AT_CLEANUP

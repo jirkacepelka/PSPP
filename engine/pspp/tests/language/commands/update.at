@@ -1,0 +1,125 @@
+dnl PSPP - a program for statistical analysis.
+dnl Copyright (C) 2017, 2020 Free Software Foundation, Inc.
+dnl
+dnl This program is free software: you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, either version 3 of the License, or
+dnl (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+m4_define([CHECK_UPDATE],
+  [AT_SETUP([UPDATE $1 with $2])
+   AT_DATA([a.data], [dnl
+1aB
+8aM
+3aE
+5aG
+0aA
+5aH
+6aI
+7aJ
+2aD
+7aK
+1aC
+7aL
+4aF
+])
+   AT_DATA([b.data], [dnl
+1bN
+3 O
+4bP
+6bQ
+7bR
+9bS
+])
+   m4_if([$1], [sav],
+     [AT_DATA([save-a.sps], [dnl
+DATA LIST NOTABLE FILE='a.data' /a b c 1-3 (A).
+SAVE OUTFILE='a.sav'.
+])
+      AT_CHECK([pspp -O format=csv save-a.sps])])
+   m4_if([$2], [sav],
+     [AT_DATA([save-b.sps], [dnl
+DATA LIST NOTABLE FILE='b.data' /a b c 1-3 (A).
+SAVE OUTFILE='b.sav'.
+])
+      AT_CHECK([pspp -O format=csv save-b.sps])])
+   AT_DATA([update.sps], [dnl
+m4_if([$1], [sav], [], [DATA LIST NOTABLE FILE='a.data' /a b c 1-3 (A).])
+m4_if([$2], [sav], [], [DATA LIST NOTABLE FILE='b.data' /a b c 1-3 (A).])
+UPDATE
+    m4_if([$1], [sav], [FILE='a.sav'], [FILE=*]) /IN=InA /SORT
+    m4_if([$2], [sav], [FILE='b.sav'], [FILE=*]) /IN=InB /RENAME c=d
+    /BY a.
+LIST.
+])
+   cat update.sps
+   AT_CHECK([pspp -O format=csv update.sps], [0], [dnl
+update.sps:6: warning: UPDATE: Encountered 3 sets of duplicate cases in the master file.
+
+Table: Data List
+a,b,c,d,InA,InB
+0,a,A,,1,0
+1,b,B,N,1,1
+1,a,C,,1,0
+2,a,D,,1,0
+3,a,E,O,1,1
+4,b,F,P,1,1
+5,a,G,,1,0
+5,a,H,,1,0
+6,b,I,Q,1,1
+7,b,J,R,1,1
+7,a,K,,1,0
+7,a,L,,1,0
+8,a,M,,1,0
+9,b,,S,0,1
+])
+AT_CLEANUP
+])
+
+AT_BANNER([UPDATE])
+
+CHECK_UPDATE([sav], [sav])
+CHECK_UPDATE([sav], [inline])
+CHECK_UPDATE([inline], [sav])
+
+dnl Far more syntax errors are possible, but the rest are all covered
+dnl by the MATCH FILES tests.
+AT_SETUP([UPDATE syntax errors])
+AT_DATA([insert.sps], [dnl
+INSERT FILE='update.sps' ERROR=IGNORE.
+])
+AT_DATA([update.sps], [dnl
+DATA LIST LIST NOTABLE/name (A6) x.
+BEGIN DATA.
+al,7
+brad,8
+carl,9
+END DATA.
+SAVE OUTFILE='x.sav'.
+
+DATA LIST LIST NOTABLE/name (A7) y.
+BEGIN DATA.
+al,1
+carl,2
+dan,3
+END DATA.
+UPDATE/FILE='x.sav'/FILE=*/RENAME(name=name2).
+UPDATE/xyzzy.
+])
+AT_CHECK([pspp --testing-mode -O format=csv insert.sps], [1], [dnl
+"update.sps:15.1-15.46: error: UPDATE: Required subcommand BY was not specified.
+   15 | UPDATE/FILE='x.sav'/FILE=*/RENAME(name=name2).
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+"update.sps:16.8-16.12: error: UPDATE: Syntax error expecting FILE or TABLE.
+   16 | UPDATE/xyzzy.
+      |        ^~~~~"
+])
+AT_CLEANUP
