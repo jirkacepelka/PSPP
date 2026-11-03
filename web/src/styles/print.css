@@ -1,0 +1,66 @@
+/* Print stylesheet: prints the output document only (use "Save as PDF" in the print dialog). */
+@media print {
+  :root {
+    color-scheme: light;
+  }
+  html,
+  body,
+  #root,
+  .app {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  .appbar,
+  .toolbar,
+  .formula-bar,
+  .view-tabs,
+  .statusbar,
+  .output-bar,
+  .output-outline,
+  .item-actions,
+  .paper-actions,
+  .paper-syntax,
+  .toasts,
+  .skip-link {
+    display: none !important;
+  }
+  .main,
+  .output-view,
+  .output-body,
+  .output-scroll {
+    display: block !important;
+    overflow: visible !important;
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+  }
+  .output-doc {
+    max-width: none;
+    zoom: 1 !important;
+  }
+  .paper {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 0 24px !important;
+    break-after: auto;
+  }
+  .output-item {
+    break-inside: avoid;
+  }
+  .output-doc,
+  .output-doc * {
+    color: #000 !important;
+  }
+  .ts-modern tbody th,
+  .ts-modern thead th,
+  .ts-modern tbody tr:first-child th {
+    background: #f1f3f4 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  a[href]::after {
+    content: '';
+  }
+}

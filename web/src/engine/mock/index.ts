@@ -128,7 +128,8 @@ function frequencies(ctx: Ctx, toks: Token[]) {
   let vars: string[] = [];
   let stats = new Set<string>(['MEAN', 'STDDEV', 'MINIMUM', 'MAXIMUM']);
   let showTable = true;
-  let order: 'AVALUE' | 'DVALUE' | 'AFREQ' | 'DFREQ' = 'AVALUE';
+  type Order = 'AVALUE' | 'DVALUE' | 'AFREQ' | 'DFREQ';
+  let order = 'AVALUE' as Order;
   const pct: number[] = [];
   const charts: string[] = [];
   for (const s of subs) {
@@ -149,7 +150,7 @@ function frequencies(ctx: Ctx, toks: Token[]) {
         const w = String(t.v).toUpperCase();
         if (w === 'NOTABLE') showTable = false;
         if (w === 'TABLE') showTable = true;
-        if (['AVALUE', 'DVALUE', 'AFREQ', 'DFREQ'].includes(w)) order = w as typeof order;
+        if (['AVALUE', 'DVALUE', 'AFREQ', 'DFREQ'].includes(w)) order = w as Order;
       }
     } else if (s.name === 'PERCENTILES') {
       s.toks.filter((t) => t.t === 'num').forEach((t) => pct.push(Number(t.v)));
@@ -467,7 +468,7 @@ function sortCases(ctx: Ctx, toks: Token[]) {
 function compute(ctx: Ctx, toks: Token[], text: string, condition?: Token[]) {
   const { ds } = ctx;
   const eq = toks.findIndex((t) => t.t === 'punct' && t.v === '=');
-  if (eq < 1 || toks[0].t !== 'id') throw new CmdError('COMPUTE: Syntax error expecting `='.');
+  if (eq < 1 || toks[0].t !== 'id') throw new CmdError('COMPUTE: Syntax error expecting "=".');
   const target = String(toks[0].v);
   const expr = parseExpression(toks.slice(eq + 1));
   const cond = condition ? parseExpression(condition) : null;
@@ -692,7 +693,7 @@ function runOne(ctx: Ctx, text: string) {
     case 'COMPUTE': return compute(ctx, rest, text);
     case 'IF': {
       const close = (() => { let depth = 0; for (let k = 0; k < rest.length; k++) { if (rest[k].v === '(') depth++; if (rest[k].v === ')') { depth--; if (depth === 0) return k; } } return -1; })();
-      if (rest[0]?.v !== '(' || close < 0) throw new CmdError('IF: Syntax error expecting `(\'.');
+      if (rest[0]?.v !== '(' || close < 0) throw new CmdError('IF: Syntax error expecting "(".');
       return compute(ctx, rest.slice(close + 1), text, rest.slice(1, close));
     }
     case 'SELECT IF': return selectIf(ctx, rest);

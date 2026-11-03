@@ -214,7 +214,10 @@ export function DataView() {
     () =>
       registerGrid({
         copy: () => void ref.current?.emit('copy'),
-        cut: () => void ref.current?.emit('cut'),
+        cut: () => {
+          const sel = selRef.current;
+          void ref.current?.emit('copy').then(() => clearSelection(sel));
+        },
         paste: () => void ref.current?.emit('paste'),
         clear: () => clearSelection(selRef.current),
         insertCase: () => {
@@ -284,7 +287,7 @@ export function DataView() {
       x,
       y,
       items: [
-        { type: 'item', id: 'cut', label: t('actions.cut'), icon: 'content_cut', shortcut: formatShortcut('Mod+X'), onSelect: () => void ref.current?.emit('cut') },
+        { type: 'item', id: 'cut', label: t('actions.cut'), icon: 'content_cut', shortcut: formatShortcut('Mod+X'), onSelect: () => void ref.current?.emit('copy').then(() => clearSelection(sel)) },
         { type: 'item', id: 'copy', label: t('actions.copy'), icon: 'content_copy', shortcut: formatShortcut('Mod+C'), onSelect: () => void ref.current?.emit('copy') },
         { type: 'item', id: 'paste', label: t('actions.paste'), icon: 'content_paste', shortcut: formatShortcut('Mod+V'), onSelect: () => void ref.current?.emit('paste') },
         { type: 'item', id: 'clear', label: t('actions.clearCells'), icon: 'backspace', shortcut: 'Del', onSelect: () => clearSelection(sel) },
