@@ -334,7 +334,7 @@ function AnalysisSection() {
           />
         </Row>
         <Row title={t('shell.settings.ciLevel')} desc={t('shell.settings.ciLevelDesc')} htmlFor="set-ci">
-          <NumberField id="set-ci" size="sm" className="set-narrow" value={s.ciLevel} min={50} max={99.9} step={1} decimalSeparator={s.decimalSeparator} onValueChange={(v) => v != null && s.set({ ciLevel: v })} suffix="%" />
+          <NumberField id="set-ci" size="sm" className="set-narrow" value={s.ciLevel} min={50} max={99.9} step={1} decimalSeparator={s.decimalSeparator} onValueChange={(v) => v != null && s.set({ ciLevel: v })} />
         </Row>
         <Row title={t('shell.settings.apaLocale')} desc={t('shell.settings.apaLocaleDesc')} keywords="apa kopirovat copy word">
           <Segmented

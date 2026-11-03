@@ -4,6 +4,9 @@ import { Dialog } from '../../components/Dialog';
 import { Icon } from '../../components/Icon';
 import { useUi } from '../../store/ui';
 import { GPL_URL, PSPP_URL, SOURCE_URL } from '../../app/help';
+import { Button } from '../../components/Button';
+import { LogoMark } from '../shell/Logo';
+import './misc.css';
 
 export function AboutContent() {
   const { t } = useTranslation();
@@ -12,7 +15,7 @@ export function AboutContent() {
   return (
     <div className="about">
       <div className="about-head">
-        <img src="/favicon.svg" alt="" width={64} height={64} />
+        <LogoMark size={64} />
         <div>
           <div className="about-name">PSPP Studio</div>
           <div className="set-row-desc">{t('about.tagline')}</div>
@@ -54,7 +57,7 @@ export function AboutDialog() {
   const { t } = useTranslation();
   const close = useUi((s) => s.closeModal);
   return (
-    <Dialog title={t('actions.about')} icon="info" onClose={close} footer={<button type="button" className="btn btn-filled" onClick={close}>{t('common.close')}</button>}>
+    <Dialog title={t('actions.about')} icon="info" onClose={close} footer={<Button variant="primary" onClick={close}>{t('common.close')}</Button>}>
       <AboutContent />
     </Dialog>
   );

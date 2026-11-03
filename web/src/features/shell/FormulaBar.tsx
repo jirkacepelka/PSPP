@@ -57,8 +57,8 @@ export function FormulaBar() {
   return (
     <div className="formula-bar" role="group" aria-label={t('dataView.valueBar')}>
       <button type="button" className="formula-ref" onClick={() => openModal({ kind: 'goto' })} title={t('formula.goto')}>
-        {v ? <MeasureIcon measure={measureKey(v)} size={16} /> : <Icon name="add" size={16} />}
-        <span className="formula-case">{sel ? t('dataView.caseN', { n: sel.row + 1 }) : '–'}</span>
+        {v ? <MeasureIcon measure={measureKey(v)} size={16} /> : sel ? <Icon name="add" size={16} /> : null}
+        <span className="formula-case">{sel ? t('dataView.caseN', { n: sel.row + 1 }) : t('formula.selectCell')}</span>
         {sel && <span className="formula-var">· {v?.name ?? t('formula.newVariable')}</span>}
         <span className="sr-only">{cellLabel}</span>
       </button>
@@ -68,7 +68,6 @@ export function FormulaBar() {
         aria-label={t('formula.value')}
         value={draft}
         disabled={!sel || !ds}
-        placeholder={sel ? '' : t('formula.selectCell')}
         spellCheck={false}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}

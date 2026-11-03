@@ -48,3 +48,20 @@ describe('data-quality flags', () => {
     expect(q.rows).toEqual([1, 2, 3]);
   });
 });
+
+describe('label picker matching', () => {
+  it('ranks code and label matches and folds diacritics', async () => {
+    const { filterOptions } = await import('./pick');
+    const opts = [
+      { code: '1', label: 'Žena', missing: false },
+      { code: '2', label: 'Muž', missing: false },
+      { code: '12', label: 'Jiné', missing: false },
+      { code: '9', label: 'Bez odpovědi', missing: true },
+    ];
+    expect(filterOptions(opts, '').length).toBe(4);
+    expect(filterOptions(opts, 'zena').map((o) => o.code)).toEqual(['1']);
+    expect(filterOptions(opts, '1').map((o) => o.code)).toEqual(['1', '12']);
+    expect(filterOptions(opts, 'odp').map((o) => o.code)).toEqual(['9']);
+    expect(filterOptions(opts, 'x')).toEqual([]);
+  });
+});

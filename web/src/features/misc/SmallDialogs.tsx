@@ -13,6 +13,7 @@ import { caseCount } from '../../lib/variables';
 import { formatCell } from '../../lib/format';
 import { gridCommands } from '../../app/gridBus';
 import { saveDataset, type SaveFormat } from '../../app/files';
+import './misc.css';
 
 export function GotoDialog() {
   const { t } = useTranslation();
@@ -38,8 +39,8 @@ export function GotoDialog() {
       onClose={close}
       footer={
         <>
-          <button type="button" className="btn btn-text" onClick={close}>{t('common.cancel')}</button>
-          <button type="button" className="btn btn-filled" onClick={go}>{t('goto.go')}</button>
+          <button type="button" className="btn btn-ghost" onClick={close}>{t('common.cancel')}</button>
+          <button type="button" className="btn btn-primary" onClick={go}>{t('goto.go')}</button>
         </>
       }
     >
@@ -118,9 +119,9 @@ export function FindDialog() {
       onClose={close}
       footer={
         <>
-          <button type="button" className="btn btn-text" onClick={close}>{t('common.close')}</button>
-          <button type="button" className="btn btn-outlined" onClick={() => find(-1)} disabled={!q}>{t('find.previous')}</button>
-          <button type="button" className="btn btn-filled" onClick={() => find(1)} disabled={!q}>{t('find.next')}</button>
+          <button type="button" className="btn btn-ghost" onClick={close}>{t('common.close')}</button>
+          <button type="button" className="btn btn-secondary" onClick={() => find(-1)} disabled={!q}>{t('find.previous')}</button>
+          <button type="button" className="btn btn-primary" onClick={() => find(1)} disabled={!q}>{t('find.next')}</button>
         </>
       }
     >
@@ -171,8 +172,8 @@ export function SaveAsDialog() {
       onClose={close}
       footer={
         <>
-          <button type="button" className="btn btn-text" onClick={close}>{t('common.cancel')}</button>
-          <button type="button" className="btn btn-filled" onClick={save} disabled={!name.trim()}>
+          <button type="button" className="btn btn-ghost" onClick={close}>{t('common.cancel')}</button>
+          <button type="button" className="btn btn-primary" onClick={save} disabled={!name.trim()}>
             <Icon name="download" />
             {t('saveAs.save')}
           </button>
@@ -224,7 +225,7 @@ export function ConfirmDialog({ modal }: { modal: Extract<Modal, { kind: 'confir
       onClose={close}
       footer={
         <>
-          <button type="button" className="btn btn-text" onClick={close} data-autofocus>{t('common.cancel')}</button>
+          <button type="button" className="btn btn-ghost" onClick={close} data-autofocus>{t('common.cancel')}</button>
           <button
             type="button"
             className={`btn ${modal.danger ? 'btn-danger' : 'btn-filled'}`}

@@ -24,7 +24,7 @@ export function cellChecker(v: Variable): CellChecker {
   const hit = checkerCache.get(v);
   if (hit) return hit;
   const domain = labelsDefineDomain(v);
-  const range = v.validRange && Number.isFinite(v.validRange.min) && Number.isFinite(v.validRange.max) ? v.validRange : null;
+  const range = v.validRange && !Number.isNaN(v.validRange.min) && !Number.isNaN(v.validRange.max) && v.validRange.min <= v.validRange.max ? v.validRange : null;
   let fn: CellChecker = NONE;
   if (v.type === 'numeric') {
     if (domain || range) {

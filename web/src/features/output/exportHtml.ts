@@ -6,6 +6,8 @@ import type { OutputItem } from '../../engine/types';
 import type { OutputEntry } from '../../store/output';
 import outputCss from '../../styles/output.css?raw';
 import { esc } from '../../engine/mock/html';
+import { formatTableHtml } from '../../lib/statfmt';
+import { useSettings } from '../../store/settings';
 
 function itemHtml(it: OutputItem): string {
   if ((it as { hidden?: boolean }).hidden) return '';
@@ -13,7 +15,7 @@ function itemHtml(it: OutputItem): string {
     case 'group':
       return `<section class="output-group"><h2 class="output-group-title">${esc(it.title)}</h2>${it.children.map(itemHtml).join('')}</section>`;
     case 'table':
-      return `<div class="output-item"><div class="table-wrap">${it.html}</div></div>`;
+      return `<div class="output-item"><div class="table-wrap">${formatTableHtml(it.html, useSettings.getState().leadingZero)}</div></div>`;
     case 'text':
       if (it.subtype === 'title') return `<h1 class="output-text-title">${esc(it.text)}</h1>`;
       if (it.subtype === 'subtitle' || it.subtype === 'page-title') return `<h2 class="output-text-subtitle">${esc(it.text)}</h2>`;
@@ -31,11 +33,11 @@ function itemHtml(it: OutputItem): string {
   }
 }
 
-const VARS = `:root{--font-ui:Inter,Roboto,system-ui,sans-serif;--font-display:var(--font-ui);--font-mono:'Roboto Mono',monospace;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--r-xs:4px;--r-sm:8px;--r-md:12px;--fs-xs:11px;--fs-sm:12px;--fs-lg:16px;--fs-xl:18px;--fs-2xl:22px;--fs-3xl:28px;--fw-regular:400;--fw-medium:500;--fw-semibold:600;
---on-surface:#1f1f1f;--on-surface-variant:#444746;--outline:#747775;--outline-variant:#c4c7c5;--divider:#e1e3e1;--grid-line:#e1e3e1;--surface:#fff;--surface-container-low:#f8fafd;--surface-container:#f0f4f9;--state-hover:transparent;
---info-container:#e1eaf7;--on-info-container:#0a2a52;--error-container:#f9dedc;--on-error-container:#410e0b;--warning-container:#ffefc9;--on-warning-container:#3d2600}
-body{margin:0;background:#f0f2f5;font-family:var(--font-ui)}main{max-width:900px;margin:24px auto;background:#fff;padding:48px 56px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.output-syntax{margin:0 0 12px}@media print{body{background:#fff}main{box-shadow:none;margin:0;padding:0}}`;
+const VARS = `:root{--font-ui:Inter,Roboto,system-ui,sans-serif;--font-mono:'Roboto Mono',monospace;--s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--radius-chip:4px;--radius-control:6px;--radius-panel:8px;--fs-xs:11px;--fs-sm:12px;--fs-base:14px;--fs-lg:16px;--fs-xl:18px;--fs-2xl:22px;--fw-regular:400;--fw-medium:500;--fw-semibold:600;--icon-size-sm:18px;
+--ink:#1f1e1b;--ink-2:#4a4843;--ink-3:#6b6862;--line:#e7e5df;--line-strong:#d9d6ce;--line-control:#8f8b83;--surface:#fff;--surface-sunken:#f4f3ef;--surface-hover:transparent;
+--info:#3a6390;--info-tint:#e9eff6;--info-ink:#2c4e73;--danger:#b3412e;--danger-tint:#fbeae6;--danger-ink:#8f3222;--warning:#8a5a00;--warning-tint:#fbf3e2;--warning-ink:#6e4700}
+body{margin:0;background:#f9f8f5;font-family:var(--font-ui);color:var(--ink)}main{max-width:1000px;margin:24px auto;background:#fff;padding:40px 48px;border:1px solid #d9d6ce;border-radius:8px}
+.output-entry{margin-bottom:32px}.output-syntax{margin:0 0 12px}@media print{body{background:#fff}main{border:0;margin:0;padding:0}}`;
 
 export function outputToHtml(entries: OutputEntry[], title: string, tableStyle: string): string {
   const body = entries

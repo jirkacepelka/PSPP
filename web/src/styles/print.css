@@ -21,6 +21,9 @@
   .item-actions,
   .paper-actions,
   .paper-syntax,
+  .out-explain-toggle,
+  .out-report .icon,
+  .out-explain header .icon-btn,
   .toasts,
   .skip-link {
     display: none !important;
@@ -42,6 +45,7 @@
   }
   .paper {
     box-shadow: none !important;
+    border: 0 !important;
     padding: 0 !important;
     margin: 0 0 24px !important;
     break-after: auto;
@@ -53,9 +57,7 @@
   .output-doc * {
     color: #000 !important;
   }
-  .ts-modern tbody th,
-  .ts-modern thead th,
-  .ts-modern tbody tr:first-child th {
+  .ts-modern tr:not(:has(td)) th {
     background: #f1f3f4 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;

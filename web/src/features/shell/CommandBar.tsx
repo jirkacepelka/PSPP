@@ -104,7 +104,7 @@ function DataTools({ view }: { view: View }) {
     <>
       <DataSwitch view={view} />
       <ToolbarSeparator />
-      <ToolbarGroup>
+      <ToolbarGroup className="sh-keep-mobile">
         <ActionButton id="edit.undo" />
         <ActionButton id="edit.redo" />
       </ToolbarGroup>
@@ -129,7 +129,7 @@ function OutputTools() {
   const { t } = useTranslation();
   return (
     <>
-      <ToolbarGroup>
+      <ToolbarGroup className="sh-keep-mobile">
         <ActionButton id="output.edit" />
         <ActionButton id="output.rerun" />
         <ActionButton id="output.pin" />
@@ -161,7 +161,7 @@ function SyntaxTools() {
   }));
   return (
     <>
-      <ToolbarGroup attached className="sh-run">
+      <ToolbarGroup attached className="sh-run sh-keep-mobile">
         <Button size="sm" variant="secondary" iconStart="play_arrow" disabled={running} onClick={() => runAction('syntax.runAll')} title={`${t('actions.runAll')} (${formatShortcut('Mod+Shift+Enter')})`}>
           {t('actions.runAll')}
         </Button>

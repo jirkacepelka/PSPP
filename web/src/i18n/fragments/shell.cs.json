@@ -8,7 +8,7 @@
   },
   "shell": {
     "about": "O aplikaci",
-    "searchPlaceholder": "Hledat příkaz, proměnnou nebo cíl…",
+    "searchPlaceholder": "Hledat příkaz nebo proměnnou…",
     "saveHint": "Pro sdílení nebo zálohu stáhněte soubor .sav ({{key}})",
     "renameHint": "Klikněte a přejmenujte datovou sadu",
     "analyze": "Analyzovat…",

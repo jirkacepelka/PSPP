@@ -46,7 +46,7 @@ export const GOALS: Goal[] = [
   {
     label: 'shell.goals.normality',
     words: 'normalita normalni rozdeleni shapiro kolmogorov odlehle normality normal distribution outliers',
-    actions: ['dialog:explore', 'dialog:ksOneSample|dialog:npKs|tpl:NPAR TESTS K-S', 'dialog:histogram|tpl:GRAPH HISTOGRAM'],
+    actions: ['dialog:explore', 'dialog:ksNormal|tpl:NPAR TESTS K-S', 'dialog:histogram|tpl:GRAPH HISTOGRAM'],
   },
   {
     label: 'shell.goals.recode',

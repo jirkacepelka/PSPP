@@ -1,61 +1,54 @@
 /*
- * Output document styles (shared by the in-app viewer and HTML export).
- * Engine tables are plain HTML: <table><caption/><thead?/><tbody/><tfoot/></table> with th/td cells.
+ * Output document styles (shared by the in-app viewer and HTML export; tokens only).
+ * Engine tables are plain HTML: <table><caption/><tbody/><tfoot/></table>; header rows are rows
+ * made only of <th> cells (selected with tr:not(:has(td))).
  */
 .output-doc {
   --tbl-font: var(--font-ui);
-  --tbl-fs: 13px;
-  --tbl-pad-y: 6px;
-  --tbl-pad-x: 12px;
-  --tbl-line: var(--outline-variant);
-  --tbl-head-bg: var(--surface-container-low);
-  --tbl-head-fg: var(--on-surface);
-  --tbl-stub-fg: var(--on-surface);
-  --tbl-zebra: transparent;
-  color: var(--on-surface);
+  --tbl-fs: var(--fs-sm);
+  --tbl-pad-y: 5px;
+  --tbl-pad-x: 10px;
+  --tbl-line: var(--line-strong);
+  --tbl-head-bg: var(--surface-sunken);
+  color: var(--ink);
 }
 .output-item {
-  margin: 0 0 var(--s-5);
+  margin: 0 0 var(--s-4);
   break-inside: avoid;
 }
 .output-item .item-title {
   margin: 0 0 var(--s-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-base, 14px);
   font-weight: var(--fw-semibold);
-  color: var(--on-surface);
+  color: var(--ink);
 }
 .output-group-title {
-  margin: var(--s-2) 0 var(--s-4);
-  padding-bottom: var(--s-2);
-  border-bottom: 1px solid var(--divider);
-  font-family: var(--font-display);
-  font-size: var(--fs-2xl);
-  font-weight: var(--fw-regular);
-  color: var(--on-surface);
+  margin: var(--s-2) 0 var(--s-3);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
 }
 .output-text-title {
-  font-size: var(--fs-3xl);
-  font-weight: var(--fw-regular);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-semibold);
   margin: 0 0 var(--s-3);
 }
 .output-text-subtitle {
-  font-size: var(--fs-xl);
-  color: var(--on-surface-variant);
+  font-size: var(--fs-lg);
+  color: var(--ink-2);
   margin: 0 0 var(--s-3);
 }
 .output-text-log,
 .output-syntax {
   margin: 0 0 var(--s-3);
   padding: var(--s-2) var(--s-3);
-  border-left: 3px solid var(--outline-variant);
-  border-radius: 0 var(--r-xs) var(--r-xs) 0;
-  background: var(--surface-container-low);
+  border-left: 2px solid var(--line-strong);
+  background: var(--surface-sunken);
   font-family: var(--font-mono);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   white-space: pre-wrap;
   word-break: break-word;
-  color: var(--on-surface-variant);
+  color: var(--ink-2);
 }
 .table-wrap {
   max-width: 100%;
@@ -68,16 +61,15 @@
   font-size: var(--tbl-fs);
   font-variant-numeric: tabular-nums;
   line-height: 1.35;
-  color: var(--on-surface);
+  color: var(--ink);
   margin: 0;
   caption-side: top;
 }
 .output-doc caption {
   padding: 0 0 var(--s-2);
-  text-align: left;
+  text-align: left !important;
   font-weight: var(--fw-semibold);
-  font-size: calc(var(--tbl-fs) + 1px);
-  color: var(--on-surface);
+  color: var(--ink);
 }
 .output-doc th,
 .output-doc td {
@@ -87,47 +79,42 @@
 .output-doc th {
   font-weight: var(--fw-medium);
   text-align: left;
-  color: var(--tbl-stub-fg);
+  color: var(--ink-2);
 }
-.output-doc td.num {
-  text-align: right;
+.output-doc td {
+  white-space: nowrap;
 }
 .output-doc tfoot td {
-  font-size: calc(var(--tbl-fs) - 1px);
-  color: var(--on-surface-variant);
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
   padding-top: var(--s-2);
   white-space: normal;
 }
 
-/* --- Modern (default) --- */
+/* --- Modern (default): hairlines, sunken header band, no vertical rules --- */
 .ts-modern table {
-  border: 1px solid var(--tbl-line);
-  border-radius: var(--r-sm);
-  border-collapse: separate;
-  overflow: hidden;
-}
-.ts-modern caption {
-  padding-left: 2px;
+  border-top: 1px solid var(--tbl-line);
+  border-bottom: 1px solid var(--tbl-line);
 }
 .ts-modern th,
 .ts-modern td {
-  border-bottom: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--line);
 }
-.ts-modern thead th,
-.ts-modern tbody tr:first-child th,
-.ts-modern tbody tr:first-child td:empty {
+.ts-modern tr:not(:has(td)) th {
   background: var(--tbl-head-bg);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  vertical-align: bottom;
 }
-.ts-modern thead th {
-  border-bottom: 1px solid var(--tbl-line);
-  color: var(--on-surface-variant);
-  font-size: calc(var(--tbl-fs) - 0.5px);
+.ts-modern tr:not(:has(td)):last-of-type th,
+.ts-modern tr:not(:has(td)) + tr:has(td) th,
+.ts-modern tr:not(:has(td)) + tr:has(td) td {
+  border-top: 1px solid var(--tbl-line);
 }
-.ts-modern tbody th {
-  background: var(--tbl-head-bg);
-}
-.ts-modern tbody tr:hover td {
-  background: var(--state-hover);
+.ts-modern tbody tr:has(td):hover td,
+.ts-modern tbody tr:has(td):hover th {
+  background: var(--surface-hover);
 }
 .ts-modern tbody tr:last-child th,
 .ts-modern tbody tr:last-child td {
@@ -135,37 +122,30 @@
 }
 .ts-modern tfoot td {
   border-top: 1px solid var(--tbl-line);
-  background: var(--surface);
-}
-.ts-modern th.total,
-.ts-modern td.total {
-  font-weight: var(--fw-semibold);
 }
 
-/* --- Classic PSPP --- */
+/* --- Classic PSPP: full grid --- */
 .ts-classic table {
-  --tbl-font: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  border: 1.5px solid var(--on-surface);
+  border: 1.5px solid var(--ink);
 }
 .ts-classic th,
 .ts-classic td {
-  border: 1px solid var(--outline);
+  border: 1px solid var(--line-control);
 }
-.ts-classic thead th,
+.ts-classic tr:not(:has(td)) th,
 .ts-classic tbody th {
-  background: var(--surface-container);
+  background: var(--surface-sunken);
 }
 .ts-classic caption {
-  text-align: center;
-  font-weight: var(--fw-semibold);
+  text-align: center !important;
 }
 
 /* --- Academic (APA) --- */
 .ts-apa table {
   --tbl-font: 'Times New Roman', Times, 'Liberation Serif', serif;
-  --tbl-fs: 14px;
-  border-top: 2px solid var(--on-surface);
-  border-bottom: 2px solid var(--on-surface);
+  --tbl-fs: var(--fs-base, 14px);
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
 }
 .ts-apa caption {
   font-style: italic;
@@ -173,14 +153,11 @@
 }
 .ts-apa th {
   font-weight: var(--fw-regular);
+  color: var(--ink);
 }
-.ts-apa thead tr:last-child th,
-.ts-apa thead tr:last-child td {
-  border-bottom: 1px solid var(--on-surface);
-}
-.ts-apa table:not(:has(thead)) tbody tr:first-child th,
-.ts-apa table:not(:has(thead)) tbody tr:first-child td {
-  border-bottom: 1px solid var(--on-surface);
+.ts-apa tr:not(:has(td)) + tr:has(td) th,
+.ts-apa tr:not(:has(td)) + tr:has(td) td {
+  border-top: 1px solid var(--ink);
 }
 .ts-apa tfoot td {
   font-style: italic;
@@ -188,21 +165,21 @@
 
 /* --- Compact --- */
 .ts-compact {
-  --tbl-fs: 12px;
+  --tbl-fs: var(--fs-xs);
   --tbl-pad-y: 2px;
   --tbl-pad-x: 8px;
 }
 .ts-compact th,
 .ts-compact td {
-  border-bottom: 1px solid var(--grid-line);
+  border-bottom: 1px solid var(--line);
 }
 .ts-compact table {
   border-top: 1px solid var(--tbl-line);
   border-bottom: 1px solid var(--tbl-line);
 }
-.ts-compact tbody tr:nth-child(even) td,
-.ts-compact tbody tr:nth-child(even) th {
-  background: var(--surface-container-low);
+.ts-compact tbody tr:has(td):nth-child(even) td,
+.ts-compact tbody tr:has(td):nth-child(even) th {
+  background: var(--surface-sunken);
 }
 
 /* --- messages --- */
@@ -212,23 +189,26 @@
   gap: var(--s-2);
   margin: 0 0 var(--s-3);
   padding: var(--s-2) var(--s-3);
-  border-radius: var(--r-md);
+  border-left: 2px solid var(--info);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
   font-size: var(--fs-sm);
   line-height: 1.45;
-  background: var(--info-container);
-  color: var(--on-info-container);
+  background: var(--info-tint);
+  color: var(--info-ink);
 }
 .callout .icon {
-  font-size: 18px;
+  font-size: var(--icon-size-sm, 18px);
   margin-top: 1px;
 }
 .callout.error {
-  background: var(--error-container);
-  color: var(--on-error-container);
+  border-left-color: var(--danger);
+  background: var(--danger-tint);
+  color: var(--danger-ink);
 }
 .callout.warning {
-  background: var(--warning-container);
-  color: var(--on-warning-container);
+  border-left-color: var(--warning);
+  background: var(--warning-tint);
+  color: var(--warning-ink);
 }
 .callout .callout-line {
   margin-left: auto;
@@ -236,12 +216,12 @@
   white-space: nowrap;
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
-  opacity: 0.85;
 }
 .callout button.callout-line {
   border: 0;
   background: transparent;
   color: inherit;
   text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
 }

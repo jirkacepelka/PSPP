@@ -78,3 +78,22 @@ export function measureHints(spec: DialogSpec, values: Values, ctx: DialogContex
   });
   return out;
 }
+
+/**
+ * Fills group-value fields (T-test groups, Kruskal-Wallis range) from the data, the way the dialog
+ * preselects them, so a preset can be run without opening the dialog.
+ */
+export function completeGroupValues(spec: DialogSpec, values: Values, ctx: DialogContext): Values {
+  const out = { ...values };
+  walkFields(spec.fields, (f) => {
+    if (f.kind !== 'groupvalues') return;
+    const name = ((out[f.source] as string[]) ?? [])[0];
+    const v = ctx.variables.find((x) => x.name === name);
+    if (!v) return;
+    const opts = distinctValues(v, ctx.column?.(name));
+    if (opts.length < 2) return;
+    const pick = f.mode === 'range' ? [opts[0].value, opts[opts.length - 1].value] : [...opts].sort((a, b) => b.count - a.count).slice(0, 2).map((o) => o.value).sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+    f.ids.forEach((id, i) => (out[id] = f.mode === 'range' ? Number(pick[i]) : pick[i]));
+  });
+  return out;
+}

@@ -89,7 +89,7 @@ export const MENUS: TopMenu[] = [
     label: 'menu.data',
     mnemonic: 'shell.mnemonic.data',
     items: [
-      'dialog:defineProperties|tpl:VARIABLE LEVEL',
+      'dialog:variableProperties|tpl:VARIABLE LEVEL',
       '-',
       'dialog:sortCases',
       'tpl:SORT VARIABLES',
@@ -150,7 +150,7 @@ export const MENUS: TopMenu[] = [
           'dialog:chiSquare|dialog:npChisq|tpl:NPAR TESTS CHISQUARE',
           'dialog:binomial|dialog:npBinomial|tpl:NPAR TESTS BINOMIAL',
           'dialog:runs|dialog:npRuns|tpl:NPAR TESTS RUNS',
-          'dialog:ksOneSample|dialog:npKs|tpl:NPAR TESTS K-S',
+          'dialog:ksNormal|tpl:NPAR TESTS K-S',
           '-',
           'dialog:mannWhitney|dialog:npMw|tpl:NPAR TESTS M-W',
           'dialog:kruskalWallis|dialog:npKw|tpl:NPAR TESTS K-W',
@@ -167,7 +167,7 @@ export const MENUS: TopMenu[] = [
     id: 'graphs',
     label: 'menu.graphs',
     mnemonic: 'shell.mnemonic.graphs',
-    items: ['dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT', 'dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:barChartMean|tpl:GRAPH BAR MEAN'],
+    items: ['dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT', 'dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:barChartMean|tpl:GRAPH BAR MEAN', 'dialog:boxplot'],
   },
   {
     id: 'utilities',

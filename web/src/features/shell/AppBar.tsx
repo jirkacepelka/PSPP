@@ -60,7 +60,9 @@ function TitleInput() {
   const [w, setW] = useState<number | undefined>();
   useEffect(() => setDraft(title), [title]);
   useEffect(() => {
-    if (measure.current) setW(Math.ceil(measure.current.getBoundingClientRect().width) + 2);
+    const m = () => measure.current && setW(Math.ceil(measure.current.scrollWidth) + 2);
+    m();
+    void document.fonts?.ready.then(m);
   }, [draft, hasData]);
   const commit = () => {
     const v = draft.trim();

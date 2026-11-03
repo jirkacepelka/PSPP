@@ -46,14 +46,14 @@ import { missingSummary, typeLabel, valueLabelsSummary } from './describe';
 
 type ColId = 'name' | 'label' | 'measure' | 'type' | 'width' | 'decimals' | 'values' | 'missing' | 'columns' | 'align' | 'role' | 'check';
 const ALL_COLS: { id: ColId; w: number; essential?: boolean }[] = [
-  { id: 'name', w: 160, essential: true },
-  { id: 'label', w: 240, essential: true },
+  { id: 'name', w: 150, essential: true },
+  { id: 'label', w: 220, essential: true },
   { id: 'measure', w: 132, essential: true },
-  { id: 'type', w: 150, essential: true },
+  { id: 'type', w: 140, essential: true },
   { id: 'width', w: 72 },
   { id: 'decimals', w: 92 },
-  { id: 'values', w: 260, essential: true },
-  { id: 'missing', w: 170, essential: true },
+  { id: 'values', w: 250, essential: true },
+  { id: 'missing', w: 160, essential: true },
   { id: 'columns', w: 80 },
   { id: 'align', w: 104 },
   { id: 'role', w: 104 },

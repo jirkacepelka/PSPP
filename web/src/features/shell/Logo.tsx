@@ -9,7 +9,7 @@ export function LogoMark({ size = 28, className = '' }: { size?: number; classNa
       <rect className="logo-tile" x="0" y="0" width="32" height="32" rx="7" />
       <path className="logo-base" d="M6.5 24.5h19" />
       <path className="logo-mean" d="M16 10.5v14" />
-      <path className="logo-curve" d="M5.5 23.5c4.2 0 5.6-13 10.5-13s6.3 13 10.5 13" />
+      <path className="logo-curve" d="M5 23.5C9.6 23.5 11 10.5 16 10.5S22.4 23.5 27 23.5" />
       <circle className="logo-dot" cx="22.5" cy="9" r="1.9" />
     </svg>
   );

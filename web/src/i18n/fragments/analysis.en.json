@@ -114,5 +114,417 @@
       "poor": "poor",
       "tooHigh": "An alpha above .95 may mean the items are redundant."
     }
+  },
+  "dialogs": {
+    "run": "Run",
+    "apply": "Apply",
+    "pasted": "Syntax pasted into the editor.",
+    "backToDialog": "Back to dialog",
+    "rolledBack": "The computation failed; the data changes were reverted.",
+    "measureChanged": "Measurement level of {{name}}",
+    "prefers": "Suitable measurement levels",
+    "groupCount_one": "{{count}} value",
+    "groupCount_other": "{{count}} values",
+    "example": "e.g. {{example}}",
+    "sections": "Dialog sections",
+    "mainTab": "Variables",
+    "editingResult": "Editing a result",
+    "copySyntax": "Copy syntax",
+    "sourceKeys": "Enter or → moves, {{mod}}+1–3 to a specific list, type to search.",
+    "pickGroupFirst": "First choose the variable that defines the groups.",
+    "groupsOf": "Groups of {{name}}",
+    "chooseValue": "Choose a value…",
+    "otherValue": "Other value…",
+    "insertFunction": "Insert function…"
+  },
+  "dlg": {
+    "common": {
+      "variable": "Variable"
+    },
+    "errors": {
+      "moreVariables": "Move more variables into the list.",
+      "predictors": "Add at least one predictor.",
+      "expected": "Enter the expected frequencies, e.g. 10 20 30.",
+      "nothingToDo": "Choose at least one property to set."
+    },
+    "hints": {
+      "measure": {
+        "scale": "{{name}} is {{measure}} – a scale (numeric) variable is expected here. Its mean may be meaningless.",
+        "ordinal": "{{name}} is {{measure}} – an ordinal variable is expected here.",
+        "nominal": "{{name}} is {{measure}} – a variable that splits cases into groups (nominal) is expected here."
+      },
+      "setMeasure": {
+        "scale": "Make {{name}} scale",
+        "ordinal": "Make {{name}} ordinal",
+        "nominal": "Make {{name}} nominal"
+      },
+      "nominalStats": "{{names}}: the mean and standard deviation are meaningless for nominal variables.",
+      "useMode": "Use the mode only",
+      "ordinalMedian": "For ordinal variables the median and quartiles are more suitable.",
+      "addMedian": "Add median and quartiles",
+      "suggestHistogram": "A histogram shows the distribution of a scale variable best.",
+      "addHistogram": "Add a histogram",
+      "suggestBar": "A bar chart shows categories clearly.",
+      "addBar": "Add a bar chart",
+      "suggestChisq": "Want to know whether the variables are related? Add the chi-square test.",
+      "addChisq": "Add chi-square and Cramér's V",
+      "ordinalSpearman": "{{names}} is ordinal – Spearman's correlation is more suitable.",
+      "useSpearman": "Use Spearman",
+      "fewItems": "Interpret the reliability of a two-item scale with care; usually at least three items are used.",
+      "notBinary": "{{name}} has {{count}} distinct values; logistic regression needs a two-valued dependent variable."
+    },
+    "correlations": {
+      "method": "Coefficient",
+      "pearson": "Pearson",
+      "spearman": "Spearman",
+      "kendall": "Kendall's tau-b"
+    },
+    "npar": {
+      "descriptives": "Descriptive statistics",
+      "exact": "Exact test (slower)"
+    },
+    "mannWhitney": {
+      "title": "Mann-Whitney test"
+    },
+    "kruskalWallis": {
+      "title": "Kruskal-Wallis test",
+      "min": "Lowest group value",
+      "max": "Highest group value"
+    },
+    "wilcoxon": {
+      "title": "Wilcoxon signed-rank test",
+      "sign": "Also the sign test"
+    },
+    "friedman": {
+      "title": "Friedman test",
+      "measures": "Repeated measurements",
+      "kendall": "Kendall's coefficient of concordance W"
+    },
+    "chiSquare": {
+      "title": "Chi-square goodness-of-fit test",
+      "expected": "Expected frequencies",
+      "equal": "All categories equal",
+      "values": "Given values",
+      "freqs": "Expected frequencies of the categories",
+      "freqsHint": "In category order, separated by spaces."
+    },
+    "binomial": {
+      "title": "Binomial test",
+      "p": "Test proportion",
+      "define": "Two groups",
+      "fromData": "From the data (2 values)",
+      "cut": "Cut point",
+      "cutValue": "Values ≤ the cut point form group 1"
+    },
+    "ksNormal": {
+      "title": "Normality test (Kolmogorov-Smirnov)",
+      "distribution": "Test distribution",
+      "normal": "Normal",
+      "uniform": "Uniform",
+      "poisson": "Poisson",
+      "exponential": "Exponential",
+      "info": "Distribution parameters are estimated from the data. For a visual check use Explore › Normality plots."
+    },
+    "reliability": {
+      "title": "Reliability (Cronbach's alpha)",
+      "items": "Scale items",
+      "model": "Model",
+      "alpha": "Cronbach's alpha",
+      "split": "Split-half",
+      "scaleName": "Scale name",
+      "itemTotal": "Item-total statistics (alpha if item deleted)"
+    },
+    "factor": {
+      "title": "Factor analysis",
+      "extractionBtn": "Extraction…",
+      "rotationBtn": "Rotation…",
+      "method": "Method",
+      "pc": "Principal components",
+      "paf": "Principal axis factoring",
+      "extract": "Number of factors",
+      "byEigen": "By eigenvalue",
+      "fixed": "Fixed number",
+      "mineigen": "Eigenvalue at least",
+      "factors": "Number of factors",
+      "scree": "Scree plot",
+      "rotation": "Rotation method",
+      "none": "No rotation",
+      "univariate": "Descriptive statistics",
+      "correlation": "Correlation matrix",
+      "kmo": "KMO and Bartlett's test",
+      "sort": "Sort loadings by size",
+      "blank": "Hide loadings below"
+    },
+    "quickCluster": {
+      "title": "K-means cluster analysis",
+      "k": "Number of clusters",
+      "iter": "Max. iterations",
+      "output": "Output and saving",
+      "initial": "Initial centres",
+      "membership": "Cluster membership of cases",
+      "saveCluster": "Save cluster number as a variable",
+      "saveDistance": "Save distance from the centre"
+    },
+    "logistic": {
+      "title": "Binary logistic regression",
+      "dependent": "Dependent variable (2 values)",
+      "covariates": "Predictors (scale)",
+      "categorical": "Predictors (categorical)",
+      "ci": "Confidence intervals for exp(B)",
+      "cut": "Classification cut-off",
+      "iterate": "Max. iterations",
+      "noconst": "No constant"
+    },
+    "glm": {
+      "title": "General linear model (univariate)",
+      "factors": "Fixed factors",
+      "design": "Model",
+      "full": "Full factorial",
+      "main": "Main effects only",
+      "sstype": "Sum of squares type",
+      "intercept": "Include intercept"
+    },
+    "ctables": {
+      "title": "Custom tables",
+      "rows": "Rows",
+      "cols": "Columns",
+      "catStats": "Categorical variables",
+      "scaleStats": "Scale variables",
+      "count": "Counts",
+      "colpct": "Column %",
+      "rowpct": "Row %",
+      "totalpct": "Table %",
+      "n": "Valid N",
+      "totals": "Total rows and columns"
+    },
+    "variableProperties": {
+      "title": "Define variable properties",
+      "measure": "Measurement level",
+      "role": "Role",
+      "keep": "Keep",
+      "label": "Variable label",
+      "labelHint": "Only when one variable is selected.",
+      "valueLabels": "Value labels",
+      "value": "Value",
+      "valueLabel": "Label",
+      "replace": "Replace existing value labels (otherwise add)",
+      "missing": "Missing values",
+      "missingHint": "e.g. 9, 99 or 90 thru hi; NONE removes missing values."
+    },
+    "histogram": {
+      "title": "Histogram"
+    },
+    "barChart": {
+      "title": "Bar chart",
+      "category": "Category (X axis)",
+      "cluster": "Cluster by",
+      "bars": "Bar height",
+      "count": "Number of cases",
+      "pct": "Percentage of cases",
+      "cufreq": "Cumulative count",
+      "cupct": "Cumulative percent",
+      "mean": "Mean of a variable",
+      "sum": "Sum of a variable",
+      "min": "Minimum of a variable",
+      "max": "Maximum of a variable",
+      "variable": "Variable for the bar height"
+    },
+    "scatter": {
+      "title": "Scatterplot",
+      "y": "Y axis",
+      "x": "X axis",
+      "by": "Colour by"
+    },
+    "boxplot": {
+      "title": "Boxplot",
+      "factor": "Groups by",
+      "compare": "Compare",
+      "byGroups": "Groups side by side",
+      "byVariables": "Variables side by side"
+    }
+  },
+  "assistant": {
+    "title": "Analysis guide",
+    "subtitle": "Say what you want to find out and PSPP Studio recommends a suitable test.",
+    "step1": "What do you want to find out?",
+    "step2": "Which variables?",
+    "step3": "Recommendation",
+    "back": "Back",
+    "change": "Change goal",
+    "noData": "Open some data first.",
+    "pick": "Choose variables",
+    "searchVars": "Search variables",
+    "remove": "Remove {{name}}",
+    "selected": "Selected",
+    "suitable": "Suitable",
+    "other": "Other",
+    "fillSlots": "Choose variables on the left and the recommendation appears here.",
+    "groups_one": "{{count}} group",
+    "groups_other": "{{count}} groups",
+    "testValue": "Compare with value",
+    "recommended": "Recommended",
+    "why": {
+      "describeCat": "Categorical variables are best described by frequency tables and a bar chart.",
+      "describeScale": "For scale variables you want the mean, spread and shape – Explore shows statistics, a histogram and a boxplot.",
+      "describeMixed": "Categorical variables get frequencies, scale variables the mean, standard deviation and a histogram.",
+      "ttest": "Two groups ({{group}}) and a scale variable → the independent-samples t-test compares the means.",
+      "mwOrdinal": "An ordinal variable and two groups ({{group}}) → the Mann-Whitney test compares ranks instead of means.",
+      "anova": "{{k}} groups ({{group}}) and a scale variable → one-way ANOVA; a post hoc test (Tukey) shows which groups differ.",
+      "kwOrdinal": "{{k}} groups ({{group}}) and an ordinal variable → the Kruskal-Wallis test.",
+      "crosstabs": "Both variables are categorical → a crosstabulation with the chi-square test.",
+      "paired": "Two measurements of the same people → the paired t-test compares the mean change.",
+      "wilcoxonOrdinal": "Two ordinal measurements of the same people → the Wilcoxon signed-rank test.",
+      "friedman": "{{k}} measurements of the same people → the Friedman test.",
+      "relateNominal": "Categorical variables → a crosstabulation and chi-square with the strength of association (Cramér's V).",
+      "pearson": "Scale variables → Pearson correlation; a scatterplot shows the shape of the relationship.",
+      "spearman": "At least one variable is ordinal → Spearman correlation.",
+      "logistic": "{{name}} has two values → binary logistic regression.",
+      "multinomial": "A nominal outcome with several categories is shown as a crosstabulation for now.",
+      "glm": "A scale outcome and categorical predictors → the general linear model (ANOVA with several factors).",
+      "regression": "A scale outcome ({{name}}) → linear regression shows how the predictors affect it.",
+      "distribution": "A histogram, Q-Q plot and normality tests in Explore show whether the distribution is roughly normal.",
+      "reliability": "{{k}} items of one scale → Cronbach's alpha with item-total statistics.",
+      "oneSample": "The mean of one variable against {{value}} → the one-sample t-test."
+    },
+    "assumptions": "What to check",
+    "alternative": "Alternative",
+    "alsoRun": "Also runs",
+    "run": "Run",
+    "openDialog": "Open dialog",
+    "paste": "Paste to syntax",
+    "openAlt": "Open alternative",
+    "nextTime": "Next time find it in: {{path}}",
+    "goal": {
+      "describe": {
+        "title": "Describe data",
+        "desc": "Frequencies, means, distributions"
+      },
+      "compare": {
+        "title": "Compare groups",
+        "desc": "Do men and women, faculties or treatment groups differ?"
+      },
+      "paired": {
+        "title": "Compare measurements of the same people",
+        "desc": "Before and after, repeated measures"
+      },
+      "relate": {
+        "title": "Relationship of variables",
+        "desc": "Are two or more variables related?"
+      },
+      "predict": {
+        "title": "Predict a value",
+        "desc": "Regression: what affects the outcome"
+      },
+      "distribution": {
+        "title": "Check a distribution",
+        "desc": "Is the variable normally distributed?"
+      },
+      "reliability": {
+        "title": "Scale reliability",
+        "desc": "Do the questionnaire items measure the same thing? (Cronbach's alpha)"
+      },
+      "testValue": {
+        "title": "Compare with a given value",
+        "desc": "Does the mean differ from a norm or target?"
+      }
+    },
+    "slot": {
+      "describe": "Which variables do you want to describe?",
+      "outcome": "What are you comparing? (outcome)",
+      "group": "What defines the groups?",
+      "measures": "Which measurements are you comparing? (2 or more)",
+      "relate": "Which variables? (2 or more)",
+      "predictOutcome": "What do you want to predict?",
+      "predictors": "What should explain it? (predictors)",
+      "distribution": "Which variable to check?",
+      "items": "Scale items (3 or more)",
+      "testValue": "Which variable?"
+    },
+    "test": {
+      "spearman": "Spearman correlation"
+    },
+    "assume": {
+      "independent": "Each person is in one group only (independent samples).",
+      "normal": "The variable is roughly normal in each group (with n ≥ 30 small deviations do not matter).",
+      "levene": "Similar variances in the groups – Levene's test is in the output.",
+      "expected5": "Expected counts of at least 5 in most cells.",
+      "samePeople": "The measurements belong to the same people (paired data).",
+      "normalDiff": "The differences between measurements are roughly normal.",
+      "monotonic": "The relationship is monotonic (one rises or falls with the other).",
+      "linear": "The relationship is roughly linear – check the scatterplot.",
+      "outliers": "No extreme outliers.",
+      "normalResid": "The residuals are roughly normal.",
+      "multicol": "The predictors are not too strongly correlated.",
+      "events": "Enough cases in both categories (at least 10 per predictor).",
+      "largeN": "With large samples normality tests come out “significant” even for small deviations – look mainly at the plots.",
+      "sameDirection": "All items point in the same direction (recode reversed items first)."
+    },
+    "alt": {
+      "nonNormal": "If the data are not normal or a group is small (n < 30).",
+      "nonNormalDiff": "If the differences are not normal or the data are ordinal.",
+      "repeatedGlm": "Repeated measures with normal data can also be analysed in syntax (GLM with WSFACTOR).",
+      "outliers": "If there are outliers or the relationship is not linear.",
+      "ks": "If you want a formal test (Kolmogorov-Smirnov).",
+      "factor": "To check whether the items form a single factor.",
+      "descriptivesTable": "If one compact table is enough."
+    },
+    "warn": {
+      "manyGroups": "The variable has many groups – is it really categorical?",
+      "noMultinomial": "PSPP has no multinomial regression yet.",
+      "dummy": "Nominal predictors with more than two categories need dummy (0/1) variables.",
+      "fewItems": "Reliability is usually computed from at least three items.",
+      "tinyGroups": "Very small groups (under 5 % of cases) are left out; the t-test compares the two main groups."
+    },
+    "path": {
+      "frequencies": "Analyze › Descriptive statistics › Frequencies",
+      "explore": "Analyze › Descriptive statistics › Explore",
+      "crosstabs": "Analyze › Descriptive statistics › Crosstabs",
+      "ttest": "Analyze › Compare means › Independent-samples t-test",
+      "mw": "Analyze › Nonparametric tests › Mann-Whitney",
+      "anova": "Analyze › Compare means › One-way ANOVA",
+      "kw": "Analyze › Nonparametric tests › Kruskal-Wallis",
+      "paired": "Analyze › Compare means › Paired-samples t-test",
+      "wilcoxon": "Analyze › Nonparametric tests › Wilcoxon",
+      "friedman": "Analyze › Nonparametric tests › Friedman",
+      "correlations": "Analyze › Correlate",
+      "logistic": "Analyze › Regression › Logistic",
+      "glm": "Analyze › General linear model",
+      "regression": "Analyze › Regression › Linear",
+      "reliability": "Analyze › Scale › Reliability",
+      "oneSample": "Analyze › Compare means › One-sample t-test"
+    },
+    "whyTitle": "Why"
+  },
+  "output": {
+    "by": "by {{name}}",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "entryDeleted": "Result deleted.",
+    "itemDeleted": "Item deleted.",
+    "undo": "Undo",
+    "copiedApa": "Table copied in APA style",
+    "moreCopy": "More copy options",
+    "copyAsTable": "Copy as table",
+    "copyAsApa": "Copy in APA style",
+    "copyAsText": "Copy as text",
+    "fixInDialog": "Fix in dialog",
+    "copyImage": "Copy image",
+    "copiedImage": "Chart copied as an image",
+    "downloadChart": "Download chart",
+    "resultActions": "Result actions",
+    "edit": "Edit",
+    "rerun": "Run again",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "more": "More actions",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "analyze": "Analyze…",
+    "cleared": "Output cleared.",
+    "search": "Search the output",
+    "pinned": "Pinned",
+    "noMatch": "Nothing found.",
+    "emptyAsk": "What do you want to find out?",
+    "emptyOrMenu": "Or open the Analyze menu."
   }
 }

@@ -114,7 +114,8 @@ export function DataView() {
     if (!ds) return cols;
     ds.variables.forEach((v, i) => {
       const labelled = v.valueLabels.length > 0 && isCategoricalVar(v);
-      const base = Math.max(v.columns * m.charWidth + 34, v.name.length * 8 * m.zoom + 64, labelled ? 108 * m.zoom : 72);
+      const longest = labelled ? v.valueLabels.reduce((n, l) => Math.max(n, l.label.length), 0) : 0;
+      const base = Math.max(v.columns * m.charWidth + 34, v.name.length * 8 * m.zoom + 64, labelled ? Math.min(220 * m.zoom, longest * 7 * m.zoom + 40) : 72);
       const w = widths[i] ?? Math.round(Math.min(360, base));
       cols.push({ id: `v${i}-${v.name}`, title: v.name, width: w, hasMenu: true });
     });
@@ -153,7 +154,7 @@ export function DataView() {
           tag,
           state: missing ? 'userMissing' : 'value',
           flag: highlightFlags ? vi.check(c) : null,
-          align: tag || (label !== undefined && missing) ? 'left' : v.align,
+          align: valueLabels && vi.tag && vi.options ? 'left' : v.align,
           row,
           name: v.name,
           options: vi.options,
@@ -427,6 +428,7 @@ export function DataView() {
   };
 
   const headerMenu = (col: number, x: number, y: number) => {
+    hideTip();
     if (!ds) return;
     if (col >= nVars) {
       setMenu({ x, y, items: [{ type: 'item', id: 'nv', label: t('dataView.addVariable'), icon: 'add_column_right', onSelect: () => insertVariable(nVars) }] });
@@ -484,6 +486,7 @@ export function DataView() {
   };
 
   const cellMenu = (col: number, row: number, x: number, y: number) => {
+    hideTip();
     const inSel = selection.current && selectedRects(selection).some((r) => col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height);
     if (!inSel) gotoCell(row, col);
     const sel = inSel ? selection : { ...EMPTY_SEL, current: { cell: [col, row] as Item, range: { x: col, y: row, width: 1, height: 1 }, rangeStack: [] } };
@@ -523,7 +526,11 @@ export function DataView() {
   const flagMessage = useCallback(
     (kind: FlagKind, c: Cell, v: Variable): string => {
       const value = typeof c === 'number' ? labelValueText(c, v, { decimalSeparator: dec }) : `„${String(c)}“`;
-      if (kind === 'outOfRange') return t('dataView.flag.outOfRange', { value, min: v.validRange?.min, max: v.validRange?.max });
+      if (kind === 'outOfRange') {
+        const r = v.validRange;
+        const show = (x: number | undefined, inf: string) => (x === undefined || !Number.isFinite(x) ? inf : labelValueText(x, v, { decimalSeparator: dec }));
+        return t('dataView.flag.outOfRange', { value, min: show(r?.min, '−∞'), max: show(r?.max, '∞') });
+      }
       if (kind === 'whitespace') return t('dataView.flag.whitespace');
       if (kind === 'caseVariant') return t('dataView.flag.caseVariant', { value });
       const codes = v.valueLabels.map((l) => labelValueText(l.value, v, { decimalSeparator: dec }));
@@ -545,6 +552,7 @@ export function DataView() {
       const b = args.bounds;
       if (args.kind === 'header') {
         tipTimer.current = setTimeout(() => {
+          if (useUi.getState().modal || document.querySelector('.menu')) return;
           const column = ds.columns[col] ?? [];
           let sys = 0;
           let user = 0;
@@ -568,7 +576,7 @@ export function DataView() {
         const c = ds.columns[col][row] ?? null;
         const kind = c === null ? null : info[col]?.check(c);
         if (!kind) return;
-        tipTimer.current = setTimeout(() => setTip({ x: b.x, y: b.y, below: b.y + b.height, title: t(`dataView.flagTitle.${kind}`), lines: [flagMessage(kind, c, v)], tone: 'warning' }), 300);
+        tipTimer.current = setTimeout(() => !useUi.getState().modal && setTip({ x: b.x, y: b.y, below: b.y + b.height, title: t(`dataView.flagTitle.${kind}`), lines: [flagMessage(kind, c, v)], tone: 'warning' }), 300);
       }
     },
     [ds, nCases, info, highlightFlags, t, flagMessage],
@@ -662,6 +670,7 @@ export function DataView() {
           return false;
         }}
         onItemHovered={onItemHovered}
+        onVisibleRegionChanged={hideTip}
         rangeSelect="multi-rect"
         columnSelect="multi"
         rowSelect="multi"

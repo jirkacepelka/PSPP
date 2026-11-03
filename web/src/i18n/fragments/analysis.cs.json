@@ -122,5 +122,423 @@
       "poor": "slabá",
       "tooHigh": "Alfa nad 0,95 může znamenat, že se položky opakují."
     }
+  },
+  "dialogs": {
+    "run": "Spustit",
+    "apply": "Použít",
+    "pasted": "Syntaxe vložena do editoru.",
+    "backToDialog": "Zpět k dialogu",
+    "rolledBack": "Výpočet selhal, změny dat byly vráceny.",
+    "measureChanged": "Úroveň měření {{name}}",
+    "prefers": "Vhodné úrovně měření",
+    "groupCount_one": "{{count}} hodnota",
+    "groupCount_few": "{{count}} hodnoty",
+    "groupCount_many": "{{count}} hodnot",
+    "groupCount_other": "{{count}} hodnot",
+    "example": "Např. {{example}}",
+    "sections": "Části dialogu",
+    "mainTab": "Proměnné",
+    "editingResult": "Úprava výsledku",
+    "copySyntax": "Kopírovat syntaxi",
+    "sourceKeys": "Enter nebo → přesune, {{mod}}+1–3 do konkrétního seznamu, psaním hledáte.",
+    "pickGroupFirst": "Nejdřív vyberte proměnnou, podle které se dělí skupiny.",
+    "groupsOf": "Skupiny proměnné {{name}}",
+    "chooseValue": "Vyberte hodnotu…",
+    "otherValue": "Jiná hodnota…",
+    "insertFunction": "Vložit funkci…"
+  },
+  "dlg": {
+    "common": {
+      "variable": "Proměnná"
+    },
+    "errors": {
+      "moreVariables": "Přesuňte do seznamu ještě další proměnné.",
+      "predictors": "Přidejte alespoň jeden prediktor.",
+      "expected": "Zadejte očekávané četnosti, např. 10 20 30.",
+      "nothingToDo": "Vyberte alespoň jednu vlastnost, kterou chcete nastavit."
+    },
+    "hints": {
+      "measure": {
+        "scale": "{{name}} je {{measure}} – tady se čeká spojitá (číselná) proměnná. Průměr u ní nemusí dávat smysl.",
+        "ordinal": "{{name}} je {{measure}} – tady se čeká pořadová proměnná.",
+        "nominal": "{{name}} je {{measure}} – tady se čeká proměnná, která dělí případy do skupin (nominální)."
+      },
+      "setMeasure": {
+        "scale": "Změnit {{name}} na spojitou",
+        "ordinal": "Změnit {{name}} na pořadovou",
+        "nominal": "Změnit {{name}} na nominální"
+      },
+      "nominalStats": "{{names}}: u nominálních proměnných průměr ani směrodatná odchylka nedávají smysl.",
+      "useMode": "Použít jen modus",
+      "ordinalMedian": "U pořadových proměnných je vhodnější medián a kvartily.",
+      "addMedian": "Přidat medián a kvartily",
+      "suggestHistogram": "Rozdělení spojité proměnné nejlépe ukáže histogram.",
+      "addHistogram": "Přidat histogram",
+      "suggestBar": "Kategorie přehledně ukáže sloupcový graf.",
+      "addBar": "Přidat sloupcový graf",
+      "suggestChisq": "Chcete vědět, jestli spolu proměnné souvisejí? Přidejte test chí-kvadrát.",
+      "addChisq": "Přidat chí-kvadrát a Cramérovo V",
+      "ordinalSpearman": "{{names}} je pořadová – vhodnější je Spearmanova korelace.",
+      "useSpearman": "Použít Spearmana",
+      "fewItems": "Reliabilitu škály se dvěma položkami interpretujte opatrně; obvykle se počítá alespoň ze tří.",
+      "notBinary": "{{name}} má {{count}} různých hodnot; logistická regrese potřebuje dvouhodnotovou závisle proměnnou."
+    },
+    "correlations": {
+      "method": "Koeficient",
+      "pearson": "Pearsonův",
+      "spearman": "Spearmanův",
+      "kendall": "Kendallovo tau-b"
+    },
+    "npar": {
+      "descriptives": "Popisné statistiky",
+      "exact": "Přesný test (pomalejší)"
+    },
+    "mannWhitney": {
+      "title": "Mann-Whitneyův test"
+    },
+    "kruskalWallis": {
+      "title": "Kruskal-Wallisův test",
+      "min": "Nejmenší hodnota skupiny",
+      "max": "Největší hodnota skupiny"
+    },
+    "wilcoxon": {
+      "title": "Wilcoxonův test (párový)",
+      "sign": "Také znaménkový test"
+    },
+    "friedman": {
+      "title": "Friedmanův test",
+      "measures": "Opakovaná měření",
+      "kendall": "Kendallův koeficient shody W"
+    },
+    "chiSquare": {
+      "title": "Chí-kvadrát test dobré shody",
+      "expected": "Očekávané četnosti",
+      "equal": "Všechny kategorie stejně",
+      "values": "Zadané hodnoty",
+      "freqs": "Očekávané četnosti kategorií",
+      "freqsHint": "V pořadí kategorií, oddělené mezerou."
+    },
+    "binomial": {
+      "title": "Binomický test",
+      "p": "Testovaný podíl",
+      "define": "Dvě skupiny",
+      "fromData": "Podle dat (2 hodnoty)",
+      "cut": "Dělicí bod",
+      "cutValue": "Hodnoty ≤ dělicí bod tvoří 1. skupinu"
+    },
+    "ksNormal": {
+      "title": "Test normality (Kolmogorov-Smirnov)",
+      "distribution": "Testované rozdělení",
+      "normal": "Normální",
+      "uniform": "Rovnoměrné",
+      "poisson": "Poissonovo",
+      "exponential": "Exponenciální",
+      "info": "Parametry rozdělení se odhadnou z dat. Pro grafické posouzení použijte Prozkoumat › Grafy normality."
+    },
+    "reliability": {
+      "title": "Reliabilita (Cronbachova alfa)",
+      "items": "Položky škály",
+      "model": "Model",
+      "alpha": "Cronbachova alfa",
+      "split": "Split-half",
+      "scaleName": "Název škály",
+      "itemTotal": "Statistiky položka–celek (alfa po vyřazení položky)"
+    },
+    "factor": {
+      "title": "Faktorová analýza",
+      "extractionBtn": "Extrakce…",
+      "rotationBtn": "Rotace…",
+      "method": "Metoda",
+      "pc": "Hlavní komponenty",
+      "paf": "Hlavní osy (PAF)",
+      "extract": "Počet faktorů",
+      "byEigen": "Podle vlastního čísla",
+      "fixed": "Pevný počet",
+      "mineigen": "Vlastní číslo alespoň",
+      "factors": "Počet faktorů",
+      "scree": "Sutinový graf",
+      "rotation": "Metoda rotace",
+      "none": "Bez rotace",
+      "univariate": "Popisné statistiky",
+      "correlation": "Korelační matice",
+      "kmo": "KMO a Bartlettův test",
+      "sort": "Seřadit zátěže podle velikosti",
+      "blank": "Skrýt zátěže menší než"
+    },
+    "quickCluster": {
+      "title": "Shluková analýza (k-průměrů)",
+      "k": "Počet shluků",
+      "iter": "Max. iterací",
+      "output": "Výstup a uložení",
+      "initial": "Počáteční centra",
+      "membership": "Příslušnost případů ke shlukům",
+      "saveCluster": "Uložit číslo shluku jako proměnnou",
+      "saveDistance": "Uložit vzdálenost od centra"
+    },
+    "logistic": {
+      "title": "Logistická regrese (binární)",
+      "dependent": "Závisle proměnná (2 hodnoty)",
+      "covariates": "Prediktory (spojité)",
+      "categorical": "Prediktory (kategoriální)",
+      "ci": "Intervaly spolehlivosti pro exp(B)",
+      "cut": "Klasifikační hranice",
+      "iterate": "Max. iterací",
+      "noconst": "Bez konstanty"
+    },
+    "glm": {
+      "title": "Obecný lineární model (jednorozměrný)",
+      "factors": "Pevné faktory",
+      "design": "Model",
+      "full": "Úplný faktoriální",
+      "main": "Jen hlavní efekty",
+      "sstype": "Typ součtu čtverců",
+      "intercept": "Zahrnout absolutní člen"
+    },
+    "ctables": {
+      "title": "Vlastní tabulky",
+      "rows": "Řádky",
+      "cols": "Sloupce",
+      "catStats": "Kategoriální proměnné",
+      "scaleStats": "Spojité proměnné",
+      "count": "Počty",
+      "colpct": "% ve sloupci",
+      "rowpct": "% v řádku",
+      "totalpct": "% z celku",
+      "n": "Počet platných",
+      "totals": "Řádky a sloupce Celkem"
+    },
+    "variableProperties": {
+      "title": "Definovat vlastnosti proměnných",
+      "measure": "Úroveň měření",
+      "role": "Role",
+      "keep": "Ponechat",
+      "label": "Popisek proměnné",
+      "labelHint": "Jen při výběru jedné proměnné.",
+      "valueLabels": "Popisky hodnot",
+      "value": "Hodnota",
+      "valueLabel": "Popisek",
+      "replace": "Nahradit stávající popisky hodnot (jinak se doplní)",
+      "missing": "Chybějící hodnoty",
+      "missingHint": "Např. 9, 99 nebo 90 thru hi; NONE odstraní chybějící hodnoty."
+    },
+    "histogram": {
+      "title": "Histogram"
+    },
+    "barChart": {
+      "title": "Sloupcový graf",
+      "category": "Kategorie (osa X)",
+      "cluster": "Seskupit podle",
+      "bars": "Výška sloupců",
+      "count": "Počet případů",
+      "pct": "Procento případů",
+      "cufreq": "Kumulativní počet",
+      "cupct": "Kumulativní procento",
+      "mean": "Průměr proměnné",
+      "sum": "Součet proměnné",
+      "min": "Minimum proměnné",
+      "max": "Maximum proměnné",
+      "variable": "Proměnná pro výšku sloupců"
+    },
+    "scatter": {
+      "title": "Bodový graf",
+      "y": "Osa Y",
+      "x": "Osa X",
+      "by": "Barva podle"
+    },
+    "boxplot": {
+      "title": "Krabicový graf",
+      "factor": "Skupiny podle",
+      "compare": "Porovnat",
+      "byGroups": "Skupiny vedle sebe",
+      "byVariables": "Proměnné vedle sebe"
+    }
+  },
+  "assistant": {
+    "title": "Průvodce výběrem analýzy",
+    "subtitle": "Řekněte, co chcete zjistit, a PSPP Studio doporučí vhodný test.",
+    "step1": "Co chcete zjistit?",
+    "step2": "Které proměnné?",
+    "step3": "Doporučení",
+    "back": "Zpět",
+    "change": "Změnit cíl",
+    "noData": "Nejdřív otevřete data.",
+    "pick": "Vyberte proměnné",
+    "searchVars": "Hledat proměnnou",
+    "remove": "Odebrat {{name}}",
+    "selected": "Vybráno",
+    "suitable": "Vhodné",
+    "other": "Ostatní",
+    "fillSlots": "Vyberte proměnné vlevo a doporučení se zobrazí tady.",
+    "groups_one": "{{count}} skupina",
+    "groups_few": "{{count}} skupiny",
+    "groups_many": "{{count}} skupin",
+    "groups_other": "{{count}} skupin",
+    "testValue": "Porovnat s hodnotou",
+    "recommended": "Doporučujeme",
+    "why": {
+      "describeCat": "Kategoriální proměnné nejlépe popíší tabulky četností a sloupcový graf.",
+      "describeScale": "U spojitých proměnných vás zajímá průměr, rozptyl a tvar rozdělení – Prozkoumat ukáže statistiky, histogram i krabicový graf.",
+      "describeMixed": "Kategoriální proměnné popíšeme četnostmi, spojité průměrem, směrodatnou odchylkou a histogramem.",
+      "ttest": "Dvě skupiny ({{group}}) a spojitá proměnná → T-test pro nezávislé výběry porovná průměry.",
+      "mwOrdinal": "Pořadová proměnná a dvě skupiny ({{group}}) → Mann-Whitneyův test porovná pořadí místo průměrů.",
+      "anova": "{{k}} skupin ({{group}}) a spojitá proměnná → jednofaktorová ANOVA; post hoc test (Tukey) ukáže, které skupiny se liší.",
+      "kwOrdinal": "{{k}} skupin ({{group}}) a pořadová proměnná → Kruskal-Wallisův test.",
+      "crosstabs": "Obě proměnné jsou kategoriální → kontingenční tabulka a test chí-kvadrát.",
+      "paired": "Dvě měření u stejných lidí → párový T-test porovná průměrnou změnu.",
+      "wilcoxonOrdinal": "Dvě pořadová měření u stejných lidí → Wilcoxonův párový test.",
+      "friedman": "{{k}} měření u stejných lidí → Friedmanův test.",
+      "relateNominal": "Kategoriální proměnné → kontingenční tabulka a chí-kvadrát se silou vztahu (Cramérovo V).",
+      "pearson": "Spojité proměnné → Pearsonova korelace; bodový graf ukáže tvar vztahu.",
+      "spearman": "Alespoň jedna proměnná je pořadová → Spearmanova korelace.",
+      "logistic": "{{name}} má dvě hodnoty → binární logistická regrese.",
+      "multinomial": "Nominální výsledek s více kategoriemi zatím ukážeme kontingenční tabulkou.",
+      "glm": "Spojitý výsledek a kategoriální prediktory → obecný lineární model (ANOVA s více faktory).",
+      "regression": "Spojitý výsledek ({{name}}) → lineární regrese ukáže, jak prediktory výsledek ovlivňují.",
+      "distribution": "Histogram, Q-Q graf a testy normality v dialogu Prozkoumat ukážou, zda je rozdělení přibližně normální.",
+      "reliability": "{{k}} položek jedné škály → Cronbachova alfa a statistiky položka–celek.",
+      "oneSample": "Průměr jedné proměnné proti hodnotě {{value}} → jednovýběrový T-test."
+    },
+    "assumptions": "Co ověřit",
+    "alternative": "Alternativa",
+    "alsoRun": "Spustí se také",
+    "run": "Spustit",
+    "openDialog": "Otevřít dialog",
+    "paste": "Vložit do syntaxe",
+    "openAlt": "Otevřít alternativu",
+    "nextTime": "Příště najdete v: {{path}}",
+    "goal": {
+      "describe": {
+        "title": "Popsat data",
+        "desc": "Četnosti, průměry, rozložení hodnot"
+      },
+      "compare": {
+        "title": "Porovnat skupiny",
+        "desc": "Liší se muži a ženy, fakulty, skupiny léčby?"
+      },
+      "paired": {
+        "title": "Porovnat měření u stejných lidí",
+        "desc": "Před a po, opakovaná měření"
+      },
+      "relate": {
+        "title": "Vztah proměnných",
+        "desc": "Souvisí spolu dvě nebo více proměnných?"
+      },
+      "predict": {
+        "title": "Předpovědět hodnotu",
+        "desc": "Regrese: co ovlivňuje výsledek"
+      },
+      "distribution": {
+        "title": "Ověřit rozdělení",
+        "desc": "Je proměnná normálně rozdělená?"
+      },
+      "reliability": {
+        "title": "Spolehlivost škály",
+        "desc": "Měří položky dotazníku totéž? (Cronbachova alfa)"
+      },
+      "testValue": {
+        "title": "Porovnat s danou hodnotou",
+        "desc": "Liší se průměr od normy nebo cíle?"
+      }
+    },
+    "slot": {
+      "describe": "Které proměnné chcete popsat?",
+      "outcome": "Co porovnáváte? (výsledná proměnná)",
+      "group": "Podle čeho jsou skupiny?",
+      "measures": "Která měření porovnáváte? (2 a více)",
+      "relate": "Které proměnné? (2 a více)",
+      "predictOutcome": "Co chcete předpovědět?",
+      "predictors": "Čím to chcete vysvětlit? (prediktory)",
+      "distribution": "Kterou proměnnou ověřit?",
+      "items": "Položky škály (3 a více)",
+      "testValue": "Která proměnná?"
+    },
+    "test": {
+      "spearman": "Spearmanova korelace"
+    },
+    "assume": {
+      "independent": "Každý člověk je jen v jedné skupině (nezávislé výběry).",
+      "normal": "Proměnná má v každé skupině přibližně normální rozdělení (u n ≥ 30 nevadí mírné odchylky).",
+      "levene": "Podobné rozptyly ve skupinách – Levenův test je ve výstupu.",
+      "expected5": "Očekávané četnosti alespoň 5 ve většině buněk.",
+      "samePeople": "Měření patří ke stejným lidem (párová data).",
+      "normalDiff": "Rozdíly mezi měřeními jsou přibližně normální.",
+      "monotonic": "Vztah je monotónní (s jednou roste nebo klesá druhá).",
+      "linear": "Vztah je přibližně lineární – zkontrolujte bodový graf.",
+      "outliers": "Žádné výrazně odlehlé hodnoty.",
+      "normalResid": "Rezidua jsou přibližně normální.",
+      "multicol": "Prediktory spolu příliš silně nekorelují.",
+      "events": "Dostatek případů v obou kategoriích (aspoň 10 na prediktor).",
+      "largeN": "U velkých vzorků vyjdou testy normality „významné“ i při malé odchylce – sledujte hlavně grafy.",
+      "sameDirection": "Všechny položky jsou ve stejném směru (obrácené položky nejdřív překódujte)."
+    },
+    "alt": {
+      "nonNormal": "Pokud data nejsou normální nebo je skupina malá (n < 30).",
+      "nonNormalDiff": "Pokud rozdíly nejsou normální nebo jde o pořadová data.",
+      "repeatedGlm": "Opakovaná měření s normálními daty lze analyzovat i v syntaxi (GLM s WSFACTOR).",
+      "outliers": "Pokud data obsahují odlehlé hodnoty nebo vztah není lineární.",
+      "ks": "Pokud chcete formální test (Kolmogorov-Smirnov).",
+      "factor": "Chcete-li ověřit, zda položky tvoří jeden faktor.",
+      "descriptivesTable": "Stačí-li vám jedna kompaktní tabulka."
+    },
+    "warn": {
+      "manyGroups": "Proměnná má hodně skupin – je opravdu kategoriální?",
+      "noMultinomial": "Multinomickou regresi PSPP zatím nemá.",
+      "dummy": "Nominální prediktory s více kategoriemi je třeba převést na umělé (0/1) proměnné.",
+      "fewItems": "Reliabilita se obvykle počítá alespoň ze tří položek.",
+      "tinyGroups": "Velmi malé skupiny (pod 5 % případů) vynecháváme; t-test porovná dvě hlavní skupiny."
+    },
+    "path": {
+      "frequencies": "Analýza › Popisné statistiky › Četnosti",
+      "explore": "Analýza › Popisné statistiky › Prozkoumat",
+      "crosstabs": "Analýza › Popisné statistiky › Kontingenční tabulky",
+      "ttest": "Analýza › Porovnání průměrů › T-test pro nezávislé výběry",
+      "mw": "Analýza › Neparametrické testy › Mann-Whitney",
+      "anova": "Analýza › Porovnání průměrů › Jednofaktorová ANOVA",
+      "kw": "Analýza › Neparametrické testy › Kruskal-Wallis",
+      "paired": "Analýza › Porovnání průměrů › Párový T-test",
+      "wilcoxon": "Analýza › Neparametrické testy › Wilcoxon",
+      "friedman": "Analýza › Neparametrické testy › Friedman",
+      "correlations": "Analýza › Korelace",
+      "logistic": "Analýza › Regrese › Logistická",
+      "glm": "Analýza › Obecný lineární model",
+      "regression": "Analýza › Regrese › Lineární",
+      "reliability": "Analýza › Škály › Reliabilita",
+      "oneSample": "Analýza › Porovnání průměrů › Jednovýběrový T-test"
+    },
+    "whyTitle": "Proč"
+  },
+  "output": {
+    "by": "podle {{name}}",
+    "today": "Dnes",
+    "yesterday": "Včera",
+    "entryDeleted": "Výsledek byl odstraněn.",
+    "itemDeleted": "Položka byla odstraněna.",
+    "undo": "Zpět",
+    "copiedApa": "Tabulka zkopírována ve stylu APA",
+    "moreCopy": "Další možnosti kopírování",
+    "copyAsTable": "Kopírovat jako tabulku",
+    "copyAsApa": "Kopírovat ve stylu APA",
+    "copyAsText": "Kopírovat jako text",
+    "fixInDialog": "Opravit v dialogu",
+    "copyImage": "Kopírovat obrázek",
+    "copiedImage": "Graf zkopírován jako obrázek",
+    "downloadChart": "Stáhnout graf",
+    "resultActions": "Akce výsledku",
+    "edit": "Upravit",
+    "rerun": "Spustit znovu",
+    "pin": "Připnout",
+    "unpin": "Odepnout",
+    "more": "Další akce",
+    "results_one": "{{count}} výsledek",
+    "results_few": "{{count}} výsledky",
+    "results_many": "{{count}} výsledků",
+    "results_other": "{{count}} výsledků",
+    "analyze": "Analyzovat…",
+    "cleared": "Výstup byl vymazán.",
+    "search": "Hledat ve výstupu",
+    "pinned": "Připnuté",
+    "noMatch": "Nic nenalezeno.",
+    "emptyAsk": "Co chcete zjistit?",
+    "emptyOrMenu": "Nebo otevřete nabídku Analýza."
   }
 }

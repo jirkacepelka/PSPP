@@ -1,0 +1,221 @@
+/* Command palette. Tokens only. SPDX-License-Identifier: GPL-3.0-or-later */
+.pal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-palette);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh var(--s-4) var(--s-4);
+  background: var(--scrim);
+  animation: pal-fade var(--dur-short) var(--ease-out);
+}
+.pal {
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100%);
+  max-height: min(560px, 76vh);
+  overflow: hidden;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-dialog);
+  animation: pal-pop var(--dur-medium) var(--ease-out);
+}
+.pal-search {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 52px;
+  padding: 0 var(--s-3) 0 var(--s-4);
+  border-bottom: var(--hairline) solid var(--line);
+  flex: none;
+}
+.pal-search > .icon {
+  color: var(--ink-3);
+}
+.pal-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-lg);
+}
+.pal-search input:focus {
+  outline: none;
+}
+.pal-search input::placeholder {
+  color: var(--ink-3);
+}
+.pal-scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 var(--s-2);
+  border: var(--hairline) solid var(--accent);
+  border-radius: var(--radius-chip);
+  background: var(--accent-tint);
+  color: var(--accent-text);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.pal-list {
+  flex: 1;
+  margin: 0;
+  padding: var(--s-1);
+  overflow-y: auto;
+  list-style: none;
+}
+.pal-group {
+  padding: var(--s-3) var(--s-3) var(--s-1);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.01em;
+}
+.pal-group:first-child {
+  padding-top: var(--s-2);
+}
+.pal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 40px;
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  cursor: pointer;
+}
+.pal-item.on {
+  background: var(--accent-tint-strong);
+  box-shadow: inset 2px 0 0 var(--accent-line);
+}
+.pal-item.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.pal-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  flex: none;
+  color: var(--ink-3);
+}
+.pal-icon[data-measure] {
+  color: var(--m);
+}
+.pal-item.on .pal-icon:not([data-measure]) {
+  color: var(--accent-text);
+}
+.pal-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+.pal-label {
+  flex: none;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pal-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+.pal-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.pal-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-6) var(--s-5);
+  color: var(--ink-3);
+  text-align: center;
+}
+.pal-empty strong {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+}
+.pal-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  height: 36px;
+  padding: 0 var(--s-4);
+  border-top: var(--hairline) solid var(--line);
+  background: var(--surface-sunken);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.pal-foot .kbd {
+  margin-right: 2px;
+}
+.pal-prefixes {
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@keyframes pal-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (max-width: 600px) {
+  .pal-scrim {
+    padding: 0;
+  }
+  .pal {
+    width: 100%;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+  .pal-foot {
+    display: none;
+  }
+  .pal-item {
+    min-height: 48px;
+  }
+  .pal-text {
+    flex-direction: column;
+    gap: 0;
+  }
+  .pal-label {
+    max-width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pal,
+  .pal-scrim {
+    animation: none;
+  }
+}

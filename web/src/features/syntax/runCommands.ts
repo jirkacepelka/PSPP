@@ -59,3 +59,28 @@ export function runSyntaxCommand(mode: RunMode) {
   const next = view.state.doc.line(Math.min(view.state.doc.lines, cmd.endLine + 1));
   view.dispatch({ selection: { anchor: Math.min(view.state.doc.length, next.from) }, scrollIntoView: true });
 }
+
+/** Line the syntax editor should jump to when TABID is shown next (from Output error links). */
+let pendingGoto: { tabId: string; line: number } | null = null;
+
+/** Opens syntax tab TABID with the cursor on LINE (SY-4). */
+export function gotoSyntaxLine(tabId: string, line: number) {
+  const s = useSyntax.getState();
+  if (!s.tabs.some((t) => t.id === tabId)) return false;
+  pendingGoto = { tabId, line };
+  s.setActive(tabId);
+  useUi.getState().setView('syntax');
+  // the editor may already show this tab
+  setTimeout(() => consumeGoto(), 0);
+  return true;
+}
+
+/** Applies a pending jump if the registered editor shows its tab. */
+export function consumeGoto() {
+  if (!pendingGoto || !editor || editor.tabId !== pendingGoto.tabId) return;
+  const { view } = editor;
+  const line = view.state.doc.line(Math.max(1, Math.min(view.state.doc.lines, pendingGoto.line)));
+  pendingGoto = null;
+  view.dispatch({ selection: { anchor: line.from, head: line.to }, scrollIntoView: true });
+  view.focus();
+}

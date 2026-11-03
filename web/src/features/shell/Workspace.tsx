@@ -124,8 +124,15 @@ export function splitPair(mode: string, view: View, width: number): [View, View]
   return view === left || view === 'output' ? [left, 'output'] : null;
 }
 
+/** On narrow screens the inspector covers the data, so it opens only when asked for in this session. */
+let inspectorToggledThisSession = false;
+useSettings.subscribe((s, prev) => {
+  if (prev.loaded && s.inspectorOpen !== prev.inspectorOpen) inspectorToggledThisSession = true;
+});
+
 function SidePanel({ view }: { view: View }) {
-  const inspectorOpen = useSettings((s) => s.inspectorOpen);
+  const width = useWindowWidth();
+  const inspectorOpen = useSettings((s) => s.inspectorOpen) && (width > 900 || inspectorToggledThisSession);
   const journalOpen = useLayout((s) => s.journalOpen);
   const [inspectorReady, setReady] = useState(false);
   useEffect(() => {

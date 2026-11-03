@@ -14,12 +14,12 @@ import { Button } from '../../components/Button';
 import { Chip, ValueLabelChip } from '../../components/Chip';
 import { NumberField, Select } from '../../components/Field';
 import { Checkbox } from '../../components/Choice';
-import type { Cell, Variable } from '../../engine/types';
+import type { Variable } from '../../engine/types';
 import { useData } from '../../store/data';
 import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
 import { DATE_FORMATS, DATE_FORMAT_EXAMPLE, DATE_FORMAT_WIDTH, formatNumber, isDateFormat, labelValueText, parseDate, parseNumber, PSPP_EPOCH_MS, valueLabelFor } from '../../lib/format';
-import { changeVariableType } from '../../lib/variables';
+import { conversionPreview, parseLabelPaste } from './labelTools';
 
 type Kind = 'numeric' | 'comma' | 'dot' | 'scientific' | 'date' | 'dollar' | 'custom' | 'string';
 const KIND_ICON: Record<Kind, string> = { numeric: 'pin', comma: 'pin', dot: 'pin', scientific: 'functions', date: 'event', dollar: 'payments', custom: 'payments', string: 'text_fields' };
@@ -37,25 +37,6 @@ function kindOf(v: Variable): Kind {
 }
 
 const SAMPLE_DATE = (Date.UTC(2024, 6, 15, 15, 30, 15) - PSPP_EPOCH_MS) / 1000;
-
-/** How a type change affects existing values: unchanged, becoming missing, truncated. */
-export function conversionPreview(v: Variable, col: readonly Cell[], type: 'numeric' | 'string', fmt: Variable['print']): { kept: number; lost: number; truncated: number; example?: string } {
-  const r = changeVariableType(v, col as Cell[], type, fmt);
-  let kept = 0;
-  let lost = 0;
-  let truncated = 0;
-  let example: string | undefined;
-  col.forEach((c, i) => {
-    if (c === null || c === '') return;
-    const n = r.column[i];
-    if (n === null || n === '') {
-      lost++;
-      example ??= String(c);
-    } else if (typeof c === 'string' && typeof n === 'string' && n.length < c.trimEnd().length) truncated++;
-    else kept++;
-  });
-  return { kept, lost, truncated, example };
-}
 
 export function TypeDialog({ index }: { index: number }) {
   const { t } = useTranslation();
@@ -180,20 +161,6 @@ interface LabelRow {
   suggested?: boolean;
 }
 
-/** Parses a pasted two-column block (tab, semicolon or "code label" lines). */
-export function parseLabelPaste(text: string): { value: string; label: string }[] | null {
-  const lines = text.replace(/\r/g, '').split('\n').filter((l) => l.trim() !== '');
-  if (lines.length < 2 && !text.includes('\t')) return null;
-  const out: { value: string; label: string }[] = [];
-  for (const l of lines) {
-    const parts = l.includes('\t') ? l.split('\t') : l.includes(';') ? l.split(';') : l.match(/^\s*(\S+)\s+(.+)$/)?.slice(1) ?? [l];
-    const value = (parts[0] ?? '').trim().replace(/^"(.*)"$/, '$1');
-    const label = parts.slice(1).join(' ').trim().replace(/^"(.*)"$/, '$1');
-    if (value !== '') out.push({ value, label });
-  }
-  return out.length ? out : null;
-}
-
 export function ValueLabelsDialog({ index }: { index: number }) {
   const { t } = useTranslation();
   const v = useData((s) => s.dataset?.variables[index]);
@@ -292,9 +259,11 @@ export function ValueLabelsDialog({ index }: { index: number }) {
       }
     >
       <div className="vd-labels-tools">
-        <Button size="sm" iconStart="playlist_add" disabled={!unlabelled.length} onClick={fillFromData}>
-          {t('varDialogs.fillFromData', { count: unlabelled.length })}
-        </Button>
+        {unlabelled.length > 0 && (
+          <Button size="sm" iconStart="playlist_add" onClick={fillFromData}>
+            {t('varDialogs.fillFromData', { count: unlabelled.length })}
+          </Button>
+        )}
         <span className="vd-footer-note">{t('varDialogs.pasteHint')}</span>
       </div>
       <div className="vd-labels" role="table" aria-label={t('valueLabels.title', { name: v.name })}>
@@ -360,7 +329,7 @@ export function ValueLabelsDialog({ index }: { index: number }) {
   );
 }
 
-const MISSING_HINT = /no answer|don.?t know|refus|missing|n\/a|not applicable|nev[ií]m|bez odpov|odm[ií]t|chyb[ěe]j|neuveden|nehodí/i;
+const MISSING_HINT = /no answer|don.?t know|refus|missing|(^|\s)n\/a($|\s)|not applicable|nev[ií]m|bez odpov|odm[ií]t|chyb[ěe]j|neuveden|nehod[ií]/i;
 
 export function MissingDialog({ index }: { index: number }) {
   const { t } = useTranslation();
