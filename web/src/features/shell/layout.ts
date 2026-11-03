@@ -34,6 +34,9 @@ interface LayoutState {
   /** Alt is held: menu-bar mnemonics are underlined. */
   altHeld: boolean;
   slots: Partial<Record<View, Slot>>;
+  /** Initial query of the next palette opening ('@' = variables). */
+  paletteSeed: string;
+  setPaletteSeed: (s: string) => void;
   setJournal: (b: boolean) => void;
   setSplitRatio: (r: number) => void;
   setAltHeld: (b: boolean) => void;
@@ -44,6 +47,8 @@ export const useLayout = create<LayoutState>((set, get) => ({
   ...read(),
   altHeld: false,
   slots: {},
+  paletteSeed: '',
+  setPaletteSeed: (paletteSeed) => set({ paletteSeed }),
   setJournal: (journalOpen) => {
     set({ journalOpen });
     save(get());

@@ -1,22 +1,25 @@
 /*
- * Profile avatar and popover (local profile stored in this browser).
+ * Profile avatar with a small popover: language and theme quick switches, Settings, About.
+ * Uses the design-system Popover (focus moves in, Escape/outside click close, focus returns).
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
+import { Popover } from '../../components/Popover';
+import { Segmented } from '../../components/Segmented';
 import { useSettings, type Profile } from '../../store/settings';
 import { useUi } from '../../store/ui';
 
 export function Avatar({ profile, large }: { profile: Profile; large?: boolean }) {
   return (
     <span
-      className={`avatar ${large ? 'lg' : ''}`}
+      className={`avatar sh-avatar ${large ? 'lg' : ''}`}
       style={{ backgroundColor: profile.avatar ? 'transparent' : profile.color, backgroundImage: profile.avatar ? `url(${profile.avatar})` : undefined }}
       aria-hidden="true"
     >
-      {profile.avatar ? '' : profile.initials || <span className="icon filled" style={{ fontSize: large ? 44 : 22 }}>person</span>}
+      {profile.avatar ? '' : profile.initials || <Icon name="person" filled size={large ? 40 : 20} />}
     </span>
   );
 }
@@ -30,118 +33,77 @@ export function ProfileButton() {
   const openModal = useUi((s) => s.openModal);
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
-  const pop = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    pop.current?.querySelector<HTMLElement>('button')?.focus();
-    const onDown = (e: PointerEvent) => {
-      if (!pop.current?.contains(e.target as Node) && !btn.current?.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener('pointerdown', onDown, true);
-    return () => window.removeEventListener('pointerdown', onDown, true);
-  }, [open]);
-
-  const r = btn.current?.getBoundingClientRect();
+  const name = profile.name || t('profile.defaultName');
+  const go = (fn: () => void) => {
+    setOpen(false);
+    fn();
+  };
   return (
     <>
       <button
         ref={btn}
         type="button"
-        className="avatar-btn"
+        className="sh-avatar-btn"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={t('profile.open', { name: profile.name || t('profile.defaultName') })}
-        data-tip={profile.name || t('profile.defaultName')}
+        aria-label={t('profile.open', { name })}
+        data-tip={name}
         onClick={() => setOpen(!open)}
       >
         <Avatar profile={profile} />
       </button>
-      {open &&
-        r &&
-        createPortal(
-          <div
-            ref={pop}
-            className="profile-pop"
-            role="dialog"
-            aria-label={t('profile.title')}
-            style={{ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) }}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setOpen(false);
-                btn.current?.focus();
-              }
-            }}
-          >
-            <div className="profile-head">
-              <Avatar profile={profile} large />
-              <div className="profile-name">{profile.name ? t('profile.greeting', { name: profile.name.split(' ')[0] }) : t('profile.greetingAnon')}</div>
-              <div className="profile-sub">
-                <Icon name="lock" size={16} />
-                {t('profile.localOnly')}
-              </div>
-              <button
-                type="button"
-                className="btn btn-outlined"
-                onClick={() => {
-                  setOpen(false);
-                  openModal({ kind: 'settings', section: 'profile' });
-                }}
-              >
-                {t('profile.manage')}
-              </button>
-            </div>
-            <div className="profile-rows">
-              <div className="profile-row">
-                <Icon name="translate" />
-                <span>{t('settings.language')}</span>
-                <div className="segmented">
-                  {(['cs', 'en'] as const).map((l) => (
-                    <button key={l} type="button" aria-pressed={language === l} onClick={() => set({ language: l })}>
-                      {l === 'cs' ? 'Čeština' : 'English'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="profile-row">
-                <Icon name="contrast" />
-                <span>{t('settings.theme')}</span>
-                <div className="segmented">
-                  {(['light', 'dark', 'system'] as const).map((m) => (
-                    <button key={m} type="button" aria-pressed={theme === m} aria-label={t(`settings.theme${m[0].toUpperCase()}${m.slice(1)}`)} title={t(`settings.theme${m[0].toUpperCase()}${m.slice(1)}`)} onClick={() => set({ theme: m })}>
-                      <Icon name={m === 'light' ? 'light_mode' : m === 'dark' ? 'dark_mode' : 'brightness_auto'} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="profile-foot">
-              <button
-                type="button"
-                className="btn btn-text"
-                onClick={() => {
-                  setOpen(false);
-                  openModal({ kind: 'settings' });
-                }}
-              >
-                <Icon name="settings" />
-                {t('actions.settings')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-text"
-                onClick={() => {
-                  setOpen(false);
-                  openModal({ kind: 'about' });
-                }}
-              >
-                <Icon name="info" />
-                {t('actions.about')}
-              </button>
-            </div>
-          </div>,
-          document.body,
-        )}
+      <Popover open={open} onClose={() => setOpen(false)} anchorRef={btn} label={t('profile.title')} placement="bottom-end" className="sh-profile-pop">
+        <div className="sh-profile-head">
+          <Avatar profile={profile} />
+          <div className="sh-profile-who">
+            <span className="sh-profile-name">{name}</span>
+            <span className="sh-profile-sub">
+              <Icon name="lock" size={14} />
+              {t('profile.localOnly')}
+            </span>
+          </div>
+        </div>
+        <div className="sh-profile-rows">
+          <div className="sh-profile-row">
+            <span className="sh-profile-label">{t('settings.language')}</span>
+            <Segmented
+              size="sm"
+              aria-label={t('settings.language')}
+              value={language}
+              onChange={(v) => set({ language: v })}
+              options={[
+                { value: 'cs', label: 'Čeština' },
+                { value: 'en', label: 'English' },
+              ]}
+            />
+          </div>
+          <div className="sh-profile-row">
+            <span className="sh-profile-label">{t('settings.theme')}</span>
+            <Segmented
+              size="sm"
+              aria-label={t('settings.theme')}
+              value={theme}
+              onChange={(v) => set({ theme: v })}
+              options={[
+                { value: 'light', label: t('settings.themeLight'), icon: 'light_mode', iconOnly: true },
+                { value: 'dark', label: t('settings.themeDark'), icon: 'dark_mode', iconOnly: true },
+                { value: 'system', label: t('settings.themeSystem'), icon: 'brightness_auto', iconOnly: true },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="sh-profile-foot">
+          <Button variant="ghost" size="sm" iconStart="settings" onClick={() => go(() => openModal({ kind: 'settings' }))}>
+            {t('actions.settings')}
+          </Button>
+          <Button variant="ghost" size="sm" iconStart="person" onClick={() => go(() => openModal({ kind: 'settings', section: 'profile' }))}>
+            {t('profile.title')}
+          </Button>
+          <Button variant="ghost" size="sm" iconStart="info" onClick={() => go(() => openModal({ kind: 'about' }))}>
+            {t('shell.about')}
+          </Button>
+        </div>
+      </Popover>
     </>
   );
 }

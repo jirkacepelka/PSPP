@@ -1,0 +1,118 @@
+{
+  "interpret": {
+    "title": "What it means",
+    "show": "What does it mean?",
+    "hide": "Hide explanation",
+    "copySentence": "Copy sentence",
+    "copied": "Sentence copied",
+    "computed": "Computed by PSPP Studio",
+    "effect": "Effect size",
+    "size": {
+      "negligible": "negligible",
+      "small": "small",
+      "medium": "medium",
+      "large": "large"
+    },
+    "dir": {
+      "up": "increased",
+      "down": "decreased",
+      "higher": "higher",
+      "lower": "lower"
+    },
+    "caveat": {
+      "notSame": "Note: “not significant” does not mean “the same” – a small sample can hide a difference.",
+      "cause": "The result describes an association, not a cause.",
+      "expected": "The test assumes expected counts of at least 5 in most cells."
+    },
+    "groupMeans": "{{a}}: M = {{ma}} (SD {{sda}}); {{b}}: M = {{mb}} (SD {{sdb}}).",
+    "rankEffect": "The effect size r = {{r}} is {{size}}.",
+    "ttest": {
+      "indSig": "**{{variable}}** **differs significantly** between the groups – it is higher for {{higher}} ({{stats}}).",
+      "indNs": "**{{variable}}** does **not differ significantly** between {{higher}} and {{lower}} ({{stats}}).",
+      "diffSig": "The difference of {{diff}} in favour of {{higher}} is {{size}} (d = {{d}}).",
+      "diffNs": "The difference of {{diff}} is {{size}} (d = {{d}}).",
+      "leveneOk": "Levene's test ({{p}}) does not suggest unequal variances, so the first table row applies.",
+      "leveneWelch": "Levene's test ({{p}}) shows unequal variances, so the second table row (Welch's test) applies.",
+      "pairedSig": "**{{b}}** values significantly **{{dir}}** compared with **{{a}}** ({{stats}}).",
+      "pairedNs": "There is **no significant difference** between **{{a}}** and **{{b}}** ({{stats}}).",
+      "pairedDiff": "The mean change of {{diff}} is a {{size}} effect (dz = {{d}}).",
+      "oneSig": "The mean of **{{variable}}** ({{mean}}) is significantly **{{dir}}** than {{value}} ({{stats}}).",
+      "oneNs": "The mean of **{{variable}}** ({{mean}}) does **not differ significantly** from {{value}} ({{stats}}).",
+      "oneDetail": "M = {{mean}}, SD = {{sd}}, n = {{n}}; the difference is {{size}} (d = {{d}})."
+    },
+    "anova": {
+      "sig": "The means of **{{variable}}** **differ significantly** between the groups ({{stats}}).",
+      "ns": "The means of **{{variable}}** do **not differ significantly** between the groups ({{stats}}).",
+      "range": "The highest mean is in {{hi}} ({{mhi}}), the lowest in {{lo}} ({{mlo}}).",
+      "eta": "The groups explain {{pct}} % of the variance (η² = {{eta}}), a {{size}} effect.",
+      "posthoc": "A post hoc test (e.g. Tukey) in the ANOVA dialog shows which groups differ.",
+      "levene": "Levene's test ({{p}}) shows unequal variances – treat the result with care, or use the Kruskal-Wallis test."
+    },
+    "corr": {
+      "someSig_one": "{{count}} of {{total}} correlations is significant.",
+      "someSig_other": "{{count}} of {{total}} correlations are significant.",
+      "noneSig_one": "The correlation is not significant.",
+      "noneSig_other": "None of the {{count}} correlations is significant.",
+      "pair": "{{a}} and {{b}}: {{size}} {{dir}} relationship ({{stats}}).",
+      "positive": "positive",
+      "negative": "negative",
+      "posMeaning": "A positive relationship means higher values of one variable tend to go with higher values of the other."
+    },
+    "crosstab": {
+      "sig": "There **is a significant association** between the variables in **{{title}}** ({{stats}}).",
+      "ns": "There is **no significant association** between the variables in **{{title}}** ({{stats}}).",
+      "v": "Strength of association: Cramér's V = {{v}} ({{size}})."
+    },
+    "reg": {
+      "sig": "The model **significantly predicts** {{dependent}} ({{stats}}).",
+      "ns_model": "The model does **not significantly predict** {{dependent}} ({{stats}}).",
+      "dv": "the dependent variable",
+      "r2": "Together the predictors explain {{pct}} % of the variance of {{dependent}}.",
+      "pred": "{{name}}: each extra unit {{dir}} the prediction by {{b}} ({{stats}}).",
+      "up": "raises",
+      "down": "lowers",
+      "ns": "No significant unique contribution: {{names}}."
+    },
+    "freq": {
+      "top": "The most frequent value of **{{variable}}** is **{{top}}** ({{pct}} % of valid answers).",
+      "detail_one": "{{count}} category, {{n}} cases in total.",
+      "detail_other": "{{count}} categories, {{n}} cases in total.",
+      "missing_one": "{{count}} case is missing.",
+      "missing_other": "{{count}} cases are missing."
+    },
+    "desc": {
+      "line": "**{{variable}}**: mean {{mean}}, standard deviation {{sd}} (n = {{n}}).",
+      "range": "Values range from {{min}} to {{max}}."
+    },
+    "mw": {
+      "sig": "**{{variable}}** **differs significantly** between the groups – {{higher}} has higher ranks ({{stats}}).",
+      "ns": "**{{variable}}** does **not differ significantly** between the groups ({{stats}})."
+    },
+    "kw": {
+      "sig": "**{{variable}}** **differs significantly** between the groups ({{stats}}).",
+      "ns": "**{{variable}}** does **not differ significantly** between the groups ({{stats}}).",
+      "highest": "{{group}} has the highest mean rank.",
+      "eps": "Effect size ε² = {{e}} ({{size}})."
+    },
+    "wx": {
+      "sig": "There **is a significant difference** between the measurements **{{label}}** ({{stats}}).",
+      "ns": "There is **no significant difference** between the measurements **{{label}}** ({{stats}}).",
+      "counts": "Positive differences: {{pos}}, negative: {{neg}}, ties: {{ties}}."
+    },
+    "chi1": {
+      "sig": "The categories of **{{variable}}** are **not equally represented** ({{stats}}).",
+      "ns": "The distribution of **{{variable}}** does **not differ significantly** from an even one ({{stats}}).",
+      "detail": "{{over}} is most above expectation, {{under}} most below."
+    },
+    "rel": {
+      "line": "Cronbach's alpha is **{{alpha}}** for {{items}} items – internal consistency is **{{quality}}**.",
+      "detail": "Values from .70 are usually considered acceptable, from .80 good.",
+      "excellent": "excellent",
+      "good": "good",
+      "acceptable": "acceptable",
+      "questionable": "questionable",
+      "poor": "poor",
+      "tooHigh": "An alpha above .95 may mean the items are redundant."
+    }
+  }
+}

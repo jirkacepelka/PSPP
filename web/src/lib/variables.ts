@@ -113,3 +113,19 @@ export function literal(value: number | string, v?: Variable): string {
   }
   return String(value);
 }
+
+/** Measurement-level key used by icons, chips and tag colours ('string' for text variables). */
+export function measureKey(v: Variable): 'nominal' | 'ordinal' | 'scale' | 'string' {
+  if (v.type === 'string') return 'string';
+  if (v.measure === 'nominal' || v.measure === 'ordinal') return v.measure;
+  return 'scale';
+}
+
+/** Categorical variables (nominal, ordinal, string) show value labels as tags. */
+export function isCategoricalVar(v: Variable): boolean {
+  return v.type === 'string' || v.measure === 'nominal' || v.measure === 'ordinal';
+}
+
+export function hasUserMissing(v: Variable): boolean {
+  return v.missing.values.length > 0 || !!v.missing.range;
+}

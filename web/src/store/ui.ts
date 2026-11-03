@@ -53,6 +53,9 @@ interface UiState {
   setEngine: (p: Partial<Pick<UiState, 'engineStatus' | 'engineKind' | 'engineVersion'>>) => void;
   toast: (message: string, opts?: Omit<Toast, 'id' | 'message'>) => void;
   dismissToast: (id: number) => void;
+  /** Toast ids kept on screen while hovered or focused (WCAG 2.2.1). */
+  heldToasts: number[];
+  holdToast: (id: number, held: boolean) => void;
   setMobileMenu: (b: boolean) => void;
 }
 
@@ -83,8 +86,12 @@ export const useUi = create<UiState>((set, get) => ({
   toast: (message, opts = {}) => {
     const id = toastId++;
     set({ toasts: [...get().toasts.slice(-2), { id, message, ...opts }] });
-    setTimeout(() => get().dismissToast(id), opts.action ? 8000 : 4500);
+    // action toasts stay longer; any toast stays while hovered/focused
+    const expire = () => (get().heldToasts.includes(id) ? setTimeout(expire, 1500) : get().dismissToast(id));
+    setTimeout(expire, opts.action ? 12000 : opts.kind === 'error' ? 8000 : 5000);
   },
+  heldToasts: [],
+  holdToast: (id, held) => set({ heldToasts: held ? [...get().heldToasts.filter((x) => x !== id), id] : get().heldToasts.filter((x) => x !== id) }),
   dismissToast: (id) => set({ toasts: get().toasts.filter((t) => t.id !== id) }),
   setMobileMenu: (mobileMenuOpen) => set({ mobileMenuOpen }),
 }));

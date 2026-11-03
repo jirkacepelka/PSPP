@@ -84,7 +84,7 @@ export function formatTableHtml(html: string, leadingZero: LeadingZero): string 
         col++;
       }
     };
-    return tr.replace(/<(t[dh])\b([^>]*)>([\s\S]*?)<\/t[dh]>/gi, (m, tag: string, attrs: string, inner: string) => {
+    const result = tr.replace(/<(t[dh])\b([^>]*)>([\s\S]*?)<\/t[dh]>/gi, (m, tag: string, attrs: string, inner: string) => {
       skip();
       const cs = Number(/colspan\s*=\s*["']?(\d+)/i.exec(attrs)?.[1] ?? 1);
       const rs = Number(/rowspan\s*=\s*["']?(\d+)/i.exec(attrs)?.[1] ?? 1);
@@ -107,5 +107,8 @@ export function formatTableHtml(html: string, leadingZero: LeadingZero): string 
       else if (/^-?[.,]\d/.test(text) && (leadingZero === 'always' || (leadingZero === 'apa' && !bounded))) out = text.replace(/^(-?)([.,])/, '$10$2');
       return out === text ? m : `<${tag}${attrs}>${out}</${tag}>`;
     });
+    // rowspans that cover columns after the last cell of this row
+    for (let k = col; k < pending.length; k++) if ((pending[k] ?? 0) > 0) pending[k]--;
+    return result;
   });
 }

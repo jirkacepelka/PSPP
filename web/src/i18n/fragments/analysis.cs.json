@@ -1,0 +1,126 @@
+{
+  "interpret": {
+    "title": "Co to znamená",
+    "show": "Co to znamená?",
+    "hide": "Skrýt vysvětlení",
+    "copySentence": "Kopírovat větu",
+    "copied": "Věta zkopírována",
+    "computed": "Dopočteno v PSPP Studiu",
+    "effect": "Velikost účinku",
+    "size": {
+      "negligible": "zanedbatelný",
+      "small": "malý",
+      "medium": "střední",
+      "large": "velký"
+    },
+    "dir": {
+      "up": "vzrostly",
+      "down": "poklesly",
+      "higher": "vyšší",
+      "lower": "nižší"
+    },
+    "caveat": {
+      "notSame": "Pozor: „nevýznamný“ neznamená „stejný“ – rozdíl může jen zakrývat malý vzorek.",
+      "cause": "Výsledek popisuje souvislost, ne příčinu.",
+      "expected": "Test předpokládá, že očekávané četnosti jsou ve většině buněk alespoň 5."
+    },
+    "groupMeans": "{{a}}: M = {{ma}} (SD {{sda}}); {{b}}: M = {{mb}} (SD {{sdb}}).",
+    "rankEffect": "Velikost účinku r = {{r}} je {{size}}.",
+    "ttest": {
+      "indSig": "Proměnná **{{variable}}** se mezi skupinami **statisticky významně liší** – vyšší je u skupiny {{higher}} ({{stats}}).",
+      "indNs": "Proměnná **{{variable}}** se mezi skupinami {{higher}} a {{lower}} **statisticky významně neliší** ({{stats}}).",
+      "diffSig": "Rozdíl {{diff}} ve prospěch skupiny {{higher}} je {{size}} (d = {{d}}).",
+      "diffNs": "Rozdíl {{diff}} je {{size}} (d = {{d}}).",
+      "leveneOk": "Levenův test ({{p}}) nenaznačuje rozdílné rozptyly, proto platí první řádek tabulky.",
+      "leveneWelch": "Levenův test ({{p}}) ukazuje rozdílné rozptyly, proto platí druhý řádek tabulky (Welchův test).",
+      "pairedSig": "Hodnoty **{{b}}** oproti **{{a}}** statisticky významně **{{dir}}** ({{stats}}).",
+      "pairedNs": "Mezi **{{a}}** a **{{b}}** **není statisticky významný rozdíl** ({{stats}}).",
+      "pairedDiff": "Průměrná změna o {{diff}} je {{size}} účinek (dz = {{d}}).",
+      "oneSig": "Průměr proměnné **{{variable}}** ({{mean}}) je statisticky významně **{{dir}}** než {{value}} ({{stats}}).",
+      "oneNs": "Průměr proměnné **{{variable}}** ({{mean}}) se od hodnoty {{value}} **statisticky významně neliší** ({{stats}}).",
+      "oneDetail": "M = {{mean}}, SD = {{sd}}, n = {{n}}; rozdíl je {{size}} (d = {{d}})."
+    },
+    "anova": {
+      "sig": "Průměry proměnné **{{variable}}** se mezi skupinami **statisticky významně liší** ({{stats}}).",
+      "ns": "Průměry proměnné **{{variable}}** se mezi skupinami **statisticky významně neliší** ({{stats}}).",
+      "range": "Nejvyšší průměr má {{hi}} ({{mhi}}), nejnižší {{lo}} ({{mlo}}).",
+      "eta": "Skupiny vysvětlují {{pct}} % rozptylu (η² = {{eta}}), což je {{size}} účinek.",
+      "posthoc": "Které skupiny se liší, ukáže post hoc test (např. Tukey) v dialogu ANOVA.",
+      "levene": "Levenův test ({{p}}) ukazuje rozdílné rozptyly – výsledek berte opatrně, zvažte Kruskal-Wallisův test."
+    },
+    "corr": {
+      "someSig_one": "Statisticky významná je {{count}} z {{total}} korelací.",
+      "someSig_few": "Statisticky významné jsou {{count}} z {{total}} korelací.",
+      "someSig_many": "Statisticky významných je {{count}} z {{total}} korelací.",
+      "someSig_other": "Statisticky významných je {{count}} z {{total}} korelací.",
+      "noneSig_one": "Korelace není statisticky významná.",
+      "noneSig_few": "Žádná z {{count}} korelací není statisticky významná.",
+      "noneSig_many": "Žádná z {{count}} korelací není statisticky významná.",
+      "noneSig_other": "Žádná z {{count}} korelací není statisticky významná.",
+      "pair": "{{a}} a {{b}}: {{size}} {{dir}} vztah ({{stats}}).",
+      "positive": "kladný",
+      "negative": "záporný",
+      "posMeaning": "Kladný vztah znamená, že s vyšší hodnotou jedné proměnné bývá vyšší i druhá."
+    },
+    "crosstab": {
+      "sig": "Mezi proměnnými v tabulce **{{title}}** **je statisticky významná souvislost** ({{stats}}).",
+      "ns": "Mezi proměnnými v tabulce **{{title}}** **není statisticky významná souvislost** ({{stats}}).",
+      "v": "Síla souvislosti: Cramérovo V = {{v}} ({{size}})."
+    },
+    "reg": {
+      "sig": "Model **statisticky významně předpovídá** proměnnou {{dependent}} ({{stats}}).",
+      "ns_model": "Model proměnnou {{dependent}} **statisticky významně nepředpovídá** ({{stats}}).",
+      "dv": "závisle proměnnou",
+      "r2": "Prediktory společně vysvětlují {{pct}} % rozptylu proměnné {{dependent}}.",
+      "pred": "{{name}}: s každou jednotkou navíc {{dir}} předpověď o {{b}} ({{stats}}).",
+      "up": "roste",
+      "down": "klesá",
+      "ns": "Bez významného samostatného přínosu: {{names}}."
+    },
+    "freq": {
+      "top": "Nejčastější hodnota proměnné **{{variable}}** je **{{top}}** ({{pct}} % platných odpovědí).",
+      "detail_one": "{{count}} kategorie, celkem {{n}} případů.",
+      "detail_few": "{{count}} kategorie, celkem {{n}} případů.",
+      "detail_many": "{{count}} kategorií, celkem {{n}} případů.",
+      "detail_other": "{{count}} kategorií, celkem {{n}} případů.",
+      "missing_one": "{{count}} případ chybí.",
+      "missing_few": "{{count}} případy chybí.",
+      "missing_many": "{{count}} případů chybí.",
+      "missing_other": "{{count}} případů chybí."
+    },
+    "desc": {
+      "line": "**{{variable}}**: průměr {{mean}}, směrodatná odchylka {{sd}} (n = {{n}}).",
+      "range": "Hodnoty se pohybují od {{min}} do {{max}}."
+    },
+    "mw": {
+      "sig": "Proměnná **{{variable}}** se mezi skupinami **statisticky významně liší** – vyšší pořadí má skupina {{higher}} ({{stats}}).",
+      "ns": "Proměnná **{{variable}}** se mezi skupinami **statisticky významně neliší** ({{stats}})."
+    },
+    "kw": {
+      "sig": "Proměnná **{{variable}}** se mezi skupinami **statisticky významně liší** ({{stats}}).",
+      "ns": "Proměnná **{{variable}}** se mezi skupinami **statisticky významně neliší** ({{stats}}).",
+      "highest": "Nejvyšší průměrné pořadí má skupina {{group}}.",
+      "eps": "Velikost účinku ε² = {{e}} ({{size}})."
+    },
+    "wx": {
+      "sig": "Mezi měřeními **{{label}}** **je statisticky významný rozdíl** ({{stats}}).",
+      "ns": "Mezi měřeními **{{label}}** **není statisticky významný rozdíl** ({{stats}}).",
+      "counts": "Kladných rozdílů: {{pos}}, záporných: {{neg}}, shod: {{ties}}."
+    },
+    "chi1": {
+      "sig": "Kategorie proměnné **{{variable}}** **nejsou zastoupeny rovnoměrně** ({{stats}}).",
+      "ns": "Zastoupení kategorií proměnné **{{variable}}** se od rovnoměrného **statisticky významně neliší** ({{stats}}).",
+      "detail": "Nejvíc nad očekáváním je {{over}}, nejvíc pod ním {{under}}."
+    },
+    "rel": {
+      "line": "Cronbachova alfa je **{{alpha}}** pro {{items}} položky – vnitřní konzistence je **{{quality}}**.",
+      "detail": "Hodnoty od 0,70 se obvykle považují za přijatelné, od 0,80 za dobré.",
+      "excellent": "výborná",
+      "good": "dobrá",
+      "acceptable": "přijatelná",
+      "questionable": "sporná",
+      "poor": "slabá",
+      "tooHigh": "Alfa nad 0,95 může znamenat, že se položky opakují."
+    }
+  }
+}

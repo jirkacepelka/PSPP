@@ -2,7 +2,7 @@
  * Applies appearance settings (theme, accent, density, font sizes) to the document.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { accentPalette } from '../lib/color';
+import { applyAccent } from '../lib/color';
 import { useSettings, type Settings } from '../store/settings';
 import i18n from '../i18n';
 
@@ -23,22 +23,26 @@ export function resolvedDark(s: Pick<Settings, 'theme'>): boolean {
   }
 }
 
+export function reducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
 export function applyAppearance(s: Settings) {
   const root = document.documentElement;
   const dark = resolvedDark(s);
   root.dataset.theme = dark ? 'dark' : 'light';
   root.dataset.density = s.density;
-  const p = accentPalette(s.accent, dark);
-  root.style.setProperty('--primary', p.primary);
-  root.style.setProperty('--on-primary', p.onPrimary);
-  root.style.setProperty('--primary-container', p.container);
-  root.style.setProperty('--on-primary-container', p.onContainer);
-  root.style.setProperty('--primary-soft', p.soft);
+  applyAccent(s.accent, dark, root);
   root.style.setProperty('--fs-base', `${s.fontSize}px`);
   root.style.setProperty('--font-grid', GRID_FONTS[s.gridFont] ?? GRID_FONTS.system);
   root.lang = s.language;
+  root.dataset.reducedMotion = reducedMotion() ? 'true' : 'false';
   const meta = document.querySelector('meta[name="theme-color"]');
-  meta?.setAttribute('content', dark ? '#131314' : '#f9fbfd');
+  meta?.setAttribute('content', dark ? '#191816' : '#f9f8f5');
   if (i18n.language !== s.language) void i18n.changeLanguage(s.language);
   window.dispatchEvent(new Event('pspp-theme-changed'));
 }

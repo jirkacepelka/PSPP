@@ -17,6 +17,7 @@ import { pasteSyntax, runSyntax } from './engine';
 import { manualUrl, SOURCE_URL } from './help';
 import { gridCommands } from './gridBus';
 import { runSyntaxCommand } from '../features/syntax/runCommands';
+import { useLayout, SPLIT_MIN_WIDTH } from '../features/shell/layout';
 
 export interface Action {
   id: string;
@@ -30,8 +31,12 @@ export interface Action {
   checked?: () => boolean;
   /** extra search keywords for the command palette */
   keywords?: string;
-  /** Views where the action is relevant (toolbar / palette context); all if omitted. */
+  /** Views where the action is relevant (toolbar / palette context); all if omitted.
+   *  Shortcuts of scoped actions only fire in those views, so one key can mean different
+   *  things per view (Ctrl+S saves syntax in Syntax and the dataset elsewhere). */
   scope?: View[];
+  /** PSPP command of a syntax template: the action pastes syntax instead of opening a dialog. */
+  template?: string;
 }
 
 /**
@@ -70,7 +75,25 @@ function dialog(id: string): Action {
 }
 
 function tpl(command: string, label: string, icon?: string): Action {
-  return { id: `tpl:${command}`, label, icon: icon ?? 'code_blocks', keywords: command, run: () => template(command) };
+  return { id: `tpl:${command}`, label, icon: icon ?? 'code_blocks', keywords: `${command} syntax syntaxe`, template: command, run: () => template(command) };
+}
+
+/** Active view for scoped shortcuts ('start' while the start screen is shown). */
+export function currentScope(): View | 'start' {
+  const u = useUi.getState();
+  return u.showStart ? 'start' : u.view;
+}
+
+function toggleValueLabels() {
+  const next = !useSettings.getState().showValueLabels;
+  useSettings.getState().set({ showValueLabels: next });
+  if (ui().valueLabels !== next) ui().toggleValueLabels();
+}
+
+/** Opens the command palette, optionally with a query prefix ('@' variables, '>' commands). */
+export function openPalette(seed = '') {
+  useLayout.getState().setPaletteSeed(seed);
+  ui().setPalette(true);
 }
 
 function view(v: View, label: string, icon: string, shortcut: string): Action {
@@ -85,7 +108,8 @@ export const ACTIONS: Action[] = [
   { id: 'file.sample.students', label: 'samples.students.title', icon: 'school', run: () => void openSample('students') },
   { id: 'file.sample.employees', label: 'samples.employees.title', icon: 'badge', run: () => void openSample('employees') },
   { id: 'file.sample.trial', label: 'samples.trial.title', icon: 'monitor_heart', run: () => void openSample('trial') },
-  { id: 'file.save', label: 'actions.save', icon: 'save', shortcut: 'Mod+S', run: () => void saveDataset(), enabled: hasData },
+  { id: 'file.save', label: 'actions.save', icon: 'save', shortcut: 'Mod+S', scope: ['data', 'variables', 'output'], run: () => void saveDataset(), enabled: hasData },
+  { id: 'syntax.save', label: 'actions.saveSyntax', icon: 'download', shortcut: 'Mod+S', scope: ['syntax'], run: saveSyntaxFile },
   { id: 'file.saveAs', label: 'actions.saveAs', icon: 'save_as', shortcut: 'Mod+Shift+S', run: () => ui().openModal({ kind: 'saveAs' }), enabled: hasData },
   { id: 'file.export.sav', label: 'actions.exportSav', icon: 'description', run: () => void saveDataset({ format: 'sav', saveAs: true }), enabled: hasData },
   { id: 'file.export.zsav', label: 'actions.exportZsav', icon: 'folder_zip', run: () => void saveDataset({ format: 'zsav', saveAs: true }), enabled: hasData },
@@ -125,12 +149,13 @@ export const ACTIONS: Action[] = [
   { id: 'edit.copy', label: 'actions.copy', icon: 'content_copy', shortcut: 'Mod+C', run: () => gridCommands.copy(), enabled: hasData },
   { id: 'edit.paste', label: 'actions.paste', icon: 'content_paste', shortcut: 'Mod+V', run: () => gridCommands.paste(), enabled: hasData },
   { id: 'edit.clear', label: 'actions.clearCells', icon: 'backspace', shortcut: 'Delete', run: () => gridCommands.clear(), enabled: hasData },
-  { id: 'edit.insertCase', label: 'actions.insertCase', icon: 'add_row_below', run: () => gridCommands.insertCase(), enabled: hasData },
-  { id: 'edit.insertVariable', label: 'actions.insertVariable', icon: 'add_column_right', run: () => gridCommands.insertVariable(), enabled: hasData },
+  { id: 'edit.insertCase', label: 'actions.insertCase', icon: 'add_row_below', shortcut: 'Mod+Shift+=', scope: ['data', 'variables'], run: () => gridCommands.insertCase(), enabled: hasData },
+  { id: 'edit.insertVariable', label: 'actions.insertVariable', icon: 'add_column_right', shortcut: 'Mod+Alt+=', scope: ['data', 'variables'], run: () => gridCommands.insertVariable(), enabled: hasData },
   { id: 'edit.deleteCases', label: 'actions.deleteCases', icon: 'delete_sweep', run: () => gridCommands.deleteCases(), enabled: hasData },
   { id: 'edit.deleteVariables', label: 'actions.deleteVariables', icon: 'variable_remove', run: () => gridCommands.deleteVariables(), enabled: hasData },
   { id: 'edit.find', label: 'actions.find', icon: 'search', shortcut: 'Mod+F', run: () => ui().openModal({ kind: 'find' }), enabled: hasData },
   { id: 'edit.goto', label: 'actions.gotoCase', icon: 'move_down', shortcut: 'Mod+G', run: () => ui().openModal({ kind: 'goto' }), enabled: hasData },
+  { id: 'edit.gotoVariable', label: 'shell.actions.gotoVariable', icon: 'view_column', shortcut: 'Mod+Shift+G', keywords: 'proměnná sloupec variable column jump skok', run: () => openPalette('@'), enabled: hasData },
   { id: 'edit.settings', label: 'actions.settings', icon: 'settings', shortcut: 'Mod+,', run: () => ui().openModal({ kind: 'settings' }) },
 
   // ---- analysis helpers
@@ -186,7 +211,7 @@ export const ACTIONS: Action[] = [
   },
 
   // ---- view
-  { id: 'view.inspector', label: 'actions.inspector', icon: 'right_panel_open', shortcut: 'Mod+I', run: () => useSettings.getState().set({ inspectorOpen: !useSettings.getState().inspectorOpen }), checked: () => useSettings.getState().inspectorOpen },
+  { id: 'view.inspector', label: 'actions.inspector', icon: 'right_panel_open', shortcut: 'Mod+I', scope: ['data', 'variables'], run: () => useSettings.getState().set({ inspectorOpen: !useSettings.getState().inspectorOpen }), checked: () => useSettings.getState().inspectorOpen },
   {
     id: 'view.split',
     label: 'actions.splitView',
@@ -194,15 +219,32 @@ export const ACTIONS: Action[] = [
     shortcut: 'Mod+\\',
     run: () => {
       const s = useSettings.getState();
-      s.set({ splitView: s.splitView === 'off' ? (ui().view === 'syntax' ? 'syntax-output' : 'data-output') : 'off' });
+      const on = s.splitView === 'off';
+      s.set({ splitView: on ? (ui().view === 'syntax' ? 'syntax-output' : 'data-output') : 'off' });
+      if (on && ui().view === 'variables') ui().setView('data');
     },
     checked: () => useSettings.getState().splitView !== 'off',
+    enabled: () => typeof window === 'undefined' || window.innerWidth >= SPLIT_MIN_WIDTH,
+  },
+  {
+    id: 'view.journal',
+    label: 'shell.actions.journal',
+    icon: 'history_edu',
+    shortcut: 'Mod+Shift+J',
+    keywords: 'deník journal historie history log záznam syntaxe',
+    run: () => {
+      const l = useLayout.getState();
+      const open = !l.journalOpen;
+      l.setJournal(open);
+      if (open && ui().showStart) ui().setShowStart(false);
+    },
+    checked: () => useLayout.getState().journalOpen,
   },
   view('data', 'views.data', 'table', 'Alt+1'),
   view('variables', 'views.variables', 'view_list', 'Alt+2'),
   view('output', 'views.output', 'article', 'Alt+3'),
   view('syntax', 'views.syntax', 'code', 'Alt+4'),
-  { id: 'view.valueLabels', label: 'actions.valueLabels', icon: 'label', shortcut: 'Mod+L', run: () => ui().toggleValueLabels(), checked: () => ui().valueLabels },
+  { id: 'view.valueLabels', label: 'actions.valueLabels', icon: 'label', shortcut: 'Mod+L', run: toggleValueLabels, checked: () => useSettings.getState().showValueLabels },
   { id: 'view.toolbar', label: 'actions.showToolbar', run: () => useSettings.getState().set({ showToolbar: !useSettings.getState().showToolbar }), checked: () => useSettings.getState().showToolbar },
   { id: 'view.formulaBar', label: 'actions.showFormulaBar', run: () => useSettings.getState().set({ showFormulaBar: !useSettings.getState().showFormulaBar }), checked: () => useSettings.getState().showFormulaBar },
   { id: 'view.statusBar', label: 'actions.showStatusBar', run: () => useSettings.getState().set({ showStatusBar: !useSettings.getState().showStatusBar }), checked: () => useSettings.getState().showStatusBar },
@@ -293,13 +335,13 @@ export const ACTIONS: Action[] = [
   tpl('SHOW', 'actions.showSettings', 'settings_suggest'),
   tpl('SET', 'actions.setOptions', 'settings_applications'),
   tpl('OUTPUT MODIFY', 'actions.outputModify', 'edit_note'),
-  { id: 'util.palette', label: 'actions.palette', icon: 'search', shortcut: 'Mod+K', run: () => ui().setPalette(true) },
+  { id: 'util.palette', label: 'actions.palette', icon: 'search', shortcut: 'Mod+K', run: () => openPalette() },
   { id: 'util.clearOutput', label: 'actions.clearOutput', icon: 'delete_sweep', run: () => useOutput.getState().clear() },
 
   // ---- syntax
-  { id: 'syntax.runAll', label: 'actions.runAll', icon: 'play_arrow', run: () => runSyntaxCommand('all') },
+  { id: 'syntax.runAll', label: 'actions.runAll', icon: 'play_arrow', shortcut: 'Mod+Shift+Enter', scope: ['syntax'], run: () => runSyntaxCommand('all') },
   { id: 'syntax.runSelection', label: 'actions.runSelection', icon: 'play_circle', run: () => runSyntaxCommand('selection') },
-  { id: 'syntax.runCurrent', label: 'actions.runCurrent', icon: 'subdirectory_arrow_right', shortcut: 'Mod+Enter', run: () => runSyntaxCommand('current') },
+  { id: 'syntax.runCurrent', label: 'actions.runCurrent', icon: 'subdirectory_arrow_right', shortcut: 'Mod+Enter', scope: ['syntax'], run: () => runSyntaxCommand('current') },
   { id: 'syntax.runToEnd', label: 'actions.runToEnd', icon: 'vertical_align_bottom', run: () => runSyntaxCommand('toEnd') },
 
   // ---- help
@@ -308,6 +350,9 @@ export const ACTIONS: Action[] = [
   { id: 'help.source', label: 'actions.source', icon: 'code', run: () => window.open(SOURCE_URL, '_blank', 'noopener') },
   { id: 'help.about', label: 'actions.about', icon: 'info', run: () => ui().openModal({ kind: 'about' }) },
 ];
+
+// Dialogs added by the analysis work package without a hand-written entry above.
+for (const id of Object.keys(SPECS_BY_ID)) if (!ACTIONS.some((a) => a.id === `dialog:${id}`)) ACTIONS.push(dialog(id));
 
 export const ACTIONS_BY_ID: Record<string, Action> = Object.fromEntries(ACTIONS.map((a) => [a.id, a]));
 
@@ -345,7 +390,9 @@ export function matchShortcut(e: KeyboardEvent, s: string): boolean {
   if (alt !== e.altKey) return false;
   const k = e.key.length === 1 ? e.key.toUpperCase() : e.key;
   if (key.length === 1 && /\d/.test(key)) return e.code === `Digit${key}`;
-  if (key === '=') return k === '=' || k === '+';
+  if (key === '=') return k === '=' || k === '+' || e.code === 'Equal';
+  if (key === '\\') return k === '\\' || e.code === 'Backslash' || e.code === 'IntlBackslash';
+  if (key === '/') return k === '/' || e.code === 'Slash';
   return k === key.toUpperCase() || k === key;
 }
 

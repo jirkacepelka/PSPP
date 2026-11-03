@@ -122,10 +122,45 @@ export function isMissingValue(cell: Cell, v: Variable): boolean {
   return false;
 }
 
+const labelIndexCache = new WeakMap<Variable['valueLabels'], Map<number | string, string>>();
+
+/**
+ * O(1) lookup table value → label for V (cached per valueLabels array, so it is rebuilt only
+ * when the labels change). String keys are right-trimmed, as PSPP pads string values.
+ */
+export function labelIndex(v: Variable): Map<number | string, string> {
+  let m = labelIndexCache.get(v.valueLabels);
+  if (!m) {
+    m = new Map();
+    for (const l of v.valueLabels) m.set(typeof l.value === 'string' ? l.value.trimEnd() : l.value, l.label);
+    labelIndexCache.set(v.valueLabels, m);
+  }
+  return m;
+}
+
 export function valueLabelFor(cell: Cell, v: Variable): string | undefined {
-  if (cell === null) return undefined;
-  const hit = v.valueLabels.find((l) => (typeof cell === 'string' ? String(l.value).trimEnd() === cell.trimEnd() : l.value === cell));
-  return hit?.label;
+  if (cell === null || !v.valueLabels.length) return undefined;
+  const m = labelIndex(v);
+  if (typeof cell === 'string') {
+    const k = cell.trimEnd();
+    return m.get(k) ?? (v.type === 'numeric' && k !== '' && Number.isFinite(Number(k)) ? m.get(Number(k)) : undefined);
+  }
+  return m.get(cell);
+}
+
+/** Code text for a value-label value, as shown in chips and pickers (dates formatted). */
+export function labelValueText(value: number | string, v: Variable, opts: FormatOptions = {}): string {
+  if (typeof value === 'string') return value.trimEnd();
+  if (isDateFormat(v.print.type)) return formatNumber(value, v.print);
+  const s = String(value);
+  return opts.decimalSeparator === ',' ? s.replace('.', ',') : s;
+}
+
+/** Number formatted for statistics display (fixed decimals, locale separator, no grouping). */
+export function formatStat(value: number | null | undefined, d = 2, opts: FormatOptions = {}): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '–';
+  const s = (Math.abs(value) < 1e-12 ? 0 : value).toFixed(d);
+  return opts.decimalSeparator === ',' ? s.replace('.', ',') : s;
 }
 
 /** Formats a cell for display. */
@@ -260,6 +295,10 @@ export type ParseResult = { ok: true; value: Cell } | { ok: false };
 /** Parses user input for a variable. Also accepts a value label text. */
 export function parseCell(text: string, v: Variable, opts: FormatOptions = {}): ParseResult {
   if (v.type === 'string') {
+    if (v.valueLabels.length && !labelIndex(v).has(text.trimEnd())) {
+      const byLabel = v.valueLabels.find((l) => l.label.toLowerCase() === text.trim().toLowerCase());
+      if (byLabel) text = String(byLabel.value);
+    }
     const bytes = new TextEncoder().encode(text);
     if (bytes.length <= v.width || v.width === 0) return { ok: true, value: text };
     // truncate to width bytes on a character boundary

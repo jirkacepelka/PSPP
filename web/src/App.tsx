@@ -1,23 +1,28 @@
 /*
- * PSPP Studio application shell.
+ * PSPP Studio application shell ("Klidná pracovní plocha").
+ *   header (logo · title/menu bar · engine · profile · search)
+ *   contextual command bar (per view)
+ *   [formula bar]  workspace (view or split view · right panel slot)
+ *   bottom row (view tabs · syntax tabs · journal · status)
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppBar } from './features/shell/AppBar';
-import { Toolbar } from './features/shell/Toolbar';
+import { CommandBar } from './features/shell/CommandBar';
 import { FormulaBar } from './features/shell/FormulaBar';
-import { ViewTabs } from './features/shell/ViewTabs';
-import { StatusBar } from './features/shell/StatusBar';
+import { BottomBar } from './features/shell/BottomBar';
 import { MobileMenu } from './features/shell/MobileMenu';
-import { StartScreen } from './features/start/StartScreen';
+import { Workspace } from './features/shell/Workspace';
+import { ShellToasts } from './features/shell/ShellToasts';
+import { useLayout } from './features/shell/layout';
+import { OPEN_MENU_EVENT, mnemonicIndex } from './features/shell/MenuBar';
 import { CommandPalette } from './features/palette/CommandPalette';
-import { Toasts } from './components/Toasts';
 import { Icon } from './components/Icon';
 import { useUi } from './store/ui';
 import { useSettings } from './store/settings';
 import { useData } from './store/data';
-import { ACTIONS, matchShortcut, runAction } from './app/actions';
+import { ACTIONS, currentScope, matchShortcut, runAction } from './app/actions';
 import { openFiles, startAutosave } from './app/files';
 import { initEngine } from './app/engine';
 import { startAppearance } from './app/theme';
@@ -29,14 +34,30 @@ import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
 import { ConfirmDialog, FindDialog, GotoDialog, SaveAsDialog } from './features/misc/SmallDialogs';
 import { MissingDialog, TypeDialog, ValueLabelsDialog } from './features/variables/VariableDialogs';
-
-const DataView = lazy(() => import('./features/data/DataView').then((m) => ({ default: m.DataView })));
-const VariableView = lazy(() => import('./features/variables/VariableView').then((m) => ({ default: m.VariableView })));
-const SyntaxView = lazy(() => import('./features/syntax/SyntaxView').then((m) => ({ default: m.SyntaxView })));
-const OutputView = lazy(() => import('./features/output/OutputView').then((m) => ({ default: m.OutputView })));
+import './features/shell/shell.css';
 
 /** Shortcuts that still work while typing in a text field or the syntax editor. */
-const GLOBAL_IN_INPUT = new Set(['util.palette', 'file.open', 'file.save', 'file.saveAs', 'file.print', 'edit.settings', 'help.shortcuts', 'help.manual', 'view:data', 'view:variables', 'view:output', 'view:syntax', 'file.newData']);
+const GLOBAL_IN_INPUT = new Set([
+  'util.palette',
+  'file.open',
+  'file.save',
+  'syntax.save',
+  'file.saveAs',
+  'file.print',
+  'edit.settings',
+  'help.shortcuts',
+  'help.manual',
+  'view:data',
+  'view:variables',
+  'view:output',
+  'view:syntax',
+  'file.newData',
+  'analysis.assistant',
+  'dialog.recall',
+  'view.split',
+  'view.journal',
+  'syntax.runAll',
+]);
 /** Shortcuts handled natively by the grid / editor. */
 const NATIVE = new Set(['edit.copy', 'edit.paste', 'edit.cut', 'edit.clear', 'syntax.runCurrent']);
 
@@ -45,6 +66,18 @@ function isEditable(el: EventTarget | null): boolean {
   if (!e) return false;
   const tag = e.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.isContentEditable || !!e.closest?.('.cm-editor');
+}
+
+/** F6 / Shift+F6 cycle between the big regions (WAI landmark navigation). */
+function cycleRegion(back: boolean) {
+  const regions = Array.from(document.querySelectorAll<HTMLElement>('.sh-header, .sh-commandbar, #main, .sh-bottom, .sh-toasts')).filter(
+    (r) => r.offsetParent !== null || r.classList.contains('sh-toasts'),
+  );
+  if (!regions.length) return;
+  const cur = regions.findIndex((r) => r.contains(document.activeElement));
+  const next = regions[(cur + (back ? -1 : 1) + regions.length) % regions.length];
+  const target = next.matches('#main, .sh-toasts') ? next.querySelector<HTMLElement>('button, [tabindex="0"]') ?? next : next.querySelector<HTMLElement>('[tabindex="0"], button:not([tabindex="-1"]), input');
+  (target ?? next).focus();
 }
 
 function Modals() {
@@ -80,37 +113,15 @@ function Modals() {
   }
 }
 
-function MainView() {
-  const view = useUi((s) => s.view);
-  const showStart = useUi((s) => s.showStart);
-  const { t } = useTranslation();
-  if (showStart) return <StartScreen />;
-  return (
-    <Suspense
-      fallback={
-        <div className="view-loading" role="status">
-          <span className="spinner" aria-hidden="true" />
-          {t('common.loading')}
-        </div>
-      }
-    >
-      {view === 'data' && <DataView />}
-      {view === 'variables' && <VariableView />}
-      {view === 'output' && <OutputView />}
-      {view === 'syntax' && <SyntaxView />}
-    </Suspense>
-  );
-}
-
 export function App() {
   const { t } = useTranslation();
   const showToolbar = useSettings((s) => s.showToolbar);
   const showFormula = useSettings((s) => s.showFormulaBar);
-  const showStatus = useSettings((s) => s.showStatusBar);
   const view = useUi((s) => s.view);
   const showStart = useUi((s) => s.showStart);
   const title = useData((s) => s.title);
   const dirty = useData((s) => s.dirty);
+  const altHeld = useLayout((s) => s.altHeld);
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
@@ -118,9 +129,17 @@ export function App() {
     void useSettings.getState().load();
     void initEngine();
     const stopAutosave = startAutosave();
+    // value labels: the persisted setting drives the grid's transient flag
+    const syncLabels = () => {
+      const want = useSettings.getState().showValueLabels;
+      if (useUi.getState().valueLabels !== want) useUi.getState().toggleValueLabels();
+    };
+    syncLabels();
+    const stopLabels = useSettings.subscribe(syncLabels);
     return () => {
       stopAppearance();
       stopAutosave();
+      stopLabels();
     };
   }, []);
 
@@ -130,31 +149,68 @@ export function App() {
 
   // global keyboard shortcuts
   useEffect(() => {
+    const layout = useLayout.getState;
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') layout().setAltHeld(true);
+      // a handler closer to the focus (syntax editor, grid, dialog) already took this key
+      if (e.defaultPrevented) return;
       const ui = useUi.getState();
       if (ui.modal || ui.paletteOpen) return;
       const editable = isEditable(e.target);
+      if (e.key === 'F6') {
+        e.preventDefault();
+        cycleRegion(e.shiftKey);
+        return;
+      }
+      // Alt+letter opens a menu (mnemonics), Alt+digit stays for the view actions
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && /^Key[A-Z]$/.test(e.code)) {
+        const idx = mnemonicIndex(e.code, t);
+        if (idx >= 0) {
+          e.preventDefault();
+          layout().setAltHeld(false);
+          window.dispatchEvent(new CustomEvent(OPEN_MENU_EVENT, { detail: idx }));
+          return;
+        }
+      }
+      if (!editable && e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        runAction('help.shortcuts');
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z' && !editable) {
         e.preventDefault();
         runAction('edit.redo');
         return;
       }
+      const scope = currentScope();
       for (const a of ACTIONS) {
         if (!a.shortcut || NATIVE.has(a.id)) continue;
         if (!matchShortcut(e, a.shortcut)) continue;
+        // scoped shortcuts mean something only in their own views (Ctrl+S, Ctrl+E …)
+        if (a.scope && (scope === 'start' || !a.scope.includes(scope))) continue;
         if (editable && !GLOBAL_IN_INPUT.has(a.id)) return;
         e.preventDefault();
         runAction(a.id);
         return;
       }
-      if (e.key === 'F10' && !editable) {
+      if (e.key === 'F10' && !e.shiftKey && !editable) {
         e.preventDefault();
-        document.querySelector<HTMLElement>('.menubar-item')?.focus();
+        document.querySelector<HTMLElement>('.sh-menubar-item[tabindex="0"], .sh-menubar-item')?.focus();
       }
     };
+    const onUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') layout().setAltHeld(false);
+    };
+    const onBlur = () => layout().setAltHeld(false);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    window.addEventListener('keyup', onUp);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onUp);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [t]);
 
   // drag & drop files onto the window
   useEffect(() => {
@@ -179,7 +235,10 @@ export function App() {
       depth = 0;
       setDragging(false);
       const files = Array.from(e.dataTransfer?.files ?? []);
-      if (files.length) void openFiles(files);
+      if (files.length) {
+        useUi.getState().toast(t('shell.loadingFile', { name: files.map((f) => f.name).join(', ') }));
+        void openFiles(files);
+      }
     };
     window.addEventListener('dragenter', enter);
     window.addEventListener('dragleave', leave);
@@ -191,29 +250,32 @@ export function App() {
       window.removeEventListener('dragover', over);
       window.removeEventListener('drop', drop);
     };
-  }, []);
+  }, [t]);
 
+  const h1 = showStart ? 'PSPP Studio' : `${title || 'PSPP Studio'}: ${t(`views.${view}`)}`;
   return (
-    <div className="app">
+    <div className={`app sh-app ${altHeld ? 'alt-held' : ''} ${showStart ? 'is-start' : ''}`}>
       <a href="#main" className="skip-link">
         {t('common.skipToContent')}
       </a>
+      <h1 className="sr-only">{h1}</h1>
       <AppBar />
-      {showToolbar && <Toolbar />}
-      {showFormula && view === 'data' && !showStart && <FormulaBar />}
-      <main id="main" className={`main view-${showStart ? 'start' : view}`}>
-        <MainView />
-      </main>
-      <ViewTabs />
-      {showStatus && <StatusBar />}
+      {showToolbar && !showStart && <CommandBar />}
+      {showFormula && view === 'data' && !showStart && (
+        <div className="sh-formula">
+          <FormulaBar />
+        </div>
+      )}
+      <Workspace />
+      <BottomBar />
       <Modals />
       <CommandPalette />
       <MobileMenu />
-      <Toasts />
+      <ShellToasts />
       {dragging && (
-        <div className="drop-overlay" aria-hidden="true">
-          <div className="drop-card">
-            <Icon name="upload_file" size={48} />
+        <div className="sh-drop" aria-hidden="true">
+          <div className="sh-drop-card">
+            <Icon name="upload_file" size={40} />
             <span>{t('files.dropToOpen')}</span>
           </div>
         </div>

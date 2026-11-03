@@ -1,5 +1,7 @@
 /*
  * Data View: spreadsheet-like grid of cases × variables.
+ * Value labels as tags, measurement-level headers, a label picker editor, data-quality flags,
+ * quick analyses from the header menu, named undo steps.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -8,30 +10,59 @@ import {
   CompactSelection,
   DataEditor,
   GridCellKind,
-  GridColumnIcon,
   type DataEditorRef,
   type EditableGridCell,
   type GridCell,
   type GridColumn,
+  type GridMouseEventArgs,
   type GridSelection,
   type Item,
+  type ProvideEditorCallback,
   type Rectangle,
 } from '@glideapps/glide-data-grid';
 import '@glideapps/glide-data-grid/dist/index.css';
-import type { Cell } from '../../engine/types';
+import './data.css';
+import type { Cell, Measure, Variable } from '../../engine/types';
 import { useData, type CellEdit } from '../../store/data';
 import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
-import { editText, formatCell, isDateFormat, isMissingValue, parseCell, parseNumber } from '../../lib/format';
-import { caseCount } from '../../lib/variables';
-import { registerGrid } from '../../app/gridBus';
-import { useGridTheme } from '../grid/gridTheme';
-import { Menu, type MenuEntry } from '../../components/Menu';
-import { Icon } from '../../components/Icon';
+import { editText, formatCell, formatSpec, isMissingValue, labelValueText, parseCell, parseNumber, valueLabelFor } from '../../lib/format';
+import { caseCount, hasUserMissing, isCategoricalVar, measureKey } from '../../lib/variables';
+import { registerGrid, useActiveVariable } from '../../app/gridBus';
+import { variableIcon } from '../../app/varIcons';
 import { formatShortcut } from '../../app/actions';
 import { newDataset, openFileDialog, openSample } from '../../app/files';
+import { useGridTheme } from '../grid/gridTheme';
+import { makeDataCellRenderer, isDataCell, type DataCell, type DataCellData, type PickOption } from '../grid/dataCell';
+import { makeDrawHeader, type HeaderInfo } from '../grid/header';
+import { LabelPickerEditor, TextEditor } from '../grid/editors';
+import { cellChecker, labelsDefineDomain, type CellChecker, type FlagKind } from '../grid/quality';
+import { Menu, type MenuEntry } from '../../components/Menu';
+import { Button } from '../../components/Button';
+import { EmptyState } from '../../components/EmptyState';
+import { typeLabel } from '../variables/describe';
+import { useDataPrefs } from './prefs';
+import { inspectVariable, quickAnalysis } from './quickActions';
 
 const EMPTY_SEL: GridSelection = { columns: CompactSelection.empty(), rows: CompactSelection.empty() };
+
+interface VarInfo {
+  v: Variable;
+  options: PickOption[] | undefined;
+  check: CellChecker;
+  userMissing: boolean;
+  tag: DataCellData['tag'];
+}
+
+interface Tip {
+  x: number;
+  y: number;
+  /** bottom of the anchor; the tip goes below it */
+  below: number;
+  title: string;
+  lines: string[];
+  tone?: 'warning';
+}
 
 export function DataView() {
   const { t } = useTranslation();
@@ -43,60 +74,139 @@ export function DataView() {
   const setView = useUi((s) => s.setView);
   const openModal = useUi((s) => s.openModal);
   const dec = useSettings((s) => s.decimalSeparator);
+  const highlightFlags = useDataPrefs((s) => s.highlightFlags);
+  const headerLabels = useDataPrefs((s) => s.headerLabels);
   const m = useGridTheme();
   const ref = useRef<DataEditorRef>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [selection, setSelection] = useState<GridSelection>(EMPTY_SEL);
-  const [menu, setMenu] = useState<{ items: MenuEntry[]; x: number; y: number } | null>(null);
+  const [menu, setMenu] = useState<{ items: MenuEntry[]; x: number; y: number; label?: string } | null>(null);
   const [widths, setWidths] = useState<Record<number, number>>({});
+  const [tip, setTip] = useState<Tip | null>(null);
+  const tipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const nVars = ds?.variables.length ?? 0;
   const nCases = caseCount(ds);
-  const extraCols = Math.max(4, 20 - nVars);
+  const extraCols = Math.max(3, 16 - nVars);
   const totalCols = nVars + extraCols;
   const totalRows = Math.max(nCases + 100, 200);
+  const anyLabels = useMemo(() => !!ds?.variables.some((v) => v.label), [ds?.variables]);
+  const twoLineHeader = headerLabels && anyLabels;
+  const headerHeight = twoLineHeader ? m.headerHeight : Math.round(m.headerHeight * 0.78);
+
+  // per-variable lookup tables, rebuilt only when the dictionary changes
+  const info = useMemo<VarInfo[]>(
+    () =>
+      (ds?.variables ?? []).map((v) => ({
+        v,
+        options: v.valueLabels.length
+          ? v.valueLabels.map((l) => ({ code: labelValueText(l.value, v, { decimalSeparator: dec }), label: l.label, missing: hasUserMissing(v) && isMissingValue(l.value, v) }))
+          : undefined,
+        check: cellChecker(v),
+        userMissing: hasUserMissing(v),
+        tag: isCategoricalVar(v) ? measureKey(v) : null,
+      })),
+    [ds?.variables, dec],
+  );
 
   const columns = useMemo<GridColumn[]>(() => {
     const cols: GridColumn[] = [];
     if (!ds) return cols;
     ds.variables.forEach((v, i) => {
-      const w = widths[i] ?? Math.round(Math.min(360, Math.max(72, v.columns * m.charWidth + 34, v.name.length * 8 * m.zoom + 52)));
-      cols.push({
-        id: `v${i}-${v.name}`,
-        title: v.name,
-        width: w,
-        icon: v.type === 'string' ? GridColumnIcon.HeaderString : isDateFormat(v.print.type) ? GridColumnIcon.HeaderDate : GridColumnIcon.HeaderNumber,
-        hasMenu: false,
-      });
+      const labelled = v.valueLabels.length > 0 && isCategoricalVar(v);
+      const base = Math.max(v.columns * m.charWidth + 34, v.name.length * 8 * m.zoom + 64, labelled ? 108 * m.zoom : 72);
+      const w = widths[i] ?? Math.round(Math.min(360, base));
+      cols.push({ id: `v${i}-${v.name}`, title: v.name, width: w, hasMenu: true });
     });
-    for (let i = 0; i < extraCols; i++) {
-      cols.push({ id: `empty${i}`, title: t('data.newVarHeader'), width: Math.round(84 * m.zoom), themeOverride: { textHeader: m.muted } });
-    }
+    for (let i = 0; i < extraCols; i++) cols.push({ id: `empty${i}`, title: i === 0 ? t('dataView.addVariable') : '', width: Math.round((i === 0 ? 150 : 84) * m.zoom) });
     return cols;
-  }, [ds, extraCols, widths, m, t]);
+  }, [ds, extraCols, widths, m.charWidth, m.zoom, t]);
 
   const getCellContent = useCallback(
     ([col, row]: Item): GridCell => {
-      const v = ds?.variables[col];
-      if (!ds || !v || row >= nCases) {
-        return { kind: GridCellKind.Text, data: '', displayData: '', allowOverlay: true, readonly: false };
-      }
-      const c = ds.columns[col][row] ?? null;
-      const display = formatCell(c, v, { valueLabels, decimalSeparator: dec });
-      const raw = editText(c, v, { decimalSeparator: dec });
-      const userMissing = c !== null && c !== '' && isMissingValue(c, v);
-      return {
-        kind: GridCellKind.Text,
-        data: raw,
-        displayData: display,
+      const vi = info[col];
+      const blank = (name?: string, options?: PickOption[], isString?: boolean): DataCell => ({
+        kind: GridCellKind.Custom,
         allowOverlay: true,
         readonly: false,
-        contentAlign: v.align,
-        copyData: valueLabels ? display : raw,
-        themeOverride: userMissing ? { textDark: m.error } : undefined,
-      };
+        copyData: '',
+        data: { kind: 'pspp-data', text: '', raw: '', tag: null, state: 'empty', flag: null, align: 'left', row, name, options, isString },
+      });
+      if (!ds || !vi) return blank();
+      const v = vi.v;
+      const c: Cell = row < nCases ? ds.columns[col][row] ?? null : null;
+      if (c === null || c === '') return blank(v.name, vi.options, v.type === 'string');
+      const label = valueLabels && vi.options ? valueLabelFor(c, v) : undefined;
+      const missing = vi.userMissing && isMissingValue(c, v);
+      const text = label ?? formatCell(c, v, { decimalSeparator: dec });
+      const raw = editText(c, v, { decimalSeparator: dec });
+      const tag = label !== undefined && !missing ? vi.tag : null;
+      return {
+        kind: GridCellKind.Custom,
+        allowOverlay: true,
+        readonly: false,
+        copyData: valueLabels ? text : raw,
+        data: {
+          kind: 'pspp-data',
+          text,
+          raw,
+          tag,
+          state: missing ? 'userMissing' : 'value',
+          flag: highlightFlags ? vi.check(c) : null,
+          align: tag || (label !== undefined && missing) ? 'left' : v.align,
+          row,
+          name: v.name,
+          options: vi.options,
+          isString: v.type === 'string',
+        },
+      } as DataCell;
     },
-    [ds, nCases, valueLabels, dec, m.error],
+    [ds, info, nCases, valueLabels, dec, highlightFlags],
+  );
+
+  // canvas renderers read the live palette through refs, so they are created once
+  const paletteRef = useRef(m.palette);
+  paletteRef.current = m.palette;
+  const zoomRef = useRef(m.zoom);
+  zoomRef.current = m.zoom;
+  const infoRef = useRef(info);
+  infoRef.current = info;
+  const labelsRef = useRef(twoLineHeader);
+  labelsRef.current = twoLineHeader;
+  const addText = t('dataView.addVariable');
+  const addRef = useRef(addText);
+  addRef.current = addText;
+  const nVarsRef = useRef(nVars);
+  nVarsRef.current = nVars;
+  const customRenderers = useMemo(() => [makeDataCellRenderer(() => paletteRef.current, () => zoomRef.current)], []);
+  const drawHeader = useMemo(
+    () =>
+      makeDrawHeader(
+        (col): HeaderInfo => {
+          const vi = infoRef.current[col];
+          if (vi) return { kind: 'var', name: vi.v.name, label: vi.v.label, measure: measureKey(vi.v), icon: variableIcon(vi.v) };
+          return col === nVarsRef.current ? { kind: 'add', text: addRef.current } : { kind: 'blank' };
+        },
+        () => paletteRef.current,
+        () => zoomRef.current,
+        () => labelsRef.current,
+      ),
+    [],
+  );
+  // redraw headers when what they show changes
+  useEffect(() => {
+    ref.current?.updateCells(Array.from({ length: totalCols }, (_, c) => ({ cell: [c, -1] as Item })));
+  }, [info, m.key, twoLineHeader, totalCols]);
+
+  const provideEditor = useCallback<ProvideEditorCallback<GridCell>>((cell) => {
+    if (!isDataCell(cell)) return undefined;
+    const editor = cell.data.options?.length ? LabelPickerEditor : TextEditor;
+    return { editor: editor as never, disablePadding: true, disableStyling: true };
+  }, []);
+
+  const getRowThemeOverride = useCallback(
+    (row: number) => (row >= nCases ? { bgCell: m.palette.canvas, textLight: m.palette.ink3, borderColor: m.palette.line } : undefined),
+    [nCases, m.palette],
   );
 
   const toValue = useCallback(
@@ -113,8 +223,10 @@ export function DataView() {
     [ds, dec],
   );
 
+  const cellName = useCallback((col: number, row: number) => `${ds?.variables[col]?.name ?? t('dataView.newVariable')}[${row + 1}]`, [ds, t]);
+
   const applyEdits = useCallback(
-    (raw: { col: number; row: number; text: string }[]) => {
+    (raw: { col: number; row: number; text: string }[], label?: string) => {
       const edits: CellEdit[] = [];
       const bad: string[] = [];
       // guess type for new columns: numeric unless any value is non-numeric
@@ -135,30 +247,35 @@ export function DataView() {
         if (r.ok) edits.push({ row: e.row, col: e.col, value: r.value });
         else bad.push(e.text);
       }
-      // ensure string values for new string columns
       for (const e of edits) if (ds && e.col >= ds.variables.length && newColString.get(e.col) && e.value === null) e.value = '';
-      if (edits.length) setCells(edits);
-      if (bad.length) toast(t('data.invalidValues', { count: bad.length, example: bad[0] }), { kind: 'error' });
+      if (edits.length) setCells(edits, label ?? (edits.length === 1 ? t('undo.editCell', { cell: cellName(edits[0].col, edits[0].row) }) : t('undo.editCells', { count: edits.length })));
+      if (bad.length) {
+        const first = raw.find((e) => e.text === bad[0]);
+        const v = first ? ds?.variables[first.col] : undefined;
+        toast(bad.length === 1 && v ? t('data.invalidValue', { value: bad[0], name: v.name }) : t('data.invalidValues', { count: bad.length, example: bad[0] }), { kind: 'error' });
+      }
     },
-    [ds, dec, setCells, toast, t, toValue],
+    [ds, dec, setCells, toast, t, toValue, cellName],
   );
 
   const onCellEdited = useCallback(
     ([col, row]: Item, val: EditableGridCell) => {
-      if (val.kind !== GridCellKind.Text) return;
-      applyEdits([{ col, row, text: val.data }]);
+      if (!isDataCell(val)) return;
+      const cur = ds && col < nVars && row < nCases ? editText(ds.columns[col][row] ?? null, ds.variables[col], { decimalSeparator: dec }) : '';
+      if (val.data.raw === cur) return;
+      applyEdits([{ col, row, text: val.data.raw }]);
     },
-    [applyEdits],
+    [applyEdits, ds, nVars, nCases, dec],
   );
 
   const onPaste = useCallback(
     ([col, row]: Item, values: readonly (readonly string[])[]) => {
       const raw: { col: number; row: number; text: string }[] = [];
       values.forEach((line, r) => line.forEach((text, c) => raw.push({ col: col + c, row: row + r, text })));
-      applyEdits(raw);
+      applyEdits(raw, raw.length === 1 ? undefined : t('undo.paste', { count: raw.length }));
       return false;
     },
-    [applyEdits],
+    [applyEdits, t],
   );
 
   const selectedRects = (sel: GridSelection): Rectangle[] => {
@@ -177,10 +294,10 @@ export function DataView() {
         for (let c = rect.x; c < Math.min(rect.x + rect.width, nVars); c++)
           for (let r = rect.y; r < Math.min(rect.y + rect.height, nCases); r++) edits.push({ col: c, row: r, value: ds.variables[c].type === 'string' ? '' : null });
       }
-      if (edits.length) setCells(edits);
+      if (edits.length) setCells(edits, edits.length === 1 ? t('undo.clearCell', { cell: cellName(edits[0].col, edits[0].row) }) : t('undo.clearCells', { count: edits.length }));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ds, nVars, nCases, setCells],
+    [ds, nVars, nCases, setCells, t, cellName],
   );
 
   const selectedRows = (sel: GridSelection): number[] => {
@@ -194,6 +311,8 @@ export function DataView() {
     return [...cols].filter((c) => c < nVars).sort((a, b) => a - b);
   };
 
+  const undoToast = useCallback((message: string) => toast(message, { action: { label: t('actions.undo'), run: () => useData.getState().undo() } }), [toast, t]);
+
   const gotoCell = useCallback(
     (row: number, col = selection.current?.cell[0] ?? 0) => {
       const c = Math.max(0, Math.min(totalCols - 1, col));
@@ -201,11 +320,74 @@ export function DataView() {
       const sel: GridSelection = { columns: CompactSelection.empty(), rows: CompactSelection.empty(), current: { cell: [c, r], range: { x: c, y: r, width: 1, height: 1 }, rangeStack: [] } };
       setSelection(sel);
       select({ row: r, col: c });
+      if (c < nVars) useActiveVariable.getState().setActive(c);
       ref.current?.scrollTo(c, r, 'both', 0, 0, { vAlign: 'center' });
       ref.current?.focus();
     },
-    [selection, totalCols, totalRows, select],
+    [selection, totalCols, totalRows, select, nVars],
   );
+
+  const deleteCases = useCallback(
+    (rows: number[]) => {
+      if (!rows.length) return;
+      useData.getState().deleteCases(rows, t('undo.deleteCases', { count: rows.length }));
+      setSelection(EMPTY_SEL);
+      undoToast(t('dataView.casesDeleted', { count: rows.length }));
+    },
+    [t, undoToast],
+  );
+  const deleteVariables = useCallback(
+    (cols: number[]) => {
+      if (!cols.length || !ds) return;
+      const names = cols.map((c) => ds.variables[c]?.name).filter(Boolean).join(', ');
+      useData.getState().deleteVariables(cols, t('undo.deleteVariables', { count: cols.length, names }));
+      setSelection(EMPTY_SEL);
+      undoToast(t('dataView.variablesDeleted', { count: cols.length, names }));
+    },
+    [ds, t, undoToast],
+  );
+  const sortBy = useCallback(
+    (col: number, dir: 1 | -1) => {
+      const v = ds?.variables[col];
+      if (!v) return;
+      const d = t(dir === 1 ? 'dataView.ascending' : 'dataView.descending');
+      useData.getState().sortBy(col, dir, t('undo.sort', { name: v.name, dir: d }));
+      undoToast(t('dataView.sorted', { name: v.name, dir: d }));
+    },
+    [ds, t, undoToast],
+  );
+  const insertVariable = useCallback(
+    (at: number) => {
+      const name = useData.getState().insertVariable(at, {}, t('undo.insertVariable'));
+      if (name) setTimeout(() => gotoVariableRef.current(at), 0);
+    },
+    [t],
+  );
+  const insertCases = useCallback((at: number) => useData.getState().insertCases(at, 1, t('undo.insertCase', { row: at + 1 })), [t]);
+
+  const gotoVariable = useCallback(
+    (index: number) => {
+      const c = Math.max(0, Math.min(totalCols - 1, index));
+      const r = selection.current?.cell[1] ?? 0;
+      const sel: GridSelection = { columns: CompactSelection.fromSingleSelection(c), rows: CompactSelection.empty(), current: { cell: [c, r], range: { x: c, y: r, width: 1, height: 1 }, rangeStack: [] } };
+      setSelection(sel);
+      select({ row: r, col: c });
+      if (c < nVars) useActiveVariable.getState().setActive(c);
+      ref.current?.scrollTo(c, r, 'horizontal');
+      ref.current?.focus();
+    },
+    [totalCols, selection, select, nVars],
+  );
+  const gotoVariableRef = useRef(gotoVariable);
+  gotoVariableRef.current = gotoVariable;
+
+  // keep the inspector in sync when the Data View opens
+  useEffect(() => {
+    const c = selection.current?.cell[0];
+    if (c !== undefined && c < nVars) useActiveVariable.getState().setActive(c, selectedCols(selection));
+    else if (useActiveVariable.getState().index === null && nVars) useActiveVariable.getState().setActive(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nVars]);
 
   // register commands for menus/toolbar
   const selRef = useRef(selection);
@@ -220,61 +402,83 @@ export function DataView() {
         },
         paste: () => void ref.current?.emit('paste'),
         clear: () => clearSelection(selRef.current),
-        insertCase: () => {
-          const r = selRef.current.current?.cell[1] ?? nCases;
-          useData.getState().insertCases(Math.min(r, nCases));
-        },
-        insertVariable: () => {
-          const c = selRef.current.current?.cell[0] ?? nVars;
-          useData.getState().insertVariable(Math.min(c, nVars));
-        },
-        deleteCases: () => {
-          const rows = selectedRows(selRef.current);
-          if (rows.length) useData.getState().deleteCases(rows);
-          setSelection(EMPTY_SEL);
-        },
-        deleteVariables: () => {
-          const cols = selectedCols(selRef.current);
-          if (cols.length) useData.getState().deleteVariables(cols);
-          setSelection(EMPTY_SEL);
-        },
+        insertCase: () => insertCases(Math.min(selRef.current.current?.cell[1] ?? nCases, nCases)),
+        insertVariable: () => insertVariable(Math.min(selRef.current.current?.cell[0] ?? nVars, nVars)),
+        deleteCases: () => deleteCases(selectedRows(selRef.current)),
+        deleteVariables: () => deleteVariables(selectedCols(selRef.current)),
         gotoCase: (row, col) => gotoCell(row, col),
+        gotoVariable: (i) => gotoVariable(i),
         focus: () => ref.current?.focus(),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clearSelection, gotoCell, nCases, nVars],
+    [clearSelection, gotoCell, gotoVariable, nCases, nVars, insertCases, insertVariable, deleteCases, deleteVariables],
   );
 
-  const sortItems = (col: number): MenuEntry[] => [
-    { type: 'item', id: 'sa', label: t('data.sortAsc'), icon: 'arrow_upward', onSelect: () => useData.getState().sortBy(col, 1) },
-    { type: 'item', id: 'sd', label: t('data.sortDesc'), icon: 'arrow_downward', onSelect: () => useData.getState().sortBy(col, -1) },
-  ];
+  // accessible name for the canvas grid (A-1)
+  const title = useData((s) => s.title);
+  useEffect(() => {
+    wrapRef.current?.querySelector('[role="grid"]')?.setAttribute('aria-label', t('dataView.gridLabel', { title }));
+  });
+
+  const setMeasure = (cols: number[], measure: Measure) => {
+    if (!ds) return;
+    const names = cols.map((c) => ds.variables[c].name).join(', ');
+    useData.getState().apply((d) => ({ ...d, variables: d.variables.map((v, i) => (cols.includes(i) && !(measure === 'scale' && v.type === 'string') ? { ...v, measure } : v)) }), t('undo.setMeasure', { names, measure: t(`measure.${measure}`) }));
+  };
 
   const headerMenu = (col: number, x: number, y: number) => {
     if (!ds) return;
     if (col >= nVars) {
-      setMenu({
-        x,
-        y,
-        items: [{ type: 'item', id: 'nv', label: t('actions.insertVariable'), icon: 'add_column_right', onSelect: () => useData.getState().insertVariable(nVars) }],
-      });
+      setMenu({ x, y, items: [{ type: 'item', id: 'nv', label: t('dataView.addVariable'), icon: 'add_column_right', onSelect: () => insertVariable(nVars) }] });
       return;
     }
     const v = ds.variables[col];
+    const sel = selectedCols(selection);
+    const cols = sel.includes(col) ? sel : [col];
+    const names = cols.map((c) => ds.variables[c].name);
+    const many = cols.length > 1;
+    const allString = cols.every((c) => ds.variables[c].type === 'string');
+    const prefs = useDataPrefs.getState();
     setMenu({
       x,
       y,
+      label: v.name,
       items: [
-        { type: 'header', label: v.name },
-        ...sortItems(col),
+        { type: 'header', label: many ? t('dataView.nVariables', { count: cols.length }) : v.label ? `${v.name} · ${v.label}` : v.name },
+        { type: 'item', id: 'freq', label: t('dataView.frequencies'), icon: 'bar_chart', onSelect: () => quickAnalysis('frequencies', names) },
+        { type: 'item', id: 'desc', label: t('dataView.descriptives'), icon: 'functions', disabled: allString, onSelect: () => quickAnalysis('descriptives', names.filter((_, i) => ds.variables[cols[i]].type !== 'string')) },
+        { type: 'item', id: 'expl', label: t('dataView.explore'), icon: 'query_stats', disabled: allString, onSelect: () => quickAnalysis('explore', names.filter((_, i) => ds.variables[cols[i]].type !== 'string')) },
+        { type: 'item', id: 'rec', label: t('dataView.recode'), icon: 'swap_horiz', onSelect: () => quickAnalysis('recode', names) },
         { type: 'sep' },
-        { type: 'item', id: 'ib', label: t('data.insertVarBefore'), icon: 'add_column_left', onSelect: () => useData.getState().insertVariable(col) },
-        { type: 'item', id: 'ia', label: t('data.insertVarAfter'), icon: 'add_column_right', onSelect: () => useData.getState().insertVariable(col + 1) },
-        { type: 'item', id: 'del', label: t('data.deleteVariable'), icon: 'delete', onSelect: () => useData.getState().deleteVariables(selectedCols(selection).includes(col) ? selectedCols(selection) : [col]) },
+        { type: 'item', id: 'sa', label: t('data.sortAsc'), icon: 'arrow_upward', disabled: many, onSelect: () => sortBy(col, 1) },
+        { type: 'item', id: 'sd', label: t('data.sortDesc'), icon: 'arrow_downward', disabled: many, onSelect: () => sortBy(col, -1) },
         { type: 'sep' },
-        { type: 'item', id: 'props', label: t('data.variableProperties'), icon: 'tune', onSelect: () => { select({ row: col, col: 0 }); setView('variables'); } },
-        { type: 'item', id: 'vl', label: t('data.valueLabelsEdit'), icon: 'label', onSelect: () => openModal({ kind: 'valueLabels', index: col }) },
-        { type: 'item', id: 'freq', label: t('data.quickFrequencies'), icon: 'bar_chart', onSelect: () => openModal({ kind: 'analysis', specId: 'frequencies' }) },
+        {
+          type: 'submenu',
+          id: 'measure',
+          label: t('dataView.measure'),
+          icon: variableIcon(v),
+          items: (['nominal', 'ordinal', 'scale'] as Measure[]).map((ms) => ({
+            type: 'item' as const,
+            id: ms,
+            label: t(`measure.${ms}`),
+            icon: ms === 'nominal' ? 'category' : ms === 'ordinal' ? 'signal_cellular_alt' : 'straighten',
+            checked: cols.every((c) => ds.variables[c].measure === ms),
+            disabled: ms === 'scale' && allString,
+            onSelect: () => setMeasure(cols, ms),
+          })),
+        },
+        { type: 'item', id: 'vl', label: t('data.valueLabelsEdit'), icon: 'sell', disabled: many, onSelect: () => openModal({ kind: 'valueLabels', index: col }) },
+        { type: 'item', id: 'insp', label: t('dataView.inspect'), icon: 'right_panel_open', shortcut: formatShortcut('Mod+I'), onSelect: () => inspectVariable(col) },
+        { type: 'item', id: 'props', label: t('dataView.openInVariableView'), icon: 'view_list', onSelect: () => { useActiveVariable.getState().setActive(col); select({ row: col, col: 0 }); setView('variables'); } },
+        { type: 'sep' },
+        { type: 'item', id: 'ib', label: t('data.insertVarBefore'), icon: 'add_column_left', onSelect: () => insertVariable(col) },
+        { type: 'item', id: 'ia', label: t('data.insertVarAfter'), icon: 'add_column_right', onSelect: () => insertVariable(col + 1) },
+        { type: 'item', id: 'del', label: many ? t('dataView.deleteVariables', { count: cols.length }) : t('data.deleteVariable'), icon: 'delete', danger: true, onSelect: () => deleteVariables(cols) },
+        { type: 'sep' },
+        { type: 'item', id: 'vlab', label: t('actions.valueLabels'), shortcut: formatShortcut('Mod+L'), checked: useUi.getState().valueLabels, onSelect: () => useUi.getState().toggleValueLabels() },
+        { type: 'item', id: 'flags', label: t('dataView.highlightFlags'), checked: prefs.highlightFlags, onSelect: () => prefs.set({ highlightFlags: !prefs.highlightFlags }) },
+        { type: 'item', id: 'hl', label: t('dataView.headerLabels'), checked: prefs.headerLabels, onSelect: () => prefs.set({ headerLabels: !prefs.headerLabels }) },
       ],
     });
   };
@@ -283,6 +487,7 @@ export function DataView() {
     const inSel = selection.current && selectedRects(selection).some((r) => col >= r.x && col < r.x + r.width && row >= r.y && row < r.y + r.height);
     if (!inSel) gotoCell(row, col);
     const sel = inSel ? selection : { ...EMPTY_SEL, current: { cell: [col, row] as Item, range: { x: col, y: row, width: 1, height: 1 }, rangeStack: [] } };
+    const v = ds?.variables[col];
     setMenu({
       x,
       y,
@@ -292,42 +497,136 @@ export function DataView() {
         { type: 'item', id: 'paste', label: t('actions.paste'), icon: 'content_paste', shortcut: formatShortcut('Mod+V'), onSelect: () => void ref.current?.emit('paste') },
         { type: 'item', id: 'clear', label: t('actions.clearCells'), icon: 'backspace', shortcut: 'Del', onSelect: () => clearSelection(sel) },
         { type: 'sep' },
-        { type: 'item', id: 'ica', label: t('data.insertCaseAbove'), icon: 'add_row_above', onSelect: () => useData.getState().insertCases(Math.min(row, nCases)) },
-        { type: 'item', id: 'icb', label: t('data.insertCaseBelow'), icon: 'add_row_below', onSelect: () => useData.getState().insertCases(Math.min(row + 1, nCases)) },
-        { type: 'item', id: 'dc', label: t('actions.deleteCases'), icon: 'delete_sweep', disabled: row >= nCases, onSelect: () => useData.getState().deleteCases(selectedRows(sel).length ? selectedRows(sel) : [row]) },
-        ...(col < nVars ? [{ type: 'sep' } as MenuEntry, ...sortItems(col)] : []),
+        { type: 'item', id: 'ica', label: t('data.insertCaseAbove'), icon: 'add_row_above', onSelect: () => insertCases(Math.min(row, nCases)) },
+        { type: 'item', id: 'icb', label: t('data.insertCaseBelow'), icon: 'add_row_below', onSelect: () => insertCases(Math.min(row + 1, nCases)) },
+        { type: 'item', id: 'dc', label: t('actions.deleteCases'), icon: 'delete_sweep', danger: true, disabled: row >= nCases, onSelect: () => deleteCases(selectedRows(sel).length ? selectedRows(sel) : [row]) },
+        ...(v
+          ? ([
+              { type: 'sep' },
+              { type: 'item', id: 'sa', label: t('data.sortAsc'), icon: 'arrow_upward', onSelect: () => sortBy(col, 1) },
+              { type: 'item', id: 'sd', label: t('data.sortDesc'), icon: 'arrow_downward', onSelect: () => sortBy(col, -1) },
+              { type: 'item', id: 'insp', label: t('dataView.inspect'), icon: 'right_panel_open', shortcut: formatShortcut('Mod+I'), onSelect: () => inspectVariable(col) },
+            ] as MenuEntry[])
+          : []),
       ],
     });
   };
 
+  // ---- tooltips: header summary and data-quality flags ----
+  const hideTip = useCallback(() => {
+    if (tipTimer.current) clearTimeout(tipTimer.current);
+    tipTimer.current = null;
+    setTip(null);
+  }, []);
+  useEffect(() => hideTip, [hideTip]);
+
+  const flagMessage = useCallback(
+    (kind: FlagKind, c: Cell, v: Variable): string => {
+      const value = typeof c === 'number' ? labelValueText(c, v, { decimalSeparator: dec }) : `„${String(c)}“`;
+      if (kind === 'outOfRange') return t('dataView.flag.outOfRange', { value, min: v.validRange?.min, max: v.validRange?.max });
+      if (kind === 'whitespace') return t('dataView.flag.whitespace');
+      if (kind === 'caseVariant') return t('dataView.flag.caseVariant', { value });
+      const codes = v.valueLabels.map((l) => labelValueText(l.value, v, { decimalSeparator: dec }));
+      return t('dataView.flag.noLabel', { value, name: v.name, codes: codes.length > 8 ? `${codes.slice(0, 8).join(', ')}, …` : codes.join(', ') });
+    },
+    [t, dec],
+  );
+
+  const onItemHovered = useCallback(
+    (args: GridMouseEventArgs) => {
+      if (tipTimer.current) clearTimeout(tipTimer.current);
+      tipTimer.current = null;
+      setTip(null);
+      if (!ds) return;
+      const [col, row] = args.location;
+      const v = ds.variables[col];
+      if (!v) return;
+      if (args.kind !== 'header' && args.kind !== 'cell') return;
+      const b = args.bounds;
+      if (args.kind === 'header') {
+        tipTimer.current = setTimeout(() => {
+          const column = ds.columns[col] ?? [];
+          let sys = 0;
+          let user = 0;
+          const um = hasUserMissing(v);
+          for (let r = 0; r < nCases; r++) {
+            const c = column[r] ?? null;
+            if (c === null || c === '') sys++;
+            else if (um && isMissingValue(c, v)) user++;
+          }
+          const lines = [
+            `${t(`measure.${v.type === 'string' ? 'nominal' : v.measure}`)} · ${typeLabel(v, t)} ${formatSpec(v.print)}`,
+            t('dataView.tipCounts', { valid: nCases - sys - user, missing: sys + user }),
+          ];
+          if (v.valueLabels.length) lines.push(t('dataView.tipLabels', { count: v.valueLabels.length }));
+          if (labelsDefineDomain(v) || v.validRange) lines.push(t('dataView.tipFlagsHint'));
+          setTip({ x: b.x, y: b.y, below: b.y + b.height, title: v.label ? `${v.name} — ${v.label}` : v.name, lines });
+        }, 450);
+        return;
+      }
+      if (args.kind === 'cell' && highlightFlags && row < nCases) {
+        const c = ds.columns[col][row] ?? null;
+        const kind = c === null ? null : info[col]?.check(c);
+        if (!kind) return;
+        tipTimer.current = setTimeout(() => setTip({ x: b.x, y: b.y, below: b.y + b.height, title: t(`dataView.flagTitle.${kind}`), lines: [flagMessage(kind, c, v)], tone: 'warning' }), 300);
+      }
+    },
+    [ds, nCases, info, highlightFlags, t, flagMessage],
+  );
+
   if (!ds) {
     return (
-      <div className="view-empty">
-        <div className="empty-hint">
-          <Icon name="table" />
-          <h2>{t('data.noDataTitle')}</h2>
-          <p>{t('data.noDataText')}</p>
-          <div className="empty-actions">
-            <button type="button" className="btn btn-filled" onClick={newDataset}>
-              <Icon name="add" />
-              {t('actions.newData')}
-            </button>
-            <button type="button" className="btn btn-outlined" onClick={() => void openFileDialog()}>
-              <Icon name="folder_open" />
-              {t('actions.open')}
-            </button>
-            <button type="button" className="btn btn-text" onClick={() => void openSample('students')}>
-              <Icon name="school" />
-              {t('samples.students.title')}
-            </button>
-          </div>
-        </div>
+      <div className="view-empty data-empty">
+        <EmptyState
+          icon="table"
+          title={t('data.noDataTitle')}
+          description={t('data.noDataText')}
+          actions={
+            <>
+              <Button variant="primary" iconStart="add" onClick={newDataset}>
+                {t('actions.newData')}
+              </Button>
+              <Button iconStart="folder_open" onClick={() => void openFileDialog()}>
+                {t('actions.open')}
+              </Button>
+              <Button variant="ghost" iconStart="school" onClick={() => void openSample('students')}>
+                {t('samples.students.title')}
+              </Button>
+            </>
+          }
+        />
       </div>
     );
   }
 
+  const tipStyle = tip ? (() => {
+    const host = wrapRef.current?.getBoundingClientRect();
+    const left = Math.max(8, Math.min(tip.x, window.innerWidth - 300));
+    return { left: left - (host?.left ?? 0), top: tip.below - (host?.top ?? 0) + 6 };
+  })() : undefined;
+
   return (
-    <div className="grid-wrap" ref={wrapRef} onContextMenu={(e) => e.preventDefault()}>
+    <div
+      className="grid-wrap data-grid"
+      ref={wrapRef}
+      onContextMenu={(e) => e.preventDefault()}
+      onPointerLeave={hideTip}
+      onKeyDown={(e) => {
+        // Shift+F10 / context-menu key opens the menu for the focused cell or column (A-1)
+        if ((e.key === 'F10' && e.shiftKey) || e.key === 'ContextMenu') {
+          e.preventDefault();
+          const cur = selection.current;
+          if (selection.columns.length && !cur) {
+            const c = selection.columns.first() ?? 0;
+            const b = ref.current?.getBounds(c, -1);
+            if (b) headerMenu(c, b.x, b.y + b.height);
+          } else if (cur) {
+            const b = ref.current?.getBounds(cur.cell[0], cur.cell[1]);
+            if (b) cellMenu(cur.cell[0], cur.cell[1], b.x + 8, b.y + b.height);
+          }
+        }
+      }}
+    >
       <DataEditor
         ref={ref}
         width="100%"
@@ -335,6 +634,10 @@ export function DataView() {
         columns={columns}
         rows={totalRows}
         getCellContent={getCellContent}
+        customRenderers={customRenderers as never}
+        provideEditor={provideEditor}
+        drawHeader={drawHeader}
+        getRowThemeOverride={getRowThemeOverride}
         onCellEdited={onCellEdited}
         onPaste={onPaste}
         getCellsForSelection
@@ -343,23 +646,32 @@ export function DataView() {
         smoothScrollY
         theme={m.theme}
         rowHeight={m.rowHeight}
-        headerHeight={m.headerHeight}
+        headerHeight={headerHeight}
         gridSelection={selection}
         onGridSelectionChange={(sel) => {
           setSelection(sel);
+          hideTip();
           if (sel.current) select({ row: sel.current.cell[1], col: sel.current.cell[0] });
           else if (sel.columns.length) select({ row: 0, col: sel.columns.first() ?? 0 });
+          const cols = selectedCols(sel);
+          const c = sel.current?.cell[0] ?? sel.columns.first();
+          if (c !== undefined && c < nVars) useActiveVariable.getState().setActive(c, cols.includes(c) ? cols : [c]);
         }}
         onDelete={(sel) => {
           clearSelection(sel);
           return false;
         }}
+        onItemHovered={onItemHovered}
         rangeSelect="multi-rect"
         columnSelect="multi"
         rowSelect="multi"
+        onHeaderClicked={(col) => {
+          if (col === nVars) insertVariable(nVars);
+        }}
         onColumnResize={(_c, w, idx) => setWidths((x) => ({ ...x, [idx]: w }))}
         onColumnResizeEnd={(_c, w, idx) => {
-          if (idx < nVars) useData.getState().updateVariable(idx, { columns: Math.max(1, Math.round((w - 34) / m.charWidth)) });
+          const v = ds.variables[idx];
+          if (v) useData.getState().updateVariable(idx, { columns: Math.max(1, Math.round((w - 34) / m.charWidth)) }, t('undo.columnWidth', { name: v.name }));
           setWidths((x) => {
             const n = { ...x };
             delete n[idx];
@@ -367,7 +679,7 @@ export function DataView() {
           });
         }}
         onColumnMoved={(from, to) => {
-          if (from < nVars && to < nVars) useData.getState().moveVariable(from, to);
+          if (from < nVars && to < nVars) useData.getState().moveVariable(from, to, t('undo.moveVariable', { name: ds.variables[from].name }));
         }}
         onHeaderContextMenu={(col, e) => {
           e.preventDefault();
@@ -383,7 +695,17 @@ export function DataView() {
         fillHandle
         scaleToRem={false}
       />
-      {menu && <Menu items={menu.items} anchor={{ x: menu.x, y: menu.y }} onClose={() => setMenu(null)} />}
+      {tip && (
+        <div className={`data-tip ${tip.tone === 'warning' ? 'warning' : ''}`} role="tooltip" style={tipStyle}>
+          <div className="data-tip-title">{tip.title}</div>
+          {tip.lines.map((l, i) => (
+            <div key={i} className="data-tip-line">
+              {l}
+            </div>
+          ))}
+        </div>
+      )}
+      {menu && <Menu items={menu.items} label={menu.label} anchor={{ x: menu.x, y: menu.y }} onClose={() => setMenu(null)} />}
     </div>
   );
 }
