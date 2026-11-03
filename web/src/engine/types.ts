@@ -26,6 +26,8 @@ export interface Variable {
   align: Align;
   measure: Measure;
   role: Role;
+  /** Optional plausible range for data-quality checks (stored in-app only, not in .sav). */
+  validRange?: { min: number; max: number };
 }
 /** null = system-missing (numeric) */
 export type Cell = number | string | null;

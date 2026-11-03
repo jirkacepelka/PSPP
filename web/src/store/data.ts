@@ -37,15 +37,16 @@ interface DataState {
   apply: (fn: (ds: Dataset) => Dataset, label?: string) => void;
   setTitle: (t: string) => void;
   markSaved: (fileName?: string | null) => void;
-  setCells: (edits: CellEdit[]) => void;
-  insertCases: (at: number, count?: number) => void;
-  deleteCases: (rows: number[]) => void;
-  insertVariable: (at: number, init?: Partial<Variable>) => string;
-  deleteVariables: (cols: number[]) => void;
-  updateVariable: (index: number, patch: Partial<Variable>) => void;
-  setVariableType: (index: number, type: 'numeric' | 'string', fmt: Variable['print']) => void;
-  moveVariable: (from: number, to: number) => void;
-  sortBy: (col: number, dir: 1 | -1) => void;
+  /* LABEL (optional, last argument) names the undo step, e.g. "Úprava buňky gpa[12]". */
+  setCells: (edits: CellEdit[], label?: string) => void;
+  insertCases: (at: number, count?: number, label?: string) => void;
+  deleteCases: (rows: number[], label?: string) => void;
+  insertVariable: (at: number, init?: Partial<Variable>, label?: string) => string;
+  deleteVariables: (cols: number[], label?: string) => void;
+  updateVariable: (index: number, patch: Partial<Variable>, label?: string) => void;
+  setVariableType: (index: number, type: 'numeric' | 'string', fmt: Variable['print'], label?: string) => void;
+  moveVariable: (from: number, to: number, label?: string) => void;
+  sortBy: (col: number, dir: 1 | -1, label?: string) => void;
   /** Undo / redo one step; return the step's label ('' if unnamed) or null if nothing to do. */
   undo: () => string | null;
   redo: () => string | null;
@@ -116,7 +117,7 @@ export const useData = create<DataState>((set, get) => {
       set({ title: t, dirty: true, dataset: ds ? { ...ds, name: t } : ds });
     },
     markSaved: (fileName) => set({ dirty: false, ...(fileName !== undefined ? { fileName } : {}) }),
-    setCells: (edits) => {
+    setCells: (edits, label) => {
       const ds = get().dataset;
       if (!ds || !edits.length) return;
       const variables = ds.variables.slice();
@@ -150,9 +151,9 @@ export const useData = create<DataState>((set, get) => {
         col[e.row] = value;
         n = Math.max(n, e.row + 1);
       }
-      commit(normalize({ ...ds, variables, columns }, n));
+      commit(normalize({ ...ds, variables, columns }, n), label);
     },
-    insertCases: (at, count = 1) =>
+    insertCases: (at, count = 1, label) =>
       get().apply((ds) => ({
         ...ds,
         columns: ds.columns.map((c, i) => {
@@ -161,12 +162,12 @@ export const useData = create<DataState>((set, get) => {
           out.splice(at, 0, ...new Array(count).fill(blankFor(ds.variables[i])));
           return out;
         }),
-      })),
-    deleteCases: (rows) => {
+      }), label),
+    deleteCases: (rows, label) => {
       const del = new Set(rows);
-      get().apply((ds) => ({ ...ds, columns: ds.columns.map((c) => c.filter((_, r) => !del.has(r))) }));
+      get().apply((ds) => ({ ...ds, columns: ds.columns.map((c) => c.filter((_, r) => !del.has(r))) }), label);
     },
-    insertVariable: (at, init = {}) => {
+    insertVariable: (at, init = {}, label) => {
       const ds = get().dataset;
       if (!ds) return '';
       const name = init.name ?? nextVarName(ds.variables.map((v) => v.name));
@@ -178,10 +179,10 @@ export const useData = create<DataState>((set, get) => {
         variables.splice(pos, 0, v);
         columns.splice(pos, 0, new Array(caseCount(d)).fill(blankFor(v)));
         return { ...d, variables, columns };
-      });
+      }, label);
       return name;
     },
-    deleteVariables: (cols) => {
+    deleteVariables: (cols, label) => {
       const del = new Set(cols);
       get().apply((ds) => {
         const removed = ds.variables.filter((_, i) => del.has(i)).map((v) => v.name);
@@ -193,9 +194,9 @@ export const useData = create<DataState>((set, get) => {
           filter: ds.filter && removed.includes(ds.filter) ? null : ds.filter,
           split: (ds.split ?? []).filter((s) => !removed.includes(s)),
         };
-      });
+      }, label);
     },
-    updateVariable: (index, patch) =>
+    updateVariable: (index, patch, label) =>
       get().apply((ds) => {
         const variables = ds.variables.slice();
         const old = variables[index];
@@ -208,8 +209,8 @@ export const useData = create<DataState>((set, get) => {
           split = (split ?? []).map((s) => (s === old.name ? patch.name! : s));
         }
         return { ...ds, variables, weight, filter, split };
-      }),
-    setVariableType: (index, type, fmt) =>
+      }, label),
+    setVariableType: (index, type, fmt, label) =>
       get().apply((ds) => {
         const variables = ds.variables.slice();
         const columns = ds.columns.slice();
@@ -217,8 +218,8 @@ export const useData = create<DataState>((set, get) => {
         variables[index] = r.variable;
         columns[index] = r.column;
         return { ...ds, variables, columns };
-      }),
-    moveVariable: (from, to) =>
+      }, label),
+    moveVariable: (from, to, label) =>
       get().apply((ds) => {
         const variables = ds.variables.slice();
         const columns = ds.columns.slice();
@@ -227,8 +228,8 @@ export const useData = create<DataState>((set, get) => {
         variables.splice(to, 0, v);
         columns.splice(to, 0, c);
         return { ...ds, variables, columns };
-      }),
-    sortBy: (col, dir) =>
+      }, label),
+    sortBy: (col, dir, label) =>
       get().apply((ds) => {
         const key = ds.columns[col];
         const n = caseCount(ds);
@@ -242,7 +243,7 @@ export const useData = create<DataState>((set, get) => {
           return c * dir || a - b;
         });
         return { ...ds, columns: ds.columns.map((c) => order.map((r) => c[r] ?? null)) };
-      }),
+      }, label),
     undo: () => {
       const { past, dataset, future, pastLabels, futureLabels } = get();
       if (!past.length || !dataset) return null;
