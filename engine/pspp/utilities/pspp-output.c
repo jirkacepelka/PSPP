@@ -16,7 +16,7 @@
 
 #include <config.h>
 
-#include <cairo.h>
+#include "output/cairo-compat.h"
 #include <getopt.h>
 #include <limits.h>
 #include <stdlib.h>
