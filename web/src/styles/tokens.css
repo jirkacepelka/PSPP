@@ -1,10 +1,31 @@
 /*
- * PSPP Studio design tokens.
- * 8px grid · Material 3-inspired surfaces, radii and elevation · light + dark themes.
- * Accent tokens (--primary*) are injected at runtime from the chosen accent color (see lib/color.ts).
+ * PSPP Studio design tokens — "Klidná pracovní plocha" (Calm Workspace).
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Principles
+ *   · warm neutral surfaces: "paper" (light) and "graphite" (dark)
+ *   · 1px hairlines instead of elevation; shadows only on floating layers
+ *   · sharp geometry: 4px chips · 6px controls · 8px panels and dialogs
+ *   · one user-configurable accent (default emerald), used sparingly
+ *
+ * Accent: --primary, --on-primary, --primary-container, --on-primary-container and
+ * --primary-soft are injected at runtime on <html style> by app/theme.ts from
+ * lib/color.ts (accentPalette). Everything else accent-related derives from them here.
+ *
+ * Naming: new code uses the semantic names in section 1–3 (--canvas, --ink, --line,
+ * --accent …). The Material-era names in "legacy aliases" keep app.css working while
+ * feature areas migrate; do not use them in new CSS. See docs/design-system.md.
+ *
+ * Values that src/features/grid/gridTheme.ts reads with getComputedStyle must stay
+ * plain hex (no color-mix): --primary, --on-primary, --surface*, --on-surface*,
+ * --grid-*, --outline-variant, --warning, --error.
  */
+
+/* =====================================================================
+ * 0. Theme-independent scales
+ * ===================================================================== */
 :root {
-  /* spacing (4px half-steps on an 8px grid) */
+  /* spacing — 4px base rhythm */
   --s-0: 2px;
   --s-1: 4px;
   --s-2: 8px;
@@ -15,190 +36,391 @@
   --s-7: 40px;
   --s-8: 48px;
 
-  /* radii */
-  --r-xs: 4px;
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 28px;
-  --r-full: 999px;
+  /* radii — sharp, never pill-shaped */
+  --radius-chip: 4px; /* chips, tags, badges, kbd, tooltips */
+  --radius-control: 6px; /* buttons, inputs, menu items, segmented */
+  --radius-panel: 8px; /* panels, cards, menus, popovers, dialogs */
+  --radius-round: 999px; /* only true circles: avatars, dots, switch track */
 
   /* typography */
-  --font-ui: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Inter', 'Roboto', system-ui, sans-serif;
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font-ui);
   --font-mono: 'Roboto Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
   --font-grid: var(--font-ui);
-  --fs-base: 14px;
-  --fs-xs: calc(var(--fs-base) * 0.786); /* 11 */
-  --fs-sm: calc(var(--fs-base) * 0.857); /* 12 */
-  --fs-md: var(--fs-base); /* 14 */
-  --fs-lg: calc(var(--fs-base) * 1.143); /* 16 */
-  --fs-xl: calc(var(--fs-base) * 1.286); /* 18 */
-  --fs-2xl: calc(var(--fs-base) * 1.571); /* 22 */
-  --fs-3xl: calc(var(--fs-base) * 2); /* 28 */
+  /* Inter cv05: lowercase l with a tail, so l / I / 1 stay distinct in variable names */
+  --font-features: 'cv05' 1;
+  --fs-base: 14px; /* user setting (Settings → font size) */
+  --fs-xs: calc(var(--fs-base) * 0.786); /* 11 caption, counters */
+  --fs-sm: calc(var(--fs-base) * 0.857); /* 12 labels, help, chips */
+  --fs-md: var(--fs-base); /* 14 body, controls */
+  --fs-lg: calc(var(--fs-base) * 1.143); /* 16 section title */
+  --fs-xl: calc(var(--fs-base) * 1.286); /* 18 dialog title */
+  --fs-2xl: calc(var(--fs-base) * 1.571); /* 22 page title */
+  --fs-3xl: calc(var(--fs-base) * 2); /* 28 display (start screen) */
   --lh-tight: 1.25;
+  --lh-snug: 1.4;
   --lh-normal: 1.5;
+  --ls-tight: -0.011em; /* 16–18px */
+  --ls-display: -0.019em; /* 22px+ */
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
+  --icon-weight: 300;
+  --icon-size: 20px;
+  --icon-size-sm: 18px;
 
-  /* motion */
+  /* motion — short and quiet */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-emphasized: var(--ease-out);
+  --dur-fast: 90ms;
   --dur-short: 120ms;
-  --dur-medium: 220ms;
-  --dur-long: 350ms;
+  --dur-medium: 180ms;
+  --dur-long: 260ms;
 
   /* density-dependent sizes (comfortable) */
-  --control-h: 36px;
-  --icon-btn: 40px;
-  --appbar-h: 64px;
+  --control-h: 34px;
+  --control-h-sm: 28px;
+  --control-h-lg: 40px;
+  --control-pad-x: 12px;
+  --icon-btn: 34px;
+  --icon-btn-sm: 28px;
+  --appbar-h: 56px;
   --toolbar-h: 44px;
   --grid-row-h: 30px;
   --grid-header-h: 34px;
   --menu-item-h: 32px;
+  --panel-pad: 16px;
+  --dialog-pad: 24px;
 
   /* z-index scale */
+  --z-sticky: 10;
   --z-menu: 900;
   --z-dialog: 1000;
   --z-palette: 1100;
   --z-toast: 1200;
+  --z-tooltip: 1300;
 
-  /* fixed brand-neutral semantic hues */
   --focus-ring-width: 2px;
-  color-scheme: light;
+  --focus-ring-offset: 2px;
+  --hairline: 1px;
 }
 
 :root[data-density='compact'] {
-  --control-h: 32px;
-  --icon-btn: 32px;
-  --appbar-h: 56px;
-  --toolbar-h: 40px;
+  --control-h: 30px;
+  --control-h-sm: 24px;
+  --control-h-lg: 34px;
+  --control-pad-x: 10px;
+  --icon-btn: 30px;
+  --icon-btn-sm: 24px;
+  --appbar-h: 48px;
+  --toolbar-h: 38px;
   --grid-row-h: 24px;
   --grid-header-h: 28px;
   --menu-item-h: 28px;
+  --panel-pad: 12px;
+  --dialog-pad: 20px;
 }
 
-/* ---------- light theme ---------- */
-:root,
-:root[data-theme='light'] {
-  --primary: #1a73e8;
+/* =====================================================================
+ * 1. Paper (light) — complete palette on bare :root
+ * ===================================================================== */
+:root {
+  color-scheme: light;
+
+  /* surfaces */
+  --canvas: #f9f8f5; /* app background, behind panels */
+  --surface: #ffffff; /* work surfaces: grid, editor, output paper, dialogs */
+  --surface-sunken: #f4f3ef; /* wells, table headers, inactive tabs */
+  --surface-raised: #ffffff; /* menus, popovers, dialogs (with hairline + shadow) */
+  --surface-hover: #f1f0ec; /* neutral hover tint */
+  --surface-active: #e9e7e2; /* pressed */
+  --surface-selected: #edece7; /* neutral selected row (paired with accent indicator) */
+  --surface-inverse: #2a2825; /* tooltips, toasts */
+
+  /* ink */
+  --ink: #1f1e1b; /* primary text 15.7:1 on canvas */
+  --ink-2: #4a4843; /* secondary text 8.6:1 */
+  --ink-3: #6b6862; /* muted text, placeholders 5.2:1 */
+  --ink-disabled: #a8a49b;
+  --ink-inverse: #f3f1ec;
+  --inverse-success: #8cc98a; /* semantic hues readable on --surface-inverse */
+  --inverse-danger: #f0927f;
+  --inverse-warning: #e0b25c;
+
+  /* lines */
+  --line: #e7e5df; /* hairline: panel edges, dividers, grid lines */
+  --line-strong: #d9d6ce; /* card edges on canvas, table rules */
+  --line-control: #8f8b83; /* input/checkbox borders, 3.4:1 on white (WCAG 1.4.11) */
+  --line-control-hover: #6b6862;
+
+  /* semantic — muted, warm-harmonised */
+  --success: #2f7a3f;
+  --success-tint: #eaf4ec;
+  --success-ink: #24603a;
+  --warning: #8a5a00;
+  --warning-tint: #fbf3e2;
+  --warning-ink: #6e4700;
+  --danger: #b3412e;
+  --danger-tint: #fbeae6;
+  --danger-ink: #8f3222;
+  --info: #3a6390;
+  --info-tint: #e9eff6;
+  --info-ink: #2c4e73;
+
+  /* measurement levels (variable icons, measure chips) */
+  --measure-nominal: #8a4f87;
+  --measure-nominal-tint: #f5ecf4;
+  --measure-ordinal: #8c6510;
+  --measure-ordinal-tint: #f7f0e1;
+  --measure-scale: #2f6a9a;
+  --measure-scale-tint: #e8f0f7;
+  --measure-string: #6b6862;
+  --measure-string-tint: #f1f0ec;
+
+  /* elevation — floating layers only */
+  --shadow-float: 0 1px 2px rgba(41, 37, 30, 0.06), 0 8px 20px -6px rgba(41, 37, 30, 0.16);
+  --shadow-dialog: 0 2px 6px rgba(41, 37, 30, 0.06), 0 24px 48px -12px rgba(41, 37, 30, 0.24);
+  --scrim: rgba(36, 33, 28, 0.36);
+
+  /* accent defaults (overridden inline at runtime by app/theme.ts) */
+  --primary: #0f7b5f;
   --on-primary: #ffffff;
-  --primary-container: #d3e3fd;
-  --on-primary-container: #041e49;
-  --primary-soft: #e8f0fe;
+  --primary-container: #e7f2ee;
+  --on-primary-container: #0b5a45;
+  --primary-soft: #f1f8f5;
 
-  --bg: #f9fbfd;
-  --surface: #ffffff;
-  --surface-dim: #f8fafd;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f8fafd;
-  --surface-container: #f0f4f9;
-  --surface-container-high: #e9eef6;
-  --surface-container-highest: #dde3ea;
-  --on-surface: #1f1f1f;
-  --on-surface-variant: #444746;
-  --on-surface-muted: #5e6061;
-  --outline: #747775;
-  --outline-variant: #c4c7c5;
-  --divider: #e1e3e1;
+  /* data grid */
+  --grid-header-bg: #f4f3ef;
+  --grid-header-text: #4a4843;
+  --grid-line: #e7e5df;
 
-  --state-hover: rgba(31, 31, 31, 0.08);
-  --state-focus: rgba(31, 31, 31, 0.12);
-  --state-pressed: rgba(31, 31, 31, 0.12);
-  --selection-bg: #c2e7ff;
-  --scrim: rgba(0, 0, 0, 0.32);
-
-  --error: #b3261e;
-  --on-error: #ffffff;
-  --error-container: #f9dedc;
-  --on-error-container: #410e0b;
-  --warning: #7a4f01;
-  --warning-container: #ffefc9;
-  --on-warning-container: #3d2600;
-  --success: #146c2e;
-  --success-container: #c4eed0;
-  --on-success-container: #072711;
-  --info-container: #e1eaf7;
-  --on-info-container: #0a2a52;
-
+  /* output paper */
   --paper: #ffffff;
-  --paper-bg: #f0f2f5;
-  --paper-shadow: 0 1px 2px rgba(60, 64, 67, 0.15), 0 1px 3px 1px rgba(60, 64, 67, 0.08);
-  --grid-header-bg: #f8f9fa;
-  --grid-line: #e1e3e1;
-  --grid-header-text: #444746;
+  --paper-bg: #f4f3ef;
+  --paper-shadow: 0 0 0 1px #e7e5df;
 
-  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
-  --elev-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
-  --elev-3: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
-
-  --chart-1: #1a73e8;
-  --chart-2: #12a4af;
-  --chart-3: #e8710a;
-  --chart-4: #a142f4;
-  --chart-5: #188038;
-  --chart-6: #d93025;
+  /* charts (consumed by src/charts/charts.css) */
+  --chart-surface: #ffffff;
+  --chart-ink: #1f1e1b;
+  --chart-ink-2: #4a4843;
+  --chart-muted: #6b6862;
+  --chart-grid: #ecebe6;
+  --chart-axis: #c9c5bc;
+  --chart-border: rgba(31, 30, 27, 0.1);
+  --chart-reference: #4a4843;
+  --chart-other: #a8a49b;
+  --chart-tooltip-bg: #ffffff;
+  --chart-series-1: #2f6a9a; /* steel blue */
+  --chart-series-2: #c8702a; /* ochre orange */
+  --chart-series-3: #1f8a6a; /* emerald */
+  --chart-series-4: #9c4f8a; /* plum */
+  --chart-series-5: #b8941c; /* mustard */
+  --chart-series-6: #5b5fa8; /* indigo */
+  --chart-series-7: #b3463a; /* brick */
+  --chart-series-8: #6e8b3d; /* olive */
+  --chart-font: var(--font-ui);
 }
 
-/* ---------- dark theme ---------- */
+/* =====================================================================
+ * 2. Graphite (dark) — same token names, redefined
+ *    Applied by [data-theme='dark'] (app/theme.ts) or by the OS preference
+ *    when nothing has been stamped yet.
+ * ===================================================================== */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --primary: #a8c7fa;
-  --on-primary: #062e6f;
-  --primary-container: #0842a0;
-  --on-primary-container: #d3e3fd;
-  --primary-soft: #1d2a3d;
 
-  --bg: #131314;
-  --surface: #1e1f20;
-  --surface-dim: #131314;
-  --surface-container-lowest: #0e0e0f;
-  --surface-container-low: #1b1b1c;
-  --surface-container: #212224;
-  --surface-container-high: #282a2c;
-  --surface-container-highest: #333537;
-  --on-surface: #e3e3e3;
-  --on-surface-variant: #c4c7c5;
-  --on-surface-muted: #a9acaa;
-  --outline: #8e918f;
-  --outline-variant: #444746;
-  --divider: #3a3c3e;
+  --canvas: #191816;
+  --surface: #201f1c;
+  --surface-sunken: #1c1b19;
+  --surface-raised: #282724;
+  --surface-hover: #2a2926;
+  --surface-active: #33312d;
+  --surface-selected: #2e2c29;
+  --surface-inverse: #ece9e3;
 
-  --state-hover: rgba(227, 227, 227, 0.08);
-  --state-focus: rgba(227, 227, 227, 0.12);
-  --state-pressed: rgba(227, 227, 227, 0.12);
-  --selection-bg: #004a77;
-  --scrim: rgba(0, 0, 0, 0.6);
+  --ink: #eceae4;
+  --ink-2: #c2beb5;
+  --ink-3: #9c978e;
+  --ink-disabled: #66625b;
+  --ink-inverse: #1f1e1b;
+  --inverse-success: #2f7a3f;
+  --inverse-danger: #b3412e;
+  --inverse-warning: #8a5a00;
 
-  --error: #f2b8b5;
-  --on-error: #601410;
-  --error-container: #8c1d18;
-  --on-error-container: #f9dedc;
-  --warning: #ffd88a;
-  --warning-container: #5a3e00;
-  --on-warning-container: #ffefc9;
-  --success: #6dd58c;
-  --success-container: #0f5223;
-  --on-success-container: #c4eed0;
-  --info-container: #1d3557;
-  --on-info-container: #d6e4ff;
+  --line: #302e2b;
+  --line-strong: #3d3b37;
+  --line-control: #7a766e;
+  --line-control-hover: #a19c93;
 
-  --paper: #1e1f20;
-  --paper-bg: #131314;
-  --paper-shadow: 0 0 0 1px #2e3032;
-  --grid-header-bg: #1b1b1c;
-  --grid-line: #333537;
-  --grid-header-text: #c4c7c5;
+  --success: #8cc98a;
+  --success-tint: #1f2a20;
+  --success-ink: #a9dba6;
+  --warning: #e0b25c;
+  --warning-tint: #2e2618;
+  --warning-ink: #edc983;
+  --danger: #f0927f;
+  --danger-tint: #33211d;
+  --danger-ink: #f6b1a3;
+  --info: #93b4da;
+  --info-tint: #1d2530;
+  --info-ink: #b4cbe6;
 
-  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
-  --elev-2: 0 1px 2px rgba(0, 0, 0, 0.6), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
-  --elev-3: 0 4px 8px 3px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.6);
+  --measure-nominal: #d49acf;
+  --measure-nominal-tint: #2f2330;
+  --measure-ordinal: #ddb656;
+  --measure-ordinal-tint: #2e2819;
+  --measure-scale: #8db7e0;
+  --measure-scale-tint: #1d2630;
+  --measure-string: #a8a39a;
+  --measure-string-tint: #2a2926;
 
-  --chart-1: #8ab4f8;
-  --chart-2: #4ecde6;
-  --chart-3: #fcad70;
-  --chart-4: #d7aefb;
-  --chart-5: #81c995;
-  --chart-6: #f28b82;
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 24px -6px rgba(0, 0, 0, 0.5);
+  --shadow-dialog: 0 2px 6px rgba(0, 0, 0, 0.3), 0 28px 56px -12px rgba(0, 0, 0, 0.6);
+  --scrim: rgba(8, 7, 6, 0.6);
+
+  --primary: #34c79a;
+  --on-primary: #0b1f18;
+  --primary-container: #233a31;
+  --on-primary-container: #b9ecd9;
+  --primary-soft: #21302a;
+
+  --grid-header-bg: #1c1b19;
+  --grid-header-text: #c2beb5;
+  --grid-line: #302e2b;
+
+  --paper: #201f1c;
+  --paper-bg: #191816;
+  --paper-shadow: 0 0 0 1px #302e2b;
+
+  --chart-surface: #201f1c;
+  --chart-ink: #eceae4;
+  --chart-ink-2: #c2beb5;
+  --chart-muted: #9c978e;
+  --chart-grid: #2e2c29;
+  --chart-axis: #4a4742;
+  --chart-border: rgba(255, 250, 240, 0.1);
+  --chart-reference: #c2beb5;
+  --chart-other: #6f6b64;
+  --chart-tooltip-bg: #2a2926;
+  --chart-series-1: #6fa3d6;
+  --chart-series-2: #e5995a;
+  --chart-series-3: #3fbf95;
+  --chart-series-4: #cf86bd;
+  --chart-series-5: #dcbc4c;
+  --chart-series-6: #9195dd;
+  --chart-series-7: #e57a68;
+  --chart-series-8: #a2bd68;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --canvas: #191816;
+    --surface: #201f1c;
+    --surface-sunken: #1c1b19;
+    --surface-raised: #282724;
+    --surface-hover: #2a2926;
+    --surface-active: #33312d;
+    --surface-selected: #2e2c29;
+    --surface-inverse: #ece9e3;
+    --ink: #eceae4;
+    --ink-2: #c2beb5;
+    --ink-3: #9c978e;
+    --ink-disabled: #66625b;
+    --ink-inverse: #1f1e1b;
+    --line: #302e2b;
+    --line-strong: #3d3b37;
+    --line-control: #7a766e;
+    --line-control-hover: #a19c93;
+    --primary: #34c79a;
+    --on-primary: #0b1f18;
+    --primary-container: #233a31;
+    --on-primary-container: #b9ecd9;
+    --primary-soft: #21302a;
+    --grid-header-bg: #1c1b19;
+    --grid-header-text: #c2beb5;
+    --grid-line: #302e2b;
+    --paper: #201f1c;
+    --paper-bg: #191816;
+    --scrim: rgba(8, 7, 6, 0.6);
+  }
+}
+
+/* =====================================================================
+ * 3. Derived semantic tokens (both themes) — new code uses these
+ * ===================================================================== */
+:root {
+  --bg: var(--canvas);
+
+  --accent: var(--primary);
+  --accent-ink: var(--on-primary); /* text/icons on a solid accent fill */
+  --accent-text: var(--on-primary-container); /* accent-coloured text on surfaces (links, active tab) */
+  --accent-tint: var(--primary-soft); /* faint wash: drop targets, current line */
+  --accent-tint-strong: var(--primary-container); /* selected items */
+  --accent-hover: color-mix(in srgb, var(--primary), var(--ink) 14%);
+  --accent-pressed: color-mix(in srgb, var(--primary), var(--ink) 24%);
+  --accent-line: var(--primary); /* indicator bars, focus ring */
+  --focus-ring: color-mix(in srgb, var(--primary) 70%, transparent);
+  --selection-bg: color-mix(in srgb, var(--primary) 22%, transparent);
+
+  --link: var(--accent-text);
+
+  /* states as tints (use on any surface) */
+  --state-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --state-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
+  --state-focus: color-mix(in srgb, var(--ink) 10%, transparent);
+  --state-selected: color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+/* =====================================================================
+ * 4. Legacy aliases (Material-era names used by app.css / output.css)
+ *    Keep until feature areas migrate — do not use in new code.
+ * ===================================================================== */
+:root {
+  --r-xs: var(--radius-chip);
+  --r-sm: var(--radius-control);
+  --r-md: var(--radius-panel);
+  --r-lg: var(--radius-panel);
+  --r-xl: var(--radius-panel);
+  --r-full: var(--radius-control); /* was 999px pill; calm geometry has no pills */
+
+  --surface-dim: var(--canvas);
+  --surface-container-lowest: var(--surface);
+  --surface-container-low: var(--surface-sunken);
+  --surface-container: var(--surface-hover);
+  --surface-container-high: var(--surface-raised);
+  --surface-container-highest: var(--surface-active);
+  --on-surface: var(--ink);
+  --on-surface-variant: var(--ink-2);
+  --on-surface-muted: var(--ink-3);
+  --outline: var(--line-control);
+  --outline-variant: var(--line-strong);
+  --divider: var(--line);
+
+  --error: var(--danger);
+  --on-error: #ffffff;
+  --error-container: var(--danger-tint);
+  --on-error-container: var(--danger-ink);
+  --warning-container: var(--warning-tint);
+  --on-warning-container: var(--warning-ink);
+  --success-container: var(--success-tint);
+  --on-success-container: var(--success-ink);
+  --info-container: var(--info-tint);
+  --on-info-container: var(--info-ink);
+
+  --elev-1: 0 1px 2px rgba(41, 37, 30, 0.08);
+  --elev-2: var(--shadow-float);
+  --elev-3: var(--shadow-dialog);
+
+  --chart-1: var(--chart-series-1);
+  --chart-2: var(--chart-series-2);
+  --chart-3: var(--chart-series-3);
+  --chart-4: var(--chart-series-4);
+  --chart-5: var(--chart-series-5);
+  --chart-6: var(--chart-series-6);
+}
+/* light hex values the grid reads with getComputedStyle (must not be var()-chained to color-mix) */
+:root[data-theme='dark'] {
+  --on-error: #2a0f0a;
 }
