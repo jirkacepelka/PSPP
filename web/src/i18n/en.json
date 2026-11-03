@@ -111,7 +111,16 @@
     "shortcuts": "Keyboard shortcuts",
     "manual": "PSPP manual",
     "source": "Source code",
-    "about": "About PSPP Studio"
+    "about": "About PSPP Studio",
+    "undone": "Undone: {{label}}",
+    "redone": "Redone: {{label}}",
+    "assistant": "Analysis assistant…",
+    "recallDialog": "Recall last dialog",
+    "editResult": "Edit analysis…",
+    "rerunResult": "Run again",
+    "pinResult": "Pin result",
+    "inspector": "Variable panel",
+    "splitView": "Split view"
   },
   "views": {
     "label": "Views",

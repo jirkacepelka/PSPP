@@ -4,6 +4,8 @@
  */
 import i18n from '../i18n';
 import { getEngineHandle, markSynced } from '../engine/client';
+import { useJournal, type JournalEntry } from '../store/journal';
+import { useDialogMemory, type DialogValues } from '../store/dialogs';
 import type { Dataset } from '../engine/types';
 import { kvDel, kvGet, kvSet } from '../lib/storage';
 import { emptyDataset } from '../lib/variables';
@@ -356,6 +358,8 @@ export interface AutosaveState {
   tabs: SyntaxTab[];
   activeTab: string;
   output: OutputEntry[];
+  journal?: JournalEntry[];
+  dialogs?: { lastValues: Record<string, Record<string, DialogValues>>; recent: string[] };
 }
 
 export async function getAutosave(): Promise<AutosaveState | undefined> {
@@ -367,6 +371,8 @@ export function restoreAutosave(a: AutosaveState) {
   if (a.dataset) useData.getState().load(a.dataset, { title: a.title, fileName: a.fileName, dirty: true });
   if (a.tabs?.length) useSyntax.getState().load(a.tabs, a.activeTab);
   if (a.output?.length) useOutput.getState().load(a.output);
+  if (a.journal?.length) useJournal.getState().load(a.journal);
+  if (a.dialogs) useDialogMemory.getState().load(a.dialogs);
   useUi.getState().setView(a.dataset ? 'data' : 'syntax');
 }
 
@@ -393,6 +399,8 @@ export function scheduleAutosave() {
       tabs: s.tabs.map((x) => ({ ...x, diagnostics: [] })),
       activeTab: s.activeId,
       output: o.entries.slice(-100),
+      journal: useJournal.getState().entries.slice(-500),
+      dialogs: { lastValues: useDialogMemory.getState().lastValues, recent: useDialogMemory.getState().recent },
     };
     const ok = await kvSet(AUTOSAVE_KEY, state);
     if (ok) {
@@ -403,6 +411,12 @@ export function scheduleAutosave() {
 }
 
 export function startAutosave(): () => void {
-  const unsubs = [useData.subscribe(scheduleAutosave), useSyntax.subscribe(scheduleAutosave), useOutput.subscribe(scheduleAutosave)];
+  const unsubs = [
+    useData.subscribe(scheduleAutosave),
+    useSyntax.subscribe(scheduleAutosave),
+    useOutput.subscribe(scheduleAutosave),
+    useJournal.subscribe(scheduleAutosave),
+    useDialogMemory.subscribe(scheduleAutosave),
+  ];
   return () => unsubs.forEach((u) => u());
 }

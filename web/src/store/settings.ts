@@ -38,6 +38,30 @@ export interface Settings {
   showToolbar: boolean;
   showFormulaBar: boolean;
   showStatusBar: boolean;
+  /** Show value labels instead of codes in the data grid. */
+  showValueLabels: boolean;
+  /** Plain-language interpretation cards under key results. */
+  explainResults: 'always' | 'onDemand' | 'never';
+  /** Leading zero for values bounded by 1 (p, r): APA omits it. */
+  leadingZero: 'always' | 'apa' | 'never';
+  /** p-value display: exact (p = ,032) or thresholds (p < ,05). */
+  pFormat: 'exact' | 'threshold';
+  /** Default confidence level in dialogs, in percent. */
+  ciLevel: number;
+  /** Language of APA-style copied tables. */
+  apaLocale: Lang;
+  /** Re-running an output result replaces it instead of appending. */
+  rerunReplaces: boolean;
+  /** How variables are listed in dialogs and pickers. */
+  listShows: 'name' | 'label' | 'both';
+  /** Live syntax preview in analysis dialogs. */
+  showSyntaxPreview: boolean;
+  /** Variable View shows all SPSS columns (otherwise the essential ones). */
+  variableViewAllColumns: boolean;
+  /** Variable inspector side panel open. */
+  inspectorOpen: boolean;
+  /** Split view layout, or off. */
+  splitView: 'off' | 'syntax-output' | 'data-output';
 }
 
 export const ACCENT_PRESETS = ['#1a73e8', '#0b8043', '#8e24aa', '#d93025', '#e37400', '#00796b', '#3949ab', '#5f6368'];
@@ -85,6 +109,18 @@ export const defaultSettings = (): Settings => {
     showToolbar: true,
     showFormulaBar: true,
     showStatusBar: true,
+    showValueLabels: true,
+    explainResults: 'always',
+    leadingZero: 'apa',
+    pFormat: 'exact',
+    ciLevel: 95,
+    apaLocale: lang,
+    rerunReplaces: true,
+    listShows: 'both',
+    showSyntaxPreview: true,
+    variableViewAllColumns: false,
+    inspectorOpen: true,
+    splitView: 'off',
   };
 };
 

@@ -6,6 +6,7 @@
 import i18n from '../i18n';
 import { useData } from '../store/data';
 import { useOutput } from '../store/output';
+import { useDialogMemory } from '../store/dialogs';
 import { useSettings } from '../store/settings';
 import { useSyntax } from '../store/syntax';
 import { useUi, type View } from '../store/ui';
@@ -29,9 +30,27 @@ export interface Action {
   checked?: () => boolean;
   /** extra search keywords for the command palette */
   keywords?: string;
+  /** Views where the action is relevant (toolbar / palette context); all if omitted. */
+  scope?: View[];
+}
+
+/**
+ * Opens analysis dialog SPECID, optionally pre-filled (field id → value), e.g. with the
+ * variables selected in the grid.  REPLACEENTRYID makes the run replace that output result.
+ */
+export function openDialog(specId: string, preset?: Record<string, unknown>, replaceEntryId?: string) {
+  useUi.getState().openModal({ kind: 'analysis', specId, preset, replaceEntryId });
 }
 
 const hasData = () => !!useData.getState().dataset;
+/** The output entry containing the selected output item (or the selected entry itself). */
+function selectedEntry() {
+  const { entries, selectedId } = useOutput.getState();
+  if (!selectedId) return entries[entries.length - 1];
+  const has = (items: { id: string; kind: string; children?: unknown }[]): boolean =>
+    items.some((i) => i.id === selectedId || (i.kind === 'group' && has(i.children as { id: string; kind: string }[])));
+  return entries.find((e) => e.id === selectedId || has(e.items as { id: string; kind: string }[]));
+}
 const ui = () => useUi.getState();
 const lang = () => (i18n.language === 'cs' ? 'cs' : 'en');
 
@@ -46,7 +65,7 @@ function dialog(id: string): Action {
     label: spec.title,
     icon: spec.icon,
     keywords: spec.command,
-    run: () => ui().openModal({ kind: 'analysis', specId: id }),
+    run: () => openDialog(id),
   };
 }
 
@@ -94,8 +113,14 @@ export const ACTIONS: Action[] = [
   },
 
   // ---- edit
-  { id: 'edit.undo', label: 'actions.undo', icon: 'undo', shortcut: 'Mod+Z', run: () => useData.getState().undo(), enabled: () => useData.getState().past.length > 0 },
-  { id: 'edit.redo', label: 'actions.redo', icon: 'redo', shortcut: 'Mod+Y', run: () => useData.getState().redo(), enabled: () => useData.getState().future.length > 0 },
+  { id: 'edit.undo', label: 'actions.undo', icon: 'undo', shortcut: 'Mod+Z', run: () => {
+    const label = useData.getState().undo();
+    if (label) ui().toast(i18n.t('actions.undone', { label }), { action: { label: i18n.t('actions.redo'), run: () => useData.getState().redo() } });
+  }, enabled: () => useData.getState().past.length > 0 },
+  { id: 'edit.redo', label: 'actions.redo', icon: 'redo', shortcut: 'Mod+Y', run: () => {
+    const label = useData.getState().redo();
+    if (label) ui().toast(i18n.t('actions.redone', { label }));
+  }, enabled: () => useData.getState().future.length > 0 },
   { id: 'edit.cut', label: 'actions.cut', icon: 'content_cut', shortcut: 'Mod+X', run: () => gridCommands.cut(), enabled: hasData },
   { id: 'edit.copy', label: 'actions.copy', icon: 'content_copy', shortcut: 'Mod+C', run: () => gridCommands.copy(), enabled: hasData },
   { id: 'edit.paste', label: 'actions.paste', icon: 'content_paste', shortcut: 'Mod+V', run: () => gridCommands.paste(), enabled: hasData },
@@ -108,7 +133,71 @@ export const ACTIONS: Action[] = [
   { id: 'edit.goto', label: 'actions.gotoCase', icon: 'move_down', shortcut: 'Mod+G', run: () => ui().openModal({ kind: 'goto' }), enabled: hasData },
   { id: 'edit.settings', label: 'actions.settings', icon: 'settings', shortcut: 'Mod+,', run: () => ui().openModal({ kind: 'settings' }) },
 
+  // ---- analysis helpers
+  { id: 'analysis.assistant', label: 'actions.assistant', icon: 'explore', shortcut: 'Mod+Shift+A', keywords: 'průvodce pomoc test vybrat assistant choose test which', run: () => ui().openModal({ kind: 'assistant' }), enabled: hasData },
+  {
+    id: 'dialog.recall',
+    label: 'actions.recallDialog',
+    icon: 'history',
+    shortcut: 'Mod+Shift+R',
+    run: () => {
+      const recent = useDialogMemory.getState().recent[0];
+      if (recent) openDialog(recent);
+    },
+    enabled: () => useDialogMemory.getState().recent.length > 0,
+  },
+
+  // ---- output results
+  {
+    id: 'output.edit',
+    label: 'actions.editResult',
+    icon: 'tune',
+    shortcut: 'Mod+E',
+    scope: ['output'],
+    run: () => {
+      const e = selectedEntry();
+      if (e?.source) openDialog(e.source.specId, e.source.values, useSettings.getState().rerunReplaces ? e.id : undefined);
+    },
+    enabled: () => !!selectedEntry()?.source,
+  },
+  {
+    id: 'output.rerun',
+    label: 'actions.rerunResult',
+    icon: 'replay',
+    shortcut: 'Mod+R',
+    scope: ['output'],
+    run: () => {
+      const e = selectedEntry();
+      if (e) void runSyntax(e.syntax, { source: e.source, replaceEntryId: useSettings.getState().rerunReplaces ? e.id : undefined, origin: 'menu' });
+    },
+    enabled: () => !!selectedEntry() && hasData(),
+  },
+  {
+    id: 'output.pin',
+    label: 'actions.pinResult',
+    icon: 'push_pin',
+    scope: ['output'],
+    run: () => {
+      const e = selectedEntry();
+      if (e) useOutput.getState().togglePin(e.id);
+    },
+    checked: () => !!selectedEntry()?.pinned,
+    enabled: () => !!selectedEntry(),
+  },
+
   // ---- view
+  { id: 'view.inspector', label: 'actions.inspector', icon: 'right_panel_open', shortcut: 'Mod+I', run: () => useSettings.getState().set({ inspectorOpen: !useSettings.getState().inspectorOpen }), checked: () => useSettings.getState().inspectorOpen },
+  {
+    id: 'view.split',
+    label: 'actions.splitView',
+    icon: 'splitscreen_right',
+    shortcut: 'Mod+\\',
+    run: () => {
+      const s = useSettings.getState();
+      s.set({ splitView: s.splitView === 'off' ? (ui().view === 'syntax' ? 'syntax-output' : 'data-output') : 'off' });
+    },
+    checked: () => useSettings.getState().splitView !== 'off',
+  },
   view('data', 'views.data', 'table', 'Alt+1'),
   view('variables', 'views.variables', 'view_list', 'Alt+2'),
   view('output', 'views.output', 'article', 'Alt+3'),

@@ -8,7 +8,9 @@ export type View = 'data' | 'variables' | 'output' | 'syntax';
 export type EngineStatus = 'loading' | 'ready' | 'running' | 'error';
 
 export type Modal =
-  | { kind: 'analysis'; specId: string }
+  /** PRESET pre-fills dialog fields (field id → value), e.g. variables selected in the grid. */
+  | { kind: 'analysis'; specId: string; preset?: Record<string, unknown>; replaceEntryId?: string }
+  | { kind: 'assistant' }
   | { kind: 'settings'; section?: string }
   | { kind: 'about' }
   | { kind: 'shortcuts' }
@@ -61,7 +63,7 @@ export const useUi = create<UiState>((set, get) => ({
   showStart: true,
   modal: null,
   paletteOpen: false,
-  valueLabels: false,
+  valueLabels: true,
   zoom: 1,
   selected: null,
   engineStatus: 'loading',

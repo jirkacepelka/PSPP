@@ -111,7 +111,16 @@
     "shortcuts": "Klávesové zkratky",
     "manual": "Příručka PSPP",
     "source": "Zdrojový kód",
-    "about": "O aplikaci PSPP Studio"
+    "about": "O aplikaci PSPP Studio",
+    "undone": "Vráceno: {{label}}",
+    "redone": "Znovu provedeno: {{label}}",
+    "assistant": "Průvodce výběrem analýzy…",
+    "recallDialog": "Znovu otevřít poslední dialog",
+    "editResult": "Upravit analýzu…",
+    "rerunResult": "Spustit znovu",
+    "pinResult": "Připnout výsledek",
+    "inspector": "Panel proměnné",
+    "splitView": "Rozdělené zobrazení"
   },
   "views": {
     "label": "Zobrazení",

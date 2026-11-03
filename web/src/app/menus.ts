@@ -63,6 +63,9 @@ export const MENUS: TopMenu[] = [
       'view:syntax',
       '-',
       'view.valueLabels',
+      'view.inspector',
+      'view.split',
+      '-',
       'view.toolbar',
       'view.formulaBar',
       'view.statusBar',
@@ -115,6 +118,9 @@ export const MENUS: TopMenu[] = [
     id: 'analyze',
     label: 'menu.analyze',
     items: [
+      'analysis.assistant',
+      'dialog.recall',
+      '-',
       { sub: 'menu.descriptive', icon: 'bar_chart', items: ['dialog:frequencies', 'dialog:descriptives', 'dialog:explore', 'dialog:crosstabs'] },
       'tpl:CTABLES',
       { sub: 'menu.compareMeans', icon: 'compare_arrows', items: ['dialog:means', '-', 'dialog:ttestOneSample', 'dialog:ttestIndependent', 'dialog:ttestPaired', '-', 'dialog:oneway'] },
@@ -129,7 +135,6 @@ export const MENUS: TopMenu[] = [
         sub: 'menu.nonparametric',
         icon: 'ssid_chart',
         items: [
-          { header: 'menu.legacyDialogs' },
           'tpl:NPAR TESTS CHISQUARE',
           'tpl:NPAR TESTS BINOMIAL',
           'tpl:NPAR TESTS RUNS',

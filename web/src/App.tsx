@@ -23,6 +23,7 @@ import { initEngine } from './app/engine';
 import { startAppearance } from './app/theme';
 import { SPECS_BY_ID } from './features/dialogs/specs';
 import { AnalysisDialog } from './features/dialogs/DialogRenderer';
+import { AssistantDialog } from './features/assistant/AssistantDialog';
 import { SettingsDialog } from './features/settings/SettingsDialog';
 import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
@@ -52,8 +53,10 @@ function Modals() {
   switch (modal.kind) {
     case 'analysis': {
       const spec = SPECS_BY_ID[modal.specId];
-      return spec ? <AnalysisDialog key={modal.specId} spec={spec} /> : null;
+      return spec ? <AnalysisDialog key={modal.specId} spec={spec} preset={modal.preset} replaceEntryId={modal.replaceEntryId} /> : null;
     }
+    case 'assistant':
+      return <AssistantDialog />;
     case 'settings':
       return <SettingsDialog section={modal.section} />;
     case 'about':

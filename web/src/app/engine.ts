@@ -9,6 +9,7 @@ import { useData } from '../store/data';
 import { useOutput } from '../store/output';
 import { useSyntax, type SyntaxDiagnostic } from '../store/syntax';
 import { useUi } from '../store/ui';
+import { useJournal, type JournalSource } from '../store/journal';
 import { useSettings } from '../store/settings';
 import { commandName } from '../lib/commands';
 import { splitCommands } from '../lib/syntax';
@@ -71,12 +72,31 @@ export interface RunOptions {
   showOutput?: boolean;
   /** suppress the syntax echo item */
   quiet?: boolean;
+  /** Keep the editor's data unchanged if the run reports errors. */
+  rollbackOnError?: boolean;
+  /** Dialog that generated the syntax, recorded for Edit / Re-run. */
+  source?: { specId: string; values: Record<string, unknown> };
+  /** Where the syntax came from, for the journal (default: 'dialog' if source, else 'syntax'). */
+  origin?: JournalSource;
+  /** Replace this output entry instead of appending a new one (re-run). */
+  replaceEntryId?: string;
+}
+
+export interface RunOutcome {
+  ok: boolean;
+  /** Id of the output entry created or replaced, if any. */
+  entryId: string | null;
 }
 
 /** Runs PSPP syntax on the active dataset. Returns true when there were no errors. */
 export async function runSyntax(syntax: string, opts: RunOptions = {}): Promise<boolean> {
+  return (await runSyntaxDetailed(syntax, opts)).ok;
+}
+
+/** Like runSyntax, but also returns the id of the output entry it produced. */
+export async function runSyntaxDetailed(syntax: string, opts: RunOptions = {}): Promise<RunOutcome> {
   const text = syntax.trim();
-  if (!text) return true;
+  if (!text) return { ok: true, entryId: null };
   const ui = useUi.getState();
   ui.setEngine({ engineStatus: 'running' });
   try {
@@ -91,28 +111,41 @@ export async function runSyntax(syntax: string, opts: RunOptions = {}): Promise<
         return it;
       });
     const items = shift(result.items);
-    if (result.dataset) {
+    const errs = countErrors(items);
+    const cmds = splitCommands(text).map((c) => commandName(c.text)).filter((c): c is string => !!c && c !== 'COMMENT');
+    if (result.dataset && !(opts.rollbackOnError && errs)) {
       const cur = useData.getState();
-      cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName });
+      cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName, label: cmds.slice(0, 3).join(', ') });
       markSynced(useData.getState().dataset);
     }
-    const cmds = splitCommands(text).map((c) => commandName(c.text)).filter((c): c is string => !!c && c !== 'COMMENT');
+    useJournal.getState().add({
+      time: Date.now(),
+      source: opts.origin ?? (opts.source ? 'dialog' : 'syntax'),
+      specId: opts.source?.specId,
+      values: opts.source?.values,
+      syntax: text,
+      ok: errs === 0,
+    });
     const groups = items.filter((i) => i.kind === 'group');
     const base = groups.length === 1 && groups[0].kind === 'group' ? groups[0].title : cmds[0];
     const title = !base ? i18n.t('output.log') : cmds.length <= 1 ? base : `${base} +${cmds.length - 1}`;
+    let entryId: string | null = null;
     if (items.length || !opts.quiet) {
-      useOutput.getState().add({ id: `e${Date.now().toString(36)}${entryCounter++}`, title, syntax: text, time: Date.now(), items });
+      entryId = `e${Date.now().toString(36)}${entryCounter++}`;
+      const entry = { id: entryId, title, syntax: text, time: Date.now(), items, source: opts.source, tabId: opts.tabId, status: errs ? ('error' as const) : ('ok' as const) };
+      const out = useOutput.getState();
+      if (opts.replaceEntryId && out.entries.some((e) => e.id === opts.replaceEntryId)) out.replace(opts.replaceEntryId, entry);
+      else out.add(entry);
     }
     if (opts.tabId) useSyntax.getState().setDiagnostics(opts.tabId, collectMessages(items));
-    const errs = countErrors(items);
     if (errs) useUi.getState().toast(i18n.t('run.errors', { count: errs }), { kind: 'error' });
     const hasVisible = items.some((i) => i.kind !== 'message' || i.severity !== 'note');
     if (opts.showOutput !== false && hasVisible && (errs === 0 || !opts.tabId)) useUi.getState().setView('output');
-    return result.ok && errs === 0;
+    return { ok: result.ok && errs === 0, entryId };
   } catch (e) {
     console.error(e);
     useUi.getState().toast(i18n.t('run.failed', { message: e instanceof Error ? e.message : String(e) }), { kind: 'error' });
-    return false;
+    return { ok: false, entryId: null };
   } finally {
     useUi.getState().setEngine({ engineStatus: 'ready' });
   }

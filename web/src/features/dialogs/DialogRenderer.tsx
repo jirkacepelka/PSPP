@@ -30,7 +30,15 @@ function useLabel() {
 
 const EXPR_TOKENS = ['+', '-', '*', '/', '**', '(', ')', '=', '<>', '<', '>', '<=', '>=', 'AND', 'OR', 'NOT', 'MEAN()', 'SUM()', 'SQRT()', 'ABS()', 'RND()', 'LN()', 'EXP()', 'MISSING()'];
 
-export function AnalysisDialog({ spec }: { spec: DialogSpec }) {
+export function AnalysisDialog({
+  spec,
+}: {
+  spec: DialogSpec;
+  /** Field id → initial value (e.g. variables selected in the grid). TODO(WP3): apply. */
+  preset?: Record<string, unknown>;
+  /** Output entry that the run replaces (Edit / Re-run). TODO(WP3): pass to runSyntax. */
+  replaceEntryId?: string;
+}) {
   const { t } = useTranslation();
   const L = useLabel();
   const dataset = useData((s) => s.dataset);

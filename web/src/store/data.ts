@@ -28,10 +28,13 @@ interface DataState {
   revision: number;
   past: Dataset[];
   future: Dataset[];
+  /** Human-readable name of each undoable step, parallel to past / future. */
+  pastLabels: string[];
+  futureLabels: string[];
   /** Replace the dataset (e.g. file open). Clears history unless keepHistory. */
-  load: (ds: Dataset | null, opts?: { title?: string; fileName?: string | null; keepHistory?: boolean; dirty?: boolean }) => void;
-  /** Apply a modification to the dataset as one undoable step. */
-  apply: (fn: (ds: Dataset) => Dataset) => void;
+  load: (ds: Dataset | null, opts?: { title?: string; fileName?: string | null; keepHistory?: boolean; dirty?: boolean; label?: string }) => void;
+  /** Apply a modification to the dataset as one undoable step, named LABEL (e.g. "COMPUTE bmi"). */
+  apply: (fn: (ds: Dataset) => Dataset, label?: string) => void;
   setTitle: (t: string) => void;
   markSaved: (fileName?: string | null) => void;
   setCells: (edits: CellEdit[]) => void;
@@ -43,8 +46,9 @@ interface DataState {
   setVariableType: (index: number, type: 'numeric' | 'string', fmt: Variable['print']) => void;
   moveVariable: (from: number, to: number) => void;
   sortBy: (col: number, dir: 1 | -1) => void;
-  undo: () => void;
-  redo: () => void;
+  /** Undo / redo one step; return the step's label ('' if unnamed) or null if nothing to do. */
+  undo: () => string | null;
+  redo: () => string | null;
 }
 
 function blankFor(v: Variable): Cell {
@@ -65,13 +69,15 @@ function normalize(ds: Dataset, n = caseCount(ds)): Dataset {
 }
 
 export const useData = create<DataState>((set, get) => {
-  const commit = (next: Dataset) => {
-    const { dataset, past } = get();
+  const commit = (next: Dataset, label = '') => {
+    const { dataset, past, pastLabels } = get();
     if (!dataset || next === dataset) return;
     set({
       dataset: next,
       past: [...past.slice(-MAX_HISTORY + 1), dataset],
+      pastLabels: [...pastLabels.slice(-MAX_HISTORY + 1), label],
       future: [],
+      futureLabels: [],
       dirty: true,
       revision: get().revision + 1,
     });
@@ -84,6 +90,8 @@ export const useData = create<DataState>((set, get) => {
     revision: 0,
     past: [],
     future: [],
+    pastLabels: [],
+    futureLabels: [],
     load: (ds, opts = {}) => {
       const prev = get().dataset;
       set({
@@ -91,15 +99,17 @@ export const useData = create<DataState>((set, get) => {
         title: opts.title ?? ds?.name ?? get().title,
         fileName: opts.fileName === undefined ? get().fileName : opts.fileName,
         past: opts.keepHistory && prev ? [...get().past.slice(-MAX_HISTORY + 1), prev] : [],
+        pastLabels: opts.keepHistory && prev ? [...get().pastLabels.slice(-MAX_HISTORY + 1), opts.label ?? ''] : [],
         future: [],
+        futureLabels: [],
         dirty: opts.dirty ?? false,
         revision: get().revision + 1,
       });
     },
-    apply: (fn) => {
+    apply: (fn, label) => {
       const ds = get().dataset;
       if (!ds) return;
-      commit(normalize(fn(ds)));
+      commit(normalize(fn(ds)), label);
     },
     setTitle: (t) => {
       const ds = get().dataset;
@@ -234,14 +244,34 @@ export const useData = create<DataState>((set, get) => {
         return { ...ds, columns: ds.columns.map((c) => order.map((r) => c[r] ?? null)) };
       }),
     undo: () => {
-      const { past, dataset, future } = get();
-      if (!past.length || !dataset) return;
-      set({ dataset: past[past.length - 1], past: past.slice(0, -1), future: [dataset, ...future], dirty: true, revision: get().revision + 1 });
+      const { past, dataset, future, pastLabels, futureLabels } = get();
+      if (!past.length || !dataset) return null;
+      const label = pastLabels[pastLabels.length - 1] ?? '';
+      set({
+        dataset: past[past.length - 1],
+        past: past.slice(0, -1),
+        pastLabels: pastLabels.slice(0, -1),
+        future: [dataset, ...future],
+        futureLabels: [label, ...futureLabels],
+        dirty: true,
+        revision: get().revision + 1,
+      });
+      return label;
     },
     redo: () => {
-      const { past, dataset, future } = get();
-      if (!future.length || !dataset) return;
-      set({ dataset: future[0], future: future.slice(1), past: [...past, dataset], dirty: true, revision: get().revision + 1 });
+      const { past, dataset, future, pastLabels, futureLabels } = get();
+      if (!future.length || !dataset) return null;
+      const label = futureLabels[0] ?? '';
+      set({
+        dataset: future[0],
+        future: future.slice(1),
+        futureLabels: futureLabels.slice(1),
+        past: [...past, dataset],
+        pastLabels: [...pastLabels, label],
+        dirty: true,
+        revision: get().revision + 1,
+      });
+      return label;
     },
   };
 });
