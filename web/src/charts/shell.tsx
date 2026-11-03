@@ -4,7 +4,6 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useId,
@@ -72,7 +71,7 @@ export interface TipContent {
   rows: TipRow[];
 }
 
-interface TipApi {
+export interface TipApi {
   show(at: { clientX: number; clientY: number } | Element, content: TipContent): void;
   hide(): void;
 }
@@ -81,6 +80,8 @@ export interface PlotArea {
   width: number;
   height: number;
   uid: string;
+  /** Tooltip API of the enclosing chart. */
+  tip: TipApi;
 }
 
 /** Categorical slot colors (1-based slots, never cycled past 8). */
@@ -100,26 +101,22 @@ export const FONT = {
 const TipCtx = createContext<TipApi>({ show: () => undefined, hide: () => undefined });
 export const useTip = (): TipApi => useContext(TipCtx);
 
-/** Hover + keyboard focus handlers for one mark (bar, box, slice). */
-export function useMarkTip(): (content: TipContent, ariaLabel?: string) => Record<string, unknown> {
-  const tip = useTip();
-  return useCallback(
-    (content: TipContent, ariaLabel?: string) => ({
-      tabIndex: 0,
-      role: 'graphics-symbol',
-      'aria-label': ariaLabel ?? [content.title, ...content.rows.map((r) => `${r.label}: ${r.value}`)].filter(Boolean).join(', '),
-      onPointerEnter: (e: React.PointerEvent) => tip.show(e, content),
-      onPointerMove: (e: React.PointerEvent) => tip.show(e, content),
-      onPointerLeave: () => tip.hide(),
-      onFocus: (e: React.FocusEvent) => tip.show(e.currentTarget, content),
-      onBlur: () => tip.hide(),
-    }),
-    [tip],
-  );
+/** Hover + keyboard focus props for one mark (bar, box, slice). Pass `area.tip`. */
+export function markTip(tip: TipApi, content: TipContent, ariaLabel?: string) {
+  return {
+    tabIndex: 0,
+    role: 'graphics-symbol',
+    'aria-label': ariaLabel ?? [content.title, ...content.rows.map((r) => (r.label ? `${r.label}: ${r.value}` : r.value))].filter(Boolean).join(', '),
+    onPointerEnter: (e: React.PointerEvent) => tip.show(e, content),
+    onPointerMove: (e: React.PointerEvent) => tip.show(e, content),
+    onPointerLeave: () => tip.hide(),
+    onFocus: (e: React.FocusEvent) => tip.show(e.currentTarget, content),
+    onBlur: () => tip.hide(),
+  };
 }
 
-function TipKey({ row }: { row: TipRow }) {
-  if (!row.color || row.key === 'none') return null;
+function TipKey({ row, pad }: { row: TipRow; pad: boolean }) {
+  if (!row.color || row.key === 'none') return pad ? <span className="pspp-chart__tipkey" style={{ width: 14 }} aria-hidden="true" /> : null;
   return (
     <svg className="pspp-chart__tipkey" width="14" height="10" aria-hidden="true">
       {row.key === 'marker' ? (
@@ -578,7 +575,7 @@ export function ChartShell(props: ChartShellProps) {
   if (legendLayout) y = legendY + legendLayout.height;
   const headerH = y + 8;
   const bottomPad = 12;
-  const defaultPlotH = props.plotHeight ? props.plotHeight(innerW) : clamp(Math.round(innerW * 0.56), 220, 420);
+  const defaultPlotH = props.plotHeight ? props.plotHeight(innerW) : clamp(Math.round(innerW * 0.56), 240, 420);
   const plotH = Math.round(props.height ? Math.max(160, props.height - headerH - bottomPad) : defaultPlotH);
   const totalH = headerH + plotH + bottomPad;
 
@@ -625,7 +622,7 @@ export function ChartShell(props: ChartShellProps) {
                 </text>
               ))}
               {legendLayout && <Legend layout={legendLayout} y={legendY} />}
-              <g transform={`translate(0 ${headerH})`}>{children({ width: innerW, height: plotH, uid })}</g>
+              <g transform={`translate(0 ${headerH})`}>{children({ width: innerW, height: plotH, uid, tip: tipApi })}</g>
             </g>
           </svg>
         ) : (
@@ -658,7 +655,7 @@ export function ChartShell(props: ChartShellProps) {
           {tip.content.title && <div className="pspp-chart__tip-title">{tip.content.title}</div>}
           {tip.content.rows.map((r, i) => (
             <div key={i} className="pspp-chart__tip-row">
-              <TipKey row={r} />
+              <TipKey row={r} pad={tip.content.rows.some((x) => x.color && x.key !== 'none')} />
               <span className="pspp-chart__tip-value">{r.value}</span>
               <span className="pspp-chart__tip-label">{r.label}</span>
             </div>

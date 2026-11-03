@@ -1,11 +1,10 @@
-import { AxisTitles, Baseline, ChartShell, FONT, Marker, YAxis, plotMargins, seriesColor, useMarkTip, type ChartCommonProps, type LegendItem } from './shell';
+import { Baseline, ChartShell, FONT, Marker, YAxis, plotMargins, seriesColor, markTip, type ChartCommonProps, type LegendItem } from './shell';
 import { clamp, formatValue, linearScale, niceTicks, padExtent, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { BoxplotSpec } from './types';
 
 export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommonProps) {
   const { t, locale } = c;
-  const mark = useMarkTip();
   const title = spec.title || tr(t, 'boxplot');
   const boxes = spec.boxes;
   const hasOut = boxes.some((b) => b.outliers.some((o) => !o.extreme));
@@ -100,7 +99,7 @@ export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommon
               });
               return (
                 <g key={bi}>
-                  <g className="pspp-chart__mark pspp-chart__box" {...mark(tip)}>
+                  <g className="pspp-chart__mark pspp-chart__box" {...markTip(area.tip, tip)}>
                     <rect x={cx - boxW / 2 - 6} y={top - 4} width={boxW + 12} height={bottom - top + 8} className="pspp-chart__hitband" data-export="omit" />
                     {wh !== null && <line className="pspp-chart__whisker" x1={cx} x2={cx} y1={wh} y2={q3} />}
                     {wl !== null && <line className="pspp-chart__whisker" x1={cx} x2={cx} y1={q1} y2={wl} />}
@@ -123,7 +122,7 @@ export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommon
                       ],
                     };
                     return (
-                      <g key={'o' + i} className="pspp-chart__mark" {...mark(otip)}>
+                      <g key={'o' + i} className="pspp-chart__mark" {...markTip(area.tip, otip)}>
                         <circle cx={cx} cy={e.y} r={10} className="pspp-chart__hitband" data-export="omit" />
                         <Marker shape={e.o.extreme ? 'asterisk' : 'ring'} x={cx} y={e.y} r={4} color={e.o.extreme ? extColor : outColor} />
                         {labelled.has(i) && (
@@ -143,7 +142,6 @@ export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommon
               );
             })}
             <Baseline x1={m.left} x2={m.left + plotW} y={m.top + plotH} />
-            <AxisTitles left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
           </g>
         );
       }}

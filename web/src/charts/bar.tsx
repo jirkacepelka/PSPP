@@ -1,14 +1,27 @@
-import { AxisTitles, Baseline, ChartShell, FONT, YAxis, barPath, plotMargins, seriesColor, useMarkTip, type ChartCommonProps, type LegendItem } from './shell';
-import { clamp, formatPercent, formatValue, linearScale, measureText, niceTicks, tickFormatter, truncateText } from './scale';
+import { AxisTitles, Baseline, ChartShell, FONT, YAxis, barPath, plotMargins, seriesColor, markTip, type ChartCommonProps, type LegendItem } from './shell';
+import { clamp, formatPercent, formatValue, linearScale, measureText, niceTicks, percentTickFormatter, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { BarSpec } from './types';
 
 const GAP = 2;
 const MAX_BAR = 24;
+const MAX_ROTATED = 110;
+
+/** How category labels fit a band: flat, tilted 45°, or vertical (thinned if still too dense). */
+function catLabels(cats: string[], band: number) {
+  const maxLabel = Math.max(0, ...cats.map((s) => measureText(s, FONT.tick)));
+  let mode: 'flat' | 'tilt' | 'vertical' = 'flat';
+  let every = 1;
+  if (maxLabel > band - 6) mode = band >= 18 ? 'tilt' : 'vertical';
+  if (mode === 'vertical' && band < 13) every = Math.ceil(13 / band);
+  const labels = cats.map((s) => truncateText(s, mode === 'flat' ? band - 4 : MAX_ROTATED, FONT.tick));
+  const longest = Math.max(0, ...labels.map((s) => measureText(s, FONT.tick)));
+  const labelBand = mode === 'flat' ? 18 : mode === 'tilt' ? longest * Math.SQRT1_2 + 18 : longest + 12;
+  return { mode, every, labels, labelBand };
+}
 
 export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
   const { t, locale } = c;
-  const mark = useMarkTip();
   const title = spec.title || tr(t, 'barChart');
   const yName = spec.ylabel || (spec.percent ? tr(t, 'percent') : tr(t, 'count'));
 
@@ -43,6 +56,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         .map((b) => `${b.x}${grouped ? ' / ' + (b.group ?? '') : ''} ${fmtVal(b.count)}`)
         .join(', ')}.`}
       table={{ columns: tableCols, rows, numeric: grouped ? [false, false, true] : [false, true] }}
+      plotHeight={(w) => clamp(Math.round(w * 0.56), 240, 420) + catLabels(cats, Math.max(1, (w - 64) / Math.max(1, cats.length))).labelBand - 18}
     >
       {(area) => {
         if (!cats.length) {
@@ -55,23 +69,13 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         const maxV = spec.bars.reduce((m, b) => Math.max(m, value(b.count)), 0);
         const minV = Math.min(0, ...spec.bars.map((b) => value(b.count)));
         const yt = niceTicks(minV, maxV || 1, clamp(Math.floor(area.height / 48), 3, 8));
-        const fy0 = tickFormatter(yt.step, yt.ticks, locale);
-        const fy = spec.percent ? (v: number) => fy0(v) + ' %' : fy0;
+        const fy = spec.percent ? percentTickFormatter(yt.step, locale) : tickFormatter(yt.step, yt.ticks, locale);
 
         // First pass for the left margin, then size the category labels.
         const m = plotMargins({ yTickLabels: yt.ticks.map(fy), yTitle: yName });
         const plotW = area.width - m.left - m.right;
         const band = plotW / cats.length;
-        const labelW = cats.map((s) => measureText(s, FONT.tick));
-        const maxLabel = Math.max(...labelW);
-        let mode: 'flat' | 'tilt' | 'vertical' = 'flat';
-        let every = 1;
-        if (maxLabel > band - 6) mode = band >= 18 ? 'tilt' : 'vertical';
-        if (mode === 'vertical' && band < 13) every = Math.ceil(13 / band);
-        const maxRot = clamp(area.height * 0.28, 50, 120);
-        const rotLabels = cats.map((s) => (mode === 'flat' ? truncateText(s, band - 4, FONT.tick) : truncateText(s, maxRot, FONT.tick)));
-        const rotMax = Math.max(...rotLabels.map((s) => measureText(s, FONT.tick)));
-        const labelBand = mode === 'flat' ? 18 : mode === 'tilt' ? rotMax * Math.sin(Math.PI / 4) + 16 : rotMax + 12;
+        const { mode, every, labels: rotLabels, labelBand } = catLabels(cats, band);
 
         const showValues = !grouped && cats.length <= 24 && cats.every((cName) => measureText(fmtVal(cell.get(cName + '\u0000') ?? 0), FONT.label) <= band - 4);
         const top = m.top + (showValues ? 14 : 0);
@@ -99,7 +103,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                       rows: [{ label: grouped ? g || tr(t, 'missing') : yName, value: fmtVal(count), color: gColor(gi), key: 'rect' as const }],
                     };
                     return (
-                      <g key={gi} className="pspp-chart__mark" {...mark(tip, `${cName}${grouped ? ', ' + g : ''}: ${fmtVal(count)}`)}>
+                      <g key={gi} className="pspp-chart__mark" {...markTip(area.tip, tip, `${cName}${grouped ? ', ' + g : ''}: ${fmtVal(count)}`)}>
                         <rect x={x - GAP / 2} y={top} width={barW + GAP} height={plotH} className="pspp-chart__hitband" data-export="omit" />
                         <path d={barPath(x, barW, base, yv)} style={{ fill: gColor(gi) }} />
                         {showValues && (

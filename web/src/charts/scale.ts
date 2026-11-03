@@ -93,7 +93,10 @@ export function niceTicks(min: number, max: number, count: number): Ticks {
 export function padExtent(min: number, max: number, frac = 0.05): [number, number] {
   [min, max] = safeExtent(min, max);
   const pad = (max - min) * frac;
-  return [min - pad, max + pad];
+  // Don't let padding push an all-positive (or all-negative) extent across zero.
+  const lo = min >= 0 && min - pad < 0 ? 0 : min - pad;
+  const hi = max <= 0 && max + pad > 0 ? 0 : max + pad;
+  return [lo, hi];
 }
 
 /* ---------------------------------------------------------------- numbers */
@@ -123,6 +126,13 @@ export function tickFormatter(step: number, ticks: number[], locale?: string): (
   const dec = stepDecimals(step);
   const f = nf(locale, { minimumFractionDigits: dec, maximumFractionDigits: dec });
   return (v) => f.format(v);
+}
+
+/** Tick formatter for an axis in percent units (values 0–100). */
+export function percentTickFormatter(step: number, locale?: string): (v: number) => string {
+  const dec = stepDecimals(step);
+  const f = nf(locale, { style: 'percent', minimumFractionDigits: dec, maximumFractionDigits: dec });
+  return (v) => f.format(v / 100);
 }
 
 /** General-purpose value formatting for tooltips and tables. */

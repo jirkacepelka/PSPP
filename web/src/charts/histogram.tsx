@@ -7,7 +7,7 @@ import {
   barPath,
   plotMargins,
   seriesColor,
-  useMarkTip,
+  markTip,
   type ChartCommonProps,
   type LegendItem,
 } from './shell';
@@ -19,7 +19,6 @@ const SQRT2PI = Math.sqrt(2 * Math.PI);
 
 export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCommonProps) {
   const { t, locale } = c;
-  const mark = useMarkTip();
   const name = spec.title || tr(t, 'untitled');
   const title = tr(t, 'histogramOf', { name });
   const freq = tr(t, 'frequency');
@@ -100,7 +99,7 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
               const tip = { title: range, rows: [{ label: freq, value: formatValue(b[2], locale), color: seriesColor(0), key: 'rect' as const }] };
               const w = Math.max(1, xb - xa - 2);
               return (
-                <g key={i} className="pspp-chart__mark" {...mark(tip)}>
+                <g key={i} className="pspp-chart__mark" {...markTip(area.tip, tip)}>
                   <rect x={xa} y={m.top} width={xb - xa} height={plotH} className="pspp-chart__hitband" data-export="omit" />
                   {b[2] > 0 && <path d={barPath(xa + 1, w, base, sy(b[2]))} style={{ fill: seriesColor(0) }} />}
                 </g>

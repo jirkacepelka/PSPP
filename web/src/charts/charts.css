@@ -350,6 +350,7 @@
   position: absolute;
   z-index: 2;
   pointer-events: none;
+  width: max-content;
   min-width: 96px;
   max-width: 260px;
   padding: 8px 10px;

@@ -63,7 +63,7 @@ export function PsppChart({ chart, width, height, t = defaultT, locale }: PsppCh
           </div>
           <div>
             <div className="pspp-chart__fallback-title">{spec.title || tr(t, 'untitled')}</div>
-            <div className="pspp-chart__fallback-text">{tr(t, 'unsupported', { type: spec.type === 'unknown' ? spec.rawType : spec.type })}</div>
+            <div className="pspp-chart__fallback-text">{tr(t, 'unsupported', { type: spec.rawType })}</div>
           </div>
         </figure>
       );

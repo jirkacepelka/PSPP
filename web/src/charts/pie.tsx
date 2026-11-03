@@ -1,4 +1,4 @@
-import { ChartShell, FONT, seriesColor, useMarkTip, type ChartCommonProps } from './shell';
+import { ChartShell, FONT, seriesColor, markTip, type ChartCommonProps } from './shell';
 import { formatPercent, formatValue, measureText, truncateText } from './scale';
 import { tr } from './strings';
 import type { PieSpec } from './types';
@@ -40,7 +40,6 @@ function arcPath(cx: number, cy: number, r: number, a0: number, a1: number): str
 
 export function PieChart({ spec, ...c }: { spec: PieSpec } & ChartCommonProps) {
   const { t, locale } = c;
-  const mark = useMarkTip();
   const title = spec.title || tr(t, 'pieChart');
   const { slices, folded } = foldSlices(spec, tr(t, 'other'));
   const total = slices.reduce((s, x) => s + x.value, 0);
@@ -106,7 +105,7 @@ export function PieChart({ spec, ...c }: { spec: PieSpec } & ChartCommonProps) {
                   className="pspp-chart__mark pspp-chart__slice"
                   d={arcPath(cx, cy, r, a0, a)}
                   style={{ fill: s.color }}
-                  {...mark(tip, `${s.label}: ${valueText(s.value)}`)}
+                  {...markTip(area.tip, tip, `${s.label}: ${valueText(s.value)}`)}
                 />
               );
             })}

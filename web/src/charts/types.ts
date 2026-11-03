@@ -117,7 +117,8 @@ const num = (v: unknown): number | null => (typeof v === 'number' && isFinite(v)
 const str = (v: unknown): string => (typeof v === 'string' ? v : typeof v === 'number' ? String(v) : '');
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 /** PSPP pads labels with trailing blanks; collapse whitespace. */
-export const clean = (s: string): string => s.replace(/\s+/g, ' ').trim();
+export const clean = (s: string): string =>
+  s.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim();
 
 function pts(v: unknown): Pt[] {
   const out: Pt[] = [];

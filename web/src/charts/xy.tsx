@@ -19,7 +19,7 @@ import {
   type PlotArea,
   type TipContent,
 } from './shell';
-import { clamp, formatValue, linearScale, niceTicks, padExtent, tickFormatter, ticksWithin, type Ticks } from './scale';
+import { clamp, formatValue, linearScale, niceStep, niceTicks, padExtent, tickFormatter, ticksWithin, type Ticks } from './scale';
 import { tr } from './strings';
 import type { NpSpec, Pt, RocSpec, ScatterSpec, ScreeSpec, SpreadLevelSpec } from './types';
 
@@ -50,6 +50,7 @@ interface XYPlotProps {
   refLines?: RefLine[];
   xGrid?: boolean;
   xFormat?: (v: number) => string;
+  emptyText?: string;
   tipFor: (s: XYSeries, p: Pt) => TipContent;
 }
 
@@ -150,6 +151,8 @@ export function XYPlot(props: XYPlotProps) {
         {(props.refLines ?? []).map((l, i) => (
           <line key={i} className="pspp-chart__ref" x1={sx(l.x1)} y1={sy(l.y1)} x2={sx(l.x2)} y2={sy(l.y2)} />
         ))}
+      </g>
+      <g clipPath={`url(#${clipId})`}>
         {series.map((s, si) =>
           s.line && s.points.length > 1 ? (
             <polyline
@@ -199,6 +202,11 @@ export function XYPlot(props: XYPlotProps) {
           tip.hide();
         }}
       />
+      {!flat.length && props.emptyText && (
+        <text className="pspp-chart__empty" x={m.left + plotW / 2} y={m.top + plotH / 2} textAnchor="middle" dominantBaseline="central">
+          {props.emptyText}
+        </text>
+      )}
       <AxisTitles xTitle={props.xTitle} yTitle={props.yTitle} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
     </g>
   );
@@ -283,7 +291,7 @@ export function NpChart({ spec, ...c }: { spec: NpSpec } & ChartCommonProps) {
           const [a, b] = xt.domain;
           ref.push({ x1: a, y1: spec.intercept + spec.slope * a, x2: b, y2: spec.intercept + spec.slope * b });
         }
-        return <XYPlot area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} refLines={ref} tipFor={pointTip(xName, yName, locale, false)} />;
+        return <XYPlot emptyText={tr(t, 'noData')} area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} refLines={ref} tipFor={pointTip(xName, yName, locale, false)} />;
       }}
     </ChartShell>
   );
@@ -320,6 +328,7 @@ export function RocChart({ spec, ...c }: { spec: RocSpec } & ChartCommonProps) {
         const yt = { ...ticksWithin(0, 1, n), domain: [0, 1] as [number, number] };
         return (
           <XYPlot
+            emptyText={tr(t, 'noData')}
             area={area}
             locale={locale}
             x={xt}
@@ -382,7 +391,7 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
         const yd = padExtent(spec.yMin ?? ey0, spec.yMax ?? ey1, 0.02);
         const xt = niceTicks(xd[0], xd[1], xCount(area.width));
         const yt = niceTicks(yd[0], yd[1], yCount(area.height));
-        return <XYPlot area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} tipFor={pointTip(xName, yName, locale, series.length > 1)} />;
+        return <XYPlot emptyText={tr(t, 'noData')} area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} tipFor={pointTip(xName, yName, locale, series.length > 1)} />;
       }}
     </ChartShell>
   );
@@ -413,12 +422,13 @@ export function ScreeChart({ spec, ...c }: { spec: ScreeSpec } & ChartCommonProp
       {(area) => {
         const maxAbs = spec.values.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
         const yt = niceTicks(0, maxAbs || 1, yCount(area.height));
-        const step = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(area.width / 40))));
-        const ticks: number[] = [];
-        for (let i = 1; i <= n; i += step) ticks.push(i);
+        const step = Math.max(1, niceStep(n, Math.max(2, Math.floor(area.width / 48))));
+        const ticks: number[] = step === 1 ? [] : [1];
+        for (let i = step; i <= n; i += step) ticks.push(i);
         const xt: Ticks = { ticks, step, domain: [0.5, n + 0.5] };
         return (
           <XYPlot
+            emptyText={tr(t, 'noData')}
             area={area}
             locale={locale}
             x={xt}
@@ -461,7 +471,7 @@ export function SpreadLevelChart({ spec, ...c }: { spec: SpreadLevelSpec } & Cha
         const yd = padExtent(...extent(spec.points.map((p) => p[1])), 0.1);
         const xt = niceTicks(xd[0], xd[1], xCount(area.width));
         const yt = niceTicks(yd[0], yd[1], yCount(area.height));
-        return <XYPlot area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} tipFor={pointTip(xName, yName, locale, false)} />;
+        return <XYPlot emptyText={tr(t, 'noData')} area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} tipFor={pointTip(xName, yName, locale, false)} />;
       }}
     </ChartShell>
   );
