@@ -16,6 +16,15 @@
 
 #include <config.h>
 
+#ifdef __EMSCRIPTEN__
+/* Emscripten's <fcntl.h> declares a Linux "struct file_handle" (for
+   name_to_handle_at) that clashes with PSPP's own.  Include it first under
+   another name so that its include guard keeps it out of the way. */
+#define file_handle emscripten_file_handle
+#include <fcntl.h>
+#undef file_handle
+#endif
+
 #include "data/file-handle-def.h"
 
 #include <assert.h>

@@ -19,7 +19,7 @@
 #include "output/spv/spv.h"
 
 #include <assert.h>
-#include <cairo.h>
+#include "output/cairo-compat.h"
 #include <inttypes.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/xmlreader.h>

@@ -25,41 +25,27 @@ src_output_liboutput_la_LIBADD = $(CAIRO_LIBS) $(LIBXML2_LIBS)
 src_output_liboutput_la_SOURCES = \
 	src/output/ascii.c \
 	src/output/ascii.h \
-	src/output/cairo-chart.c \
 	src/output/cairo-chart.h \
-	src/output/cairo-fsm.c \
-	src/output/cairo-fsm.h \
-	src/output/cairo-pager.c \
-	src/output/cairo-pager.h \
-	src/output/cairo.c \
+	src/output/cairo-compat.h \
 	src/output/chart-provider.h \
 	src/output/chart.c \
 	src/output/chart.h \
-	src/output/charts/barchart-cairo.c \
 	src/output/charts/barchart.c \
 	src/output/charts/barchart.h \
-	src/output/charts/boxplot-cairo.c \
 	src/output/charts/boxplot.c \
 	src/output/charts/boxplot.h \
-	src/output/charts/np-plot-cairo.c \
 	src/output/charts/np-plot.c \
 	src/output/charts/np-plot.h \
-	src/output/charts/piechart-cairo.c \
 	src/output/charts/piechart.c \
 	src/output/charts/piechart.h \
-	src/output/charts/plot-hist-cairo.c \
 	src/output/charts/plot-hist.c \
 	src/output/charts/plot-hist.h \
-	src/output/charts/roc-chart-cairo.c \
 	src/output/charts/roc-chart.c \
 	src/output/charts/roc-chart.h \
-	src/output/charts/scatterplot-cairo.c \
 	src/output/charts/scatterplot.c \
 	src/output/charts/scatterplot.h \
-	src/output/charts/scree-cairo.c \
 	src/output/charts/scree.c \
 	src/output/charts/scree.h \
-	src/output/charts/spreadlevel-cairo.c \
 	src/output/charts/spreadlevel-plot.c \
 	src/output/charts/spreadlevel-plot.h \
 	src/output/csv.c \
@@ -67,6 +53,7 @@ src_output_liboutput_la_SOURCES = \
 	src/output/driver.c \
 	src/output/driver.h \
 	src/output/html.c \
+	src/output/html.h \
 	src/output/journal.c \
 	src/output/journal.h \
 	src/output/measure.c \
@@ -100,6 +87,27 @@ src_output_liboutput_la_SOURCES = \
 	src/output/tex-rendering.h \
 	src/output/tex.c
 nodist_src_output_liboutput_la_SOURCES =
+
+if HAVE_CAIRO
+src_output_liboutput_la_SOURCES += \
+	src/output/cairo-chart.c \
+	src/output/cairo-fsm.c \
+	src/output/cairo-fsm.h \
+	src/output/cairo-pager.c \
+	src/output/cairo-pager.h \
+	src/output/cairo.c \
+	src/output/charts/barchart-cairo.c \
+	src/output/charts/boxplot-cairo.c \
+	src/output/charts/np-plot-cairo.c \
+	src/output/charts/piechart-cairo.c \
+	src/output/charts/plot-hist-cairo.c \
+	src/output/charts/roc-chart-cairo.c \
+	src/output/charts/scatterplot-cairo.c \
+	src/output/charts/scree-cairo.c \
+	src/output/charts/spreadlevel-cairo.c
+else
+src_output_liboutput_la_SOURCES += src/output/cairo-stub.c
+endif
 
 EXTRA_DIST += \
 	src/output/README \

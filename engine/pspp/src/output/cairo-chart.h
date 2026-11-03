@@ -17,7 +17,7 @@
 #ifndef OUTPUT_CAIRO_CHART_H
 #define OUTPUT_CAIRO_CHART_H 1
 
-#include <cairo/cairo.h>
+#include "output/cairo-compat.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include "libpspp/compiler.h"

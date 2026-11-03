@@ -97,9 +97,18 @@ AC_ARG_VAR([PSPP_LDFLAGS], [linker flags to be used for linking the pspp binary 
 AC_ARG_VAR([PSPPIRE_LDFLAGS], [linker flags to be used for linking the psppire binary only])
 
 # Support for Cairo and Pango.
-PKG_CHECK_MODULES([CAIRO], [cairo >= 1.5 pango >= 1.22 pangocairo],
-  [CPPFLAGS="$CPPFLAGS $CAIRO_CFLAGS"],
-  [PSPP_REQUIRED_PREREQ([cairo 1.5 or later and pango 1.22 or later])])
+AC_ARG_WITH([cairo],
+  [AS_HELP_STRING([--without-cairo],
+                  [Build without Cairo and Pango (no PDF/PS/SVG/PNG output
+                   and no chart rendering; implies --without-gui)])],
+  [], [with_cairo=yes])
+if test "$with_cairo" != "no"; then
+  PKG_CHECK_MODULES([CAIRO], [cairo >= 1.5 pango >= 1.22 pangocairo],
+    [CPPFLAGS="$CPPFLAGS $CAIRO_CFLAGS"],
+    [PSPP_REQUIRED_PREREQ([cairo 1.5 or later and pango 1.22 or later (or use --without-cairo)])])
+  AC_DEFINE([HAVE_CAIRO], [1], [Define to 1 if building with Cairo and Pango.])
+fi
+AM_CONDITIONAL([HAVE_CAIRO], [test "$with_cairo" != "no"])
 
 dnl One of the tests uses xmllint.
 AC_CACHE_CHECK([for an xmllint program which fits our needs],[ac_cv_path_XMLLINT],

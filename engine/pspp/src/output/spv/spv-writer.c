@@ -18,7 +18,7 @@
 
 #include "output/spv/spv-writer.h"
 
-#include <cairo.h>
+#include "output/cairo-compat.h"
 #include <inttypes.h>
 #include <libxml/xmlwriter.h>
 #include <math.h>

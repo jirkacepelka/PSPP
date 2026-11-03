@@ -22,7 +22,7 @@
    An output item is a self-contained chunk of output.
 */
 
-#include <cairo.h>
+#include "output/cairo-compat.h"
 #include <stdbool.h>
 #include "libpspp/cast.h"
 #include "libpspp/string-array.h"

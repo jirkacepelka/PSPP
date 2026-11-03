@@ -34,6 +34,7 @@
 #include "libpspp/message.h"
 #include "libpspp/version.h"
 #include "output/cairo-chart.h"
+#include "output/html.h"
 #include "output/chart.h"
 #include "output/driver-provider.h"
 #include "output/options.h"
@@ -66,6 +67,11 @@ struct html_driver
     bool bare;
     bool css;
     bool borders;
+
+    /* If true, omit presentational inline styles (fonts, colors, borders)
+       and keep only semantic ones (alignment, emphasis), so that an
+       embedding application can style tables with its own CSS. */
+    bool semantic;
   };
 
 static const struct output_driver_class html_driver_class;
@@ -527,18 +533,18 @@ html_put_table_cell (struct html_driver *html, const struct pivot_table *pt,
 
   const struct font_style *fs = cell->font_style;
   char bgcolor[32];
-  if (format_color (fs->bg[cell->d[V][0] % 2],
+  if (!html->semantic && format_color (fs->bg[cell->d[V][0] % 2],
                     (struct cell_color) CELL_COLOR_WHITE,
                     bgcolor, sizeof bgcolor))
     put_style (&style, "background", bgcolor);
 
   char fgcolor[32];
-  if (format_color (fs->fg[cell->d[V][0] % 2],
+  if (!html->semantic && format_color (fs->fg[cell->d[V][0] % 2],
                     (struct cell_color) CELL_COLOR_BLACK,
                     fgcolor, sizeof fgcolor))
     put_style (&style, "color", fgcolor);
 
-  if (fs->typeface)
+  if (fs->typeface && !html->semantic)
     {
       put_style (&style, "font-family", "\"");
       escape_string (html->file, fs->typeface, " ", "\n");
@@ -552,7 +558,7 @@ html_put_table_cell (struct html_driver *html, const struct pivot_table *pt,
     put_style (&style, "font-style", "italic");
   if (fs->underline)
     put_style (&style, "text-decoration", "underline");
-  if (fs->size)
+  if (fs->size && !html->semantic)
     {
       char buf[32];
       snprintf (buf, sizeof buf, "%dpt", fs->size);
@@ -734,6 +740,35 @@ html_output_table (struct html_driver *html, const struct output_item *item)
   size_t *layer_indexes;
   PIVOT_OUTPUT_FOR_EACH_LAYER (layer_indexes, item->table, true)
     html_output_table_layer (html, item->table, layer_indexes);
+}
+
+/* Renders the table in ITEM, which must be an OUTPUT_ITEM_TABLE, as a
+   fragment of HTML (one <table> per layer) and returns it as a
+   malloc()'d string.  BORDERS has the same meaning as the "borders" driver
+   option.  If SEMANTIC is true, presentational inline styles are omitted
+   (see struct html_driver).  Used by embedders, such as the WebAssembly bridge, that lay out
+   output themselves. */
+char *
+html_table_to_string (const struct output_item *item, bool borders,
+                      bool semantic)
+{
+  char *buf = NULL;
+  size_t len = 0;
+  struct html_driver html = {
+    .driver = { .class = &html_driver_class, .name = (char *) "html" },
+    .file = open_memstream (&buf, &len),
+    .bare = true,
+    .css = false,
+    .borders = borders && !semantic,
+    .semantic = semantic,
+    .fg = CELL_COLOR_BLACK,
+    .bg = CELL_COLOR_WHITE,
+  };
+  if (!html.file)
+    return NULL;
+  html_output_table (&html, item);
+  fclose (html.file);
+  return buf;
 }
 
 struct output_driver_factory html_driver_factory =
