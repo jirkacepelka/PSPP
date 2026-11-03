@@ -15,6 +15,7 @@ export function MenuBar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState<{ index: number; keyboard: boolean } | null>(null);
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [focusIdx, setFocusIdx] = useState(0);
   // re-render menus when state that affects enabled/checked changes
   useData((s) => s.revision);
   useUi((s) => `${s.view}${s.valueLabels}${s.zoom}`);
@@ -45,6 +46,8 @@ export function MenuBar() {
           aria-haspopup="menu"
           aria-expanded={open?.index === i}
           className={`menubar-item ${open?.index === i ? 'open' : ''}`}
+          tabIndex={i === focusIdx ? 0 : -1}
+          onFocus={() => setFocusIdx(i)}
           data-menu-trigger
           onClick={() => (open?.index === i ? setOpen(null) : openAt(i, false))}
           onMouseEnter={() => open && open.index !== i && openAt(i, false)}

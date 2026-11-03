@@ -60,7 +60,7 @@ export function DataView() {
     const cols: GridColumn[] = [];
     if (!ds) return cols;
     ds.variables.forEach((v, i) => {
-      const w = widths[i] ?? Math.round(Math.min(360, Math.max(72, v.columns * m.charWidth + 34)));
+      const w = widths[i] ?? Math.round(Math.min(360, Math.max(72, v.columns * m.charWidth + 34, v.name.length * 8 * m.zoom + 52)));
       cols.push({
         id: `v${i}-${v.name}`,
         title: v.name,

@@ -2240,3 +2240,28 @@ button.outline-toggle:hover {
     display: none;
   }
 }
+
+/* larger touch targets on touch devices (WCAG 2.5.5) */
+@media (pointer: coarse) {
+  .icon-btn.sm {
+    width: 44px;
+    height: 44px;
+  }
+  .tab-close {
+    width: 36px;
+    height: 36px;
+  }
+  .view-tabs {
+    height: 48px;
+  }
+  .menubar-item,
+  .menu-item {
+    min-height: 44px;
+  }
+  .var-list li {
+    min-height: 40px;
+  }
+  .btn-sm {
+    height: 40px;
+  }
+}

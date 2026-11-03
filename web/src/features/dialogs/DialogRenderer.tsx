@@ -514,13 +514,14 @@ export function AnalysisDialog({ spec }: { spec: DialogSpec }) {
                 <Icon name="search" />
                 <input className="input" placeholder={t('dialogs.filterVariables')} aria-label={t('dialogs.filterVariables')} value={filter} onChange={(e) => setFilter(e.target.value)} />
               </div>
-              <ul className="var-list source" role="listbox" aria-labelledby={`src-${spec.id}`} aria-multiselectable="true" tabIndex={0} onKeyDown={onSourceKey}>
+              <ul className="var-list source" role="listbox" aria-labelledby={`src-${spec.id}`} aria-multiselectable="true" tabIndex={0} onKeyDown={onSourceKey} aria-activedescendant={selectedSource.length ? `src-${spec.id}-${selectedSource[selectedSource.length - 1]}` : undefined}>
                 {variables.length === 0 && <li className="var-empty">{t('dialogs.noData')}</li>}
                 {source.map((v, i) => {
                   const on = selectedSource.includes(v.name);
                   return (
                     <li
                       key={v.name}
+                      id={`src-${spec.id}-${v.name}`}
                       role="option"
                       aria-selected={on}
                       className={on ? 'on' : ''}

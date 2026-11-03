@@ -274,6 +274,7 @@ export function VariableView() {
         headerHeight={m.headerHeight}
         gridSelection={selection}
         onGridSelectionChange={setSelection}
+        cellActivationBehavior="second-click"
         onCellActivated={([c, r]) => activate(c, r)}
         onCellClicked={([c, r], e) => {
           const id = COLS[c]?.id;

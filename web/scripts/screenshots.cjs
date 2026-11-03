@@ -91,7 +91,9 @@ async function settle(page, ms = 400) {
 
   // command palette
   await page.keyboard.press('Control+k');
-  await page.keyboard.type('t test');
+  await page.waitForSelector('.palette input');
+  await settle(page, 200);
+  await page.keyboard.type('t test', { delay: 30 });
   await settle(page, 300);
   await page.screenshot({ path: path.join(out, '12-palette.png') });
   await page.keyboard.press('Escape');
