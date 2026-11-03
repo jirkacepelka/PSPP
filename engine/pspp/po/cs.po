@@ -19,7 +19,7 @@ msgstr "Statistický program"
 
 #: src/ui/gui/gen-dot-desktop.sh:21
 msgid "Analyze statistical data with a free alternative to SPSS"
-msgstr "Analyzuj statistická data se svobodnou variantou SPSS"
+msgstr "Analyzujte statistická data se svobodnou alternativou k SPSS"
 
 #: gl/clean-temp.c:230
 msgid "cannot find a temporary directory, try setting $TMPDIR"
@@ -2161,7 +2161,7 @@ msgstr "Na střed"
 #: src/language/commands/sys-file-info.c:217
 #: src/language/commands/sys-file-info.c:224
 msgid "Unknown"
-msgstr "Neznámá"
+msgstr "Neznámé"
 
 #: src/data/variable.c:67
 msgid "Nominal"
@@ -2173,7 +2173,7 @@ msgstr "Ordinální"
 
 #: src/data/variable.c:69 src/language/commands/ks-one-sample.c:300
 msgid "Scale"
-msgstr "Škálová"
+msgstr "Měřítko"
 
 #: src/data/variable.c:75
 msgid "Input"
@@ -2198,7 +2198,7 @@ msgstr "Obojí"
 #: src/ui/gui/examine.ui:598 src/ui/gui/examine.ui:691
 #: src/ui/gui/options.ui:304 src/ui/gui/text-data-import.ui:494
 msgid "None"
-msgstr "Žádná"
+msgstr "Žádné"
 
 #: src/data/variable.c:79
 msgid "Partition"
@@ -2460,7 +2460,7 @@ msgstr "Zobrazit nastavení"
 
 #: src/language/command.def:45
 msgid "Subtitle"
-msgstr "Podtitul"
+msgstr "Podnadpis"
 
 #: src/language/command.def:46
 msgid "Sysfile Info"
@@ -2468,7 +2468,7 @@ msgstr "Informace o systémovém souboru"
 
 #: src/language/command.def:47 src/output/output-item.c:737
 msgid "Title"
-msgstr "Titul"
+msgstr "Nadpis"
 
 #: src/language/command.def:50
 msgid "Add Files"
@@ -2476,7 +2476,7 @@ msgstr "Přidat soubory"
 
 #: src/language/command.def:52 src/language/commands/list.c:81
 msgid "Data List"
-msgstr "Seznam dat"
+msgstr "Načtení dat"
 
 #: src/language/command.def:53
 msgid "Get"
@@ -2711,7 +2711,7 @@ msgstr "Začátek dat"
 #: src/ui/gui/psppire-dialog-action-crosstabs.c:90
 #: src/ui/gui/psppire-dialog-action-ctables.c:190
 msgid "Count"
-msgstr "Počet výskytů"
+msgstr "Počet"
 
 #: src/language/command.def:119 src/ui/gui/crosstabs.ui:99
 msgid "Crosstabs"
@@ -2749,7 +2749,7 @@ msgstr "Export"
 #: src/language/command.def:127 src/language/commands/factor.c:1559
 #: src/language/commands/factor.c:1638 src/language/commands/factor.c:1700
 msgid "Factor"
-msgstr "Faktorová analýza"
+msgstr "Faktor"
 
 #: src/language/command.def:128
 msgid "Filter"
@@ -4293,7 +4293,7 @@ msgstr "Cíl nemůže být textová proměnná."
 #: src/language/commands/crosstabs.c:74
 #: src/ui/gui/psppire-dialog-action-crosstabs.c:94
 msgid "Expected"
-msgstr "Očekávaný"
+msgstr "Očekávaný počet"
 
 #: src/language/commands/crosstabs.c:75 src/language/commands/ctables.c:340
 msgid "Row %"
@@ -5635,11 +5635,11 @@ msgstr "Cíl"
 
 #: src/language/commands/descriptives.c:1065 src/language/commands/roc.c:924
 msgid "Valid N (listwise)"
-msgstr "Platné N (celkem)"
+msgstr "Platné N (po případech)"
 
 #: src/language/commands/descriptives.c:1065
 msgid "Missing N (listwise)"
-msgstr "Chybějící N (celkem)"
+msgstr "Chybějící N (po případech)"
 
 #: src/language/commands/do-if.c:66
 msgid "ELSE IF is not allowed following ELSE within DO IF...END IF."
@@ -7118,7 +7118,8 @@ msgid ""
 "Only an %zu-element vector may be assigned to this %zu-element subvector of "
 "%s."
 msgstr ""
-"Této podvektoru %s o %zu prvcích lze přiřadit pouze vektor o %zu prvcích."
+"Lze přiřadit pouze vektor o %zu prvcích do tohoto podvektoru o %zu prvcích z "
+"%s."
 
 #: src/language/commands/matrix.c:4970
 #, c-format
@@ -7433,104 +7434,110 @@ msgstr ""
 #: src/language/commands/matrix.c:7809
 #, c-format
 msgid "The first MSAVE in MATRIX did not specify %s."
-msgstr ""
+msgstr "První MSAVE v MATRIX neuvedlo %s."
 
 #: src/language/commands/matrix.c:7812
 #, c-format
 msgid "This is the specification of %s on a later MSAVE."
-msgstr ""
+msgstr "Toto je určení %s v pozdějším MSAVE."
 
 #: src/language/commands/matrix.c:7819
 #, c-format
 msgid "%s must specify the same variables on each MSAVE within a given MATRIX."
-msgstr ""
+msgstr "%s musí v každém MSAVE v rámci daného MATRIX uvádět stejné proměnné."
 
 #: src/language/commands/matrix.c:7822
 #, c-format
 msgid "This is the specification of %s on the first MSAVE."
-msgstr ""
+msgstr "Toto je určení %s v prvním MSAVE."
 
 #: src/language/commands/matrix.c:7825
 #, c-format
 msgid "This is a different specification of %s on a later MSAVE."
-msgstr ""
+msgstr "Toto je odlišné určení %s v pozdějším MSAVE."
 
 #: src/language/commands/matrix.c:7839
 msgid ""
 "OUTFILE must name the same file on each MSAVE within a single MATRIX command."
 msgstr ""
+"OUTFILE musí v každém MSAVE v rámci jednoho příkazu MATRIX uvádět stejný "
+"soubor."
 
 #: src/language/commands/matrix.c:7842
 msgid "This is the OUTFILE on the first MSAVE command."
-msgstr ""
+msgstr "Toto je OUTFILE v prvním příkazu MSAVE."
 
 #: src/language/commands/matrix.c:7844
 msgid "This is the OUTFILE on a later MSAVE command."
-msgstr ""
+msgstr "Toto je OUTFILE v pozdějším příkazu MSAVE."
 
 #: src/language/commands/matrix.c:7934
 #, c-format
 msgid "Variable name %s is reserved."
-msgstr ""
+msgstr "Název proměnné %s je vyhrazený."
 
 #: src/language/commands/matrix.c:8043
 msgid "FNAMES requires FACTOR."
-msgstr ""
+msgstr "FNAMES vyžaduje FACTOR."
 
 #: src/language/commands/matrix.c:8048
 msgid "SNAMES requires SPLIT."
-msgstr ""
+msgstr "SNAMES vyžaduje SPLIT."
 
 #: src/language/commands/matrix.c:8110
 #, c-format
 msgid "%s expression must evaluate to vector, not a %zu×%zu matrix."
-msgstr ""
+msgstr "Výraz %s musí dávat vektor, nikoli matici %zu×%zu."
 
 #: src/language/commands/matrix.c:8148
 #, c-format
 msgid "Duplicate or invalid FACTOR variable name %s."
-msgstr ""
+msgstr "Duplicitní nebo neplatný název proměnné FACTOR %s."
 
 #: src/language/commands/matrix.c:8159
 #, c-format
 msgid "Duplicate or invalid variable name %s."
-msgstr ""
+msgstr "Duplicitní nebo neplatný název proměnné %s."
 
 #: src/language/commands/matrix.c:8191
 #, c-format
 msgid "Matrix on MSAVE has %zu columns but there are %zu variables."
-msgstr ""
+msgstr "Matice v MSAVE má %zu sloupců, ale proměnných je %zu."
 
 #: src/language/commands/matrix.c:8209
 #, c-format
 msgid "There are %zu factor variables, but %zu factor values were supplied."
 msgstr ""
+"Existuje %zu faktorových proměnných, ale bylo zadáno %zu faktorových hodnot."
 
 #: src/language/commands/matrix.c:8229
 #, c-format
 msgid "There are %zu split variables, but %zu split values were supplied."
 msgstr ""
+"Existuje %zu proměnných rozdělení, ale bylo zadáno %zu hodnot rozdělení."
 
 #: src/language/commands/matrix.c:8365
 #, c-format
 msgid "Matrix data file lacks %s variable."
-msgstr ""
+msgstr "Maticovému datovému souboru chybí proměnná %s."
 
 #: src/language/commands/matrix.c:8370
 #, c-format
 msgid ""
 "%s variable in matrix data file must be 8-byte string, but it has width %d."
 msgstr ""
+"Proměnná %s v maticovém datovém souboru musí být řetězec o 8 bajtech, ale má "
+"šířku %d."
 
 #: src/language/commands/matrix.c:8447
 #, c-format
 msgid "Matrix data file contains unknown ROWTYPE_ \"%.*s\"."
-msgstr ""
+msgstr "Maticový datový soubor obsahuje neznámý ROWTYPE_ \"%.*s\"."
 
 #: src/language/commands/matrix.c:8464
 #, c-format
 msgid "Matrix data file contains variable with existing name %s."
-msgstr ""
+msgstr "Maticový datový soubor obsahuje proměnnou s existujícím názvem %s."
 
 #: src/language/commands/matrix.c:8509
 #, c-format
@@ -7541,68 +7548,76 @@ msgid_plural ""
 "Matrix data file variable %s contains %zu missing values, which were treated "
 "as zero."
 msgstr[0] ""
+"Proměnná %s maticového datového souboru obsahuje chybějící hodnotu, se kterou"
+" bylo zacházeno jako s nulou."
 msgstr[1] ""
+"Proměnná %s maticového datového souboru obsahuje %zu chybějící hodnoty, se "
+"kterými bylo zacházeno jako s nulou."
+msgstr[2] ""
+"Proměnná %s maticového datového souboru obsahuje %zu chybějících hodnot, se "
+"kterými bylo zacházeno jako s nulou."
 
 #: src/language/commands/matrix.c:8538
 msgid "ROWTYPE_ must precede VARNAME_ in matrix data file."
-msgstr ""
+msgstr "ROWTYPE_ musí v maticovém datovém souboru předcházet VARNAME_."
 
 #: src/language/commands/matrix.c:8543
 msgid "Matrix data file contains no continuous variables."
-msgstr ""
+msgstr "Maticový datový soubor neobsahuje žádné spojité proměnné."
 
 #: src/language/commands/matrix.c:8553
 #, c-format
 msgid "Matrix data file contains unexpected string variable %s."
-msgstr ""
+msgstr "Maticový datový soubor obsahuje neočekávanou textovou proměnnou %s."
 
 #: src/language/commands/matrix.c:8578
 msgid "Matrix Variables Created by MGET"
-msgstr ""
+msgstr "Maticové proměnné vytvořené pomocí MGET"
 
 #: src/language/commands/matrix.c:8586 src/language/commands/split-file.c:89
 msgid "Split Values"
-msgstr ""
+msgstr "Hodnoty rozdělení"
 
 #: src/language/commands/matrix.c:8594
 msgid "Factors"
-msgstr ""
+msgstr "Faktory"
 
 #: src/language/commands/matrix.c:8599
 msgid "Dimensions"
-msgstr ""
+msgstr "Rozměry"
 
 #: src/language/commands/matrix.c:8752
 msgid "Argument of EIGEN must be symmetric."
-msgstr ""
+msgstr "Argument EIGEN musí být symetrický."
 
 #: src/language/commands/matrix.c:8823
 #, c-format
 msgid "SETDIAG destination matrix %s is uninitialized."
-msgstr ""
+msgstr "Cílová matice %s funkce SETDIAG není inicializována."
 
 #: src/language/commands/matrix.c:8847
 #, c-format
 msgid "SETDIAG argument 2 must be a scalar or a vector, not a %zu×%zu matrix."
 msgstr ""
+"Argument 2 funkce SETDIAG musí být skalár nebo vektor, nikoli matice %zu×%zu."
 
 #: src/language/commands/matrix.c:9114
 #, c-format
 msgid "Premature END MATRIX within %s."
-msgstr ""
+msgstr "Předčasné END MATRIX uvnitř %s."
 
 #: src/language/commands/matrix.c:9180
 msgid "Unknown matrix command."
-msgstr ""
+msgstr "Neznámý maticový příkaz."
 
 #: src/language/commands/matrix.c:9182
 #, c-format
 msgid "Matrix command %s is not yet implemented."
-msgstr ""
+msgstr "Maticový příkaz %s zatím není implementován."
 
 #: src/language/commands/matrix.c:9224
 msgid "Unexpected end of input expecting matrix command."
-msgstr ""
+msgstr "Neočekávaný konec vstupu, očekáván maticový příkaz."
 
 #: src/language/commands/mcnemar.c:184
 #, c-format
@@ -7611,62 +7626,67 @@ msgid ""
 "for dichotomous variables.  %zu cases with other than the two stated values "
 "were ignored."
 msgstr ""
+"Tato proměnná není dichotomická, ale McNemarův test je vhodný pouze pro "
+"dichotomické proměnné. %zu případů s jinými než dvěma uvedenými hodnotami "
+"bylo ignorováno."
 
 #: src/language/commands/mcnemar.c:238 src/language/commands/sign.c:105
 msgid "Point Probability"
-msgstr ""
+msgstr "Bodová pravděpodobnost"
 
 #: src/language/commands/mcnemar.c:241 src/language/commands/sign.c:78
 #: src/language/commands/sign.c:108 src/language/commands/t-test-paired.c:199
 #: src/language/commands/t-test-paired.c:257
 #: src/language/commands/wilcoxon.c:242 src/language/commands/wilcoxon.c:281
 msgid "Pairs"
-msgstr ""
+msgstr "Páry"
 
 #: src/language/commands/mconvert.c:82
 msgid ""
 "No active file is defined and no external file is specified on MATRIX=IN."
 msgstr ""
+"Není definován žádný aktivní soubor a v MATRIX=IN není zadán žádný externí "
+"soubor."
 
 #: src/language/commands/means-calc.c:443
 msgid "Group Median"
-msgstr ""
+msgstr "Skupinový medián"
 
 #: src/language/commands/means-calc.c:455
 msgid "First"
-msgstr ""
+msgstr "První"
 
 #: src/language/commands/means-calc.c:456
 msgid "Last"
-msgstr ""
+msgstr "Poslední"
 
 #: src/language/commands/means-calc.c:458
 msgid "Percent N"
-msgstr ""
+msgstr "Procento N"
 
 #: src/language/commands/means-calc.c:459
 msgid "Percent Sum"
-msgstr ""
+msgstr "Procento součtu"
 
 #: src/language/commands/means-calc.c:461
 msgid "Harmonic Mean"
-msgstr ""
+msgstr "Harmonický průměr"
 
 #: src/language/commands/means-calc.c:462
 msgid "Geom. Mean"
-msgstr ""
+msgstr "Geom. průměr"
 
 #: src/language/commands/means.c:703
 msgid "Included"
-msgstr ""
+msgstr "Zahrnuté"
 
 #: src/language/commands/means.c:705 src/language/commands/reliability.c:495
 msgid "Excluded"
-msgstr ""
+msgstr "Vyloučené"
 
 #: src/language/commands/means.c:754
 msgid "Report"
-msgstr ""
+msgstr "Výsledky"
 
 #: src/language/commands/means.c:837
 #, c-format
@@ -7674,93 +7694,103 @@ msgid ""
 "The table \"%s\" has no non-empty control variables.  No result for this "
 "table will be displayed."
 msgstr ""
+"Tabulka \"%s\" nemá žádné neprázdné řídicí proměnné. Pro tuto tabulku nebude "
+"zobrazen žádný výsledek."
 
 #: src/language/commands/median.c:316
 msgid "> Median"
-msgstr ""
+msgstr "> Medián"
 
 #: src/language/commands/median.c:316
 msgid "≤ Median"
-msgstr ""
+msgstr "≤ Medián"
 
 #: src/language/commands/missing-values.c:83
 msgid ""
 "Too many numeric missing values.  At most three individual values or one "
 "value and one range are allowed."
 msgstr ""
+"Příliš mnoho číselných chybějících hodnot. Povoleny jsou nejvýše tři "
+"jednotlivé hodnoty nebo jedna hodnota a jeden rozsah."
 
 #: src/language/commands/missing-values.c:109
 #, c-format
 msgid "Truncating missing value to maximum acceptable length (%d bytes)."
 msgstr ""
+"Chybějící hodnota se zkracuje na maximální přípustnou délku (%d bajtů)."
 
 #: src/language/commands/missing-values.c:122
 msgid ""
 "Too many string missing values.  At most three individual values are allowed."
 msgstr ""
+"Příliš mnoho textových chybějících hodnot. Povoleny jsou nejvýše tři "
+"jednotlivé hodnoty."
 
 #: src/language/commands/missing-values.c:147
 #, c-format
 msgid "Cannot assign string missing values to numeric variable %s."
-msgstr ""
+msgstr "Číselné proměnné %s nelze přiřadit textové chybějící hodnoty."
 
 #: src/language/commands/missing-values.c:151
 #, c-format
 msgid "Missing values are too long to assign to variable %s with width %d."
 msgstr ""
+"Chybějící hodnoty jsou příliš dlouhé pro přiřazení proměnné %s o šířce %d."
 
 #: src/language/commands/mrsets.c:56
 msgid ""
 "MRSETS is implemented but no other commands support multiple response sets "
 "yet."
 msgstr ""
+"MRSETS je implementováno, ale žádné jiné příkazy zatím sady vícenásobných "
+"odpovědí nepodporují."
 
 #: src/language/commands/mrsets.c:140
 msgid "At least two variables are required."
-msgstr ""
+msgstr "Jsou vyžadovány alespoň dvě proměnné."
 
 #: src/language/commands/mrsets.c:175
 msgid "Numeric VALUE must be an integer."
-msgstr ""
+msgstr "Číselné VALUE musí být celé číslo."
 
 #: src/language/commands/mrsets.c:205
 msgid "Syntax error expecting integer or string."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno celé číslo nebo řetězec."
 
 #: src/language/commands/mrsets.c:258
 msgid "VARIABLES and VALUE must have the same type."
-msgstr ""
+msgstr "VARIABLES a VALUE musí mít stejný typ."
 
 #: src/language/commands/mrsets.c:261
 msgid "These are string variables."
-msgstr ""
+msgstr "Toto jsou textové proměnné."
 
 #: src/language/commands/mrsets.c:264
 msgid "These are numeric variables."
-msgstr ""
+msgstr "Toto jsou číselné proměnné."
 
 #: src/language/commands/mrsets.c:267
 msgid "This is a string value."
-msgstr ""
+msgstr "Toto je textová hodnota."
 
 #: src/language/commands/mrsets.c:270
 msgid "This is a numeric value."
-msgstr ""
+msgstr "Toto je číselná hodnota."
 
 #: src/language/commands/mrsets.c:289
 msgid ""
 "The VALUE string must be no longer than the narrowest variable in the group."
-msgstr ""
+msgstr "Řetězec VALUE nesmí být delší než nejužší proměnná ve skupině."
 
 #: src/language/commands/mrsets.c:292
 #, c-format
 msgid "The VALUE string is %d bytes long."
-msgstr ""
+msgstr "Řetězec VALUE má délku %d bajtů."
 
 #: src/language/commands/mrsets.c:295
 #, c-format
 msgid "Variable %s has a width of %d bytes."
-msgstr ""
+msgstr "Proměnná %s má šířku %d bajtů."
 
 #: src/language/commands/mrsets.c:306
 #, c-format
@@ -7768,6 +7798,8 @@ msgid ""
 "MDGROUP subcommand for group %s specifies LABELSOURCE=VARLABEL but not "
 "CATEGORYLABELS=COUNTEDVALUES.  Ignoring LABELSOURCE."
 msgstr ""
+"Podpříkaz MDGROUP pro skupinu %s uvádí LABELSOURCE=VARLABEL, ale ne "
+"CATEGORYLABELS=COUNTEDVALUES. LABELSOURCE se ignoruje."
 
 #: src/language/commands/mrsets.c:313
 #, c-format
@@ -7775,11 +7807,13 @@ msgid ""
 "MDGROUP subcommand for group %s specifies both LABEL and LABELSOURCE, but "
 "only one of these subcommands may be used at a time.  Ignoring LABELSOURCE."
 msgstr ""
+"Podpříkaz MDGROUP pro skupinu %s uvádí LABEL i LABELSOURCE, ale současně lze "
+"použít pouze jeden z těchto podpříkazů. LABELSOURCE se ignoruje."
 
 #: src/language/commands/mrsets.c:319 src/language/commands/mrsets.c:321
 #, c-format
 msgid "Here is the %s setting."
-msgstr ""
+msgstr "Zde je nastavení %s."
 
 #: src/language/commands/mrsets.c:358
 #, c-format
@@ -7788,6 +7822,9 @@ msgid ""
 " same variable label.  Categories represented by these variables will not be "
 "distinguishable in output."
 msgstr ""
+"Proměnné %s a %s zadané jako součást skupiny vícenásobných dichotomií %s mají"
+" stejný popisek proměnné. Kategorie reprezentované těmito proměnnými nebude "
+"možné ve výstupu rozlišit."
 
 #: src/language/commands/mrsets.c:384
 #, c-format
@@ -7796,6 +7833,9 @@ msgid ""
 "CATEGORYLABELS=COUNTEDVALUES) has no value label for its counted value.  This"
 " category will not be distinguishable in output."
 msgstr ""
+"Proměnná %s zadaná jako součást skupiny vícenásobných dichotomií %s (která má"
+" CATEGORYLABELS=COUNTEDVALUES) nemá pro svou počítanou hodnotu popisek "
+"hodnoty. Tuto kategorii nebude možné ve výstupu rozlišit."
 
 #: src/language/commands/mrsets.c:398
 #, c-format
@@ -7804,6 +7844,9 @@ msgid ""
 "has CATEGORYLABELS=COUNTEDVALUES) have the same value label for the group's "
 "counted value.  These categories will not be distinguishable in output."
 msgstr ""
+"Proměnné %s a %s zadané jako součást skupiny vícenásobných dichotomií %s "
+"(která má CATEGORYLABELS=COUNTEDVALUES) mají pro počítanou hodnotu skupiny "
+"stejný popisek hodnoty. Tyto kategorie nebude možné ve výstupu rozlišit."
 
 #: src/language/commands/mrsets.c:455
 #, c-format
@@ -7812,16 +7855,21 @@ msgid ""
 " (and possibly others) in multiple category group %s have different value "
 "labels for value %s."
 msgstr ""
+"Proměnné zadané v MCGROUP by měly mít stejné kategorie, ale %s a %s (a možná "
+"další) ve skupině vícenásobných kategorií %s mají pro hodnotu %s různé "
+"popisky hodnot."
 
 #: src/language/commands/mrsets.c:515
 #, c-format
 msgid "No multiple response set named %s."
-msgstr ""
+msgstr "Žádná sada vícenásobných odpovědí s názvem %s."
 
 #: src/language/commands/mrsets.c:569
 msgid ""
 "The active dataset dictionary does not contain any multiple response sets."
 msgstr ""
+"Slovník aktivního datového souboru neobsahuje žádné sady vícenásobných "
+"odpovědí."
 
 #: src/language/commands/mrsets.c:580 src/language/commands/sys-file-info.c:192
 #: src/language/commands/sys-file-info.c:296
@@ -7830,34 +7878,34 @@ msgstr ""
 #: src/language/commands/sys-file-info.c:673 src/ui/gui/psppire-var-info.c:45
 #: src/ui/gui/psppire-var-sheet-header.c:67 src/ui/gui/compute.ui:157
 msgid "Label"
-msgstr ""
+msgstr "Popisek"
 
 #: src/language/commands/mrsets.c:580 src/language/commands/sys-file-info.c:242
 msgid "Encoding"
-msgstr ""
+msgstr "Kódování"
 
 #: src/language/commands/mrsets.c:580
 msgid "Counted Value"
-msgstr ""
+msgstr "Počítaná hodnota"
 
 #: src/language/commands/mrsets.c:580
 msgid "Member Variables"
-msgstr ""
+msgstr "Členské proměnné"
 
 #: src/language/commands/mrsets.c:583 src/language/commands/sys-file-info.c:435
 #: src/language/commands/sys-file-info.c:573 src/ui/gui/psppire-var-info.c:44
 #: src/ui/gui/psppire-var-sheet-header.c:55
 msgid "Name"
-msgstr ""
+msgstr "Název"
 
 #: src/language/commands/mrsets.c:600
 msgid "Dichotomies"
-msgstr ""
+msgstr "Dichotomie"
 
 #: src/language/commands/npar.c:421
 #, c-format
 msgid "Syntax error expecting %s, %s, %s or a number."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s nebo číslo."
 
 #: src/language/commands/npar.c:584
 #, c-format
@@ -7865,6 +7913,8 @@ msgid ""
 "%d expected values were given, but the specified range (%d-%d) requires "
 "exactly %d values."
 msgstr ""
+"Bylo zadáno %d očekávaných hodnot, ale zadaný rozsah (%d-%d) vyžaduje přesně "
+"%d hodnot."
 
 #: src/language/commands/npar.c:765 src/language/commands/t-test-parser.c:179
 #, c-format
@@ -7872,44 +7922,46 @@ msgid ""
 "PAIRED was specified, but the number of variables preceding WITH (%zu) does "
 "not match the number following (%zu)."
 msgstr ""
+"Bylo zadáno PAIRED, ale počet proměnných před WITH (%zu) neodpovídá počtu "
+"proměnných za ním (%zu)."
 
 #: src/language/commands/numeric.c:71
 #, c-format
 msgid "Format type %s may not be used with a numeric variable."
-msgstr ""
+msgstr "Typ formátu %s nelze použít s číselnou proměnnou."
 
 #: src/language/commands/numeric.c:90 src/language/commands/numeric.c:150
 #, c-format
 msgid "There is already a variable named %s."
-msgstr ""
+msgstr "Proměnná s názvem %s již existuje."
 
 #: src/language/commands/oneway.c:357
 msgid "LSD"
-msgstr ""
+msgstr "LSD"
 
 #: src/language/commands/oneway.c:358 src/ui/gui/oneway.ui:680
 msgid "Tukey HSD"
-msgstr ""
+msgstr "Tukey HSD"
 
 #: src/language/commands/oneway.c:359 src/ui/gui/oneway.ui:595
 msgid "Bonferroni"
-msgstr ""
+msgstr "Bonferroni"
 
 #: src/language/commands/oneway.c:360 src/ui/gui/oneway.ui:646
 msgid "Scheffé"
-msgstr ""
+msgstr "Scheffé"
 
 #: src/language/commands/oneway.c:361
 msgid "Games-Howell"
-msgstr ""
+msgstr "Games-Howell"
 
 #: src/language/commands/oneway.c:362 src/ui/gui/oneway.ui:663
 msgid "Šidák"
-msgstr ""
+msgstr "Šidák"
 
 #: src/language/commands/oneway.c:498
 msgid "Unknown post hoc analysis method."
-msgstr ""
+msgstr "Neznámá metoda post hoc analýzy."
 
 #: src/language/commands/oneway.c:778
 #, c-format
@@ -7917,6 +7969,8 @@ msgid ""
 "Dependent variable %s has no non-missing values.  No analysis for this "
 "variable will be done."
 msgstr ""
+"Závisle proměnná %s nemá žádné nechybějící hodnoty. Pro tuto proměnnou nebude"
+" provedena žádná analýza."
 
 #: src/language/commands/oneway.c:855
 #, c-format
@@ -7924,120 +7978,122 @@ msgid ""
 "In contrast list %zu, the number of coefficients (%zu) does not equal the "
 "number of groups (%d). This contrast list will be ignored."
 msgstr ""
+"V seznamu kontrastů %zu se počet koeficientů (%zu) nerovná počtu skupin (%d)."
+" Tento seznam kontrastů bude ignorován."
 
 #: src/language/commands/oneway.c:867
 #, c-format
 msgid "Coefficients for contrast %zu do not total zero"
-msgstr ""
+msgstr "Koeficienty kontrastu %zu nemají součet nula"
 
 #: src/language/commands/oneway.c:900
 msgid "ANOVA"
-msgstr ""
+msgstr "ANOVA"
 
 #: src/language/commands/oneway.c:903 src/language/commands/regression.c:932
 msgid "Sum of Squares"
-msgstr ""
+msgstr "Součet čtverců"
 
 #: src/language/commands/oneway.c:909 src/language/commands/sys-file-info.c:227
 #: src/ui/gui/psppire-var-sheet-header.c:58 src/ui/gui/compute.ui:304
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 #: src/language/commands/oneway.c:910
 msgid "Between Groups"
-msgstr ""
+msgstr "Mezi skupinami"
 
 #: src/language/commands/oneway.c:910
 msgid "Within Groups"
-msgstr ""
+msgstr "Uvnitř skupin"
 
 #: src/language/commands/oneway.c:1004 src/language/commands/oneway.c:1186
 msgid "Dependent Variable"
-msgstr ""
+msgstr "Závisle proměnná"
 
 #: src/language/commands/oneway.c:1077
 msgid "Test of Homogeneity of Variances"
-msgstr ""
+msgstr "Test homogenity rozptylů"
 
 #: src/language/commands/oneway.c:1080
 msgid "Levene Statistic"
-msgstr ""
+msgstr "Leveneova statistika"
 
 #: src/language/commands/oneway.c:1081
 msgid "df1"
-msgstr ""
+msgstr "df1"
 
 #: src/language/commands/oneway.c:1082
 msgid "df2"
-msgstr ""
+msgstr "df2"
 
 #: src/language/commands/oneway.c:1121
 msgid "Contrast Coefficients"
-msgstr ""
+msgstr "Koeficienty kontrastů"
 
 #: src/language/commands/oneway.c:1128 src/language/commands/oneway.c:1175
 msgid "Contrast"
-msgstr ""
+msgstr "Kontrast"
 
 #: src/language/commands/oneway.c:1165
 msgid "Contrast Tests"
-msgstr ""
+msgstr "Testy kontrastů"
 
 #: src/language/commands/oneway.c:1168
 msgid "Value of Contrast"
-msgstr ""
+msgstr "Hodnota kontrastu"
 
 #: src/language/commands/oneway.c:1170 src/language/commands/regression.c:807
 #: src/language/commands/t-test-indep.c:266
 #: src/language/commands/t-test-one-sample.c:74
 #: src/language/commands/t-test-paired.c:252
 msgid "t"
-msgstr ""
+msgstr "t"
 
 #: src/language/commands/oneway.c:1181
 msgid "Assumption"
-msgstr ""
+msgstr "Předpoklad"
 
 #: src/language/commands/oneway.c:1182
 msgid "Assume equal variances"
-msgstr ""
+msgstr "Předpokládá se shoda rozptylů"
 
 #: src/language/commands/oneway.c:1183
 msgid "Does not assume equal variances"
-msgstr ""
+msgstr "Nepředpokládá se shoda rozptylů"
 
 #: src/language/commands/oneway.c:1294
 #, c-format
 msgid "Multiple Comparisons (%s)"
-msgstr ""
+msgstr "Mnohonásobná porovnání (%s)"
 
 #: src/language/commands/oneway.c:1300
 msgid "Mean Difference (I - J)"
-msgstr ""
+msgstr "Rozdíl průměrů (I - J)"
 
 #: src/language/commands/oneway.c:1305
 #, c-format
 msgid "%g%% Confidence Interval"
-msgstr ""
+msgstr "%g%% interval spolehlivosti"
 
 #: src/language/commands/oneway.c:1336
 msgid "Test"
-msgstr ""
+msgstr "Test"
 
 #: src/language/commands/output.c:113
 #, c-format
 msgid "Unknown cell class %s."
-msgstr ""
+msgstr "Neznámá třída buněk %s."
 
 #: src/language/commands/permissions.c:115
 #, c-format
 msgid "Cannot read permissions for %s: %s"
-msgstr ""
+msgstr "Nelze přečíst oprávnění pro %s: %s"
 
 #: src/language/commands/permissions.c:129
 #, c-format
 msgid "Cannot change permissions for %s: %s"
-msgstr ""
+msgstr "Nelze změnit oprávnění pro %s: %s"
 
 #: src/language/commands/placement-parser.c:96
 #, c-format
@@ -8045,241 +8101,255 @@ msgid ""
 "Number of variables specified (%zu) differs from number of variable formats "
 "(%zu)."
 msgstr ""
+"Počet zadaných proměnných (%zu) se liší od počtu formátů proměnných (%zu)."
 
 #: src/language/commands/placement-parser.c:106
 msgid ""
 "SPSS-like or Fortran-like format specification expected after variable names."
 msgstr ""
+"Za názvy proměnných se očekává určení formátu ve stylu SPSS nebo Fortranu."
 
 #: src/language/commands/placement-parser.c:129
 #, c-format
 msgid "The %d columns %d-%d can't be evenly divided into %zu fields."
-msgstr ""
+msgstr "%d sloupců %d-%d nelze rovnoměrně rozdělit do %zu polí."
 
 #: src/language/commands/placement-parser.c:335
 msgid "Column positions for fields must be positive."
-msgstr ""
+msgstr "Pozice sloupců pro pole musí být kladné."
 
 #: src/language/commands/placement-parser.c:338
 msgid "Column positions for fields must not be negative."
-msgstr ""
+msgstr "Pozice sloupců pro pole nesmí být záporné."
 
 #: src/language/commands/placement-parser.c:391
 msgid "The ending column for a field must be greater than the starting column."
-msgstr ""
+msgstr "Koncový sloupec pole musí být větší než počáteční sloupec."
 
 #: src/language/commands/print-space.c:137
 #, c-format
 msgid "The expression on %s evaluated to the system-missing value."
-msgstr ""
+msgstr "Výraz v %s dal systémově chybějící hodnotu."
 
 #: src/language/commands/print-space.c:141
 #, c-format
 msgid "The expression on %s evaluated to %g."
-msgstr ""
+msgstr "Výraz v %s dal %g."
 
 #: src/language/commands/print.c:214
 #, c-format
 msgid "%s is required when binary formats are specified."
-msgstr ""
+msgstr "Jsou-li zadány binární formáty, je %s povinné."
 
 #: src/language/commands/print.c:299
 #, c-format
 msgid "Output calls for %d records but %zu specified on RECORDS subcommand."
-msgstr ""
+msgstr "Výstup vyžaduje %d záznamů, ale v podpříkazu RECORDS je zadáno %zu."
 
 #: src/language/commands/print.c:448
 msgid "Print Summary"
-msgstr ""
+msgstr "Souhrn tisku"
 
 #: src/language/commands/print.c:478
 msgid "N of Records"
-msgstr ""
+msgstr "Počet záznamů"
 
 #: src/language/commands/quick-cluster.c:534
 msgid "Initial Cluster Centers"
-msgstr ""
+msgstr "Počáteční centra shluků"
 
 #: src/language/commands/quick-cluster.c:535
 msgid "Final Cluster Centers"
-msgstr ""
+msgstr "Konečná centra shluků"
 
 #: src/language/commands/quick-cluster.c:538
 #: src/language/commands/quick-cluster.c:613
 #: src/language/commands/quick-cluster.c:614
 #: src/language/commands/quick-cluster.c:711
 msgid "Cluster"
-msgstr ""
+msgstr "Shluk"
 
 #: src/language/commands/quick-cluster.c:611
 msgid "Cluster Membership"
-msgstr ""
+msgstr "Příslušnost ke shlukům"
 
 #: src/language/commands/quick-cluster.c:701
 msgid "Number of Cases in each Cluster"
-msgstr ""
+msgstr "Počet případů v každém shluku"
 
 #: src/language/commands/quick-cluster.c:708
 msgid "Clusters"
-msgstr ""
+msgstr "Shluky"
 
 #: src/language/commands/quick-cluster.c:816
 #: src/language/commands/quick-cluster.c:842
 #, c-format
 msgid "A variable called `%s' already exists."
-msgstr ""
+msgstr "Proměnná s názvem `%s' již existuje."
 
 #: src/language/commands/rank.c:213
 #, c-format
 msgid ""
 "Cannot generate variable name for ranking %s with %s.  All candidates in use."
 msgstr ""
+"Nelze vygenerovat název proměnné pro pořadí %s pomocí %s. Všechny kandidátní "
+"názvy jsou použity."
 
 #: src/language/commands/rank.c:316
 #, c-format
 msgid "Too many variables in %s clause."
-msgstr ""
+msgstr "Příliš mnoho proměnných v klauzuli %s."
 
 #: src/language/commands/rank.c:318
 #, c-format
 msgid "Variable %s already exists."
-msgstr ""
+msgstr "Proměnná %s již existuje."
 
 #: src/language/commands/rank.c:320 src/language/expressions/evaluate.c:193
 #, c-format
 msgid "Duplicate variable name %s."
-msgstr ""
+msgstr "Duplicitní název proměnné %s."
 
 #: src/language/commands/rank.c:608
 #, c-format
 msgid "%s of %s by %s"
-msgstr ""
+msgstr "%s (%s) podle %s"
 
 #: src/language/commands/rank.c:758
 msgid "Variables Created by RANK"
-msgstr ""
+msgstr "Proměnné vytvořené pomocí RANK"
 
 #: src/language/commands/rank.c:760 src/language/commands/rank.c:761
 msgid "New Variable"
-msgstr ""
+msgstr "Nová proměnná"
 
 #: src/language/commands/rank.c:761
 msgid "Function"
-msgstr ""
+msgstr "Funkce"
 
 #: src/language/commands/rank.c:762
 msgid "Fraction"
-msgstr ""
+msgstr "Podíl"
 
 #: src/language/commands/rank.c:762
 msgid "Grouping Variables"
-msgstr ""
+msgstr "Seskupující proměnné"
 
 #: src/language/commands/rank.c:765 src/language/commands/rank.c:766
 msgid "Existing Variable"
-msgstr ""
+msgstr "Existující proměnná"
 
 #: src/language/commands/recode.c:293
 msgid "CONVERT requires string input values."
-msgstr ""
+msgstr "CONVERT vyžaduje textové vstupní hodnoty."
 
 #: src/language/commands/recode.c:299
 msgid "Output values must be all numeric or all string."
-msgstr ""
+msgstr "Výstupní hodnoty musí být buď všechny číselné, nebo všechny textové."
 
 #: src/language/commands/recode.c:313
 msgid "This output value is numeric."
-msgstr ""
+msgstr "Tato výstupní hodnota je číselná."
 
 #: src/language/commands/recode.c:315
 msgid "This output value is string."
-msgstr ""
+msgstr "Tato výstupní hodnota je textová."
 
 #: src/language/commands/recode.c:374
 #, c-format
 msgid "%s is not allowed with string variables."
-msgstr ""
+msgstr "%s není povoleno s textovými proměnnými."
 
 #: src/language/commands/recode.c:439
 msgid "Syntax error expecting output value."
-msgstr ""
+msgstr "Syntaktická chyba: očekávána výstupní hodnota."
 
 #: src/language/commands/recode.c:487
 msgid "Source and target variable counts must match."
-msgstr ""
+msgstr "Počty zdrojových a cílových proměnných se musí shodovat."
 
 #: src/language/commands/recode.c:489
 #, c-format
 msgid "There is %zu source variable."
 msgid_plural "There are %zu source variables."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Je zadána %zu zdrojová proměnná."
+msgstr[1] "Jsou zadány %zu zdrojové proměnné."
+msgstr[2] "Je zadáno %zu zdrojových proměnných."
 
 #: src/language/commands/recode.c:494
 #, c-format
 msgid "There is %zu target variable."
 msgid_plural "There are %zu target variables."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Je zadána %zu cílová proměnná."
+msgstr[1] "Jsou zadány %zu cílové proměnné."
+msgstr[2] "Je zadáno %zu cílových proměnných."
 
 #: src/language/commands/recode.c:509
 msgid ""
 "All string variables specified on INTO must already exist.  (Use the STRING "
 "command to create a string variable.)"
 msgstr ""
+"Všechny textové proměnné zadané v INTO již musí existovat. (Textovou "
+"proměnnou vytvoříte příkazem STRING.)"
 
 #: src/language/commands/recode.c:513
 #, c-format
 msgid "There is no variable named %s."
-msgstr ""
+msgstr "Neexistuje žádná proměnná s názvem %s."
 
 #: src/language/commands/recode.c:529
 msgid "INTO is required with numeric input values and string output values."
 msgstr ""
+"Při číselných vstupních hodnotách a textových výstupních hodnotách je INTO "
+"povinné."
 
 #: src/language/commands/recode.c:533
 msgid "INTO is required with string input values and numeric output values."
 msgstr ""
+"Při textových vstupních hodnotách a číselných výstupních hodnotách je INTO "
+"povinné."
 
 #: src/language/commands/recode.c:546
 #, c-format
 msgid "Type mismatch: cannot store string data in numeric variable %s."
-msgstr ""
+msgstr "Neshoda typů: textová data nelze uložit do číselné proměnné %s."
 
 #: src/language/commands/recode.c:550
 #, c-format
 msgid "Type mismatch: cannot store numeric data in string variable %s."
-msgstr ""
+msgstr "Neshoda typů: číselná data nelze uložit do textové proměnné %s."
 
 #: src/language/commands/recode.c:589
 msgid "At least one target variable is too narrow for the output values."
-msgstr ""
+msgstr "Alespoň jedna cílová proměnná je pro výstupní hodnoty příliš úzká."
 
 #: src/language/commands/recode.c:592
 #, c-format
 msgid "This output value has width %d."
-msgstr ""
+msgstr "Tato výstupní hodnota má šířku %d."
 
 #: src/language/commands/recode.c:595
 #, c-format
 msgid "Target variable %s only has width %d."
-msgstr ""
+msgstr "Cílová proměnná %s má šířku pouze %d."
 
 #: src/language/commands/regression.c:213
 #: src/language/commands/regression.c:219
 #, c-format
 msgid "VARIABLES may not appear after %s"
-msgstr ""
+msgstr "VARIABLES se nesmí vyskytovat za %s"
 
 #: src/language/commands/regression.c:379
 msgid ""
 "REGRESSION with SAVE ignores TEMPORARY.  Temporary transformations will be "
 "made permanent."
 msgstr ""
+"REGRESSION se SAVE ignoruje TEMPORARY. Dočasné transformace se stanou "
+"trvalými."
 
 #: src/language/commands/regression.c:384
 msgid "REGRESSION with SAVE ignores FILTER.  All cases will be processed."
-msgstr ""
+msgstr "REGRESSION se SAVE ignoruje FILTER. Budou zpracovány všechny případy."
 
 #: src/language/commands/regression.c:506
 msgid ""
@@ -8287,189 +8357,194 @@ msgid ""
 "squares line is therefore Y=X. Standard errors and related statistics may be "
 "meaningless."
 msgstr ""
+"Závisle proměnná je shodná s nezávisle proměnnou. Přímka nejmenších čtverců "
+"je proto Y=X. Směrodatné chyby a související statistiky mohou být "
+"bezvýznamné."
 
 #: src/language/commands/regression.c:683
 msgid "No valid data found. This command was skipped."
-msgstr ""
+msgstr "Nebyla nalezena žádná platná data. Tento příkaz byl přeskočen."
 
 #: src/language/commands/regression.c:765
 #, c-format
 msgid "Model Summary (%s)"
-msgstr ""
+msgstr "Souhrn modelu (%s)"
 
 #: src/language/commands/regression.c:770
 #: src/ui/gui/psppire-dialog-action-regression.c:42
 msgid "R"
-msgstr ""
+msgstr "R"
 
 #: src/language/commands/regression.c:770
 msgid "R Square"
-msgstr ""
+msgstr "R kvadrát"
 
 #: src/language/commands/regression.c:770
 msgid "Adjusted R Square"
-msgstr ""
+msgstr "Upravený R kvadrát"
 
 #: src/language/commands/regression.c:771
 msgid "Std. Error of the Estimate"
-msgstr ""
+msgstr "Směrodatná chyba odhadu"
 
 #: src/language/commands/regression.c:797
 #, c-format
 msgid "Coefficients (%s)"
-msgstr ""
+msgstr "Koeficienty (%s)"
 
 #: src/language/commands/regression.c:803
 msgid "Unstandardized Coefficients"
-msgstr ""
+msgstr "Nestandardizované koeficienty"
 
 #: src/language/commands/regression.c:806
 msgid "Standardized Coefficients"
-msgstr ""
+msgstr "Standardizované koeficienty"
 
 #: src/language/commands/regression.c:806
 msgid "Beta"
-msgstr ""
+msgstr "Beta"
 
 #: src/language/commands/regression.c:813
 #, c-format
 msgid "%g%% Confidence Interval for B"
-msgstr ""
+msgstr "%g%% interval spolehlivosti pro B"
 
 #: src/language/commands/regression.c:821
-#, fuzzy
 msgid "Collinearity Statistics"
-msgstr "Statistický program"
+msgstr "Statistiky kolinearity"
 
 #: src/language/commands/regression.c:822
 msgid "Tolerance"
-msgstr ""
+msgstr "Tolerance"
 
 #: src/language/commands/regression.c:822
 msgid "VIF"
-msgstr ""
+msgstr "VIF"
 
 #: src/language/commands/regression.c:835
 msgid "(Constant)"
-msgstr ""
+msgstr "(Konstanta)"
 
 #: src/language/commands/regression.c:928
 #, c-format
 msgid "ANOVA (%s)"
-msgstr ""
+msgstr "ANOVA (%s)"
 
 #: src/language/commands/regression.c:983
 #, c-format
 msgid "Coefficient Correlations (%s)"
-msgstr ""
+msgstr "Korelace koeficientů (%s)"
 
 #: src/language/commands/regression.c:990
 msgid "Models"
-msgstr ""
+msgstr "Modely"
 
 #: src/language/commands/regression.c:998
 msgid "Covariances"
-msgstr ""
+msgstr "Kovariance"
 
 #: src/language/commands/reliability.c:152
 msgid "Reliability on a single variable is not useful."
-msgstr ""
+msgstr "Reliabilita jediné proměnné nemá smysl."
 
 #: src/language/commands/reliability.c:260
 msgid ""
 "The STATISTICS subcommand is not yet implemented.  No statistics will be "
 "produced."
 msgstr ""
+"Podpříkaz STATISTICS zatím není implementován. Nebudou vytvořeny žádné "
+"statistiky."
 
 #: src/language/commands/reliability.c:276
 msgid "The split point must be less than the number of variables."
-msgstr ""
+msgstr "Bod rozdělení musí být menší než počet proměnných."
 
 #: src/language/commands/reliability.c:279
 #, c-format
 msgid "There is %zu variable."
 msgid_plural "There are %zu variables."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Je zadána %zu proměnná."
+msgstr[1] "Jsou zadány %zu proměnné."
+msgstr[2] "Je zadáno %zu proměnných."
 
 #: src/language/commands/reliability.c:476
 #, c-format
 msgid "Scale: %s"
-msgstr ""
+msgstr "Škála: %s"
 
 #: src/language/commands/reliability.c:529
 msgid "Item-Total Statistics"
-msgstr ""
+msgstr "Statistiky položka–celek"
 
 #: src/language/commands/reliability.c:532
 msgid "Scale Mean if Item Deleted"
-msgstr ""
+msgstr "Průměr škály při vypuštění položky"
 
 #: src/language/commands/reliability.c:533
 msgid "Scale Variance if Item Deleted"
-msgstr ""
+msgstr "Rozptyl škály při vypuštění položky"
 
 #: src/language/commands/reliability.c:534
 msgid "Corrected Item-Total Correlation"
-msgstr ""
+msgstr "Korigovaná korelace položka–celek"
 
 #: src/language/commands/reliability.c:535
 msgid "Cronbach's Alpha if Item Deleted"
-msgstr ""
+msgstr "Cronbachova alfa při vypuštění položky"
 
 #: src/language/commands/reliability.c:578
 msgid "Reliability Statistics"
-msgstr ""
+msgstr "Statistiky reliability"
 
 #: src/language/commands/reliability.c:585
 #: src/language/commands/reliability.c:598
 msgid "Cronbach's Alpha"
-msgstr ""
+msgstr "Cronbachova alfa"
 
 #: src/language/commands/reliability.c:586
 #: src/language/commands/reliability.c:601
 #: src/language/commands/reliability.c:604
 msgid "N of Items"
-msgstr ""
+msgstr "Počet položek"
 
 #: src/language/commands/reliability.c:599
 msgid "Part 1"
-msgstr ""
+msgstr "Část 1"
 
 #: src/language/commands/reliability.c:602
 msgid "Part 2"
-msgstr ""
+msgstr "Část 2"
 
 #: src/language/commands/reliability.c:606
 msgid "Total N of Items"
-msgstr ""
+msgstr "Celkový počet položek"
 
 #: src/language/commands/reliability.c:608
 msgid "Correlation Between Forms"
-msgstr ""
+msgstr "Korelace mezi formami"
 
 #: src/language/commands/reliability.c:611
 msgid "Spearman-Brown Coefficient"
-msgstr ""
+msgstr "Spearman-Brownův koeficient"
 
 #: src/language/commands/reliability.c:612
 msgid "Equal Length"
-msgstr ""
+msgstr "Stejná délka"
 
 #: src/language/commands/reliability.c:613
 msgid "Unequal Length"
-msgstr ""
+msgstr "Nestejná délka"
 
 #: src/language/commands/reliability.c:615
 msgid "Guttman Split-Half Coefficient"
-msgstr ""
+msgstr "Guttmanův koeficient split-half"
 
 #: src/language/commands/rename-variables.c:50
 #, c-format
 msgid ""
 "%s may not be used after %s.  Temporary transformations will be made "
 "permanent."
-msgstr ""
+msgstr "%s nelze použít po %s. Dočasné transformace se stanou trvalými."
 
 #: src/language/commands/rename-variables.c:79
 #, c-format
@@ -8477,232 +8552,238 @@ msgid ""
 "Differing number of variables in old name list (%zu) and in new name list "
 "(%zu)."
 msgstr ""
+"Rozdílný počet proměnných v seznamu starých názvů (%zu) a v seznamu nových "
+"názvů (%zu)."
 
 #: src/language/commands/rename-variables.c:101
 #, c-format
 msgid ""
 "Variable %s is of class %s, but renaming it to %s would make it of class %s."
 msgstr ""
+"Proměnná %s je třídy %s, ale její přejmenování na %s by ji zařadilo do třídy "
+"%s."
 
 #: src/language/commands/rename-variables.c:116
 #, c-format
 msgid "Renaming would duplicate variable name %s."
-msgstr ""
+msgstr "Přejmenování by vytvořilo duplicitní název proměnné %s."
 
 #: src/language/commands/repeat.c:108
 #, c-format
 msgid "Dummy variable name `%s' hides dictionary variable `%s'."
-msgstr ""
+msgstr "Název zástupné proměnné `%s' zakrývá proměnnou slovníku `%s'."
 
 #: src/language/commands/repeat.c:112
 #, c-format
 msgid "Dummy variable name `%s' is given twice."
-msgstr ""
+msgstr "Název zástupné proměnné `%s' je uveden dvakrát."
 
 #: src/language/commands/repeat.c:140
 msgid "Syntax error expecting substitution values."
-msgstr ""
+msgstr "Syntaktická chyba: očekávány hodnoty pro dosazení."
 
 #: src/language/commands/repeat.c:148
 msgid "Syntax error expecting `/' or end of command."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno `/' nebo konec příkazu."
 
 #: src/language/commands/repeat.c:159
 msgid "Each dummy variable must have the same number of substitutions."
-msgstr ""
+msgstr "Každá zástupná proměnná musí mít stejný počet dosazení."
 
 #: src/language/commands/repeat.c:163 src/language/commands/repeat.c:168
 #, c-format
 msgid "Dummy variable %s had %zu substitution."
 msgid_plural "Dummy variable %s had %zu substitutions."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Zástupná proměnná %s měla %zu dosazení."
+msgstr[1] "Zástupná proměnná %s měla %zu dosazení."
+msgstr[2] "Zástupná proměnná %s měla %zu dosazení."
 
 #: src/language/commands/repeat.c:274
 msgid "Syntax error expecting END REPEAT."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno END REPEAT."
 
 #: src/language/commands/repeat.c:285
 #, c-format
 msgid "Expansion %zu of %zu"
-msgstr ""
+msgstr "Rozvinutí %zu z %zu"
 
 #: src/language/commands/repeat.c:359
 msgid "Ranges may only have integer bounds."
-msgstr ""
+msgstr "Rozsahy mohou mít pouze celočíselné meze."
 
 #: src/language/commands/repeat.c:374
 #, c-format
 msgid "%ld TO %ld is an invalid range."
-msgstr ""
+msgstr "%ld TO %ld je neplatný rozsah."
 
 #: src/language/commands/repeat.c:422
 #, c-format
 msgid "No matching %s."
-msgstr ""
+msgstr "Žádné odpovídající %s."
 
 #: src/language/commands/roc.c:862
 msgid "Area Under the Curve"
-msgstr ""
+msgstr "Plocha pod křivkou"
 
 #: src/language/commands/roc.c:866
 msgid "Area"
-msgstr ""
+msgstr "Plocha"
 
 #: src/language/commands/roc.c:872
 msgid "Asymptotic Sig."
-msgstr ""
+msgstr "Asymptotická sig."
 
 #: src/language/commands/roc.c:875
 #, c-format
 msgid "Asymp. %g%% Confidence Interval"
-msgstr ""
+msgstr "Asymp. %g%% interval spolehlivosti"
 
 #: src/language/commands/roc.c:883
 msgid "Variable under test"
-msgstr ""
+msgstr "Testovaná proměnná"
 
 #: src/language/commands/roc.c:921
 msgid "Case Summary"
-msgstr ""
+msgstr "Souhrn případů"
 
 #: src/language/commands/roc.c:925
 msgid "Unweighted"
-msgstr ""
+msgstr "Nevážené"
 
 #: src/language/commands/roc.c:926
 msgid "Weighted"
-msgstr ""
+msgstr "Vážené"
 
 #: src/language/commands/roc.c:959
 msgid "Coordinates of the Curve"
-msgstr ""
+msgstr "Souřadnice křivky"
 
 #: src/language/commands/roc.c:962
 msgid "Positive if greater than or equal to"
-msgstr ""
+msgstr "Pozitivní, je-li větší nebo rovno"
 
 #: src/language/commands/roc.c:963 src/output/charts/roc-chart-cairo.c:38
 msgid "Sensitivity"
-msgstr ""
+msgstr "Senzitivita"
 
 #: src/language/commands/roc.c:963 src/output/charts/roc-chart-cairo.c:37
 msgid "1 - Specificity"
-msgstr ""
+msgstr "1 - Specificita"
 
 #: src/language/commands/roc.c:966
 msgid "Coordinates"
-msgstr ""
+msgstr "Souřadnice"
 
 #: src/language/commands/roc.c:970
 msgid "Test variable"
-msgstr ""
+msgstr "Testová proměnná"
 
 #: src/language/commands/runs.c:169
 #, c-format
 msgid ""
 "Multiple modes exist for variable `%s'.  Using %.*g as the threshold value."
 msgstr ""
+"Pro proměnnou `%s' existuje více modů. Jako prahová hodnota se použije %.*g."
 
 #: src/language/commands/runs.c:314 src/ui/gui/runs.ui:24
 msgid "Runs Test"
-msgstr ""
+msgstr "Test počtu běhů"
 
 #: src/language/commands/runs.c:319
 msgid "Test Value"
-msgstr ""
+msgstr "Testová hodnota"
 
 #: src/language/commands/runs.c:320
 msgid "Test Value (mode)"
-msgstr ""
+msgstr "Testová hodnota (modus)"
 
 #: src/language/commands/runs.c:321
 msgid "Test Value (mean)"
-msgstr ""
+msgstr "Testová hodnota (průměr)"
 
 #: src/language/commands/runs.c:322
 msgid "Test Value (median)"
-msgstr ""
+msgstr "Testová hodnota (medián)"
 
 #: src/language/commands/runs.c:323
 msgid "Cases < Test Value"
-msgstr ""
+msgstr "Případy < testová hodnota"
 
 #: src/language/commands/runs.c:324
 msgid "Cases ≥ Test Value"
-msgstr ""
+msgstr "Případy ≥ testová hodnota"
 
 #: src/language/commands/runs.c:325
 msgid "Total Cases"
-msgstr ""
+msgstr "Celkem případů"
 
 #: src/language/commands/runs.c:326
 msgid "Number of Runs"
-msgstr ""
+msgstr "Počet běhů"
 
 #: src/language/commands/save-translate.c:149
 #: src/language/commands/save-translate.c:164
 #, c-format
 msgid "The %s string must contain exactly one character."
-msgstr ""
+msgstr "Řetězec %s musí obsahovat přesně jeden znak."
 
 #: src/language/commands/save-translate.c:237
 #, c-format
 msgid "Output file `%s' exists but %s was not specified."
-msgstr ""
+msgstr "Výstupní soubor `%s' existuje, ale nebylo zadáno %s."
 
 #: src/language/commands/save.c:308
 msgid "The OUTFILE or METADATA subcommand is required."
-msgstr ""
+msgstr "Je vyžadován podpříkaz OUTFILE nebo METADATA."
 
 #: src/language/commands/select-if.c:112
 msgid "The filter variable must be numeric."
-msgstr ""
+msgstr "Filtrační proměnná musí být číselná."
 
 #: src/language/commands/select-if.c:119
 msgid "The filter variable may not be scratch."
-msgstr ""
+msgstr "Filtrační proměnná nesmí být pomocná."
 
 #: src/language/commands/set.c:264
 msgid "ISL (32-bit IEEE 754 single, little-endian)"
-msgstr ""
+msgstr "ISL (32bitové IEEE 754 single, little-endian)"
 
 #: src/language/commands/set.c:267
 msgid "ISB (32-bit IEEE 754 single, big-endian)"
-msgstr ""
+msgstr "ISB (32bitové IEEE 754 single, big-endian)"
 
 #: src/language/commands/set.c:270
 msgid "IDL (64-bit IEEE 754 double, little-endian)"
-msgstr ""
+msgstr "IDL (64bitové IEEE 754 double, little-endian)"
 
 #: src/language/commands/set.c:273
 msgid "IDB (64-bit IEEE 754 double, big-endian)"
-msgstr ""
+msgstr "IDB (64bitové IEEE 754 double, big-endian)"
 
 #: src/language/commands/set.c:277
 msgid "VF (32-bit VAX F, VAX-endian)"
-msgstr ""
+msgstr "VF (32bitové VAX F, pořadí bajtů VAX)"
 
 #: src/language/commands/set.c:280
 msgid "VD (64-bit VAX D, VAX-endian)"
-msgstr ""
+msgstr "VD (64bitové VAX D, pořadí bajtů VAX)"
 
 #: src/language/commands/set.c:283
 msgid "VG (64-bit VAX G, VAX-endian)"
-msgstr ""
+msgstr "VG (64bitové VAX G, pořadí bajtů VAX)"
 
 #: src/language/commands/set.c:287
 msgid "ZS (32-bit IBM Z hexadecimal short, big-endian)"
-msgstr ""
+msgstr "ZS (32bitové IBM Z šestnáctkové krátké, big-endian)"
 
 #: src/language/commands/set.c:290
 msgid "ZL (64-bit IBM Z hexadecimal long, big-endian)"
-msgstr ""
+msgstr "ZL (64bitové IBM Z šestnáctkové dlouhé, big-endian)"
 
 #: src/language/commands/set.c:502
 #, c-format
 msgid "Syntax error expecting %s or year."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s nebo rok."
 
 #: src/language/commands/set.c:549
 #, c-format
@@ -8710,60 +8791,62 @@ msgid ""
 "%s requires numeric output format as an argument.  Specified format %s is of "
 "type string."
 msgstr ""
+"%s vyžaduje jako argument číselný výstupní formát. Zadaný formát %s je "
+"textového typu."
 
 #: src/language/commands/set.c:623
 msgid "Syntax error expecting ON or OFF or a file name."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno ON, OFF nebo název souboru."
 
 #: src/language/commands/set.c:696
 #, c-format
 msgid "%s is not a recognized encoding or locale name"
-msgstr ""
+msgstr "%s není rozpoznaný název kódování ani národního prostředí"
 
 #: src/language/commands/set.c:1251
 msgid "Settings"
-msgstr ""
+msgstr "Nastavení"
 
 #: src/language/commands/set.c:1252
 msgid "Setting"
-msgstr ""
+msgstr "Nastavení"
 
 #: src/language/commands/set.c:1290
 msgid "System Information"
-msgstr ""
+msgstr "Informace o systému"
 
 #: src/language/commands/set.c:1293
 msgid "Version"
-msgstr ""
+msgstr "Verze"
 
 #: src/language/commands/set.c:1294
 msgid "Host System"
-msgstr ""
+msgstr "Hostitelský systém"
 
 #: src/language/commands/set.c:1295
 msgid "Build System"
-msgstr ""
+msgstr "Systém sestavení"
 
 #: src/language/commands/set.c:1298
 msgid "Locale Directory"
-msgstr ""
+msgstr "Adresář národních prostředí"
 
 #: src/language/commands/set.c:1301 src/ui/gui/options.ui:401
 msgid "Journal File"
-msgstr ""
+msgstr "Soubor deníku"
 
 #: src/language/commands/set.c:1303
 msgid "Compiler Version"
-msgstr ""
+msgstr "Verze překladače"
 
 #: src/language/commands/set.c:1381 src/language/commands/set.c:1493
 #: src/language/commands/set.c:1500
 msgid "Syntax error expecting the name of a setting."
-msgstr ""
+msgstr "Syntaktická chyba: očekáván název nastavení."
 
 #: src/language/commands/set.c:1423
 msgid "Environment Variables"
-msgstr ""
+msgstr "Proměnné prostředí"
 
 #: src/language/commands/set.c:1542
 #, c-format
@@ -8771,208 +8854,210 @@ msgid ""
 "Too many %s commands without a %s: at most %d levels of saved settings are "
 "allowed."
 msgstr ""
+"Příliš mnoho příkazů %s bez %s: povoleno je nejvýše %d úrovní uložených "
+"nastavení."
 
 #: src/language/commands/set.c:1565
 #, c-format
 msgid "%s without matching %s."
-msgstr ""
+msgstr "%s bez odpovídajícího %s."
 
 #: src/language/commands/sign.c:72
 msgid "Differences"
-msgstr ""
+msgstr "Rozdíly"
 
 #: src/language/commands/sign.c:73
 msgid "Negative Differences"
-msgstr ""
+msgstr "Záporné rozdíly"
 
 #: src/language/commands/sign.c:74
 msgid "Positive Differences"
-msgstr ""
+msgstr "Kladné rozdíly"
 
 #: src/language/commands/sign.c:75 src/language/commands/wilcoxon.c:239
 msgid "Ties"
-msgstr ""
+msgstr "Shody"
 
 #: src/language/commands/sort-criteria.c:90
 #, c-format
 msgid "Variable %s specified twice in sort criteria."
-msgstr ""
+msgstr "Proměnná %s je v kritériích řazení zadána dvakrát."
 
 #: src/language/commands/split-file.c:68
 msgid "At most 8 split variables may be specified."
-msgstr ""
+msgstr "Lze zadat nejvýše 8 proměnných rozdělení."
 
 #: src/language/commands/sys-file-info.c:185
 msgid "File Information"
-msgstr ""
+msgstr "Informace o souboru"
 
 #: src/language/commands/sys-file-info.c:188
 msgid "File"
-msgstr ""
+msgstr "Soubor"
 
 #: src/language/commands/sys-file-info.c:195
 msgid "Created"
-msgstr ""
+msgstr "Vytvořeno"
 
 #: src/language/commands/sys-file-info.c:204
 msgid "Integer Format"
-msgstr ""
+msgstr "Formát celých čísel"
 
 #: src/language/commands/sys-file-info.c:206
 msgid "Big Endian"
-msgstr ""
+msgstr "Big Endian"
 
 #: src/language/commands/sys-file-info.c:207
 msgid "Little Endian"
-msgstr ""
+msgstr "Little Endian"
 
 #: src/language/commands/sys-file-info.c:210
 msgid "Real Format"
-msgstr ""
+msgstr "Formát reálných čísel"
 
 #: src/language/commands/sys-file-info.c:212
 msgid "IEEE 754 LE."
-msgstr ""
+msgstr "IEEE 754 LE."
 
 #: src/language/commands/sys-file-info.c:213
 msgid "IEEE 754 BE."
-msgstr ""
+msgstr "IEEE 754 BE."
 
 #: src/language/commands/sys-file-info.c:214
 msgid "VAX D."
-msgstr ""
+msgstr "VAX D."
 
 #: src/language/commands/sys-file-info.c:215
 msgid "VAX G."
-msgstr ""
+msgstr "VAX G."
 
 #: src/language/commands/sys-file-info.c:216
 msgid "IBM 390 Hex Long."
-msgstr ""
+msgstr "IBM 390 Hex Long."
 
 #: src/language/commands/sys-file-info.c:234
 msgid "Not weighted"
-msgstr ""
+msgstr "Nevážený"
 
 #: src/language/commands/sys-file-info.c:236
 msgid "Compression"
-msgstr ""
+msgstr "Komprese"
 
 #: src/language/commands/sys-file-info.c:246
 #: src/language/commands/sys-file-info.c:527
 #: src/language/commands/sys-file-info.c:529
 msgid "Documents"
-msgstr ""
+msgstr "Dokumenty"
 
 #: src/language/commands/sys-file-info.c:300
 #: src/language/commands/sys-file-info.c:533
 msgid "(none)"
-msgstr ""
+msgstr "(žádné)"
 
 #: src/language/commands/sys-file-info.c:388
 msgid "No variables to display."
-msgstr ""
+msgstr "Žádné proměnné k zobrazení."
 
 #: src/language/commands/sys-file-info.c:414
 msgid "No macros to display."
-msgstr ""
+msgstr "Žádná makra k zobrazení."
 
 #: src/language/commands/sys-file-info.c:427
 msgid "Macros"
-msgstr ""
+msgstr "Makra"
 
 #: src/language/commands/sys-file-info.c:432
 msgid "Source Location"
-msgstr ""
+msgstr "Umístění ve zdroji"
 
 #: src/language/commands/sys-file-info.c:466
 msgid "No variable sets defined."
-msgstr ""
+msgstr "Nejsou definovány žádné sady proměnných."
 
 #: src/language/commands/sys-file-info.c:470
 msgid "Variable Sets"
-msgstr ""
+msgstr "Sady proměnných"
 
 #: src/language/commands/sys-file-info.c:474
 msgid "Variable Set and Position"
-msgstr ""
+msgstr "Sada proměnných a pozice"
 
 #: src/language/commands/sys-file-info.c:501
 #: src/ui/gui/psppire-spreadsheet-model.c:246
 msgid "(empty)"
-msgstr ""
+msgstr "(prázdné)"
 
 #: src/language/commands/sys-file-info.c:557 src/ui/gui/psppire-var-info.c:46
 msgid "Position"
-msgstr ""
+msgstr "Pozice"
 
 #: src/language/commands/sys-file-info.c:559 src/ui/gui/psppire-var-info.c:47
 msgid "Measurement Level"
-msgstr ""
+msgstr "Úroveň měření"
 
 #: src/language/commands/sys-file-info.c:560 src/ui/gui/psppire-var-info.c:48
 #: src/ui/gui/psppire-var-sheet-header.c:85
 msgid "Role"
-msgstr ""
+msgstr "Role"
 
 #: src/language/commands/sys-file-info.c:561 src/ui/gui/psppire-var-info.c:49
 #: src/ui/gui/psppire-var-sheet-header.c:61 src/ui/gui/compute.ui:216
 msgid "Width"
-msgstr ""
+msgstr "Šířka"
 
 #: src/language/commands/sys-file-info.c:562 src/ui/gui/psppire-var-info.c:50
 msgid "Alignment"
-msgstr ""
+msgstr "Zarovnání"
 
 #: src/language/commands/sys-file-info.c:563
 #: src/language/commands/sys-file-info.c:837 src/ui/gui/psppire-var-info.c:51
 msgid "Print Format"
-msgstr ""
+msgstr "Formát zobrazení"
 
 #: src/language/commands/sys-file-info.c:564 src/ui/gui/psppire-var-info.c:52
 msgid "Write Format"
-msgstr ""
+msgstr "Formát zápisu"
 
 #: src/language/commands/sys-file-info.c:676
 msgid "Variable Value"
-msgstr ""
+msgstr "Hodnota proměnné"
 
 #: src/language/commands/sys-file-info.c:680
 msgid "User-missing value"
-msgstr ""
+msgstr "Uživatelsky chybějící hodnota"
 
 #: src/language/commands/sys-file-info.c:796
 msgid "Variable and Dataset Attributes"
-msgstr ""
+msgstr "Atributy proměnných a datového souboru"
 
 #: src/language/commands/sys-file-info.c:802
 msgid "Variable and Name"
-msgstr ""
+msgstr "Proměnná a název"
 
 #: src/language/commands/sys-file-info.c:805
 msgid "(dataset)"
-msgstr ""
+msgstr "(datový soubor)"
 
 #: src/language/commands/sys-file-info.c:825
 msgid "No vectors defined."
-msgstr ""
+msgstr "Nejsou definovány žádné vektory."
 
 #: src/language/commands/sys-file-info.c:835
 msgid "Vectors"
-msgstr ""
+msgstr "Vektory"
 
 #: src/language/commands/sys-file-info.c:839
 msgid "Vector and Position"
-msgstr ""
+msgstr "Vektor a pozice"
 
 #: src/language/commands/sys-file-info.c:1101
 msgid "No valid encodings found."
-msgstr ""
+msgstr "Nebyla nalezena žádná platná kódování."
 
 #: src/language/commands/sys-file-info.c:1107
 #, c-format
 msgid "Usable encodings for %s."
-msgstr ""
+msgstr "Použitelná kódování pro %s."
 
 #: src/language/commands/sys-file-info.c:1111
 #, c-format
@@ -8981,265 +9066,274 @@ msgid ""
 "the GET command's ENCODING subcommand).  Encodings that yield identical text "
 "are listed together."
 msgstr ""
+"Kódování, která dokážou úspěšně přečíst %s (zadáním názvu kódování v "
+"podpříkazu ENCODING příkazu GET). Kódování, která dávají shodný text, jsou "
+"uvedena společně."
 
 #: src/language/commands/sys-file-info.c:1116
 #: src/language/commands/sys-file-info.c:1117
 msgid "Encodings"
-msgstr ""
+msgstr "Kódování"
 
 #: src/language/commands/sys-file-info.c:1146
 #, c-format
 msgid "%s Encoded Text Strings"
-msgstr ""
+msgstr "Textové řetězce v kódování %s"
 
 #: src/language/commands/sys-file-info.c:1151
 msgid ""
 "Text strings in the file dictionary that the previously listed encodings "
 "interpret differently, along with the interpretations."
 msgstr ""
+"Textové řetězce ve slovníku souboru, které výše uvedená kódování interpretují"
+" různě, spolu s jejich interpretacemi."
 
 #: src/language/commands/sys-file-info.c:1154 src/output/output-item.c:715
 #: src/output/output-item.c:744 src/ui/gui/psppire-import-textfile.c:271
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
 #: src/language/commands/sys-file-info.c:1164
 msgid "Purpose"
-msgstr ""
+msgstr "Účel"
 
 #: src/language/commands/t-test-indep.c:190
 msgid "Group Statistics"
-msgstr ""
+msgstr "Skupinové statistiky"
 
 #: src/language/commands/t-test-indep.c:200 src/output/output-item.c:235
 msgid "Group"
-msgstr ""
+msgstr "Skupina"
 
 #: src/language/commands/t-test-indep.c:256
 msgid "Independent Samples Test"
-msgstr ""
+msgstr "Test pro nezávislé výběry"
 
 #: src/language/commands/t-test-indep.c:261
 msgid "Levene's Test for Equality of Variances"
-msgstr ""
+msgstr "Leveneův test shody rozptylů"
 
 #: src/language/commands/t-test-indep.c:265
 msgid "T-Test for Equality of Means"
-msgstr ""
+msgstr "T-test shody průměrů"
 
 #: src/language/commands/t-test-indep.c:269
 #: src/language/commands/t-test-one-sample.c:77
 msgid "Mean Difference"
-msgstr ""
+msgstr "Rozdíl průměrů"
 
 #: src/language/commands/t-test-indep.c:270
 msgid "Std. Error Difference"
-msgstr ""
+msgstr "Směrodatná chyba rozdílu"
 
 #: src/language/commands/t-test-indep.c:273
 #, no-c-format
 msgid "95% Confidence Interval of the Difference"
-msgstr ""
+msgstr "95% interval spolehlivosti rozdílu"
 
 #: src/language/commands/t-test-indep.c:277
 msgid "Assumptions"
-msgstr ""
+msgstr "Předpoklady"
 
 #: src/language/commands/t-test-indep.c:278
 msgid "Equal variances assumed"
-msgstr ""
+msgstr "Předpokládá se shoda rozptylů"
 
 #: src/language/commands/t-test-indep.c:279
 msgid "Equal variances not assumed"
-msgstr ""
+msgstr "Nepředpokládá se shoda rozptylů"
 
 #: src/language/commands/t-test-one-sample.c:64
 msgid "One-Sample Test"
-msgstr ""
+msgstr "Jednovýběrový test"
 
 #: src/language/commands/t-test-one-sample.c:71
 #, c-format
 msgid "Test Value = %.*g"
-msgstr ""
+msgstr "Testová hodnota = %.*g"
 
 #: src/language/commands/t-test-one-sample.c:80
 #: src/language/commands/t-test-paired.c:246
 #, c-format
 msgid "%g%% Confidence Interval of the Difference"
-msgstr ""
+msgstr "%g%% interval spolehlivosti rozdílu"
 
 #: src/language/commands/t-test-one-sample.c:122
 msgid "One-Sample Statistics"
-msgstr ""
+msgstr "Jednovýběrové statistiky"
 
 #: src/language/commands/t-test-paired.c:147
 msgid "Paired Sample Statistics"
-msgstr ""
+msgstr "Statistiky párových výběrů"
 
 #: src/language/commands/t-test-paired.c:163
 #: src/language/commands/t-test-paired.c:205
 #: src/language/commands/t-test-paired.c:263
 #, c-format
 msgid "Pair %zu"
-msgstr ""
+msgstr "Pár %zu"
 
 #: src/language/commands/t-test-paired.c:190
 msgid "Paired Samples Correlations"
-msgstr ""
+msgstr "Korelace párových výběrů"
 
 #: src/language/commands/t-test-paired.c:208
 #, c-format
 msgid "%s & %s"
-msgstr ""
+msgstr "%s & %s"
 
 #: src/language/commands/t-test-paired.c:234
 msgid "Paired Samples Test"
-msgstr ""
+msgstr "Test párových výběrů"
 
 #: src/language/commands/t-test-paired.c:240
 msgid "Paired Differences"
-msgstr ""
+msgstr "Párové rozdíly"
 
 #: src/language/commands/t-test-paired.c:266
 #, c-format
 msgid "%s - %s"
-msgstr ""
+msgstr "%s - %s"
 
 #: src/language/commands/t-test-parser.c:138
 #, c-format
 msgid "When applying %s to a string variable, two values must be specified."
-msgstr ""
+msgstr "Při použití %s na textovou proměnnou musí být zadány dvě hodnoty."
 
 #: src/language/commands/t-test-parser.c:151
 #: src/language/commands/t-test-parser.c:231
 #, c-format
 msgid "%s subcommand may not be used with %s."
-msgstr ""
+msgstr "Podpříkaz %s nelze použít s %s."
 
 #: src/language/commands/t-test-parser.c:293
 msgid "Exactly one of TESTVAL, GROUPS and PAIRS subcommands must be specified."
-msgstr ""
+msgstr "Musí být zadán právě jeden z podpříkazů TESTVAL, GROUPS a PAIRS."
 
 #: src/language/commands/temporary.c:44
 msgid ""
 "This command may only appear once between procedures and procedure-like "
 "commands."
 msgstr ""
+"Tento příkaz se může mezi procedurami a příkazy podobnými procedurám "
+"vyskytovat pouze jednou."
 
 #: src/language/commands/title.c:104
 #, c-format
 msgid "   (Entered %s)"
-msgstr ""
+msgstr "   (Zadáno %s)"
 
 #: src/language/commands/trim.c:105
 msgid "Old and new variable counts do not match."
-msgstr ""
+msgstr "Počty starých a nových proměnných se neshodují."
 
 #: src/language/commands/trim.c:107
 #, c-format
 msgid "There is %zu old variable."
 msgid_plural "There are %zu old variables."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Je zadána %zu stará proměnná."
+msgstr[1] "Jsou zadány %zu staré proměnné."
+msgstr[2] "Je zadáno %zu starých proměnných."
 
 #: src/language/commands/trim.c:111
 #, c-format
 msgid "There is %zu new variable name."
 msgid_plural "There are %zu new variable names."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Je zadán %zu nový název proměnné."
+msgstr[1] "Jsou zadány %zu nové názvy proměnných."
+msgstr[2] "Je zadáno %zu nových názvů proměnných."
 
 #: src/language/commands/trim.c:124
 #, c-format
 msgid "Requested renaming duplicates variable name %s."
-msgstr ""
+msgstr "Požadované přejmenování vytváří duplicitní název proměnné %s."
 
 #: src/language/commands/trim.c:157
 msgid "Cannot DROP all variables from dictionary."
-msgstr ""
+msgstr "Ze slovníku nelze odstranit (DROP) všechny proměnné."
 
 #: src/language/commands/value-labels.c:153
 #, c-format
 msgid "Truncating value label to %d bytes."
-msgstr ""
+msgstr "Popisek hodnoty se zkracuje na %d bajtů."
 
 #: src/language/commands/vector.c:73
 #, c-format
 msgid "A vector named %s already exists."
-msgstr ""
+msgstr "Vektor s názvem %s již existuje."
 
 #: src/language/commands/vector.c:82
 #, c-format
 msgid "Vector name %s is given twice."
-msgstr ""
+msgstr "Název vektoru %s je uveden dvakrát."
 
 #: src/language/commands/vector.c:103
 msgid ""
 "Only a single vector name may be specified when a list of variables is given."
-msgstr ""
+msgstr "Je-li uveden seznam proměnných, lze zadat pouze jeden název vektoru."
 
 #: src/language/commands/vector.c:129
 msgid "Vector length may only be specified once."
-msgstr ""
+msgstr "Délku vektoru lze zadat pouze jednou."
 
 #: src/language/commands/vector.c:143
 msgid "Only one format may be specified."
-msgstr ""
+msgstr "Lze zadat pouze jeden formát."
 
 #: src/language/commands/vector.c:159
 msgid "Syntax error expecting vector length or format."
-msgstr ""
+msgstr "Syntaktická chyba: očekávána délka vektoru nebo formát."
 
 #: src/language/commands/vector.c:169
 msgid "Vector length is required."
-msgstr ""
+msgstr "Délka vektoru je povinná."
 
 #: src/language/commands/vector.c:192
 #, c-format
 msgid "%s is an existing variable name."
-msgstr ""
+msgstr "%s je název existující proměnné."
 
 #: src/language/commands/vector.c:204
 #, c-format
 msgid "Two different vectors add variable %s%zu."
-msgstr ""
+msgstr "Dva různé vektory přidávají proměnnou %s%zu."
 
 #: src/language/commands/weight.c:50
 msgid "The weighting variable must be numeric."
-msgstr ""
+msgstr "Váhová proměnná musí být číselná."
 
 #: src/language/commands/weight.c:56
 msgid "The weighting variable may not be scratch."
-msgstr ""
+msgstr "Váhová proměnná nesmí být pomocná."
 
 #: src/language/commands/wilcoxon.c:237
 msgid "Sign"
-msgstr ""
+msgstr "Znaménko"
 
 #: src/language/commands/wilcoxon.c:238
 msgid "Negative Ranks"
-msgstr ""
+msgstr "Záporná pořadí"
 
 #: src/language/commands/wilcoxon.c:238
 msgid "Positive Ranks"
-msgstr ""
+msgstr "Kladná pořadí"
 
 #: src/language/commands/wilcoxon.c:285
 msgid "Too many pairs to calculate exact significance"
-msgstr ""
+msgstr "Příliš mnoho párů pro výpočet přesné významnosti"
 
 #: src/language/tests/moments-test.c:50
 msgid "Syntax error expecting weight value."
-msgstr ""
+msgstr "Syntaktická chyba: očekávána hodnota váhy."
 
 #: src/language/expressions/evaluate.c:179
 msgid "Syntax error expecting number or string."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno číslo nebo řetězec."
 
 #: src/language/expressions/helpers.c:44
 #, c-format
 msgid "Invalid arguments to %s function."
-msgstr ""
+msgstr "Neplatné argumenty funkce %s."
 
 #: src/language/expressions/helpers.c:117
 #, c-format
@@ -9247,11 +9341,13 @@ msgid ""
 "Unrecognized date unit `%.*s'.  Valid date units are `%s', `%s', `%s', `%s', "
 "`%s', `%s', `%s', and `%s'."
 msgstr ""
+"Nerozpoznaná jednotka data `%.*s'. Platné jednotky data jsou `%s', `%s', "
+"`%s', `%s', `%s', `%s', `%s' a `%s'."
 
 #: src/language/expressions/helpers.c:273
 #, c-format
 msgid "Invalid DATESUM method.  Valid choices are `%s' and `%s'."
-msgstr ""
+msgstr "Neplatná metoda DATESUM. Platné volby jsou `%s' a `%s'."
 
 #: src/language/expressions/helpers.c:519
 #, c-format
@@ -9259,21 +9355,23 @@ msgid ""
 "Index outside valid range 1 to %zu, inclusive, for vector %s.  The value will"
 " be treated as system-missing."
 msgstr ""
+"Index mimo platný rozsah 1 až %zu (včetně) pro vektor %s. Hodnota bude "
+"považována za systémově chybějící."
 
 #: src/language/expressions/helpers.c:524
 msgid "The index is system-missing."
-msgstr ""
+msgstr "Index je systémově chybějící."
 
 #: src/language/expressions/helpers.c:527
 #, c-format
 msgid "The index has value %g."
-msgstr ""
+msgstr "Index má hodnotu %g."
 
 #: src/language/expressions/parse.c:117
 #, c-format
 msgid ""
 "Type mismatch: expression has %s type, but a boolean value is required here."
-msgstr ""
+msgstr "Neshoda typů: výraz má typ %s, ale zde je vyžadována logická hodnota."
 
 #: src/language/expressions/parse.c:148
 #, c-format
@@ -9282,43 +9380,46 @@ msgid ""
 " it, but this is not supported.  Use the STRING command to create the new "
 "variable with the correct width before assigning to it, e.g. STRING %s(A20)."
 msgstr ""
+"Tento příkaz se pokouší vytvořit novou proměnnou %s přiřazením textové "
+"hodnoty, což není podporováno. Před přiřazením vytvořte novou proměnnou se "
+"správnou šířkou příkazem STRING, např. STRING %s(A20)."
 
 #: src/language/expressions/parse.c:314
 #, c-format
 msgid ""
 "Type mismatch: expression has type '%s', but a numeric value is required."
-msgstr ""
+msgstr "Neshoda typů: výraz má typ '%s', ale je vyžadována číselná hodnota."
 
 #: src/language/expressions/parse.c:325
 #, c-format
 msgid ""
 "Type mismatch: expression has type '%s', but a string value is required."
-msgstr ""
+msgstr "Neshoda typů: výraz má typ '%s', ale je vyžadována textová hodnota."
 
 #: src/language/expressions/parse.c:641
 #, c-format
 msgid "Both operands of %s must have the same type."
-msgstr ""
+msgstr "Oba operandy %s musí mít stejný typ."
 
 #: src/language/expressions/parse.c:644
 #, c-format
 msgid "Both operands of %s must be numeric."
-msgstr ""
+msgstr "Oba operandy %s musí být číselné."
 
 #: src/language/expressions/parse.c:649 src/language/expressions/parse.c:652
 #, c-format
 msgid "This operand has type '%s'."
-msgstr ""
+msgstr "Tento operand má typ '%s'."
 
 #: src/language/expressions/parse.c:702
 #, c-format
 msgid "The unary %s operator requires a numeric operand."
-msgstr ""
+msgstr "Unární operátor %s vyžaduje číselný operand."
 
 #: src/language/expressions/parse.c:705
 #, c-format
 msgid "The operand of %s has type '%s'."
-msgstr ""
+msgstr "Operand %s má typ '%s'."
 
 #: src/language/expressions/parse.c:744
 msgid ""
@@ -9327,34 +9428,37 @@ msgid ""
 "problem (e.g. `a < b AND b < c').  To disable this warning, insert "
 "parentheses."
 msgstr ""
+"Řetězení relačních operátorů (např. `a < b < c') nedá matematicky očekávaný "
+"výsledek. Problém opravíte použitím logického operátoru AND (např. `a < b AND"
+" b < c'). Pro potlačení tohoto upozornění vložte závorky."
 
 #: src/language/expressions/parse.c:913
 #, c-format
 msgid "Unknown system variable %s."
-msgstr ""
+msgstr "Neznámá systémová proměnná %s."
 
 #: src/language/expressions/parse.c:961
 #, c-format
 msgid "Unknown identifier %s."
-msgstr ""
+msgstr "Neznámý identifikátor %s."
 
 #: src/language/expressions/parse.c:999
 msgid "Syntax error parsing expression."
-msgstr ""
+msgstr "Syntaktická chyba při zpracování výrazu."
 
 #: src/language/expressions/parse.c:1050
 msgid "A vector index must be numeric."
-msgstr ""
+msgstr "Index vektoru musí být číselný."
 
 #: src/language/expressions/parse.c:1053
 #, c-format
 msgid "This vector index has type '%s'."
-msgstr ""
+msgstr "Tento index vektoru má typ '%s'."
 
 #: src/language/expressions/parse.c:1205
 #, c-format
 msgid "%s must have an odd number of arguments."
-msgstr ""
+msgstr "%s musí mít lichý počet argumentů."
 
 #: src/language/expressions/parse.c:1215
 #, c-format
@@ -9362,229 +9466,237 @@ msgid ""
 "%s function cannot accept suffix .%d to specify the minimum number of valid "
 "arguments."
 msgstr ""
+"Funkce %s nepřipouští příponu .%d k určení minimálního počtu platných "
+"argumentů."
 
 #: src/language/expressions/parse.c:1226
 #, c-format
 msgid ""
 "For %s with %d arguments, at most %d (not %d) may be required to be valid."
-msgstr ""
+msgstr "U %s s %d argumenty lze vyžadovat platnost nejvýše %d (ne %d) z nich."
 
 #: src/language/expressions/parse.c:1275
 #, c-format
 msgid "Type mismatch invoking %s as "
-msgstr ""
+msgstr "Neshoda typů při volání %s jako "
 
 #: src/language/expressions/parse.c:1280
 msgid "Function invocation "
-msgstr ""
+msgstr "Volání funkce "
 
 #: src/language/expressions/parse.c:1282
 msgid " does not match any known function.  Candidates are:"
-msgstr ""
+msgstr " neodpovídá žádné známé funkci. Kandidáti jsou:"
 
 #: src/language/expressions/parse.c:1314
 #, c-format
 msgid "This argument has type '%s' but '%s' is required."
-msgstr ""
+msgstr "Tento argument má typ '%s', ale je vyžadován '%s'."
 
 #: src/language/expressions/parse.c:1333
 #, c-format
 msgid "No function or vector named %s."
-msgstr ""
+msgstr "Žádná funkce ani vektor s názvem %s."
 
 #: src/language/expressions/parse.c:1411
 #, c-format
 msgid "%s is a PSPP extension."
-msgstr ""
+msgstr "%s je rozšíření PSPP."
 
 #: src/language/expressions/parse.c:1415
 #, c-format
 msgid "%s is not available in this version of PSPP."
-msgstr ""
+msgstr "%s není v této verzi PSPP k dispozici."
 
 #: src/language/expressions/parse.c:1422
 #, c-format
 msgid "%s may not appear after %s."
-msgstr ""
+msgstr "%s se nesmí vyskytovat za %s."
 
 #: src/libpspp/ext-array.c:76
 msgid "failed to create temporary file"
-msgstr ""
+msgstr "nepodařilo se vytvořit dočasný soubor"
 
 #: src/libpspp/ext-array.c:116
 msgid "seeking in temporary file"
-msgstr ""
+msgstr "přesun v dočasném souboru"
 
 #: src/libpspp/ext-array.c:135
 msgid "reading temporary file"
-msgstr ""
+msgstr "čtení dočasného souboru"
 
 #: src/libpspp/ext-array.c:137
 msgid "unexpected end of file reading temporary file"
-msgstr ""
+msgstr "neočekávaný konec souboru při čtení dočasného souboru"
 
 #: src/libpspp/ext-array.c:157
 msgid "writing to temporary file"
-msgstr ""
+msgstr "zápis do dočasného souboru"
 
 #: src/libpspp/i18n.c:1194
 msgid "Arabic"
-msgstr ""
+msgstr "Arabské"
 
 #: src/libpspp/i18n.c:1196
 msgid "Armenian"
-msgstr ""
+msgstr "Arménské"
 
 #: src/libpspp/i18n.c:1197
 msgid "Baltic"
-msgstr ""
+msgstr "Baltské"
 
 #: src/libpspp/i18n.c:1199
 msgid "Celtic"
-msgstr ""
+msgstr "Keltské"
 
 #: src/libpspp/i18n.c:1200
 msgid "Central European"
-msgstr ""
+msgstr "Středoevropské"
 
 #: src/libpspp/i18n.c:1202
 msgid "Chinese Simplified"
-msgstr ""
+msgstr "Čínské zjednodušené"
 
 #: src/libpspp/i18n.c:1204
 msgid "Chinese Traditional"
-msgstr ""
+msgstr "Čínské tradiční"
 
 #: src/libpspp/i18n.c:1206
 msgid "Croatian"
-msgstr ""
+msgstr "Chorvatské"
 
 #: src/libpspp/i18n.c:1207
 msgid "Cyrillic"
-msgstr ""
+msgstr "Cyrilice"
 
 #: src/libpspp/i18n.c:1209
 msgid "Cyrillic/Russian"
-msgstr ""
+msgstr "Cyrilice/ruské"
 
 #: src/libpspp/i18n.c:1210
 msgid "Cyrillic/Ukrainian"
-msgstr ""
+msgstr "Cyrilice/ukrajinské"
 
 #: src/libpspp/i18n.c:1212
 msgid "Georgian"
-msgstr ""
+msgstr "Gruzínské"
 
 #: src/libpspp/i18n.c:1213
 msgid "Greek"
-msgstr ""
+msgstr "Řecké"
 
 #: src/libpspp/i18n.c:1214
 msgid "Gujarati"
-msgstr ""
+msgstr "Gudžarátské"
 
 #: src/libpspp/i18n.c:1215
 msgid "Gurmukhi"
-msgstr ""
+msgstr "Gurmukhí"
 
 #: src/libpspp/i18n.c:1216
 msgid "Hebrew"
-msgstr ""
+msgstr "Hebrejské"
 
 #: src/libpspp/i18n.c:1218
 msgid "Hebrew Visual"
-msgstr ""
+msgstr "Hebrejské vizuální"
 
 #: src/libpspp/i18n.c:1219
 msgid "Hindi"
-msgstr ""
+msgstr "Hindské"
 
 #: src/libpspp/i18n.c:1220
 msgid "Icelandic"
-msgstr ""
+msgstr "Islandské"
 
 #: src/libpspp/i18n.c:1221
 msgid "Japanese"
-msgstr ""
+msgstr "Japonské"
 
 #: src/libpspp/i18n.c:1223
 msgid "Korean"
-msgstr ""
+msgstr "Korejské"
 
 #: src/libpspp/i18n.c:1225
 msgid "Nordic"
-msgstr ""
+msgstr "Severské"
 
 #: src/libpspp/i18n.c:1226
 msgid "Romanian"
-msgstr ""
+msgstr "Rumunské"
 
 #: src/libpspp/i18n.c:1228
 msgid "South European"
-msgstr ""
+msgstr "Jihoevropské"
 
 #: src/libpspp/i18n.c:1229
 msgid "Thai"
-msgstr ""
+msgstr "Thajské"
 
 #: src/libpspp/i18n.c:1231
 msgid "Turkish"
-msgstr ""
+msgstr "Turecké"
 
 #: src/libpspp/i18n.c:1233
 msgid "Vietnamese"
-msgstr ""
+msgstr "Vietnamské"
 
 #: src/libpspp/i18n.c:1235
 msgid "Western European"
-msgstr ""
+msgstr "Západoevropské"
 
 #: src/libpspp/message.c:321
 msgid "error"
-msgstr ""
+msgstr "chyba"
 
 #: src/libpspp/message.c:323
 msgid "warning"
-msgstr ""
+msgstr "upozornění"
 
 #: src/libpspp/message.c:326
 msgid "note"
-msgstr ""
+msgstr "poznámka"
 
 #: src/libpspp/message.c:548
 #, c-format
 msgid "Notes (%d) exceed limit (%d).  Suppressing further notes."
 msgstr ""
+"Počet poznámek (%d) překračuje limit (%d). Další poznámky se potlačují."
 
 #: src/libpspp/message.c:556
 #, c-format
 msgid "Warnings (%d) exceed limit (%d).  Syntax processing will be halted."
 msgstr ""
+"Počet upozornění (%d) překračuje limit (%d). Zpracování syntaxe bude "
+"zastaveno."
 
 #: src/libpspp/message.c:559
 #, c-format
 msgid "Errors (%d) exceed limit (%d).  Syntax processing will be halted."
 msgstr ""
+"Počet chyb (%d) překračuje limit (%d). Zpracování syntaxe bude zastaveno."
 
 #: src/libpspp/zip-reader.c:192
 #, c-format
 msgid "%s: unexpected end of file"
-msgstr ""
+msgstr "%s: neočekávaný konec souboru"
 
 #: src/libpspp/zip-reader.c:200
 #, c-format
 msgid "%s: I/O error reading Zip archive (%s)"
-msgstr ""
+msgstr "%s: chyba vstupu/výstupu při čtení archivu Zip (%s)"
 
 #: src/libpspp/zip-reader.c:202
 #, c-format
 msgid "%s: I/O error reading Zip archive"
-msgstr ""
+msgstr "%s: chyba vstupu/výstupu při čtení archivu Zip"
 
 #: src/libpspp/zip-reader.c:218
 #, c-format
 msgid "%s: corrupt archive at 0x%llx: expected %#<PRIx32> but got %#<PRIx32>"
 msgstr ""
+"%s: poškozený archiv na pozici 0x%llx: očekáváno %#<PRIx32>, ale nalezeno "
+"%#<PRIx32>"
 
 #: src/libpspp/zip-reader.c:246
 #, c-format
@@ -9592,68 +9704,72 @@ msgid ""
 "%s: corrupt archive reading member \"%s\": bad CRC %#<PRIx32> (expected "
 "%<PRIx32>)"
 msgstr ""
+"%s: poškozený archiv při čtení členu \"%s\": chybný CRC %#<PRIx32> (očekáváno"
+" %<PRIx32>)"
 
 #: src/libpspp/zip-reader.c:344 src/libpspp/zip-reader.c:458
 #, c-format
 msgid "%s: open failed (%s)"
-msgstr ""
+msgstr "%s: otevření selhalo (%s)"
 
 #: src/libpspp/zip-reader.c:359
 #, c-format
 msgid "%s: cannot find central directory"
-msgstr ""
+msgstr "%s: nelze najít centrální adresář"
 
 #: src/libpspp/zip-reader.c:363 src/libpspp/zip-reader.c:390
 #: src/libpspp/zip-reader.c:476
 #, c-format
 msgid "%s: seek failed (%s)"
-msgstr ""
+msgstr "%s: přesun v souboru selhal (%s)"
 
 #: src/libpspp/zip-reader.c:453
 #, c-format
 msgid "%s: unknown member \"%s\""
-msgstr ""
+msgstr "%s: neznámý člen \"%s\""
 
 #: src/libpspp/zip-reader.c:491
 #, c-format
 msgid "%s: member \"%s\" has unknown compression type %<PRIu16>"
-msgstr ""
+msgstr "%s: člen \"%s\" má neznámý typ komprese %<PRIu16>"
 
 #: src/libpspp/zip-reader.c:514
 #, c-format
 msgid ""
 "%s: name mismatch between central directory (%s) and local file header (%s)"
 msgstr ""
+"%s: neshoda názvu mezi centrálním adresářem (%s) a místní hlavičkou souboru "
+"(%s)"
 
 #: src/libpspp/zip-reader.c:710
 #, c-format
 msgid "%s: cannot initialize inflator (%s)"
-msgstr ""
+msgstr "%s: nelze inicializovat dekompresor (%s)"
 
 #: src/libpspp/zip-reader.c:769
 #, c-format
 msgid "%s: error inflating \"%s\" (%s)"
-msgstr ""
+msgstr "%s: chyba při dekompresi \"%s\" (%s)"
 
 #: src/libpspp/zip-writer.c:106 utilities/pspp-convert.c:351
 #, c-format
 msgid "%s: error opening output file"
-msgstr ""
+msgstr "%s: chyba při otevírání výstupního souboru"
 
 #: src/libpspp/zip-writer.c:114
 #, c-format
 msgid "%s: not writing ZIP file to terminal"
-msgstr ""
+msgstr "%s: soubor ZIP se nezapisuje na terminál"
 
 #: src/libpspp/zip-writer.c:195
 #, c-format
 msgid "%s: error seeking in output file"
-msgstr ""
+msgstr "%s: chyba při přesunu ve výstupním souboru"
 
 #: src/libpspp/zip-writer.c:325
 #, c-format
 msgid "%s: write failed"
-msgstr ""
+msgstr "%s: zápis selhal"
 
 #. TRANSLATORS: This is a format string which, when presented to
 #. printf like functions, will create a pango markup string to
@@ -9673,28 +9789,30 @@ msgstr ""
 #: src/math/chart-geometry.c:137
 #, c-format
 msgid "%%.%dlf&#215;10<sup>%d</sup>"
-msgstr ""
+msgstr "%%.%dlf&#215;10<sup>%d</sup>"
 
 #: src/math/histogram.c:140
 msgid ""
 "Not creating histogram because the data contains less than 2 distinct values"
-msgstr ""
+msgstr "Histogram se nevytváří, protože data obsahují méně než 2 různé hodnoty"
 
 #: src/math/shapiro-wilk.c:83
 msgid ""
 "One or more weight values are non-integer.  Fractional parts will be ignored "
 "when calculating the Shapiro-Wilk statistic."
 msgstr ""
+"Jedna nebo více hodnot váhy nejsou celá čísla. Při výpočtu Shapiro-Wilkovy "
+"statistiky budou desetinné části ignorovány."
 
 #: src/output/ascii.c:376
 #, c-format
 msgid "ascii: opening output file `%s'"
-msgstr ""
+msgstr "ascii: otevírání výstupního souboru `%s'"
 
 #: src/output/ascii.c:475
 #, c-format
 msgid "%s: %s must be positive integer or `auto'"
-msgstr ""
+msgstr "%s: %s musí být kladné celé číslo nebo `auto'"
 
 #: src/output/ascii.c:495
 #, c-format
@@ -9702,249 +9820,252 @@ msgid ""
 "ascii: page must be at least %d characters wide, but as configured is only %d"
 " characters"
 msgstr ""
+"ascii: stránka musí být široká alespoň %d znaků, ale podle konfigurace má "
+"pouze %d znaků"
 
 #: src/output/ascii.c:603
 #, c-format
 msgid "See %s for an image."
-msgstr ""
+msgstr "Obrázek viz %s."
 
 #: src/output/ascii.c:622
 #, c-format
 msgid "See %s for a chart."
-msgstr ""
+msgstr "Graf viz %s."
 
 #: src/output/cairo-chart.c:695
 #, c-format
 msgid "error writing output file `%s': %s"
-msgstr ""
+msgstr "chyba při zápisu výstupního souboru `%s': %s"
 
 #: src/output/cairo.c:175
 #, c-format
 msgid "`%s': bad font specification"
-msgstr ""
+msgstr "`%s': chybné určení písma"
 
 #: src/output/cairo.c:278
 #, c-format
 msgid "error opening output file `%s': %s"
-msgstr ""
+msgstr "chyba při otevírání výstupního souboru `%s': %s"
 
 #: src/output/cairo.c:523
 #, c-format
 msgid "error drawing output for %s driver: %s\n"
-msgstr ""
+msgstr "chyba při vykreslování výstupu pro ovladač %s: %s\n"
 
 #: src/output/charts/barchart-cairo.c:65
 msgid "Bar Chart"
-msgstr ""
+msgstr "Sloupcový graf"
 
 #: src/output/charts/np-plot-cairo.c:37
 #, c-format
 msgid "Normal Q-Q Plot of %s"
-msgstr ""
+msgstr "Normální Q-Q graf %s"
 
 #: src/output/charts/np-plot-cairo.c:38 src/output/charts/np-plot-cairo.c:68
 msgid "Observed Value"
-msgstr ""
+msgstr "Pozorovaná hodnota"
 
 #: src/output/charts/np-plot-cairo.c:39
 msgid "Expected Normal"
-msgstr ""
+msgstr "Očekávaná normální hodnota"
 
 #: src/output/charts/np-plot-cairo.c:67
 #, c-format
 msgid "Detrended Normal Q-Q Plot of %s"
-msgstr ""
+msgstr "Detrendovaný normální Q-Q graf %s"
 
 #: src/output/charts/np-plot-cairo.c:69
 msgid "Dev from Normal"
-msgstr ""
+msgstr "Odchylka od normality"
 
 #: src/output/charts/piechart.c:54
 msgid "*MISSING*"
-msgstr ""
+msgstr "*CHYBĚJÍCÍ*"
 
 #: src/output/charts/plot-hist-cairo.c:71
 #, c-format
 msgid "N = %.0f"
-msgstr ""
+msgstr "N = %.0f"
 
 #: src/output/charts/plot-hist-cairo.c:120
 msgid "HISTOGRAM"
-msgstr ""
+msgstr "HISTOGRAM"
 
 #: src/output/charts/roc-chart-cairo.c:36 src/ui/gui/roc.ui:24
 msgid "ROC Curve"
-msgstr ""
+msgstr "ROC křivka"
 
 #: src/output/charts/scatterplot-cairo.c:57
 #, c-format
 msgid "Scatterplot %s"
-msgstr ""
+msgstr "Bodový graf %s"
 
 #: src/output/charts/scree-cairo.c:36
 msgid "Scree Plot"
-msgstr ""
+msgstr "Sutinový graf"
 
 #: src/output/charts/scree-cairo.c:38
 msgid "Eigenvalue"
-msgstr ""
+msgstr "Vlastní číslo"
 
 #: src/output/charts/spreadlevel-cairo.c:37
 #, c-format
 msgid "Spread vs. Level Plot of %s"
-msgstr ""
+msgstr "Graf rozptýlení vs. úrovně %s"
 
 #: src/output/charts/spreadlevel-cairo.c:38
 msgid "Level"
-msgstr ""
+msgstr "Úroveň"
 
 #: src/output/charts/spreadlevel-cairo.c:39
 msgid "Spread"
-msgstr ""
+msgstr "Rozptýlení"
 
 #: src/output/csv.c:81 src/output/html.c:184 src/output/journal.c:180
 #: src/output/msglog.c:67 src/output/tex.c:124
 #, c-format
 msgid "error opening output file `%s'"
-msgstr ""
+msgstr "chyba při otevírání výstupního souboru `%s'"
 
 #: src/output/driver.c:599
 #, c-format
 msgid "%s: unknown option `%s'"
-msgstr ""
+msgstr "%s: neznámá volba `%s'"
 
 #: src/output/driver.c:617
 #, c-format
 msgid "%s: output option missing `='"
-msgstr ""
+msgstr "%s: ve výstupní volbě chybí `='"
 
 #: src/output/driver.c:624
 #, c-format
 msgid "%s: output option specified more than once"
-msgstr ""
+msgstr "%s: výstupní volba zadána vícekrát"
 
 #: src/output/html.c:104
 msgid "PSPP Output"
-msgstr ""
+msgstr "Výstup PSPP"
 
 #: src/output/html.c:265
 msgid "No description"
-msgstr ""
+msgstr "Bez popisu"
 
 #: src/output/journal.c:68
 #, c-format
 msgid "error writing output file `%s'"
-msgstr ""
+msgstr "chyba při zápisu výstupního souboru `%s'"
 
 #: src/output/measure.c:66
 #, c-format
 msgid "`%s' is not a valid length."
-msgstr ""
+msgstr "`%s' není platná délka."
 
 #: src/output/measure.c:93
 #, c-format
 msgid "syntax error in paper size `%s'"
-msgstr ""
+msgstr "syntaktická chyba ve velikosti papíru `%s'"
 
 #: src/output/measure.c:226
 #, c-format
 msgid "unknown paper type `%.*s'"
-msgstr ""
+msgstr "neznámý typ papíru `%.*s'"
 
 #: src/output/measure.c:243
 #, c-format
 msgid "error opening input file `%s'"
-msgstr ""
+msgstr "chyba při otevírání vstupního souboru `%s'"
 
 #: src/output/measure.c:271
 #, c-format
 msgid "file `%s' does not state a paper size"
-msgstr ""
+msgstr "soubor `%s' neuvádí velikost papíru"
 
 #: src/output/options.c:81
 #, c-format
 msgid "%s: `%s' is `%s' but a Boolean value is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadována logická hodnota"
 
 #: src/output/options.c:141
 #, c-format
 msgid "%s: `%s' is `%s' but one of the following is required: %s"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadována jedna z následujících hodnot: %s"
 
 #: src/output/options.c:181
 #, c-format
 msgid "%s: `%s' is `%s' but a non-negative integer is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadováno nezáporné celé číslo"
 
 #: src/output/options.c:185
 #, c-format
 msgid "%s: `%s' is `%s' but a positive integer is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadováno kladné celé číslo"
 
 #: src/output/options.c:188
 #, c-format
 msgid "%s: `%s' is `%s' but an integer is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadováno celé číslo"
 
 #: src/output/options.c:191
 #, c-format
 msgid "%s: `%s' is `%s' but an integer greater than %d is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadováno celé číslo větší než %d"
 
 #: src/output/options.c:196
 #, c-format
 msgid "%s: `%s' is `%s'  but an integer between %d and %d is required"
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadováno celé číslo mezi %d a %d"
 
 #: src/output/options.c:257
 #, c-format
 msgid "%s: `%s' is `%s' but a file name that contains `#' is required."
-msgstr ""
+msgstr "%s: `%s' je `%s', ale je vyžadován název souboru obsahující `#'."
 
 #: src/output/options.c:534
 #, c-format
 msgid "%s: `%s' is `%s', which could not be parsed as a color"
-msgstr ""
+msgstr "%s: `%s' je `%s', což nelze zpracovat jako barvu"
 
 #: src/output/output-item.c:232
 msgid "Chart"
-msgstr ""
+msgstr "Graf"
 
 #: src/output/output-item.c:241 src/output/pivot-table.c:990
 #: src/output/spv/spv.c:535
 msgid "Error"
-msgstr ""
+msgstr "Chyba"
 
 #: src/output/output-item.c:242
 msgid "Warning"
-msgstr ""
+msgstr "Upozornění"
 
 #: src/output/output-item.c:243
 msgid "Note"
-msgstr ""
+msgstr "Poznámka"
 
 #: src/output/output-item.c:246
 msgid "Page Break"
-msgstr ""
+msgstr "Konec stránky"
 
 #: src/output/output-item.c:252
 msgid "Table"
-msgstr ""
+msgstr "Tabulka"
 
 #: src/output/output-item.c:734
 msgid "Page Title"
-msgstr ""
+msgstr "Nadpis stránky"
 
 #: src/output/output-item.c:741
 msgid "Log"
-msgstr ""
+msgstr "Protokol"
 
 #: src/output/pivot-table.c:3308
 #, c-format
 msgid "Suppressed %d additional warning about duplicate split values."
 msgid_plural "Suppressed %d additional warnings about duplicate split values."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Potlačeno %d další upozornění na duplicitní hodnoty rozdělení."
+msgstr[1] "Potlačena %d další upozornění na duplicitní hodnoty rozdělení."
+msgstr[2] "Potlačeno %d dalších upozornění na duplicitní hodnoty rozdělení."
 
 #: src/output/pivot-table.c:3447
 #, c-format
@@ -9954,6 +10075,10 @@ msgid ""
 "the same split values were found separated by cases with different values.  "
 "Each run will be analyzed separately.  The duplicate split values are: %s"
 msgstr ""
+"Je-li aktivní SPLIT FILE, musí být vstupní data seřazena podle proměnných "
+"rozdělení (například pomocí SORT CASES), ale bylo nalezeno více sledů případů"
+" se stejnými hodnotami rozdělení oddělených případy s jinými hodnotami. Každý"
+" sled bude analyzován samostatně. Duplicitní hodnoty rozdělení jsou: %s"
 
 #. TRANSLATORS: Do not translate this string.  If the script of your language
 #. reads from right to left (eg Persian, Arabic, Hebrew etc), then replace
@@ -9961,50 +10086,50 @@ msgstr ""
 #. untranslated or copy it verbatim.
 #: src/output/render.c:1041
 msgid "output-direction-ltr"
-msgstr ""
+msgstr "output-direction-ltr"
 
 #: src/output/spv/spv-legacy-decoder.c:1951
 msgid "Table lacks cell data."
-msgstr ""
+msgstr "Tabulce chybí data buněk."
 
 #: src/output/spv/spv-table-look.c:602
 #, c-format
 msgid "%s: create failed (%s)"
-msgstr ""
+msgstr "%s: vytvoření selhalo (%s)"
 
 #: src/output/spv/spv-table-look.c:609
 #, c-format
 msgid "%s: failed to start writing XML"
-msgstr ""
+msgstr "%s: nepodařilo se zahájit zápis XML"
 
 #: src/output/spv/spv-table-look.c:738
 #, c-format
 msgid "%s: error writing file (%s)"
-msgstr ""
+msgstr "%s: chyba při zápisu souboru (%s)"
 
 #: src/output/spv/spv-writer.c:73
 #, c-format
 msgid "%s: create failed"
-msgstr ""
+msgstr "%s: vytvoření selhalo"
 
 #: src/output/spv/spv-writer.c:94
 msgid "I/O error writing SPV file"
-msgstr ""
+msgstr "Chyba vstupu/výstupu při zápisu souboru SPV"
 
 #: src/output/spv/spv.c:428
 #, c-format
 msgid "%s: Failed to create XML parser"
-msgstr ""
+msgstr "%s: Nepodařilo se vytvořit analyzátor XML"
 
 #: src/output/spv/spv.c:453
 #, c-format
 msgid "%s: document is not well-formed"
-msgstr ""
+msgstr "%s: dokument není správně utvořený"
 
 #: src/output/spv/spv.c:461
 #, c-format
 msgid "%s: root node is \"%s\" but \"%s\" was expected"
-msgstr ""
+msgstr "%s: kořenový uzel je \"%s\", ale očekával se \"%s\""
 
 #: src/ui/gui/psppire-acr.c:273
 msgid "Add"
@@ -10610,22 +10735,24 @@ msgstr ""
 #: src/ui/source-init-opts.c:72
 #, c-format
 msgid "Algorithm must be either `%s' or `%s'."
-msgstr ""
+msgstr "Algoritmus musí být buď `%s', nebo `%s'."
 
 #: src/ui/source-init-opts.c:97
 #, c-format
 msgid "Syntax must be either `%s' or `%s'."
-msgstr ""
+msgstr "Syntaxe musí být buď `%s', nebo `%s'."
 
 #: src/ui/terminal/main.c:148
 msgid "Error encountered while ERROR=STOP is effective."
-msgstr ""
+msgstr "Došlo k chybě, zatímco je aktivní ERROR=STOP."
 
 #: src/ui/terminal/main.c:155
 msgid ""
 "Stopping syntax file processing here to avoid a cascade of dependent command "
 "failures."
 msgstr ""
+"Zpracování souboru syntaxe se zde zastavuje, aby se zabránilo kaskádě selhání"
+" závislých příkazů."
 
 #: src/ui/terminal/terminal-opts.c:150
 #, c-format
@@ -10666,6 +10793,41 @@ msgid ""
 "\n"
 "Non-option arguments are interpreted as syntax files to execute.\n"
 msgstr ""
+"PSPP, program pro statistickou analýzu výběrových dat.\n"
+"Použití: %s [VOLBA]... SOUBOR...\n"
+"\n"
+"Argumenty dlouhých voleb platí i pro odpovídající krátké volby.\n"
+"\n"
+"Volby výstupu:\n"
+"  -o, --output=SOUBOR       výstup do SOUBORU, výchozí formát podle názvu SOUBORU\n"
+"  -O format=FORMÁT          přepíše formát pro předchozí -o\n"
+"  -O VOLBA=HODNOTA          nastaví výstupní volbu pro úpravu předchozího -o\n"
+"  -O device={terminal|listing}  přepíše typ zařízení pro předchozí -o\n"
+"  -e, --error-file=SOUBOR   připojí chyby, upozornění a poznámky do SOUBORU\n"
+"  --no-output               vypne výchozí výstupní ovladač\n"
+"  --table-look=SOUBOR       použije styl výstupu načtený ze SOUBORU\n"
+"Podporované výstupní formáty: %s\n"
+"\n"
+"Volby jazyka:\n"
+"  -I, --include=ADR         připojí ADR k cestě pro hledání\n"
+"  -I-, --no-include         vymaže cestu pro hledání\n"
+"  -r, --no-statrc           vypne spuštění souboru rc při startu\n"
+"  -a, --algorithm={compatible|enhanced}\n"
+"                            nastavte na `compatible', chcete-li výstup\n"
+"                            vypočtený chybnými algoritmy\n"
+"  -x, --syntax={compatible|enhanced}\n"
+"                            nastavte na `compatible' pro vypnutí rozšíření PSPP\n"
+"  -b, --batch               interpretuje syntaxi v dávkovém režimu\n"
+"  -i, --interactive         interpretuje syntaxi v interaktivním režimu\n"
+"  --syntax-encoding=KÓDOVÁNÍ  určí kódování souborů syntaxe\n"
+"  -s, --safer               nepovolí některé nebezpečné operace\n"
+"Výchozí cesta pro hledání: %s\n"
+"\n"
+"Informativní výstup:\n"
+"  -h, --help                zobrazí tuto nápovědu a skončí\n"
+"  -V, --version             vypíše informace o verzi a skončí\n"
+"\n"
+"Argumenty, které nejsou volbami, se interpretují jako soubory syntaxe k provedení.\n"
 
 #: src/ui/gui/find-dialog.c:662
 #, c-format
@@ -11337,36 +11499,38 @@ msgstr ""
 #: utilities/pspp-convert.c:68
 #, c-format
 msgid "%s argument must be a single character"
-msgstr ""
+msgstr "Argument %s musí být jediný znak"
 
 #: utilities/pspp-convert.c:266
 msgid "exactly two non-option arguments are required; use --help for help"
 msgstr ""
+"jsou vyžadovány přesně dva argumenty, které nejsou volbami; nápovědu "
+"zobrazíte pomocí --help"
 
 #: utilities/pspp-convert.c:277
 #, c-format
 msgid "%s: cannot guess output format (use -O option)"
-msgstr ""
+msgstr "%s: nelze odhadnout výstupní formát (použijte volbu -O)"
 
 #: utilities/pspp-convert.c:346
 #, c-format
 msgid "%s: unknown output format (use -O option)"
-msgstr ""
+msgstr "%s: neznámý výstupní formát (použijte volbu -O)"
 
 #: utilities/pspp-convert.c:365
 #, c-format
 msgid "%s: error reading input file"
-msgstr ""
+msgstr "%s: chyba při čtení vstupního souboru"
 
 #: utilities/pspp-convert.c:367
 #, c-format
 msgid "%s: error writing output file"
-msgstr ""
+msgstr "%s: chyba při zápisu výstupního souboru"
 
 #: utilities/pspp-convert.c:414
 #, c-format
 msgid "%s: error opening password file"
-msgstr ""
+msgstr "%s: chyba při otevírání souboru s hesly"
 
 #: utilities/pspp-convert.c:430
 #, c-format
@@ -11374,57 +11538,61 @@ msgid ""
 "\n"
 "%s: password not in file"
 msgstr ""
+"\n"
+"%s: heslo není v souboru"
 
 #: utilities/pspp-convert.c:467
 #, c-format
 msgid "%s: '%c' is not in alphabet"
-msgstr ""
+msgstr "%s: '%c' není v abecedě"
 
 #: utilities/pspp-convert.c:531
 msgid "sorry, wrong password"
-msgstr ""
+msgstr "bohužel, chybné heslo"
 
 #: utilities/pspp-output.c:526
 #, c-format
 msgid "%s: invalid XPath expression"
-msgstr ""
+msgstr "%s: neplatný výraz XPath"
 
 #: utilities/pspp-output.c:825
 msgid "missing command name (use --help for help)"
-msgstr ""
+msgstr "chybí název příkazu (nápovědu zobrazíte pomocí --help)"
 
 #: utilities/pspp-output.c:829
 #, c-format
 msgid "unknown command \"%s\" (use --help for help)"
-msgstr ""
+msgstr "neznámý příkaz \"%s\" (nápovědu zobrazíte pomocí --help)"
 
 #: utilities/pspp-output.c:837
 #, c-format
 msgid "\"%s\" command takes exactly %d argument"
 msgid_plural "\"%s\" command takes exactly %d arguments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "příkaz \"%s\" přijímá přesně %d argument"
+msgstr[1] "příkaz \"%s\" přijímá přesně %d argumenty"
+msgstr[2] "příkaz \"%s\" přijímá přesně %d argumentů"
 
 #: utilities/pspp-output.c:844
 #, c-format
 msgid "\"%s\" command requires at least %d argument"
 msgid_plural "\"%s\" command requires at least %d arguments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "příkaz \"%s\" vyžaduje alespoň %d argument"
+msgstr[1] "příkaz \"%s\" vyžaduje alespoň %d argumenty"
+msgstr[2] "příkaz \"%s\" vyžaduje alespoň %d argumentů"
 
 #: utilities/pspp-output.c:851
 #, c-format
 msgid "\"%s\" command requires between %d and %d arguments"
-msgstr ""
+msgstr "příkaz \"%s\" vyžaduje %d až %d argumentů"
 
 #: utilities/pspp-output.c:893
 msgid "The following object classes are supported:"
-msgstr ""
+msgstr "Podporovány jsou následující třídy objektů:"
 
 #: utilities/pspp-output.c:902
 #, c-format
 msgid "unknown object class \"%s\" (use --select=help for help)"
-msgstr ""
+msgstr "neznámá třída objektů \"%s\" (nápovědu zobrazíte pomocí --select=help)"
 
 #: src/ui/gui/aggregate.ui:20
 msgid "Aggregate Data"
@@ -13400,11 +13568,11 @@ msgstr ""
 #. TRANSLATORS: This is the application name in the desktop file
 #: doc/org.gnu.pspp.metainfo.xml.in:7 doc/org.gnu.pspp.desktop.in:6
 msgid "GNU PSPP"
-msgstr ""
+msgstr "GNU PSPP"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:8
 msgid "GNU PSPP is a program for statistical analysis of sampled data"
-msgstr ""
+msgstr "GNU PSPP je program pro statistickou analýzu výběrových dat"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:10
 msgid ""
@@ -13417,6 +13585,14 @@ msgid ""
 "additional packages to purchase in order to get “advanced” functions; all "
 "functionality that PSPP currently supports is in the core package."
 msgstr ""
+"GNU PSPP je program pro statistickou analýzu výběrových dat. Je svobodnou "
+"náhradou proprietárního programu SPSS a až na několik výjimek se mu velmi "
+"podobá. Nejdůležitější z těchto výjimek je, že neobsahuje žádné „časované "
+"bomby“; vaše kopie PSPP v budoucnu „nevyprší“ ani úmyslně nepřestane "
+"fungovat. Neexistují ani žádné umělé limity počtu případů nebo proměnných, "
+"které můžete použít. Pro získání „pokročilých“ funkcí není nutné kupovat "
+"žádné další balíčky; veškerá funkčnost, kterou PSPP v současnosti podporuje, "
+"je součástí základního balíčku."
 
 #: doc/org.gnu.pspp.metainfo.xml.in:11
 msgid ""
@@ -13427,86 +13603,104 @@ msgid ""
 " fast as possible, regardless of the size of the input data. You can use PSPP"
 " with its graphical interface or the more traditional syntax commands."
 msgstr ""
+"PSPP je stabilní a spolehlivá aplikace. Umí počítat popisné statistiky, "
+"t-testy, ANOVA, lineární a logistickou regresi, míry asociace, shlukovou "
+"analýzu, analýzu reliability a faktorovou analýzu, neparametrické testy a "
+"další. Jeho jádro je navrženo tak, aby provádělo analýzy co nejrychleji bez "
+"ohledu na velikost vstupních dat. PSPP můžete používat prostřednictvím "
+"grafického rozhraní nebo tradičnějších příkazů syntaxe."
 
 #: doc/org.gnu.pspp.metainfo.xml.in:12
 msgid "A brief list of some of PSPP's features."
-msgstr ""
+msgstr "Stručný přehled některých funkcí PSPP."
 
 #: doc/org.gnu.pspp.metainfo.xml.in:14
 msgid "Support for over 1 billion cases"
-msgstr ""
+msgstr "Podpora více než 1 miliardy případů"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:15
 msgid "Support for over 1 billion variables"
-msgstr ""
+msgstr "Podpora více než 1 miliardy proměnných"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:16
 msgid "Syntax and data files which are compatible with those of SPSS"
-msgstr ""
+msgstr "Soubory syntaxe a dat kompatibilní se soubory SPSS"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:17
 msgid "A choice of terminal or graphical user interface"
-msgstr ""
+msgstr "Volba mezi terminálovým a grafickým uživatelským rozhraním"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:18
 msgid ""
 "A choice of text, postscript, pdf, opendocument, html or TeX output formats"
 msgstr ""
+"Volba výstupních formátů text, PostScript, PDF, OpenDocument, HTML nebo TeX"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:19
 msgid ""
 "Inter-operability with: LibreOffice, Apache OpenOffice, Gnumeric and other "
 "free software"
 msgstr ""
+"Spolupráce s: LibreOffice, Apache OpenOffice, Gnumeric a dalším svobodným "
+"softwarem"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:20
 msgid "Easy data import from spreadsheets, text files and database sources"
 msgstr ""
+"Snadný import dat z tabulkových procesorů, textových souborů a databázových "
+"zdrojů"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:21
 msgid ""
 "The capability to open, analyse and edit two or more datasets concurrently"
 msgstr ""
+"Možnost současně otevírat, analyzovat a upravovat dva nebo více datových "
+"souborů"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:22
 msgid "A user interface supporting all common character sets"
-msgstr ""
+msgstr "Uživatelské rozhraní podporující všechny běžné znakové sady"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:23
 msgid "The user interface has been translated to multiple languages"
-msgstr ""
+msgstr "Uživatelské rozhraní bylo přeloženo do mnoha jazyků"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:24
 msgid "Very fast statistical procedures, even on very large data sets"
 msgstr ""
+"Velmi rychlé statistické procedury, i na velmi velkých datových souborech"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:25
 msgid "No license fees and no expiration period"
-msgstr ""
+msgstr "Žádné licenční poplatky a žádná doba platnosti"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:26
 msgid "No unethical “end user license agreements”"
-msgstr ""
+msgstr "Žádné neetické „licenční smlouvy s koncovým uživatelem“"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:27
 msgid "A fully indexed user manual"
-msgstr ""
+msgstr "Plně indexovaná uživatelská příručka"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:28
 msgid "Freedom ensured; It is licensed under the GPLv3 or later"
-msgstr ""
+msgstr "Zaručená svoboda; licencováno pod GPLv3 nebo novější"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:29
 msgid ""
 "Portability; Runs on many different computers and many different operating "
 "systems"
 msgstr ""
+"Přenositelnost; běží na mnoha různých počítačích a mnoha různých operačních "
+"systémech"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:31
 msgid ""
 "PSPP is particularly aimed at statisticians, social scientists and students "
 "requiring fast convenient analysis of sampled data."
 msgstr ""
+"PSPP je určen zejména statistikům, sociálním vědcům a studentům, kteří "
+"potřebují rychlou a pohodlnou analýzu výběrových dat."
 
 #: doc/org.gnu.pspp.metainfo.xml.in:32
 msgid ""
@@ -13514,21 +13708,23 @@ msgid ""
 "the command-line interface, run: <code>flatpak run --command=pspp "
 "org.gnu.pspp</code>."
 msgstr ""
+"Flatpak pro PSPP obsahuje grafické i příkazové rozhraní. Pro použití "
+"příkazového rozhraní spusťte: <code>flatpak run --command=pspp "
+"org.gnu.pspp</code>."
 
 #: doc/org.gnu.pspp.metainfo.xml.in:43
 msgid "GNU PSPP Variable View"
-msgstr ""
+msgstr "GNU PSPP – zobrazení proměnných"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:52
-#, fuzzy
 msgid "statistics"
-msgstr "Statistický program"
+msgstr "statistika"
 
 #: doc/org.gnu.pspp.metainfo.xml.in:56
 msgid "Free Software Foundation"
-msgstr ""
+msgstr "Free Software Foundation"
 
 #. TRANSLATORS: You must keep all ";" - also at the end of line.
 #: doc/org.gnu.pspp.desktop.in:16
 msgid "statistics;analysis;spss;"
-msgstr ""
+msgstr "statistika;analýza;spss;"
