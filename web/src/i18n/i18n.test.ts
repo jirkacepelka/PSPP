@@ -12,7 +12,20 @@ function flatten(o: unknown, prefix = '', out: string[] = []): string[] {
   return out;
 }
 
+const fragments = import.meta.glob<{ default: unknown }>('./fragments/*.json', { eager: true });
+
 describe('translations', () => {
+  it('each fragment has the same keys in cs and en', () => {
+    for (const [path, mod] of Object.entries(fragments)) {
+      if (!path.endsWith('.cs.json')) continue;
+      const other = fragments[path.replace(/\.cs\.json$/, '.en.json')];
+      expect(other, `${path} needs an .en.json twin`).toBeTruthy();
+      const a = new Set(flatten(mod.default));
+      const b = new Set(flatten(other.default));
+      expect([...a].filter((k) => !b.has(k)), path).toEqual([]);
+      expect([...b].filter((k) => !a.has(k)), path).toEqual([]);
+    }
+  });
   it('cs and en define the same keys', () => {
     const a = new Set(flatten(cs));
     const b = new Set(flatten(en));
