@@ -39,6 +39,7 @@ export type MarkerShape =
   | 'plus'
   | 'hexagon'
   | 'star'
+  | 'ring'
   | 'asterisk';
 
 export const GROUP_SHAPES: MarkerShape[] = ['circle', 'square', 'triangle', 'diamond', 'triangleDown', 'plus', 'hexagon', 'star'];
@@ -207,6 +208,17 @@ export function Marker({
         {ring && <path d={d} style={{ stroke: 'var(--c-surface)', strokeWidth: 6, strokeLinecap: 'round', fill: 'none' }} />}
         <path d={d} style={{ stroke: color, strokeWidth: 2, strokeLinecap: 'round', fill: 'none' }} />
       </g>
+    );
+  }
+  if (shape === 'ring') {
+    return (
+      <circle
+        className={className}
+        cx={x}
+        cy={y}
+        r={r}
+        style={{ fill: 'var(--c-surface)', stroke: color, strokeWidth: 2 }}
+      />
     );
   }
   return (

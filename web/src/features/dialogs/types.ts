@@ -178,7 +178,7 @@ export function validateGeneric(spec: DialogSpec, values: Values): string | null
     if (f.when && !f.when(values)) return;
     if (f.kind === 'varlist' && (f.min ?? 0) > 0) {
       const list = (values[f.id] as string[]) ?? [];
-      if (list.length < (f.min ?? 0)) err = 'dialogs.errors.needVariables';
+      if (list.length < (f.min ?? 0)) err = 'dlg.errors.needVariables';
     }
   });
   return err;
