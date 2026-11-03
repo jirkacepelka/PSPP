@@ -1,0 +1,247 @@
+/*
+ * Output document styles (shared by the in-app viewer and HTML export).
+ * Engine tables are plain HTML: <table><caption/><thead?/><tbody/><tfoot/></table> with th/td cells.
+ */
+.output-doc {
+  --tbl-font: var(--font-ui);
+  --tbl-fs: 13px;
+  --tbl-pad-y: 6px;
+  --tbl-pad-x: 12px;
+  --tbl-line: var(--outline-variant);
+  --tbl-head-bg: var(--surface-container-low);
+  --tbl-head-fg: var(--on-surface);
+  --tbl-stub-fg: var(--on-surface);
+  --tbl-zebra: transparent;
+  color: var(--on-surface);
+}
+.output-item {
+  margin: 0 0 var(--s-5);
+  break-inside: avoid;
+}
+.output-item .item-title {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--on-surface);
+}
+.output-group-title {
+  margin: var(--s-2) 0 var(--s-4);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--divider);
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--on-surface);
+}
+.output-text-title {
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-regular);
+  margin: 0 0 var(--s-3);
+}
+.output-text-subtitle {
+  font-size: var(--fs-xl);
+  color: var(--on-surface-variant);
+  margin: 0 0 var(--s-3);
+}
+.output-text-log,
+.output-syntax {
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--outline-variant);
+  border-radius: 0 var(--r-xs) var(--r-xs) 0;
+  background: var(--surface-container-low);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--on-surface-variant);
+}
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.output-doc table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--tbl-font);
+  font-size: var(--tbl-fs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  color: var(--on-surface);
+  margin: 0;
+  caption-side: top;
+}
+.output-doc caption {
+  padding: 0 0 var(--s-2);
+  text-align: left;
+  font-weight: var(--fw-semibold);
+  font-size: calc(var(--tbl-fs) + 1px);
+  color: var(--on-surface);
+}
+.output-doc th,
+.output-doc td {
+  padding: var(--tbl-pad-y) var(--tbl-pad-x);
+  vertical-align: top;
+}
+.output-doc th {
+  font-weight: var(--fw-medium);
+  text-align: left;
+  color: var(--tbl-stub-fg);
+}
+.output-doc td.num {
+  text-align: right;
+}
+.output-doc tfoot td {
+  font-size: calc(var(--tbl-fs) - 1px);
+  color: var(--on-surface-variant);
+  padding-top: var(--s-2);
+  white-space: normal;
+}
+
+/* --- Modern (default) --- */
+.ts-modern table {
+  border: 1px solid var(--tbl-line);
+  border-radius: var(--r-sm);
+  border-collapse: separate;
+  overflow: hidden;
+}
+.ts-modern caption {
+  padding-left: 2px;
+}
+.ts-modern th,
+.ts-modern td {
+  border-bottom: 1px solid var(--grid-line);
+}
+.ts-modern thead th,
+.ts-modern tbody tr:first-child th,
+.ts-modern tbody tr:first-child td:empty {
+  background: var(--tbl-head-bg);
+}
+.ts-modern thead th {
+  border-bottom: 1px solid var(--tbl-line);
+  color: var(--on-surface-variant);
+  font-size: calc(var(--tbl-fs) - 0.5px);
+}
+.ts-modern tbody th {
+  background: var(--tbl-head-bg);
+}
+.ts-modern tbody tr:hover td {
+  background: var(--state-hover);
+}
+.ts-modern tbody tr:last-child th,
+.ts-modern tbody tr:last-child td {
+  border-bottom: 0;
+}
+.ts-modern tfoot td {
+  border-top: 1px solid var(--tbl-line);
+  background: var(--surface);
+}
+.ts-modern th.total,
+.ts-modern td.total {
+  font-weight: var(--fw-semibold);
+}
+
+/* --- Classic PSPP --- */
+.ts-classic table {
+  --tbl-font: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  border: 1.5px solid var(--on-surface);
+}
+.ts-classic th,
+.ts-classic td {
+  border: 1px solid var(--outline);
+}
+.ts-classic thead th,
+.ts-classic tbody th {
+  background: var(--surface-container);
+}
+.ts-classic caption {
+  text-align: center;
+  font-weight: var(--fw-semibold);
+}
+
+/* --- Academic (APA) --- */
+.ts-apa table {
+  --tbl-font: 'Times New Roman', Times, 'Liberation Serif', serif;
+  --tbl-fs: 14px;
+  border-top: 2px solid var(--on-surface);
+  border-bottom: 2px solid var(--on-surface);
+}
+.ts-apa caption {
+  font-style: italic;
+  font-weight: var(--fw-regular);
+}
+.ts-apa th {
+  font-weight: var(--fw-regular);
+}
+.ts-apa thead tr:last-child th,
+.ts-apa thead tr:last-child td {
+  border-bottom: 1px solid var(--on-surface);
+}
+.ts-apa table:not(:has(thead)) tbody tr:first-child th,
+.ts-apa table:not(:has(thead)) tbody tr:first-child td {
+  border-bottom: 1px solid var(--on-surface);
+}
+.ts-apa tfoot td {
+  font-style: italic;
+}
+
+/* --- Compact --- */
+.ts-compact {
+  --tbl-fs: 12px;
+  --tbl-pad-y: 2px;
+  --tbl-pad-x: 8px;
+}
+.ts-compact th,
+.ts-compact td {
+  border-bottom: 1px solid var(--grid-line);
+}
+.ts-compact table {
+  border-top: 1px solid var(--tbl-line);
+  border-bottom: 1px solid var(--tbl-line);
+}
+.ts-compact tbody tr:nth-child(even) td,
+.ts-compact tbody tr:nth-child(even) th {
+  background: var(--surface-container-low);
+}
+
+/* --- messages --- */
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  background: var(--info-container);
+  color: var(--on-info-container);
+}
+.callout .icon {
+  font-size: 18px;
+  margin-top: 1px;
+}
+.callout.error {
+  background: var(--error-container);
+  color: var(--on-error-container);
+}
+.callout.warning {
+  background: var(--warning-container);
+  color: var(--on-warning-container);
+}
+.callout .callout-line {
+  margin-left: auto;
+  padding-left: var(--s-2);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  opacity: 0.85;
+}
+.callout button.callout-line {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
