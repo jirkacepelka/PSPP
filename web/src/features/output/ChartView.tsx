@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useTranslation } from 'react-i18next';
-import { Icon } from '../../components/Icon';
+import { PsppChart } from '../../charts';
 
 interface SimpleChart {
   type: 'bar' | 'histogram' | 'pie';
@@ -17,7 +17,8 @@ interface SimpleChart {
   n?: number;
 }
 
-function isSimple(c: unknown): c is SimpleChart {
+/** True for the demo engine's simplified chart data (the real engine sends PSPP chart JSON). */
+export function isSimple(c: unknown): c is SimpleChart {
   const x = c as SimpleChart;
   return !!x && typeof x === 'object' && ['bar', 'histogram', 'pie'].includes(x.type) && Array.isArray(x.values) && Array.isArray(x.categories);
 }
@@ -32,13 +33,14 @@ function niceMax(v: number) {
 }
 
 export function ChartView({ chart, title }: { chart: unknown; title: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (!isSimple(chart)) {
     return (
-      <div className="chart-placeholder">
-        <Icon name="insert_chart" size={40} />
-        <span>{t('output.chartPlaceholder')}</span>
-      </div>
+      <PsppChart
+        chart={chart}
+        t={(key, fallback) => t(key, { ns: 'charts', defaultValue: fallback })}
+        locale={i18n.language}
+      />
     );
   }
   const W = 560;

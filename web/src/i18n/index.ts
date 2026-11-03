@@ -4,9 +4,13 @@ import { initReactI18next } from 'react-i18next';
 import cs from './cs.json';
 import en from './en.json';
 import { detectLanguage } from '../store/settings';
+import { chartStrings } from '../charts/strings';
 
 void i18n.use(initReactI18next).init({
-  resources: { cs: { translation: cs }, en: { translation: en } },
+  resources: {
+    cs: { translation: cs, charts: chartStrings.cs },
+    en: { translation: en, charts: chartStrings.en },
+  },
   lng: detectLanguage(),
   fallbackLng: 'en',
   interpolation: { escapeValue: false },

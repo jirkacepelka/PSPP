@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import i18n from '../i18n';
-import { getEngineHandle } from '../engine/client';
+import { getEngineHandle, markSynced } from '../engine/client';
 import type { Dataset } from '../engine/types';
 import { kvDel, kvGet, kvSet } from '../lib/storage';
 import { emptyDataset } from '../lib/variables';
@@ -145,6 +145,7 @@ export async function openBytes(name: string, bytes: Uint8Array, opts: { handle?
       const title = name.replace(/\.[^.]+$/, '');
       const apply = () => {
         useData.getState().load({ ...ds, name: title }, { title, fileName: name });
+        markSynced(useData.getState().dataset);
         currentHandle = opts.handle ?? null;
         useUi.getState().setView('data');
         toast(t('files.opened', { name }));

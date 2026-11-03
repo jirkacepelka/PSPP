@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import i18n from '../i18n';
-import { getEngineHandle } from '../engine/client';
+import { getEngineHandle, markSynced } from '../engine/client';
 import type { OutputItem } from '../engine/types';
 import { useData } from '../store/data';
 import { useOutput } from '../store/output';
 import { useSyntax, type SyntaxDiagnostic } from '../store/syntax';
 import { useUi } from '../store/ui';
+import { useSettings } from '../store/settings';
 import { commandName } from '../lib/commands';
 import { splitCommands } from '../lib/syntax';
 
@@ -18,9 +19,27 @@ export async function initEngine() {
   try {
     const h = await getEngineHandle();
     useUi.getState().setEngine({ engineStatus: 'ready', engineKind: h.kind, engineVersion: h.version });
+    await applyEngineSettings();
+    // Keep PSPP's output language and decimal separator in step with the settings.
+    useSettings.subscribe((s, prev) => {
+      if (s.language !== prev.language || s.decimalSeparator !== prev.decimalSeparator) void applyEngineSettings();
+    });
   } catch (e) {
     console.error(e);
     useUi.getState().setEngine({ engineStatus: 'error' });
+  }
+}
+
+/** Applies UI settings that affect PSPP's own output: language and decimal separator. */
+async function applyEngineSettings() {
+  try {
+    const { api } = await getEngineHandle();
+    const { language, decimalSeparator } = useSettings.getState();
+    await api.setLanguage?.(language);
+    // Runs against the engine's current dataset (null = unchanged); the result is not shown.
+    await api.run(`SET DECIMAL=${decimalSeparator === ',' ? 'COMMA' : 'DOT'}.`, null);
+  } catch (e) {
+    console.warn('[PSPP Studio] could not apply engine settings', e);
   }
 }
 
@@ -75,6 +94,7 @@ export async function runSyntax(syntax: string, opts: RunOptions = {}): Promise<
     if (result.dataset) {
       const cur = useData.getState();
       cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName });
+      markSynced(useData.getState().dataset);
     }
     const cmds = splitCommands(text).map((c) => commandName(c.text)).filter((c): c is string => !!c && c !== 'COMMENT');
     const groups = items.filter((i) => i.kind === 'group');

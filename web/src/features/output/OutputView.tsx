@@ -12,7 +12,7 @@ import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
 import { exportOutputHtml, printOutput } from '../../app/files';
 import { pasteSyntax } from '../../app/engine';
-import { ChartView } from './ChartView';
+import { ChartView, isSimple } from './ChartView';
 
 function itemTitle(it: OutputItem, t: (k: string) => string): string {
   switch (it.kind) {
@@ -117,7 +117,8 @@ function Item({ item, depth }: { item: OutputItem; depth: number }) {
       return (
         <figure className={`output-item has-actions chart-item ${selected ? 'selected' : ''}`} id={`out-${item.id}`} data-chart-id={item.id}>
           {actions(false)}
-          <figcaption className="item-title">{item.title}</figcaption>
+          {/* PsppChart draws its own title; only the demo engine's charts need a caption. */}
+          {isSimple(item.chart) && <figcaption className="item-title">{item.title}</figcaption>}
           <ChartView chart={item.chart} title={item.title} />
         </figure>
       );

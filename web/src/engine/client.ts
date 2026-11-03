@@ -16,6 +16,8 @@ export interface EngineHandle {
 }
 
 let handle: Promise<EngineHandle> | null = null;
+/** The dataset object the worker currently holds (see run()). */
+let lastSynced: unknown;
 
 function wantMock(): boolean {
   try {
@@ -59,10 +61,23 @@ async function load(): Promise<EngineHandle> {
       init: () => remote.init(),
       open: (f) => {
         const bytes = f.bytes.slice();
-        return remote.open(Comlink.transfer({ name: f.name, bytes }, [bytes.buffer as ArrayBuffer]));
+        return remote.open(Comlink.transfer({ name: f.name, bytes }, [bytes.buffer as ArrayBuffer])).then((r) => {
+          lastSynced = undefined; // caller stores the result, then calls markSynced()
+          return r;
+        });
       },
       save: (d, fmt) => remote.save(d, fmt),
-      run: (s, d) => remote.run(s, d),
+      run: async (s, d) => {
+        // The worker keeps the dataset from the previous call.  Only send it again when the
+        // editor's dataset is a different object (i.e. it was edited) — structured cloning a
+        // large dataset on every run would be wasteful.
+        const send = d && d === lastSynced ? null : d;
+        const r = await remote.run(s, send);
+        const crashed = r.items.some((i) => i.id.startsWith('crash-'));
+        lastSynced = crashed ? undefined : r.dataset ? undefined : d ?? undefined;
+        return r;
+      },
+      setLanguage: (lang) => (remote as unknown as { setLanguage(l: string): Promise<boolean> }).setLanguage(lang),
     };
     return { api, kind: 'wasm', version };
   } catch (e) {
@@ -70,6 +85,15 @@ async function load(): Promise<EngineHandle> {
     console.info('[PSPP Studio] WebAssembly engine unavailable, using demo engine:', e instanceof Error ? e.message : e);
     return loadMock();
   }
+}
+
+/**
+ * Tells the client that DATASET (the editor's current dataset object) is identical to what the
+ * engine holds, e.g. right after storing a dataset returned by run() or open(), so the next
+ * run() need not send it again.
+ */
+export function markSynced(dataset: unknown) {
+  lastSynced = dataset;
 }
 
 export function getEngineHandle(): Promise<EngineHandle> {

@@ -58,4 +58,6 @@ export interface EngineApi {
   open(file: { name: string; bytes: Uint8Array }): Promise<{ dataset?: Dataset; syntax?: string; items?: OutputItem[] }>;
   save(dataset: Dataset, format: 'sav' | 'zsav' | 'por' | 'csv'): Promise<Uint8Array>;
   run(syntax: string, dataset: Dataset | null): Promise<RunResult>;
+  /** Language of PSPP's own output and messages ('cs', 'en'). Optional for engines without catalogs. */
+  setLanguage?(lang: string): Promise<boolean>;
 }

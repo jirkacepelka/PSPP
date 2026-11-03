@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   worker: { format: 'es' },
+  // The worker imports the shared engine wrapper from ../engine/js.
+  server: { fs: { allow: ['..'] } },
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 2500,
