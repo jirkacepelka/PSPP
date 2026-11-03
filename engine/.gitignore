@@ -1,4 +1,6 @@
 .build/
+.build-nls/
 .build-*.log
+.build-nls.log
 pspp/autom4te.cache/
 pspp/*~

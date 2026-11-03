@@ -37,6 +37,7 @@ export async function createEngine(createModule, moduleOpts = {}) {
     init: c('pspp_init', 'number', []),
     version: c('pspp_version', 'string', []),
     run: c('pspp_run', 'string', ['string']),
+    setLanguage: c('pspp_set_language', 'number', ['string']),
     dsBegin: c('ds_begin', null, []),
     dsAddVar: c('ds_add_var', 'number', ['string', 'number']),
     dsVarSetLabel: c('ds_var_set_label', null, ['number', 'string']),
@@ -234,6 +235,19 @@ export async function createEngine(createModule, moduleOpts = {}) {
       const bytes = M.FS.readFile(path);
       M.FS.unlink(path);
       return bytes;
+    },
+
+    /**
+     * Switches the language of PSPP's output and messages.  MO is the
+     * compiled message catalog (pspp.mo) for LANG, or null for English.
+     */
+    async setLanguage(lang, mo) {
+      if (mo) {
+        const dir = `/pspp/share/locale/${lang}/LC_MESSAGES`;
+        M.FS.mkdirTree(dir);
+        M.FS.writeFile(`${dir}/pspp.mo`, mo);
+      }
+      return api.setLanguage(lang) === 1;
     },
 
     /** Runs syntax without touching the dataset (internal/testing). */

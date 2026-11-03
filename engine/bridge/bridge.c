@@ -34,6 +34,7 @@
 #include <config.h>
 
 #include <float.h>
+#include <locale.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -284,6 +285,23 @@ pspp_init (void)
   the_session = session_create (NULL);
   dataset_create (the_session, "");
   return 1;
+}
+
+/* Selects the language of messages and output labels, e.g. "cs" or "en".
+   The message catalog must already be installed in the virtual file system
+   at <localedir>/LANG/LC_MESSAGES/pspp.mo.  Affects output produced from
+   now on.  Returns true if the locale was accepted. */
+EXPORT int
+pspp_set_language (const char *lang)
+{
+  pspp_init ();
+  char name[64];
+  if (!lang || !*lang || !strcmp (lang, "en") || !strcmp (lang, "C"))
+    snprintf (name, sizeof name, "C.UTF-8");
+  else
+    snprintf (name, sizeof name, "%s.UTF-8", lang);
+  setenv ("LANGUAGE", lang && *lang ? lang : "C", 1);
+  return setlocale (LC_MESSAGES, name) != NULL;
 }
 
 /* Runs SYNTAX against the active dataset and returns a JSON object

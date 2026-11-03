@@ -8,6 +8,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="${1:-$ROOT/.build}"
 PREFIX="$WORK/prefix"
 BUILD="$WORK/pspp"
+NLS="${NLS:-yes}"
 mkdir -p "$BUILD"
 
 PSPP_CFLAGS="-O2"
@@ -20,6 +21,9 @@ cd "$BUILD"
 if [ ! -f Makefile ]; then
   # Passing both --build and --host forces cross-compilation mode, so
   # configure never tries to run test programs under Node.
+  # musl (Emscripten's libc) implements gettext itself, but configure's probe
+  # looks for GNU libc internals, so tell it the libc version is usable.
+  export gt_cv_func_gnugettext1_libc=yes gt_cv_func_gnugettext2_libc=yes
   EM_PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
   LIBXML2_CFLAGS="-I$PREFIX/include/libxml2" LIBXML2_LIBS="-L$PREFIX/lib -lxml2 -lz" \
   GSL_CFLAGS="-I$PREFIX/include" GSL_LIBS="-L$PREFIX/lib -lgsl -lgslcblas" \
@@ -29,7 +33,8 @@ if [ ! -f Makefile ]; then
     --host=wasm32-unknown-emscripten \
     --prefix=/pspp \
     --without-gui --without-cairo --without-libpq --without-perl-module \
-    --disable-nls --disable-rpath --disable-shared --enable-static
+    $([ "$NLS" = yes ] && echo --enable-nls || echo --disable-nls) \
+    --disable-rpath --disable-shared --enable-static
 fi
 
 emmake make -j"$(nproc)" CFLAGS="$PSPP_CFLAGS" built-sources
