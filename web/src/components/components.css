@@ -1628,3 +1628,14 @@ button.chip[aria-pressed='true']:hover {
 .measure-icon {
   display: inline-flex;
 }
+.panel-title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.field > .segmented,
+.field > .radio-group {
+  align-self: flex-start;
+}

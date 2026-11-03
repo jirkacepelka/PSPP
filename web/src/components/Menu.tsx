@@ -1,5 +1,5 @@
 /*
- * Material-style popup menu with keyboard navigation and nested submenus.
+ * Popup menu with keyboard navigation (↑ ↓ Home End, type-ahead, → ← for submenus) and nested submenus.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
@@ -7,7 +7,7 @@ import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 
 export type MenuEntry =
-  | { type: 'item'; id: string; label: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; onSelect: () => void }
+  | { type: 'item'; id: string; label: string; icon?: string; shortcut?: string; checked?: boolean; disabled?: boolean; danger?: boolean; onSelect: () => void }
   | { type: 'submenu'; id: string; label: string; icon?: string; items: MenuEntry[]; disabled?: boolean }
   | { type: 'sep'; id?: string }
   | { type: 'header'; id?: string; label: string };
@@ -177,7 +177,7 @@ export function Menu({ items, anchor, onClose, label, autoFocus = true, level = 
             <button
               key={it.id}
               type="button"
-              className="menu-item"
+              className={it.danger ? 'menu-item danger' : 'menu-item'}
               role={it.checked !== undefined ? 'menuitemcheckbox' : 'menuitem'}
               aria-checked={it.checked}
               data-index={i}
