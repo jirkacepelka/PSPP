@@ -17,6 +17,8 @@ export interface VarInfo {
   distinct: number;
   /** groups holding at least 5 % of the cases (tiny groups such as "other" are left out) */
   major?: number;
+  /** looks like a case identifier (all values distinct, no labels) */
+  isId?: boolean;
 }
 
 export interface Slot {

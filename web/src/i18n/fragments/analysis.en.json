@@ -526,5 +526,26 @@
     "noMatch": "Nothing found.",
     "emptyAsk": "What do you want to find out?",
     "emptyOrMenu": "Or open the Analyze menu."
+  },
+  "syntax": {
+    "runCommand": "Run command",
+    "runCurrentShort": "Run",
+    "runMore": "More ways to run",
+    "hintGutter": "{{key}} runs the command at the cursor, {{all}} everything; ▶ next to a line runs one command.",
+    "journal": "Journal",
+    "journalDesc": "Everything that ran – from dialogs and syntax – to reproduce the analysis.",
+    "journalOpen": "Open as syntax",
+    "journalCopy": "Copy the whole journal",
+    "journalCopied": "Journal copied",
+    "journalDownload": "Download .sps",
+    "journalEmpty": "Nothing has run yet.",
+    "journalInsert": "Insert into the editor",
+    "source": {
+      "syntax": "Syntax",
+      "dialog": "Dialog",
+      "menu": "Re-run",
+      "data": "Data edit",
+      "system": "System"
+    }
   }
 }

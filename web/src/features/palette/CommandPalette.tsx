@@ -17,7 +17,7 @@ import { MENUS, resolveMenuId } from '../../app/menus';
 import { flattenMenus } from '../../app/menuEntries';
 import { manualUrl } from '../../app/help';
 import { pasteSyntax } from '../../app/engine';
-import { gridCommands } from '../../app/gridBus';
+import { gridCommands, useActiveVariable } from '../../app/gridBus';
 import { variableIcon } from '../../app/varIcons';
 import { PSPP_COMMANDS } from '../../lib/commands';
 import { SPECS_BY_ID } from '../dialogs/specs';
@@ -72,10 +72,9 @@ const has = (id: string) => !!ACTIONS_BY_ID[id];
 
 function jumpToVariable(index: number) {
   const ui = useUi.getState();
-  ui.setView('data');
-  const row = ui.selected?.row ?? 0;
-  ui.select({ row, col: index });
-  setTimeout(() => gridCommands.gotoCase(row, index), 40);
+  if (ui.showStart || (ui.view !== 'data' && ui.view !== 'variables')) ui.setView('data');
+  // wait for the grid to mount and register itself on the bus
+  setTimeout(() => gridCommands.gotoVariable(index), 80);
 }
 
 export function CommandPalette() {
@@ -223,10 +222,10 @@ export function CommandPalette() {
       if (e && !out.some((x) => x.key.endsWith(`:${id}`) || x.key === `recall:${id.slice(7)}`)) out.push(e);
     }
     const gSug = t('shell.palette.groupSuggested');
-    const sel = useUi.getState().selected;
-    const v = sel && dataset ? dataset.variables[sel.col] : undefined;
-    if (v && sel && !useUi.getState().showStart && useUi.getState().view === 'data')
-      out.push(...variableActions(v, sel.col).slice(2, 4).map((e) => ({ ...e, group: gSug })));
+    const col = useActiveVariable.getState().index ?? useUi.getState().selected?.col ?? null;
+    const v = col !== null && dataset ? dataset.variables[col] : undefined;
+    if (v && col !== null && !useUi.getState().showStart && (useUi.getState().view === 'data' || useUi.getState().view === 'variables'))
+      out.push(...variableActions(v, col).slice(2, 4).map((e) => ({ ...e, group: gSug })));
     for (const id of dataset ? ['analysis.assistant', 'dialog:frequencies', 'dialog:descriptives'] : ['file.open', 'file.newData', 'file.sample.students']) {
       const e = actionEntry(id, gSug);
       if (e && !out.some((x) => x.label === e.label)) out.push(e);
@@ -292,7 +291,7 @@ export function CommandPalette() {
       setVarFocus(null);
       setActive(0);
       useLayout.getState().setPaletteSeed('');
-      setTimeout(() => input.current?.focus(), 0);
+      input.current?.focus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -342,6 +341,7 @@ export function CommandPalette() {
           )}
           <input
             ref={input}
+            autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={focusVar ? t('shell.palette.subPlaceholder') : t('shell.palette.placeholder')}

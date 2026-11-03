@@ -8,7 +8,7 @@
   },
   "shell": {
     "about": "About",
-    "searchPlaceholder": "Search commands, variables…",
+    "searchPlaceholder": "Search commands…",
     "saveHint": "To share or back up, download a .sav file ({{key}})",
     "renameHint": "Click to rename the dataset",
     "analyze": "Analyze…",

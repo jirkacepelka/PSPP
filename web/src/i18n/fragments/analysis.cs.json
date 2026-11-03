@@ -540,5 +540,26 @@
     "noMatch": "Nic nenalezeno.",
     "emptyAsk": "Co chcete zjistit?",
     "emptyOrMenu": "Nebo otevřete nabídku Analýza."
+  },
+  "syntax": {
+    "runCommand": "Spustit příkaz",
+    "runCurrentShort": "Spustit",
+    "runMore": "Další způsoby spuštění",
+    "hintGutter": "{{key}} spustí příkaz pod kurzorem, {{all}} vše; ▶ u řádku spustí jeden příkaz.",
+    "journal": "Deník",
+    "journalDesc": "Vše, co se spustilo – z dialogů i syntaxe – pro zopakování analýzy.",
+    "journalOpen": "Otevřít jako syntaxi",
+    "journalCopy": "Kopírovat celý deník",
+    "journalCopied": "Deník zkopírován",
+    "journalDownload": "Stáhnout .sps",
+    "journalEmpty": "Zatím nic neběželo.",
+    "journalInsert": "Vložit do editoru",
+    "source": {
+      "syntax": "Syntaxe",
+      "dialog": "Dialog",
+      "menu": "Opakované spuštění",
+      "data": "Úprava dat",
+      "system": "Systém"
+    }
   }
 }

@@ -2,7 +2,7 @@
  * Syntax editor (CodeMirror 6) with PSPP highlighting, completion and engine diagnostics.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EditorState, Compartment, type Extension } from '@codemirror/state';
 import {
@@ -17,7 +17,10 @@ import {
   crosshairCursor,
   highlightSpecialChars,
   placeholder,
+  gutter,
+  GutterMarker,
 } from '@codemirror/view';
+import { RangeSetBuilder, StateField } from '@codemirror/state';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { bracketMatching, indentOnInput } from '@codemirror/language';
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
@@ -28,10 +31,56 @@ import { useSettings } from '../../store/settings';
 import { useData } from '../../store/data';
 import { useUi } from '../../store/ui';
 import { pspp, psppCompletion, setKnownVariables } from './psppLanguage';
-import { registerEditor, runSyntaxCommand } from './runCommands';
+import { consumeGoto, registerEditor, runSyntaxCommand } from './runCommands';
 import { Icon } from '../../components/Icon';
+import { IconButton } from '../../components/IconButton';
+import { MenuButton } from '../../components/MenuButton';
 import { formatShortcut } from '../../app/actions';
 import { saveSyntaxFile } from '../../app/files';
+import { runSyntax } from '../../app/engine';
+import { splitCommands } from '../../lib/syntax';
+import { JournalPanel } from './JournalPanel';
+import './syntax.css';
+
+/* ---- gutter ▶ next to the first line of each command (SY-2) ---- */
+class RunMarker extends GutterMarker {
+  toDOM() {
+    const b = document.createElement('span');
+    b.className = 'syn-run-marker';
+    b.textContent = '▶';
+    b.setAttribute('aria-hidden', 'true');
+    return b;
+  }
+}
+const runMarker = new RunMarker();
+const commandStarts = StateField.define<Set<number>>({
+  create: (st) => new Set(splitCommands(st.doc.toString()).map((c) => c.startLine)),
+  update: (v, tr) => (tr.docChanged ? new Set(splitCommands(tr.state.doc.toString()).map((c) => c.startLine)) : v),
+});
+function runGutter(getTab: () => string, title: string) {
+  return [
+    commandStarts,
+    gutter({
+      class: 'syn-run-gutter',
+      markers: (view) => {
+        const b = new RangeSetBuilder<GutterMarker>();
+        const starts = view.state.field(commandStarts);
+        for (const n of [...starts].sort((a, c) => a - c)) if (n <= view.state.doc.lines) b.add(view.state.doc.line(n).from, view.state.doc.line(n).from, runMarker);
+        return b.finish();
+      },
+      domEventHandlers: {
+        mousedown: (view, block) => {
+          const line = view.state.doc.lineAt(block.from).number;
+          const cmd = splitCommands(view.state.doc.toString()).find((c) => c.startLine === line);
+          if (!cmd) return false;
+          void runSyntax(cmd.text, { tabId: getTab(), lineOffset: cmd.startLine });
+          return true;
+        },
+      },
+    }),
+    EditorView.editorAttributes.of({ 'data-run-title': title }),
+  ];
+}
 
 const states = new Map<string, EditorState>();
 
@@ -86,6 +135,7 @@ export function SyntaxView() {
       highlightSelectionMatches(),
       search({ top: true }),
       lintGutter(),
+      runGutter(() => tabIdRef.current, t('syntax.runCommand')),
       pspp(),
       keymap.of([
         { key: 'Mod-Enter', run: () => (runSyntaxCommand('current'), true) },
@@ -134,9 +184,12 @@ export function SyntaxView() {
       versionRef.current = tab.version;
       const unregister = registerEditor(view, tab.id);
       view.focus();
+      consumeGoto();
       return () => unregister();
     }
-    return registerEditor(view, tab.id);
+    const un = registerEditor(view, tab.id);
+    consumeGoto();
+    return un;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab?.id]);
 
@@ -177,46 +230,65 @@ export function SyntaxView() {
 
   const errors = tab?.diagnostics.filter((d) => d.severity === 'error') ?? [];
   const running = engineStatus === 'running';
+  const [journalOpen, setJournalOpen] = useState(false);
+  const gotoLine = (n: number) => {
+    const view = viewRef.current;
+    if (!view) return;
+    const line = view.state.doc.line(Math.max(1, Math.min(n, view.state.doc.lines)));
+    view.dispatch({ selection: { anchor: line.from }, scrollIntoView: true });
+    view.focus();
+  };
 
   return (
     <div className="syntax-view">
       <div className="syntax-bar" role="toolbar" aria-label={t('syntax.toolbar')}>
-        <button type="button" className="btn btn-filled btn-sm" disabled={running} onClick={() => runSyntaxCommand('all')}>
-          <Icon name="play_arrow" filled />
-          {t('actions.runAll')}
-        </button>
-        <button type="button" className="btn btn-tonal btn-sm" disabled={running} onClick={() => runSyntaxCommand('selection')} data-tip={t('actions.runSelection')}>
-          <Icon name="play_circle" />
-          <span className="hide-sm">{t('syntax.selection')}</span>
-        </button>
-        <button type="button" className="btn btn-tonal btn-sm" disabled={running} onClick={() => runSyntaxCommand('current')} data-tip={`${t('actions.runCurrent')} (${formatShortcut('Mod+Enter')})`}>
-          <Icon name="subdirectory_arrow_right" />
-          <span className="hide-sm">{t('syntax.current')}</span>
-        </button>
-        <button type="button" className="btn btn-text btn-sm" disabled={running} onClick={() => runSyntaxCommand('toEnd')}>
-          <Icon name="vertical_align_bottom" />
-          <span className="hide-sm">{t('syntax.toEnd')}</span>
-        </button>
+        <div className="syn-run-split">
+          <button type="button" className="btn btn-primary btn-sm" disabled={running} onClick={() => runSyntaxCommand('current')} data-tip={`${t('actions.runCurrent')} (${formatShortcut('Mod+Enter')})`}>
+            <Icon name="play_arrow" filled />
+            {t('syntax.runCurrentShort')}
+          </button>
+          <MenuButton
+            iconOnly
+            icon="expand_more"
+            variant="primary"
+            className="primary syn-run-more"
+            size="sm"
+            label={t('syntax.runMore')}
+            disabled={running}
+            items={[
+              { type: 'item', id: 'sel', label: t('actions.runSelection'), icon: 'play_circle', onSelect: () => runSyntaxCommand('selection') },
+              { type: 'item', id: 'end', label: t('actions.runToEnd'), icon: 'vertical_align_bottom', onSelect: () => runSyntaxCommand('toEnd') },
+              { type: 'item', id: 'all', label: t('actions.runAll'), icon: 'playlist_play', shortcut: 'Mod+Shift+Enter', onSelect: () => runSyntaxCommand('all') },
+            ]}
+          />
+        </div>
+        <span className="syntax-hint hide-sm">{t('syntax.hintGutter', { key: formatShortcut('Mod+Enter'), all: formatShortcut('Mod+Shift+Enter') })}</span>
         <span className="spacer" />
         {errors.length > 0 && (
-          <button
-            type="button"
-            className="chip syntax-errors"
-            onClick={() => {
-              const view = viewRef.current;
-              if (!view) return;
-              const line = view.state.doc.line(Math.min(errors[0].line, view.state.doc.lines));
-              view.dispatch({ selection: { anchor: line.from }, scrollIntoView: true });
-              view.focus();
-            }}
-          >
+          <button type="button" className="syn-errors" onClick={() => gotoLine(errors[0].line)} title={errors[0].message}>
             <Icon name="error" />
-            {t('syntax.errorCount', { count: errors.length })}
+            <span>{t('syntax.errorCount', { count: errors.length })}</span>
+            <span className="syn-errors-msg hide-sm">
+              {t('output.line', { line: errors[0].line })}: {errors[0].message}
+            </span>
           </button>
         )}
-        <span className="syntax-hint hide-sm">{t('syntax.hint', { key: formatShortcut('Mod+Enter') })}</span>
+        <IconButton icon="history_edu" small pressed={journalOpen} label={t('syntax.journal')} onClick={() => setJournalOpen(!journalOpen)} />
+        <IconButton icon="download" small label={t('actions.saveSyntax')} onClick={saveSyntaxFile} />
       </div>
-      <div className="syntax-editor" ref={host} />
+      <div className="syntax-main">
+        <div className="syntax-editor" ref={host} />
+        {journalOpen && <JournalPanel onClose={() => setJournalOpen(false)} onInsert={(text) => {
+          const view = viewRef.current;
+          if (!view) return;
+          const pos = view.state.selection.main.head;
+          const line = view.state.doc.lineAt(pos);
+          const at = line.length ? line.to : line.from;
+          const ins = `${line.length ? '\n' : ''}${text.trim()}\n`;
+          view.dispatch({ changes: { from: at, insert: ins }, selection: { anchor: at + ins.length }, scrollIntoView: true });
+          view.focus();
+        }} />}
+      </div>
     </div>
   );
 }

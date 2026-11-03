@@ -58,7 +58,8 @@
     "tipFlagsHint": "Podezřelé hodnoty jsou označeny rohem buňky.",
     "useTyped": "Použít „{{value}}“ (hodnota bez popisku)",
     "userMissingTip": "Uživatelsky chybějící hodnota: v analýzách se vynechá.",
-    "valueBar": "Řádek hodnot"
+    "valueBar": "Řádek hodnot",
+    "flagsChip": "Kontrola dat"
   },
   "undo": {
     "editCell": "Úprava buňky {{cell}}",

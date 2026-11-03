@@ -1088,6 +1088,10 @@ body.sh-resizing canvas {
   .sh-search {
     width: 220px;
   }
+  /* inactive status chips shrink to their icon; the tooltip still explains them */
+  .sh-chips .chip:not(.sh-chip-on) .chip-text {
+    display: none;
+  }
   .sh-side,
   .sh-side-slot {
     width: 280px;

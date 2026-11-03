@@ -24,9 +24,8 @@ export function fmtVal(value: number | string, v: Variable): string {
 
 export function valueLabelsSummary(v: Variable, t: TFunction): string {
   if (!v.valueLabels.length) return t('variables.none');
-  const first = v.valueLabels[0];
-  const more = v.valueLabels.length > 1 ? ` +${v.valueLabels.length - 1}` : '';
-  return `{${fmtVal(first.value, v)}, ${first.label}}${more}`;
+  const shown = v.valueLabels.slice(0, 4).map((l) => `${fmtVal(l.value, v)} = ${l.label}`).join('; ');
+  return v.valueLabels.length > 4 ? `${shown}; +${v.valueLabels.length - 4}` : shown;
 }
 
 export function missingSummary(v: Variable, t: TFunction): string {

@@ -48,7 +48,8 @@
     "tipFlagsHint": "Suspicious values are marked with a cell corner.",
     "useTyped": "Use “{{value}}” (value without a label)",
     "userMissingTip": "User-missing value: excluded from analyses.",
-    "valueBar": "Value bar"
+    "valueBar": "Value bar",
+    "flagsChip": "Data check"
   },
   "undo": {
     "editCell": "Edit cell {{cell}}",

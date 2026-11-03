@@ -186,7 +186,7 @@ export function VariableView() {
       const fixed = (display: string): GridCell => ({ kind: GridCellKind.Text, data: display, displayData: display, allowOverlay: false, readonly: true, cursor: 'pointer' });
       switch (id) {
         case 'name':
-          return { ...text(v.name), copyData: v.name } as GridCell;
+          return { ...text(v.name, `${v.name}, ${t(`measure.${v.type === 'string' && v.measure === 'scale' ? 'nominal' : v.measure}`)}`), copyData: v.name } as GridCell;
         case 'label':
           return text(v.label);
         case 'measure':

@@ -115,6 +115,14 @@ export async function runSyntaxDetailed(syntax: string, opts: RunOptions = {}): 
     const cmds = splitCommands(text).map((c) => commandName(c.text)).filter((c): c is string => !!c && c !== 'COMMENT');
     if (result.dataset && !(opts.rollbackOnError && errs)) {
       const cur = useData.getState();
+      // PSPP knows nothing about app-only variable metadata (validRange); carry it over by name.
+      const prevMeta = new Map((cur.dataset?.variables ?? []).filter((v) => v.validRange).map((v) => [v.name, v.validRange]));
+      if (prevMeta.size) {
+        result.dataset = {
+          ...result.dataset,
+          variables: result.dataset.variables.map((v) => (prevMeta.has(v.name) && !v.validRange ? { ...v, validRange: prevMeta.get(v.name) } : v)),
+        };
+      }
       cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName, label: cmds.slice(0, 3).join(', ') });
       markSynced(useData.getState().dataset);
     }

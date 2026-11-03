@@ -321,7 +321,7 @@
 }
 .dlg-hint {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   flex-wrap: wrap;
   gap: var(--s-1) var(--s-2);
   padding: var(--s-1) var(--s-2);
@@ -339,9 +339,13 @@
 .dlg-hint .icon {
   font-size: var(--icon-size-sm);
 }
-.dlg-hint span {
+.dlg-hint > span:not(.icon) {
   flex: 1;
   min-width: 160px;
+}
+.dlg-hint > .icon {
+  align-self: flex-start;
+  margin-top: 2px;
 }
 .dlg-hint .btn {
   color: inherit;

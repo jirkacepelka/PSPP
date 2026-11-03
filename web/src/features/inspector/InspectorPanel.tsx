@@ -153,9 +153,9 @@ function VariableDetails({ index, v, others }: { index: number; v: Variable; oth
         {hint && (
           <div className="insp-hint" role="note">
             <Icon name="lightbulb" size={16} />
-            <span>{t(`inspector.hint.${hint.reason}`, { measure: t(`measure.${hint.measure}`), count: stats?.distinct })}</span>
+            <span>{t(`inspector.hint.${hint.reason}`, { measure: t(`measure.${hint.measure}`).toLocaleLowerCase(), count: stats?.distinct })}</span>
             <Button size="sm" variant="ghost" onClick={() => update({ measure: hint.measure }, t('variables.col.measure'))}>
-              {t('inspector.applyHint', { measure: t(`measure.${hint.measure}`) })}
+              {t('inspector.applyHint', { measure: t(`measure.${hint.measure}`).toLocaleLowerCase() })}
             </Button>
           </div>
         )}

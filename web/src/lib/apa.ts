@@ -19,21 +19,21 @@ export interface ApaOptions {
   title?: string;
 }
 
-const SIG = /\b(sig|p)\b|signifikance|významnost/i;
+const SIG = /(^|[\s(])sig\b|^p$|^p[\s-]value|signifikance|významnost/i;
 const BOUNDED = /\b(sig|correlation|korelace|beta|alpha|alfa|r square|r kvadrát|phi|cramer|kappa|eta)\b|^r$/i;
 const INTEGERS = /^(n|df\d?|count|frequency|četnost|počet|n of items|počet položek)$/i;
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-function formatCell(c: PivotCell, header: string, stubText: string, style: NumStyle): string {
+function formatCell(c: PivotCell, header: string, stubText: string[], style: NumStyle): string {
   if (c.header || c.num === null) return c.text;
   const raw = c.text.trim();
   const pct = raw.endsWith('%');
   const x = c.num;
-  const isSig = SIG.test(header) || SIG.test(stubText);
-  if (isSig) return x < 0.001 ? `< ${fmt(0.001, 3, style, true)}` : fmt(x, 3, style, true);
+  const isSig = SIG.test(header) || stubText.some((x) => SIG.test(x));
+  if (isSig && x >= 0) return x < 0.001 ? `< ${fmt(0.001, 3, style, true)}` : fmt(x, 3, style, true);
   if (pct) return `${fmt(x, 1, style)}${style.dec === ',' ? ' %' : '%'}`;
-  const bounded = BOUNDED.test(header) || BOUNDED.test(stubText);
+  const bounded = BOUNDED.test(header) || stubText.some((x) => BOUNDED.test(x));
   const intLike = Number.isInteger(x) && (!/[.,]/.test(raw) || INTEGERS.test(header.trim()));
   if (intLike) return fmt(x, 0, style);
   return fmt(x, 2, style, bounded && Math.abs(x) <= 1);
@@ -77,7 +77,7 @@ export function toApa(html: string, opts: ApaOptions): { html: string; text: str
 
   const bodyHtml = body
     .map((r, ri) => {
-      const stubText = r.filter((c) => c.header).map((c) => c.text).join(' ');
+      const stubText = r.filter((c) => c.header).map((c) => c.text.trim());
       const prev = ri > 0 ? body[ri - 1] : null;
       const last = ri === body.length - 1;
       const texts: string[] = [];

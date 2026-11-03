@@ -43,6 +43,8 @@ import { EmptyState } from '../../components/EmptyState';
 import { typeLabel } from '../variables/describe';
 import { useDataPrefs } from './prefs';
 import { inspectVariable, quickAnalysis } from './quickActions';
+import { FilterChip } from '../../components/Chip';
+import { useCommandBarSlot } from '../shell/layout';
 
 const EMPTY_SEL: GridSelection = { columns: CompactSelection.empty(), rows: CompactSelection.empty() };
 
@@ -84,6 +86,16 @@ export function DataView() {
   const [widths, setWidths] = useState<Record<number, number>>({});
   const [tip, setTip] = useState<Tip | null>(null);
   const tipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flagChip = useMemo(
+    () => (
+      <FilterChip selected={highlightFlags} icon="flag" onToggle={(b) => useDataPrefs.getState().set({ highlightFlags: b })}>
+        {t('dataView.flagsChip')}
+      </FilterChip>
+    ),
+    [highlightFlags, t],
+  );
+  useCommandBarSlot('data', flagChip);
 
   const nVars = ds?.variables.length ?? 0;
   const nCases = caseCount(ds);

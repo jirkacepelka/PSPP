@@ -1,0 +1,295 @@
+/* Syntax editor (WP3). Tokens only: the syntax palette is derived from the chart series and ink. */
+.syntax-view {
+  --syn-keyword: color-mix(in srgb, var(--chart-series-1) 80%, var(--ink));
+  --syn-sub: color-mix(in srgb, var(--chart-series-4) 85%, var(--ink));
+  --syn-string: color-mix(in srgb, var(--chart-series-3) 75%, var(--ink));
+  --syn-comment: var(--ink-3);
+  --syn-number: var(--warning-ink);
+  --syn-var: color-mix(in srgb, var(--chart-series-7) 80%, var(--ink));
+  --syn-atom: color-mix(in srgb, var(--chart-series-6) 85%, var(--ink));
+  --syn-func: color-mix(in srgb, var(--chart-series-5) 60%, var(--ink));
+  --syn-op: var(--ink-2);
+  --syn-data: var(--ink-3);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface);
+}
+.syntax-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  border-bottom: var(--hairline, 1px) solid var(--line);
+  overflow-x: auto;
+}
+.syn-run-split {
+  display: inline-flex;
+  flex: none;
+}
+.syn-run-split > .btn {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.syn-run-split > :last-child,
+.syn-run-split > :last-child .icon-btn,
+.syn-run-split > .icon-btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: var(--hairline, 1px) solid color-mix(in srgb, var(--accent-ink) 35%, transparent);
+}
+.syntax-hint {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.syn-errors {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  max-width: 50%;
+  height: 28px;
+  padding: 0 var(--s-2);
+  border: var(--hairline, 1px) solid transparent;
+  border-left: 2px solid var(--danger);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  background: var(--danger-tint);
+  color: var(--danger-ink);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  min-width: 0;
+}
+.syn-errors .icon {
+  font-size: var(--icon-size-sm);
+}
+.syn-errors span {
+  white-space: nowrap;
+}
+.syn-errors-msg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--danger-ink);
+  opacity: 0.9;
+}
+.syntax-main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+.syntax-editor {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.syntax-editor .cm-editor {
+  height: 100%;
+  background: var(--surface);
+  color: var(--ink);
+}
+.syntax-editor .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+.syntax-editor .cm-gutters {
+  background: var(--surface-sunken);
+  color: var(--ink-3);
+  border-right: var(--hairline, 1px) solid var(--line);
+}
+.syntax-editor .cm-activeLine {
+  background: var(--accent-tint);
+}
+.syntax-editor .cm-activeLineGutter {
+  background: var(--surface-active);
+  color: var(--ink);
+}
+.syntax-editor .cm-cursor {
+  border-left-color: var(--accent);
+  border-left-width: 2px;
+}
+.syntax-editor .cm-selectionBackground,
+.syntax-editor .cm-focused .cm-selectionBackground {
+  background: var(--selection-bg, var(--accent-tint-strong)) !important;
+}
+.syntax-editor .cm-placeholder {
+  color: var(--ink-3);
+}
+.syntax-editor .cm-tooltip {
+  border: var(--hairline, 1px) solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+}
+.syntax-editor .cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background: var(--accent-tint-strong);
+  color: var(--ink);
+}
+.syntax-editor .cm-completionDetail {
+  color: var(--ink-3);
+  margin-left: var(--s-2);
+}
+.syntax-editor .cm-tooltip-lint {
+  padding: 0;
+}
+.syntax-editor .cm-diagnostic {
+  padding: var(--s-1) var(--s-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+}
+.syntax-editor .cm-diagnostic-error {
+  border-left: 3px solid var(--danger);
+  background: var(--danger-tint);
+  color: var(--danger-ink);
+}
+.syntax-editor .cm-diagnostic-warning {
+  border-left: 3px solid var(--warning);
+}
+.syntax-editor .cm-lintRange-error {
+  background-image: none;
+  text-decoration: underline wavy var(--danger);
+  text-underline-offset: 3px;
+}
+.syntax-editor .cm-panels {
+  background: var(--surface-sunken);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.syntax-editor .cm-panels input,
+.syntax-editor .cm-panels button {
+  font-size: var(--fs-sm);
+}
+.syntax-editor .cm-textfield,
+.syntax-editor .cm-button {
+  border: var(--hairline, 1px) solid var(--line-control);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  background-image: none;
+  color: var(--ink);
+}
+.syntax-editor .cm-searchMatch {
+  background: var(--warning-tint);
+  outline: 1px solid var(--warning);
+}
+.syntax-editor .cm-matchingBracket {
+  background: var(--accent-tint-strong);
+}
+.syntax-editor .syn-run-gutter {
+  width: 18px;
+}
+.syn-run-marker {
+  display: block;
+  width: 18px;
+  text-align: center;
+  color: var(--accent-text);
+  font-size: 9px;
+  line-height: inherit;
+  opacity: 0.25;
+  cursor: pointer;
+}
+.syntax-editor .cm-gutterElement:hover .syn-run-marker,
+.syntax-editor .cm-activeLineGutter .syn-run-marker {
+  opacity: 1;
+}
+
+/* ---- journal ---- */
+.syn-journal {
+  width: 340px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: var(--hairline, 1px) solid var(--line);
+  background: var(--surface-sunken);
+}
+.syn-journal header {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-2) 0 var(--s-3);
+}
+.syn-journal h3 {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+.syn-journal-desc {
+  margin: var(--s-1) var(--s-3);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.syn-journal-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 var(--s-2) var(--s-2);
+  border-bottom: var(--hairline, 1px) solid var(--line);
+}
+.syn-journal-empty {
+  padding: var(--s-3);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+.syn-journal-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--s-2);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.syn-journal-list li {
+  padding: var(--s-1) var(--s-2) var(--s-2);
+  border: var(--hairline, 1px) solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.syn-journal-list li.error {
+  border-left: 2px solid var(--danger);
+}
+.syn-journal-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.syn-journal-meta span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.syn-journal-meta time {
+  color: var(--ink-3);
+}
+.syn-journal-list pre {
+  margin: 2px 0 0;
+  max-height: 96px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+@media (max-width: 760px) {
+  .syn-journal {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(340px, 90vw);
+    z-index: 5;
+    box-shadow: var(--shadow-float);
+  }
+  .syntax-main {
+    position: relative;
+  }
+}

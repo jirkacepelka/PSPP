@@ -218,3 +218,14 @@ describe('APA copy', () => {
     expect(r.text).toContain('7,18');
   });
 });
+
+describe('APA copy regressions', () => {
+  it('does not treat Czech words starting with P as p values', async () => {
+    const { toApa } = await import('./apa');
+    const r = toApa(F.cs.ttestIndependent.tables[1].html, { locale: 'cs' });
+    const row = r.text.split('\n').find((l) => l.includes('Předpokládá'))!;
+    expect(row).toContain('2,15');
+    expect(row).toContain('−0,09');
+    expect(row).not.toContain('< 0,001');
+  });
+});

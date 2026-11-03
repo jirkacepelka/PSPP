@@ -57,7 +57,7 @@ export const statSep = (style: NumStyle) => (style.dec === ',' ? '; ' : ', ');
 /* Display post-processing of engine table HTML (OUT-7).                                         */
 
 const SIG_HEADER = /\b(sig|signifikance|významnost|p-?value)\b/i;
-const BOUNDED_HEADER = /\b(sig|correlation|korelace|beta|alpha|alfa|r square|r kvadrát|phi|cramer|kappa|eta|percentile?|lambda|gamma|tau)\b|^r$/i;
+const BOUNDED_HEADER = /\b(sig|correlation|korelace|beta|alpha|alfa|r square|r kvadrát|phi|cramer|kappa|eta|lambda|gamma|tau)\b|^r$/i;
 
 /**
  * Post-processes PSPP table HTML for display:

@@ -31,7 +31,7 @@ function varInfo(v: Variable, col: (number | string | null)[] | undefined): VarI
     if (counts.size > 200) break;
   }
   const major = [...counts.values()].filter((c) => c >= 0.05 * n).length;
-  return { name: v.name, label: v.label, measure: v.measure, type: v.type, distinct: counts.size, major };
+  return { name: v.name, label: v.label, measure: v.measure, type: v.type, distinct: counts.size, major, isId: n > 20 && counts.size >= 0.95 * n && !v.valueLabels.length && v.measure !== 'scale' };
 }
 
 export function AssistantDialog() {
@@ -102,7 +102,7 @@ export function AssistantDialog() {
     const used = new Set(Object.values(picked).flat());
     const cand = variables
       .filter((v) => !(slot.numericOnly && v.type === 'string'))
-      .map((v, i) => ({ v, i, ok: slot.prefer.includes(v.type === 'string' ? 'nominal' : v.measure === 'unknown' ? 'scale' : v.measure) }))
+      .map((v, i) => ({ v, i, ok: !infos.get(v.name)?.isId && slot.prefer.includes(v.type === 'string' ? 'nominal' : v.measure === 'unknown' ? 'scale' : v.measure) }))
       .sort((a, b) => (a.ok === b.ok ? a.i - b.i : a.ok ? -1 : 1));
     const isGroup = slot.id === 'group' || (goal === 'predict' && slot.id === 'outcome');
     return (
