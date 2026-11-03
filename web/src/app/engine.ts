@@ -77,7 +77,9 @@ export async function runSyntax(syntax: string, opts: RunOptions = {}): Promise<
       cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName });
     }
     const cmds = splitCommands(text).map((c) => commandName(c.text)).filter((c): c is string => !!c && c !== 'COMMENT');
-    const title = cmds.length === 0 ? i18n.t('output.log') : cmds.length === 1 ? cmds[0] : `${cmds[0]} +${cmds.length - 1}`;
+    const groups = items.filter((i) => i.kind === 'group');
+    const base = groups.length === 1 && groups[0].kind === 'group' ? groups[0].title : cmds[0];
+    const title = !base ? i18n.t('output.log') : cmds.length <= 1 ? base : `${base} +${cmds.length - 1}`;
     if (items.length || !opts.quiet) {
       useOutput.getState().add({ id: `e${Date.now().toString(36)}${entryCounter++}`, title, syntax: text, time: Date.now(), items });
     }
