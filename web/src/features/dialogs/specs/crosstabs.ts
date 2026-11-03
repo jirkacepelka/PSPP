@@ -7,13 +7,14 @@ const CELLS = ['COUNT', 'EXPECTED', 'ROW', 'COLUMN', 'TOTAL', 'RESIDUAL', 'SRESI
 
 export const crosstabs: DialogSpec = {
   id: 'crosstabs',
+  kind: 'analysis',
   title: 'dlg.crosstabs.title',
   icon: 'grid_on',
   command: 'CROSSTABS',
   size: 'wide',
   fields: [
-    { kind: 'varlist', id: 'rows', label: 'dlg.crosstabs.rows', min: 1 },
-    { kind: 'varlist', id: 'cols', label: 'dlg.crosstabs.columns', min: 1 },
+    { kind: 'varlist', id: 'rows', label: 'dlg.crosstabs.rows', min: 1, prefer: ['nominal', 'ordinal'], groups: true },
+    { kind: 'varlist', id: 'cols', label: 'dlg.crosstabs.columns', min: 1, prefer: ['nominal', 'ordinal'], groups: true },
     { kind: 'varlist', id: 'layers', label: 'dlg.crosstabs.layers' },
     { kind: 'checkbox', id: 'barchart', label: 'dlg.crosstabs.barchart' },
     { kind: 'checkbox', id: 'notables', label: 'dlg.crosstabs.suppressTables' },
@@ -109,6 +110,10 @@ export const crosstabs: DialogSpec = {
       ],
     },
   ],
+  hints: (v) =>
+    vars(v, 'rows').length && vars(v, 'cols').length && !bool(v, 'st_CHISQ')
+      ? [{ level: 'info', text: 'dlg.hints.suggestChisq', action: { label: 'dlg.hints.addChisq', patch: { st_CHISQ: true, st_PHI: true } } }]
+      : [],
   toSyntax: (v) => {
     const layers = vars(v, 'layers');
     const tables = [vars(v, 'rows').join(' '), 'BY', vars(v, 'cols').join(' '), ...(layers.length ? ['BY', layers.join(' ')] : [])];

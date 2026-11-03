@@ -6,12 +6,13 @@ const POSTHOC = ['LSD', 'BONFERRONI', 'SCHEFFE', 'SIDAK', 'TUKEY', 'GH'];
 
 export const oneway: DialogSpec = {
   id: 'oneway',
+  kind: 'analysis',
   title: 'dlg.oneway.title',
   icon: 'stacked_bar_chart',
   command: 'ONEWAY',
   fields: [
-    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1 },
-    { kind: 'varlist', id: 'factor', label: 'dlg.common.factor', filter: 'numeric', max: 1, min: 1 },
+    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1, prefer: ['scale'] },
+    { kind: 'varlist', id: 'factor', label: 'dlg.common.factor', filter: 'numeric', max: 1, min: 1, prefer: ['nominal', 'ordinal'], groups: true },
     {
       kind: 'group',
       label: 'dlg.common.statistics',

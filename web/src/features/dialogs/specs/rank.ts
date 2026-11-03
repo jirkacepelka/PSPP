@@ -6,6 +6,7 @@ const FUNCS = ['RANK', 'NTILES', 'PERCENT', 'RFRACTION', 'PROPORTION', 'N', 'NOR
 
 export const rank: DialogSpec = {
   id: 'rank',
+  kind: 'transform',
   title: 'dlg.rank.title',
   icon: 'format_list_numbered',
   command: 'RANK',

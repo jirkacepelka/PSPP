@@ -6,12 +6,13 @@ const CELLS = ['MEAN', 'COUNT', 'STDDEV', 'SEMEAN', 'SUM', 'MIN', 'MAX', 'RANGE'
 
 export const means: DialogSpec = {
   id: 'means',
+  kind: 'analysis',
   title: 'dlg.means.title',
   icon: 'calculate',
   command: 'MEANS',
   fields: [
-    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1 },
-    { kind: 'varlist', id: 'layer1', label: 'dlg.means.independentList' },
+    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1, prefer: ['scale'] },
+    { kind: 'varlist', id: 'layer1', label: 'dlg.means.independentList', prefer: ['nominal', 'ordinal'], groups: true },
     { kind: 'varlist', id: 'layer2', label: 'dlg.means.layer2', when: (v) => ((v.layer1 as string[]) ?? []).length > 0 },
     {
       kind: 'subdialog',

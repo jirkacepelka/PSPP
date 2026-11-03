@@ -4,12 +4,13 @@ import { bool, command, num, str, vars, wrap } from '../syntaxUtil';
 
 export const explore: DialogSpec = {
   id: 'explore',
+  kind: 'analysis',
   title: 'dlg.explore.title',
   icon: 'query_stats',
   command: 'EXAMINE',
   fields: [
-    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1 },
-    { kind: 'varlist', id: 'factors', label: 'dlg.common.factorList' },
+    { kind: 'varlist', id: 'dependents', label: 'dlg.common.dependentList', filter: 'numeric', min: 1, prefer: ['scale'] },
+    { kind: 'varlist', id: 'factors', label: 'dlg.common.factorList', prefer: ['nominal', 'ordinal'], groups: true },
     { kind: 'varlist', id: 'id', label: 'dlg.explore.labelCases', max: 1 },
     {
       kind: 'radio',

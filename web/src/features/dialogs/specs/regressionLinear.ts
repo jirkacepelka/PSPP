@@ -4,12 +4,13 @@ import { bool, command, num, vars, wrap } from '../syntaxUtil';
 
 export const regressionLinear: DialogSpec = {
   id: 'regressionLinear',
+  kind: 'analysis',
   title: 'dlg.regressionLinear.title',
   icon: 'trending_up',
   command: 'REGRESSION',
   source: 'numeric',
   fields: [
-    { kind: 'varlist', id: 'dependent', label: 'dlg.common.dependent', filter: 'numeric', max: 1, min: 1 },
+    { kind: 'varlist', id: 'dependent', label: 'dlg.common.dependent', filter: 'numeric', max: 1, min: 1, prefer: ['scale'] },
     { kind: 'varlist', id: 'independents', label: 'dlg.common.independents', filter: 'numeric', min: 1 },
     {
       kind: 'subdialog',

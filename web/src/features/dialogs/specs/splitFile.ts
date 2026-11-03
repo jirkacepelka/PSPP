@@ -4,6 +4,7 @@ import { bool, vars, wrap } from '../syntaxUtil';
 
 export const splitFile: DialogSpec = {
   id: 'splitFile',
+  kind: 'data',
   title: 'dlg.splitFile.title',
   icon: 'call_split',
   command: 'SPLIT FILE',

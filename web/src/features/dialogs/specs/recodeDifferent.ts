@@ -6,6 +6,7 @@ import { isValidVarName, quote } from '../../../lib/variables';
 
 export const recodeDifferent: DialogSpec = {
   id: 'recodeDifferent',
+  kind: 'transform',
   title: 'dlg.recodeDifferent.title',
   icon: 'alt_route',
   command: 'RECODE',

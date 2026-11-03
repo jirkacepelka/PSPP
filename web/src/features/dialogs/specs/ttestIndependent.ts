@@ -5,12 +5,13 @@ import { ciCriteria, ttestOptions } from './ttestOneSample';
 
 export const ttestIndependent: DialogSpec = {
   id: 'ttestIndependent',
+  kind: 'analysis',
   title: 'dlg.ttestIndependent.title',
   icon: 'compare_arrows',
   command: 'T-TEST',
   fields: [
-    { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1 },
-    { kind: 'varlist', id: 'group', label: 'dlg.ttestIndependent.groupingVariable', max: 1, min: 1 },
+    { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1, prefer: ['scale'] },
+    { kind: 'varlist', id: 'group', label: 'dlg.ttestIndependent.groupingVariable', max: 1, min: 1, prefer: ['nominal', 'ordinal'], groups: true },
     {
       kind: 'radio',
       id: 'define',
@@ -22,18 +23,11 @@ export const ttestIndependent: DialogSpec = {
         { value: 'cut', label: 'dlg.ttestIndependent.cutPoint' },
       ],
     },
-    {
-      kind: 'group',
-      columns: 2,
-      when: (v) => v.define !== 'cut',
-      fields: [
-        { kind: 'text', id: 'g1', label: 'dlg.ttestIndependent.group1', default: '1' },
-        { kind: 'text', id: 'g2', label: 'dlg.ttestIndependent.group2', default: '2' },
-      ],
-    },
+    { kind: 'groupvalues', source: 'group', ids: ['g1', 'g2'], labels: ['dlg.ttestIndependent.group1', 'dlg.ttestIndependent.group2'], mode: 'pair', defaults: ['1', '2'], when: (v) => v.define !== 'cut' },
     { kind: 'number', id: 'cut', label: 'dlg.ttestIndependent.cutPointValue', when: (v) => v.define === 'cut', default: null },
     ttestOptions,
   ],
+  errorFields: { 'dlg.errors.groups': 'g1', 'dlg.errors.cutPoint': 'cut' },
   validate: (v, ctx) => {
     if (v.define === 'cut') return num(v, 'cut') === null ? 'dlg.errors.cutPoint' : null;
     if (!str(v, 'g1') || !str(v, 'g2')) return 'dlg.errors.groups';

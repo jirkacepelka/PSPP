@@ -1,15 +1,20 @@
 /*
- * Value bar (like a spreadsheet's fx bar): shows the active cell reference and its editable value.
+ * Value bar: the active cell ("Případ 12 · gender" with the variable's measurement icon and label)
+ * and its editable value; a labelled value shows as a value-label chip (DV-7, DV-1).
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import '../data/data.css';
 import { Icon } from '../../components/Icon';
+import { MeasureIcon, ValueLabelChip } from '../../components/Chip';
 import { useData } from '../../store/data';
 import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
-import { editText, formatCell, parseCell } from '../../lib/format';
+import { editText, isMissingValue, labelValueText, parseCell, valueLabelFor } from '../../lib/format';
+import { measureKey } from '../../lib/variables';
 import { gridCommands } from '../../app/gridBus';
+import { cellChecker } from '../grid/quality';
 
 export function FormulaBar() {
   const { t } = useTranslation();
@@ -27,14 +32,17 @@ export function FormulaBar() {
   useEffect(() => setDraft(raw), [raw, sel?.row, sel?.col]);
 
   if (view !== 'data') return null;
-  const ref = sel ? `${sel.row + 1} : ${v?.name ?? t('formula.newVariable')}` : '';
-  const label = v && cell !== null ? formatCell(cell, v, { valueLabels: true }) : '';
-  const showLabel = v && label && label !== formatCell(cell, v);
+  const label = v && cell !== null && cell !== '' ? valueLabelFor(cell, v) : undefined;
+  const missing = !!v && cell !== null && cell !== '' && isMissingValue(cell, v);
+  const flag = v && cell !== null ? cellChecker(v)(cell) : null;
+  const cellLabel = sel ? `${t('dataView.caseN', { n: sel.row + 1 })} · ${v?.name ?? t('formula.newVariable')}` : t('formula.selectCell');
 
   const commit = () => {
     if (!sel || draft === raw) return;
+    const name = `${v?.name ?? t('dataView.newVariable')}[${sel.row + 1}]`;
+    const label = t('undo.editCell', { cell: name });
     if (!v) {
-      setCells([{ row: sel.row, col: sel.col, value: draft.trim() === '' ? null : isNaN(Number(draft.replace(',', '.'))) ? draft : Number(draft.replace(',', '.')) }]);
+      setCells([{ row: sel.row, col: sel.col, value: draft.trim() === '' ? null : isNaN(Number(draft.replace(',', '.'))) ? draft : Number(draft.replace(',', '.')) }], label);
       return;
     }
     const r = parseCell(draft, v, { decimalSeparator: dec });
@@ -43,23 +51,25 @@ export function FormulaBar() {
       setDraft(raw);
       return;
     }
-    setCells([{ row: sel.row, col: sel.col, value: r.value }]);
+    setCells([{ row: sel.row, col: sel.col, value: r.value }], label);
   };
 
   return (
-    <div className="formula-bar">
-      <button type="button" className="cell-ref" onClick={() => openModal({ kind: 'goto' })} aria-label={t('formula.goto')} data-tip={t('formula.goto')}>
-        {ref || '–'}
+    <div className="formula-bar" role="group" aria-label={t('dataView.valueBar')}>
+      <button type="button" className="formula-ref" onClick={() => openModal({ kind: 'goto' })} title={t('formula.goto')}>
+        {v ? <MeasureIcon measure={measureKey(v)} size={16} /> : <Icon name="add" size={16} />}
+        <span className="formula-case">{sel ? t('dataView.caseN', { n: sel.row + 1 }) : '–'}</span>
+        {sel && <span className="formula-var">· {v?.name ?? t('formula.newVariable')}</span>}
+        <span className="sr-only">{cellLabel}</span>
       </button>
-      <span className="fx" aria-hidden="true">
-        <Icon name="function" />
-      </span>
+      {v?.label && <span className="formula-varlabel" title={v.label}>{v.label}</span>}
       <input
         className="formula-input"
         aria-label={t('formula.value')}
         value={draft}
         disabled={!sel || !ds}
         placeholder={sel ? '' : t('formula.selectCell')}
+        spellCheck={false}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {
@@ -72,12 +82,17 @@ export function FormulaBar() {
           }
         }}
       />
-      {showLabel && (
-        <span className="formula-label" title={t('formula.valueLabel')}>
-          <Icon name="label" size={16} />
-          {label}
-        </span>
-      )}
+      <div className="formula-chips">
+        {flag && (
+          <span className="formula-flag">
+            <Icon name="warning" size={14} />
+            {t(`dataView.flagTitle.${flag}`)}
+          </span>
+        )}
+        {v && cell !== null && cell !== '' && (label !== undefined || missing) && (
+          <ValueLabelChip value={labelValueText(cell as number | string, v, { decimalSeparator: dec })} label={label ?? t('dataView.missingTag')} missing={missing} title={missing ? t('dataView.userMissingTip') : t('formula.valueLabel')} />
+        )}
+      </div>
     </div>
   );
 }

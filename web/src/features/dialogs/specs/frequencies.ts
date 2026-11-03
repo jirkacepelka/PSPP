@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-import type { DialogSpec } from '../types';
+import type { DialogSpec, Hint } from '../types';
 import { bool, command, num, str, vars, wrap } from '../syntaxUtil';
 
 const STATS = ['MEAN', 'SEMEAN', 'MEDIAN', 'MODE', 'STDDEV', 'VARIANCE', 'RANGE', 'MINIMUM', 'MAXIMUM', 'SUM', 'SKEWNESS', 'SESKEW', 'KURTOSIS', 'SEKURT'];
@@ -7,6 +7,7 @@ const DEFAULT_STATS = ['MEAN', 'STDDEV', 'MINIMUM', 'MAXIMUM'];
 
 export const frequencies: DialogSpec = {
   id: 'frequencies',
+  kind: 'analysis',
   title: 'dlg.frequencies.title',
   icon: 'bar_chart',
   command: 'FREQUENCIES',
@@ -117,6 +118,27 @@ export const frequencies: DialogSpec = {
       ],
     },
   ],
+  hints: (v, ctx) => {
+    const list = vars(v, 'variables').map((n) => ctx.variables.find((x) => x.name === n)).filter((x): x is NonNullable<typeof x> => !!x);
+    if (!list.length) return [];
+    const out: Hint[] = [];
+    const categorical = list.filter((x) => x.measure === 'nominal' || x.type === 'string');
+    const moments = ['MEAN', 'STDDEV', 'VARIANCE', 'SKEWNESS', 'KURTOSIS', 'SUM', 'SEMEAN'].filter((s) => bool(v, `st_${s}`));
+    if (categorical.length === list.length && moments.length)
+      out.push({
+        level: 'warn',
+        text: 'dlg.hints.nominalStats',
+        args: { names: categorical.map((x) => x.name).join(', ') },
+        action: { label: 'dlg.hints.useMode', patch: Object.fromEntries([...STATS.map((s) => [`st_${s}`, false]), ['st_MODE', true]]) },
+      });
+    else if (list.every((x) => x.measure === 'ordinal') && !bool(v, 'st_MEDIAN'))
+      out.push({ level: 'info', text: 'dlg.hints.ordinalMedian', action: { label: 'dlg.hints.addMedian', patch: { st_MEDIAN: true, quartiles: true } } });
+    if (str(v, 'chart') === 'none' || !v.chart) {
+      const allScale = list.every((x) => x.measure === 'scale');
+      out.push({ level: 'info', text: allScale ? 'dlg.hints.suggestHistogram' : 'dlg.hints.suggestBar', action: { label: allScale ? 'dlg.hints.addHistogram' : 'dlg.hints.addBar', patch: { chart: allScale ? 'histogram' : 'bar', normal: allScale } } });
+    }
+    return out;
+  },
   toSyntax: (v) => {
     const subs: string[] = [];
     subs.push(wrap([`VARIABLES=${vars(v, 'variables').join(' ')}`]));

@@ -30,7 +30,7 @@ import { editText, formatCell, formatSpec, isMissingValue, labelValueText, parse
 import { caseCount, hasUserMissing, isCategoricalVar, measureKey } from '../../lib/variables';
 import { registerGrid, useActiveVariable } from '../../app/gridBus';
 import { variableIcon } from '../../app/varIcons';
-import { formatShortcut } from '../../app/actions';
+import { formatShortcut, runAction } from '../../app/actions';
 import { newDataset, openFileDialog, openSample } from '../../app/files';
 import { useGridTheme } from '../grid/gridTheme';
 import { makeDataCellRenderer, isDataCell, type DataCell, type DataCellData, type PickOption } from '../grid/dataCell';
@@ -476,7 +476,7 @@ export function DataView() {
         { type: 'item', id: 'ia', label: t('data.insertVarAfter'), icon: 'add_column_right', onSelect: () => insertVariable(col + 1) },
         { type: 'item', id: 'del', label: many ? t('dataView.deleteVariables', { count: cols.length }) : t('data.deleteVariable'), icon: 'delete', danger: true, onSelect: () => deleteVariables(cols) },
         { type: 'sep' },
-        { type: 'item', id: 'vlab', label: t('actions.valueLabels'), shortcut: formatShortcut('Mod+L'), checked: useUi.getState().valueLabels, onSelect: () => useUi.getState().toggleValueLabels() },
+        { type: 'item', id: 'vlab', label: t('actions.valueLabels'), shortcut: formatShortcut('Mod+L'), checked: useUi.getState().valueLabels, onSelect: () => runAction('view.valueLabels') },
         { type: 'item', id: 'flags', label: t('dataView.highlightFlags'), checked: prefs.highlightFlags, onSelect: () => prefs.set({ highlightFlags: !prefs.highlightFlags }) },
         { type: 'item', id: 'hl', label: t('dataView.headerLabels'), checked: prefs.headerLabels, onSelect: () => prefs.set({ headerLabels: !prefs.headerLabels }) },
       ],

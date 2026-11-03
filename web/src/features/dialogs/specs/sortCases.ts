@@ -4,6 +4,7 @@ import { str, vars, wrap } from '../syntaxUtil';
 
 export const sortCases: DialogSpec = {
   id: 'sortCases',
+  kind: 'data',
   title: 'dlg.sortCases.title',
   icon: 'sort',
   command: 'SORT CASES',

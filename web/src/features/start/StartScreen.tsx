@@ -1,41 +1,30 @@
 /*
- * Start screen (template gallery): blank dataset, samples, open file, recent files.
+ * Start screen as an on-ramp (audit ST-1, ST-2, F16): open a file first, start blank or with
+ * syntax, try a sample through guided questions, restore the last session, reopen recent files.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Badge } from '../../components/Badge';
+import { Button } from '../../components/Button';
+import { EmptyState } from '../../components/EmptyState';
 import { Icon } from '../../components/Icon';
 import { IconButton } from '../../components/IconButton';
-import { clearAutosave, getAutosave, getRecent, newDataset, newSyntax, openFileDialog, openRecent, openSample, restoreAutosave, type AutosaveState, type RecentFile, type SampleId } from '../../app/files';
+import { Kbd } from '../../components/Kbd';
+import { formatShortcut } from '../../app/actions';
+import { clearAutosave, getAutosave, getRecent, newDataset, newSyntax, openFileDialog, openRecent, openSample, removeRecent, restoreAutosave, type AutosaveState, type RecentFile, type SampleId } from '../../app/files';
 import { useData } from '../../store/data';
 import { useUi } from '../../store/ui';
 import { useSettings } from '../../store/settings';
+import { SPECS_BY_ID } from '../dialogs/specs';
+import { GUIDED_TASKS, runGuidedTask } from './guidedTasks';
+import './start.css';
 
-const SAMPLES: { id: SampleId; icon: string; tone: string }[] = [
-  { id: 'students', icon: 'school', tone: 'blue' },
-  { id: 'employees', icon: 'badge', tone: 'green' },
-  { id: 'trial', icon: 'monitor_heart', tone: 'purple' },
+const SAMPLES: { id: SampleId; icon: string; n: number; vars: number }[] = [
+  { id: 'students', icon: 'school', n: 120, vars: 12 },
+  { id: 'employees', icon: 'badge', n: 200, vars: 11 },
+  { id: 'trial', icon: 'monitor_heart', n: 60, vars: 9 },
 ];
-
-function Thumb({ tone, icon }: { tone: string; icon: string }) {
-  return (
-    <div className={`tpl-thumb tone-${tone}`} aria-hidden="true">
-      <div className="tpl-sheet">
-        <div className="tpl-head" />
-        {[0, 1, 2, 3, 4].map((r) => (
-          <div key={r} className="tpl-row">
-            <span />
-            <span />
-            <span />
-          </div>
-        ))}
-      </div>
-      <span className="tpl-badge">
-        <Icon name={icon} />
-      </span>
-    </div>
-  );
-}
 
 function sizeText(n: number) {
   if (n < 1024) return `${n} B`;
@@ -48,6 +37,7 @@ export function StartScreen() {
   const [recent, setRecent] = useState<RecentFile[]>([]);
   const [autosave, setAutosave] = useState<AutosaveState | undefined>();
   const hasData = useData((s) => !!s.dataset);
+  const title = useData((s) => s.title);
   const setShowStart = useUi((s) => s.setShowStart);
   const name = useSettings((s) => s.profile.name);
 
@@ -60,108 +50,151 @@ export function StartScreen() {
   }, []);
 
   const fmtTime = (ms: number) => new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }).format(ms);
+  const showResume = autosave && (autosave.dataset || autosave.tabs?.some((x) => x.text.trim())) && !hasData;
 
   return (
-    <div className="start">
-      <section className="start-gallery">
-        <div className="start-inner">
-          <div className="start-head">
-            <div>
-              <h1>{name ? t('start.greeting', { name: name.split(' ')[0] }) : t('start.greetingAnon')}</h1>
-              <p>{t('start.subtitle')}</p>
-            </div>
-            {hasData && (
-              <button type="button" className="btn btn-tonal" onClick={() => setShowStart(false)}>
-                <Icon name="arrow_back" />
-                {t('start.backToData')}
-              </button>
-            )}
+    <div className="st">
+      <div className="st-inner">
+        <header className="st-hero">
+          <div>
+            <h2 className="st-title">{name ? t('start.greeting', { name: name.split(' ')[0] }) : t('start.greetingAnon')}</h2>
+            <p className="st-sub">{t('start.subtitle')}</p>
           </div>
-          <h2 className="start-section-title">{t('start.newTitle')}</h2>
-          <div className="tpl-grid">
-            <button type="button" className="tpl" onClick={newDataset}>
-              <div className="tpl-thumb blank" aria-hidden="true">
-                <Icon name="add" size={56} />
-              </div>
-              <span className="tpl-name">{t('start.blank')}</span>
-              <span className="tpl-desc">{t('start.blankDesc')}</span>
-            </button>
-            {SAMPLES.map((s) => (
-              <button key={s.id} type="button" className="tpl" onClick={() => void openSample(s.id)}>
-                <Thumb tone={s.tone} icon={s.icon} />
-                <span className="tpl-name">{t(`samples.${s.id}.title`)}</span>
-                <span className="tpl-desc">{t(`samples.${s.id}.desc`)}</span>
-              </button>
-            ))}
-            <button type="button" className="tpl" onClick={() => void openFileDialog()}>
-              <div className="tpl-thumb open" aria-hidden="true">
-                <Icon name="upload_file" size={48} />
-              </div>
-              <span className="tpl-name">{t('start.open')}</span>
-              <span className="tpl-desc">{t('start.openDesc')}</span>
-            </button>
-            <button type="button" className="tpl" onClick={newSyntax}>
-              <div className="tpl-thumb code" aria-hidden="true">
-                <code>
-                  FREQUENCIES
-                  <br />
-                  &nbsp;&nbsp;/VARIABLES=…
-                </code>
-              </div>
-              <span className="tpl-name">{t('start.syntax')}</span>
-              <span className="tpl-desc">{t('start.syntaxDesc')}</span>
-            </button>
-          </div>
-        </div>
-      </section>
-      <section className="start-recent">
-        <div className="start-inner">
-          {autosave && (autosave.dataset || autosave.tabs?.some((x) => x.text.trim())) && !hasData && (
-            <div className="resume-card">
-              <Icon name="history" />
-              <div className="resume-text">
-                <strong>{t('start.resumeTitle', { name: autosave.title || t('files.untitled') })}</strong>
-                <span>{t('start.resumeText', { time: fmtTime(autosave.time) })}</span>
-              </div>
-              <button type="button" className="btn btn-filled" onClick={() => restoreAutosave(autosave)}>
-                {t('start.resume')}
-              </button>
-              <IconButton
-                icon="close"
-                small
-                label={t('start.discardAutosave')}
-                onClick={() => {
-                  void clearAutosave();
-                  setAutosave(undefined);
-                }}
-              />
-            </div>
+          {hasData && (
+            <Button variant="primary" iconStart="arrow_back" onClick={() => setShowStart(false)} className="st-back">
+              {t('shell.start.backTo', { name: title })}
+            </Button>
           )}
-          <div className="recent-head">
-            <h2 className="start-section-title">{t('start.recent')}</h2>
-          </div>
-          {recent.length === 0 ? (
-            <div className="recent-empty">
-              <Icon name="folder_open" />
-              <p>{t('start.recentEmpty')}</p>
-              <p className="drop-hint">{t('start.dropHint')}</p>
+        </header>
+
+        {showResume && (
+          <div className="st-resume" role="region" aria-label={t('start.resume')}>
+            <Icon name="history" />
+            <div className="st-resume-text">
+              <strong>{t('start.resumeTitle', { name: autosave!.title || t('files.untitled') })}</strong>
+              <span>{t('start.resumeText', { time: fmtTime(autosave!.time) })}</span>
             </div>
-          ) : (
-            <ul className="recent-list">
-              {recent.map((r) => (
-                <li key={r.id}>
-                  <button type="button" className="recent-item" onClick={() => void openRecent(r)} disabled={!r.stored}>
-                    <Icon name={r.kind === 'syntax' ? 'code' : 'table'} className={`recent-icon ${r.kind}`} />
-                    <span className="recent-name">{r.name}</span>
-                    <span className="recent-meta">{sizeText(r.size)}</span>
-                    <span className="recent-meta">{fmtTime(r.time)}</span>
-                  </button>
-                </li>
+            <Button variant="primary" onClick={() => restoreAutosave(autosave!)}>
+              {t('start.resume')}
+            </Button>
+            <IconButton
+              icon="close"
+              small
+              label={t('start.discardAutosave')}
+              onClick={() => {
+                void clearAutosave();
+                setAutosave(undefined);
+              }}
+            />
+          </div>
+        )}
+
+        <section className="st-section" aria-labelledby="st-begin">
+          <h3 id="st-begin" className="st-h">
+            {t('shell.start.begin')}
+          </h3>
+          <div className="st-begin">
+            <button type="button" className="st-open" onClick={() => void openFileDialog()}>
+              <span className="st-open-icon">
+                <Icon name="upload_file" size={28} />
+              </span>
+              <span className="st-open-text">
+                <span className="st-tile-title">{t('start.open')}</span>
+                <span className="st-tile-desc">{t('shell.start.openDesc')}</span>
+                <span className="st-formats">.sav · .zsav · .por · .csv · .ods · .sps</span>
+              </span>
+              <span className="st-open-kbd">
+                <Kbd keys={formatShortcut('Mod+O').split('+')} />
+              </span>
+            </button>
+            <button type="button" className="st-tile" onClick={newDataset}>
+              <Icon name="table" />
+              <span className="st-tile-title">{t('start.blank')}</span>
+              <span className="st-tile-desc">{t('start.blankDesc')}</span>
+            </button>
+            <button type="button" className="st-tile" onClick={newSyntax}>
+              <Icon name="code" />
+              <span className="st-tile-title">{t('shell.start.syntax')}</span>
+              <span className="st-tile-desc">{t('start.syntaxDesc')}</span>
+            </button>
+          </div>
+        </section>
+
+        <div className="st-columns">
+          <section className="st-section st-samples" aria-labelledby="st-try">
+            <h3 id="st-try" className="st-h">
+              {t('shell.start.try')}
+            </h3>
+            <p className="st-hint">{t('shell.start.tryHint')}</p>
+            <div className="st-sample-list">
+              {SAMPLES.map((s) => (
+                <article key={s.id} className="st-sample" aria-labelledby={`st-s-${s.id}`}>
+                  <div className="st-sample-head">
+                    <span className="st-sample-icon">
+                      <Icon name={s.icon} />
+                    </span>
+                    <div className="st-sample-text">
+                      <h4 id={`st-s-${s.id}`} className="st-sample-title">
+                        {t(`samples.${s.id}.title`)}
+                      </h4>
+                      <span className="st-sample-desc">{t(`samples.${s.id}.desc`)}</span>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => void openSample(s.id)}>
+                      {t('shell.start.openSample')}
+                    </Button>
+                  </div>
+                  <ul className="st-tasks">
+                    {GUIDED_TASKS.filter((g) => g.sample === s.id).map((g) => (
+                      <li key={g.id}>
+                        <button type="button" className="st-task" onClick={() => runGuidedTask(g)}>
+                          <Icon name={g.icon} size={18} />
+                          <span className="st-task-q">{t(`${g.key}.q`)}</span>
+                          <Badge className="st-task-method">{SPECS_BY_ID[g.specId] ? t(SPECS_BY_ID[g.specId].title).replace(/…$/, '') : t(`${g.key}.method`)}</Badge>
+                          <Icon name="arrow_forward" size={16} className="st-task-go" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))}
-            </ul>
-          )}
+            </div>
+          </section>
+
+          <section className="st-section st-recent" aria-labelledby="st-recent">
+            <h3 id="st-recent" className="st-h">
+              {t('start.recent')}
+            </h3>
+            {recent.length === 0 ? (
+              <EmptyState compact icon="folder_open" title={t('shell.start.recentEmptyTitle')} description={t('shell.start.recentEmptyDesc')} />
+            ) : (
+              <ul className="st-recent-list">
+                {recent.map((r) => (
+                  <li key={r.id} className="st-recent-row">
+                    <button type="button" className="st-recent-item" onClick={() => void openRecent(r)} disabled={!r.stored} title={r.stored ? r.name : t('files.recentMissing', { name: r.name })}>
+                      <Icon name={r.kind === 'syntax' ? 'code' : 'table'} />
+                      <span className="st-recent-name">{r.name}</span>
+                      <span className="st-recent-meta">
+                        {sizeText(r.size)} · {fmtTime(r.time)}
+                      </span>
+                    </button>
+                    <IconButton icon="close" small label={t('shell.start.removeRecent', { name: r.name })} onClick={() => void removeRecent(r.id)} />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="st-privacy">
+              <Icon name="lock" size={16} />
+              {t('shell.start.privacy')}
+            </p>
+            <p className="st-tip">
+              <Icon name="keyboard" size={16} />
+              <span>
+                {t('shell.start.tipSearch')} <Kbd keys={formatShortcut('Mod+K').split('+')} />
+              </span>
+            </p>
+          </section>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { isValidVarName } from '../../../lib/variables';
 
 export const autorecode: DialogSpec = {
   id: 'autorecode',
+  kind: 'transform',
   title: 'dlg.autorecode.title',
   icon: 'auto_fix_high',
   command: 'AUTORECODE',

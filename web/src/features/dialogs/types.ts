@@ -72,6 +72,8 @@ export interface GroupValuesField extends FieldBase {
   labels: string[];
   /** 'pair' preselects the two most frequent values; 'range' the minimum and maximum */
   mode?: 'pair' | 'range';
+  /** initial values, one per id */
+  defaults?: string[];
 }
 
 export interface CheckboxField extends FieldBase {
@@ -205,7 +207,7 @@ export function defaultValues(spec: DialogSpec): Values {
       case 'number': v[f.id] = f.default ?? null; break;
       case 'text': v[f.id] = f.default ?? ''; break;
       case 'rows': v[f.id] = f.default ? f.default.map((r) => ({ ...r })) : []; break;
-      case 'groupvalues': for (const id of f.ids) v[id] ??= ''; break;
+      case 'groupvalues': f.ids.forEach((id, i) => (v[id] ??= f.defaults?.[i] ?? '')); break;
     }
   });
   return v;

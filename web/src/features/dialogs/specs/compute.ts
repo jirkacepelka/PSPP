@@ -5,6 +5,7 @@ import { isValidVarName, quote } from '../../../lib/variables';
 
 export const compute: DialogSpec = {
   id: 'compute',
+  kind: 'transform',
   title: 'dlg.compute.title',
   icon: 'calculate',
   command: 'COMPUTE',
@@ -35,6 +36,7 @@ export const compute: DialogSpec = {
       ],
     },
   ],
+  errorFields: { 'dlg.errors.targetName': 'target', 'dlg.errors.expression': 'expression' },
   validate: (v) => {
     if (!isValidVarName(str(v, 'target'))) return 'dlg.errors.targetName';
     if (!str(v, 'expression')) return 'dlg.errors.expression';

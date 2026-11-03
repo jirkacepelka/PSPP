@@ -26,13 +26,21 @@ import { weightCases } from './weightCases';
 import { splitFile } from './splitFile';
 import { aggregate } from './aggregate';
 import { transpose } from './transpose';
+import { binomial, chiSquare, friedman, kruskalWallis, ksNormal, mannWhitney, wilcoxon } from './nonparametric';
+import { factor, quickCluster, reliability } from './scale';
+import { glm, logistic } from './models';
+import { ctables, variableProperties } from './tables';
+import { barChart, boxplot, histogram, scatter } from './graphs';
 
 export const DIALOG_SPECS: DialogSpec[] = [
-  frequencies, descriptives, explore, crosstabs,
-  means, ttestOneSample, ttestIndependent, ttestPaired, oneway,
-  correlations, regressionLinear,
+  frequencies, descriptives, explore, crosstabs, ctables,
+  means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm,
+  correlations, regressionLinear, logistic,
+  factor, reliability, quickCluster,
+  chiSquare, binomial, ksNormal, mannWhitney, kruskalWallis, wilcoxon, friedman,
+  histogram, barChart, scatter, boxplot,
   compute, recodeSame, recodeDifferent, count, rank, autorecode,
-  sortCases, selectCases, weightCases, splitFile, aggregate, transpose,
+  sortCases, selectCases, weightCases, splitFile, aggregate, transpose, variableProperties,
 ];
 
 export const SPECS_BY_ID: Record<string, DialogSpec> = Object.fromEntries(DIALOG_SPECS.map((s) => [s.id, s]));

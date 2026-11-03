@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { create } from 'zustand';
-import { useSettings } from '../store/settings';
-import { useUi } from '../store/ui';
 
 export interface GridCommands {
   copy(): void;
@@ -70,30 +68,3 @@ export const useActiveVariable = create<ActiveVariableState>((set, get) => ({
     set({ index, selection: sel });
   },
 }));
-
-/*
- * Value labels toggle: the toolbar/menu action flips useUi.valueLabels; keep it in sync with the
- * persisted user setting `showValueLabels` (DV-1: on by default, remembered per user).
- */
-let syncing = false;
-function startValueLabelSync() {
-  let loaded = useSettings.getState().loaded;
-  if (loaded) useUi.setState({ valueLabels: useSettings.getState().showValueLabels });
-  useSettings.subscribe((s) => {
-    if (s.loaded && !loaded) {
-      loaded = true;
-      syncing = true;
-      useUi.setState({ valueLabels: s.showValueLabels });
-      syncing = false;
-    }
-  });
-  useUi.subscribe((s, prev) => {
-    if (syncing || s.valueLabels === prev.valueLabels || !loaded) return;
-    if (useSettings.getState().showValueLabels !== s.valueLabels) useSettings.getState().set({ showValueLabels: s.valueLabels });
-  });
-}
-try {
-  startValueLabelSync();
-} catch {
-  /* non-browser test environments */
-}

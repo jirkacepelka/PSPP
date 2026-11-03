@@ -1,0 +1,263 @@
+/* Data View, grid overlays and the value bar. Tokens only (docs/design-system.md §6). */
+
+.grid-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.data-empty {
+  display: grid;
+  place-items: center;
+}
+
+/* ---------- overlay editors (rendered in #portal) ---------- */
+#portal .gdg-style,
+.gdg-overlay-editor {
+  font-family: var(--font-grid) !important;
+}
+.data-editor-input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  padding: 0 var(--s-2);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-chip);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow-float);
+  outline: none;
+}
+.data-picker {
+  display: flex;
+  flex-direction: column;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+.data-picker-input {
+  flex: none;
+  width: 100%;
+  padding: 0 var(--s-2);
+  border: 0;
+  border-bottom: var(--hairline) solid var(--line);
+  box-shadow: inset 0 0 0 2px var(--accent);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-md);
+  outline: none;
+}
+.data-picker-input::placeholder {
+  color: var(--ink-3);
+}
+.data-picker-list {
+  max-height: 280px;
+  margin: 0;
+  padding: var(--s-1);
+  list-style: none;
+  overflow: auto;
+}
+.data-picker-option {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 30px;
+  padding: 0 var(--s-2);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+.data-picker-option.active {
+  background: var(--surface-hover);
+}
+.data-picker-option.current {
+  box-shadow: inset 2px 0 0 var(--accent-line);
+}
+.data-picker-code {
+  flex: none;
+  min-width: 28px;
+  padding: 1px 6px;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-chip);
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.data-picker-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-picker-label.missing {
+  color: var(--ink-3);
+  font-style: italic;
+}
+.data-picker-tag {
+  flex: none;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.data-picker-check {
+  flex: none;
+  color: var(--accent-text);
+  font-size: var(--icon-size-sm);
+}
+.data-picker-option.other,
+.data-picker-option.clear {
+  color: var(--ink-2);
+}
+.data-picker-option.clear {
+  margin-top: var(--s-1);
+  border-top: var(--hairline) solid var(--line);
+  border-radius: 0 0 var(--radius-control) var(--radius-control);
+  color: var(--ink-3);
+}
+.data-picker-hint {
+  padding: var(--s-1) var(--s-3);
+  border-top: var(--hairline) solid var(--line);
+  background: var(--surface-sunken);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+
+/* ---------- grid tooltips ---------- */
+.data-tip {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  max-width: 300px;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-inverse);
+  color: var(--ink-inverse);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  pointer-events: none;
+  box-shadow: var(--shadow-float);
+}
+.data-tip-title {
+  margin-bottom: 2px;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+}
+.data-tip.warning .data-tip-title::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 6px;
+  border-top: 7px solid var(--warning);
+  border-left: 7px solid transparent;
+  vertical-align: 1px;
+}
+
+/* ---------- value bar (formula bar) ---------- */
+.formula-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 34px;
+  border-bottom: var(--hairline) solid var(--line);
+  background: var(--surface);
+  flex: none;
+  min-width: 0;
+}
+.formula-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 132px;
+  max-width: 280px;
+  height: 100%;
+  padding: 0 var(--s-3);
+  border: 0;
+  border-right: var(--hairline) solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+.formula-ref:hover {
+  background: var(--surface-hover);
+}
+.formula-ref .formula-case {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.formula-ref .formula-var {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.formula-varlabel {
+  max-width: 220px;
+  padding: 0 var(--s-3);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: var(--hairline) solid var(--line);
+}
+.formula-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--s-3);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-grid);
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+}
+.formula-input:focus {
+  outline: none;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+.formula-input:disabled {
+  background: transparent;
+}
+.formula-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  max-width: 45%;
+  margin-right: var(--s-2);
+  min-width: 0;
+}
+.formula-chips .chip {
+  max-width: 100%;
+}
+.formula-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--warning-ink);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .formula-ref {
+    min-width: 72px;
+  }
+  .formula-varlabel {
+    display: none;
+  }
+}

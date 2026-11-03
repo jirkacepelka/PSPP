@@ -4,6 +4,7 @@ import { command, vars, wrap } from '../syntaxUtil';
 
 export const transpose: DialogSpec = {
   id: 'transpose',
+  kind: 'data',
   title: 'dlg.transpose.title',
   icon: 'flip',
   command: 'FLIP',

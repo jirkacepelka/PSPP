@@ -4,6 +4,7 @@ import { vars } from '../syntaxUtil';
 
 export const weightCases: DialogSpec = {
   id: 'weightCases',
+  kind: 'data',
   title: 'dlg.weightCases.title',
   icon: 'scale',
   command: 'WEIGHT',

@@ -17,6 +17,27 @@ const ctx: DialogContext = {
   ],
 };
 
+const NEW_FILLED: Record<string, Values> = {
+  mannWhitney: { variables: ['score'], group: ['gender'], g1: '1', g2: '2' },
+  kruskalWallis: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
+  wilcoxon: { pairs: [{ a: 'age', b: 'score' }] },
+  friedman: { variables: ['age', 'score', 'income'] },
+  chiSquare: { variables: ['group'] },
+  binomial: { variables: ['gender'] },
+  ksNormal: { variables: ['age'] },
+  reliability: { items: ['age', 'score', 'income'] },
+  factor: { variables: ['age', 'score', 'income'] },
+  quickCluster: { variables: ['age', 'score'] },
+  logistic: { dependent: ['gender'], covariates: ['age'] },
+  glm: { dependent: ['score'], factors: ['gender'] },
+  ctables: { rows: ['gender'], cols: ['group'] },
+  histogram: { variable: ['age'] },
+  barChart: { category: ['group'] },
+  scatter: { y: ['score'], x: ['age'] },
+  boxplot: { variables: ['score'], factor: ['group'] },
+  variableProperties: { variables: ['gender'], measure: 'NOMINAL' },
+};
+
 function gen(id: string, patch: Values): string {
   const spec = SPECS_BY_ID[id];
   const values = { ...defaultValues(spec), ...patch };
@@ -61,6 +82,7 @@ describe('dialog specs', () => {
       splitFile: { groups: ['gender'] },
       aggregate: { break: ['group'], functions: [{ target: 'm', func: 'MEAN', source: 'age', label: '' }] },
       transpose: { variables: ['age'] },
+      ...NEW_FILLED,
     };
     for (const spec of DIALOG_SPECS) {
       const patch = filled[spec.id];
@@ -242,5 +264,54 @@ describe('Data', () => {
   });
   it('FLIP', () => {
     expect(gen('transpose', { variables: ['age', 'income'], newnames: ['city'] })).toBe('FLIP\n  /VARIABLES=age income\n  /NEWNAMES=city.');
+  });
+});
+
+describe('New dialogs (WP3)', () => {
+  it('nonparametric tests', () => {
+    expect(gen('mannWhitney', NEW_FILLED.mannWhitney)).toBe('NPAR TESTS\n  /M-W=score BY gender(1, 2).');
+    expect(gen('mannWhitney', { ...NEW_FILLED.mannWhitney, group: ['city'], g1: 'Brno', g2: 'Praha', descriptives: true })).toBe("NPAR TESTS\n  /M-W=score BY city('Brno', 'Praha')\n  /STATISTICS=DESCRIPTIVES.");
+    expect(gen('kruskalWallis', NEW_FILLED.kruskalWallis)).toBe('NPAR TESTS\n  /K-W=score BY group(1, 3).');
+    expect(errors('kruskalWallis', { ...NEW_FILLED.kruskalWallis, hi: 1 })).toBe('dlg.errors.range');
+    expect(gen('wilcoxon', { ...NEW_FILLED.wilcoxon, sign: true })).toBe('NPAR TESTS\n  /WILCOXON=age WITH score (PAIRED)\n  /SIGN=age WITH score (PAIRED).');
+    expect(gen('friedman', { ...NEW_FILLED.friedman, kendall: true })).toBe('NPAR TESTS\n  /FRIEDMAN=age score income\n  /KENDALL=age score income.');
+    expect(gen('chiSquare', NEW_FILLED.chiSquare)).toBe('NPAR TESTS\n  /CHISQUARE=group\n  /EXPECTED=EQUAL.');
+    expect(gen('chiSquare', { variables: ['group'], expected: 'values', freqs: '10 20 30' })).toContain('/EXPECTED=10, 20, 30');
+    expect(gen('binomial', { variables: ['age'], p: 0.3, define: 'cut', cut: 40 })).toBe('NPAR TESTS\n  /BINOMIAL(0.3)=age(40).');
+    expect(gen('ksNormal', NEW_FILLED.ksNormal)).toBe('NPAR TESTS\n  /KOLMOGOROV-SMIRNOV(NORMAL)=age.');
+  });
+  it('scale and multivariate', () => {
+    expect(gen('reliability', { ...NEW_FILLED.reliability, scale: 'Wellbeing' })).toBe("RELIABILITY\n  /VARIABLES=age score income\n  /SCALE('Wellbeing')=ALL\n  /MODEL=ALPHA\n  /SUMMARY=TOTAL.");
+    expect(gen('factor', NEW_FILLED.factor)).toBe(
+      'FACTOR VARIABLES=age score income\n  /EXTRACTION=PC\n  /ROTATION=VARIMAX\n  /CRITERIA=MINEIGEN(1)\n  /PRINT=INITIAL EXTRACTION ROTATION KMO\n  /PLOT=EIGEN\n  /FORMAT=SORT\n  /MISSING=LISTWISE.',
+    );
+    expect(gen('factor', { ...NEW_FILLED.factor, nfactors: 'fixed', factors: 2, blank: 0.3, rotation: 'NOROTATE' })).toContain('/CRITERIA=FACTORS(2)');
+    expect(gen('quickCluster', { ...NEW_FILLED.quickCluster, saveCluster: true })).toBe('QUICK CLUSTER age score\n  /CRITERIA=CLUSTERS(3) MXITER(10)\n  /SAVE=CLUSTER.');
+  });
+  it('models', () => {
+    expect(gen('logistic', { dependent: ['gender'], covariates: ['age'], categorical: ['group'] })).toBe(
+      'LOGISTIC REGRESSION gender WITH age group\n  /CATEGORICAL=group\n  /PRINT=CI(95)\n  /CRITERIA=CUT(0.5) ITERATE(20).',
+    );
+    expect(errors('logistic', { dependent: ['gender'] })).toBe('dlg.errors.predictors');
+    expect(gen('glm', { dependent: ['score'], factors: ['gender', 'group'], design: 'main' })).toBe('GLM score BY gender group\n  /METHOD=SSTYPE(3)\n  /INTERCEPT=INCLUDE\n  /DESIGN=gender group.');
+  });
+  it('tables and graphs', () => {
+    expect(gen('ctables', { rows: ['gender', 'age'], cols: ['group'], colpct: true })).toBe(
+      'CTABLES\n  /TABLE=gender [C] [COUNT, COLPCT] + age [S] [MEAN, STDDEV] BY group [C]\n  /CATEGORIES VARIABLES=gender group TOTAL=YES.',
+    );
+    expect(gen('histogram', NEW_FILLED.histogram)).toBe('GRAPH\n  /HISTOGRAM(NORMAL)=age.');
+    expect(gen('barChart', { category: ['group'], cluster: ['gender'], func: 'MEAN', variable: ['score'] })).toBe('GRAPH\n  /BAR=MEAN(score) BY group BY gender.');
+    expect(gen('scatter', { ...NEW_FILLED.scatter, by: ['gender'] })).toBe('GRAPH\n  /SCATTERPLOT(BIVARIATE)=age WITH score BY gender.');
+    expect(gen('boxplot', NEW_FILLED.boxplot)).toBe('EXAMINE VARIABLES=score BY group\n  /PLOT=BOXPLOT\n  /STATISTICS=NONE\n  /COMPARE=GROUPS.');
+  });
+  it('variable properties', () => {
+    expect(
+      gen('variableProperties', { variables: ['gender'], measure: 'NOMINAL', role: 'INPUT', label: 'Pohlaví', labels: [{ value: '1', label: 'Žena' }, { value: '2', label: 'Muž' }], missing: '9, 99' }),
+    ).toBe("VARIABLE LEVEL gender (NOMINAL).\nVARIABLE ROLE /INPUT gender.\nVARIABLE LABELS gender 'Pohlaví'.\nADD VALUE LABELS gender 1 'Žena' 2 'Muž'.\nMISSING VALUES gender (9, 99).");
+    expect(gen('variableProperties', { variables: ['age'], missing: '90 thru hi' })).toBe('MISSING VALUES age (90 THRU HIGHEST).');
+    expect(errors('variableProperties', { variables: ['age'] })).toBe('dlg.errors.nothingToDo');
+  });
+  it('correlation methods', () => {
+    expect(gen('correlations', { variables: ['age', 'score'], method: 'SPEARMAN' })).toBe('NONPAR CORR\n  /VARIABLES=age score\n  /PRINT=SPEARMAN TWOTAIL SIG\n  /MISSING=PAIRWISE.');
   });
 });

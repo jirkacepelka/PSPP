@@ -6,6 +6,7 @@ import { isValidVarName, quote } from '../../../lib/variables';
 
 export const count: DialogSpec = {
   id: 'count',
+  kind: 'transform',
   title: 'dlg.count.title',
   icon: 'pin',
   command: 'COUNT',

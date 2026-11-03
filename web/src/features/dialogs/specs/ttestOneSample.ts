@@ -29,15 +29,17 @@ export function ciCriteria(v: Record<string, unknown>): string {
 
 export const ttestOneSample: DialogSpec = {
   id: 'ttestOneSample',
+  kind: 'analysis',
   title: 'dlg.ttestOneSample.title',
   icon: 'straighten',
   command: 'T-TEST',
   source: 'numeric',
   fields: [
-    { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1 },
+    { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1, prefer: ['scale'] },
     { kind: 'number', id: 'testValue', label: 'dlg.ttestOneSample.testValue', default: 0, step: 0.1 },
     ttestOptions,
   ],
+  errorFields: { 'dlg.errors.testValue': 'testValue' },
   validate: (v) => (num(v, 'testValue') === null ? 'dlg.errors.testValue' : null),
   toSyntax: (v) =>
     command('T-TEST', '', [

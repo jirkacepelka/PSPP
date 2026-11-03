@@ -5,6 +5,7 @@ import { formatMap, recodeMapField } from './recodeShared';
 
 export const recodeSame: DialogSpec = {
   id: 'recodeSame',
+  kind: 'transform',
   title: 'dlg.recodeSame.title',
   icon: 'swap_vert',
   command: 'RECODE',

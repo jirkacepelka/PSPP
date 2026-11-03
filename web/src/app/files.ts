@@ -15,6 +15,7 @@ import { useSettings } from '../store/settings';
 import { useSyntax, type SyntaxTab } from '../store/syntax';
 import { useUi } from '../store/ui';
 import { outputToHtml } from '../features/output/exportHtml';
+import { localizeSample } from '../samples/localize';
 
 export const OPEN_ACCEPT = '.sav,.zsav,.por,.sps,.csv,.txt,.tsv,.ods,.json';
 export type SaveFormat = 'sav' | 'zsav' | 'por' | 'csv';
@@ -186,17 +187,27 @@ export type SampleId = 'students' | 'employees' | 'trial';
 export async function loadSampleDataset(id: SampleId): Promise<Dataset> {
   const mod =
     id === 'students' ? await import('../samples/students.json') : id === 'employees' ? await import('../samples/employees.json') : await import('../samples/trial.json');
-  return structuredClone(mod.default as unknown as Dataset);
+  return localizeSample(id, structuredClone(mod.default as unknown as Dataset), i18n.language);
 }
 
-export async function openSample(id: SampleId) {
+/** Opens a sample dataset; THEN runs after it is loaded (e.g. a guided task opening a dialog). */
+export async function openSample(id: SampleId, then?: () => void) {
   const ds = await loadSampleDataset(id);
   confirmDiscard(() => {
     const title = t(`samples.${id}.title`);
     useData.getState().load({ ...ds, name: title }, { title, fileName: null });
     currentHandle = null;
     useUi.getState().setView('data');
+    if (then) setTimeout(then, 60);
   });
+}
+
+/** Removes one entry from the recent-files list. */
+export async function removeRecent(id: string) {
+  const list = await getRecent();
+  await kvDel(`recent-file:${id}`);
+  await kvSet(RECENT_KEY, list.filter((r) => r.id !== id));
+  window.dispatchEvent(new Event('pspp-recent-changed'));
 }
 
 // ------------------------------------------------------------------ save

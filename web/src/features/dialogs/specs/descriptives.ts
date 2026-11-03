@@ -6,12 +6,13 @@ const STATS = ['MEAN', 'SUM', 'STDDEV', 'VARIANCE', 'RANGE', 'MIN', 'MAX', 'SEME
 
 export const descriptives: DialogSpec = {
   id: 'descriptives',
+  kind: 'analysis',
   title: 'dlg.descriptives.title',
   icon: 'functions',
   command: 'DESCRIPTIVES',
   source: 'numeric',
   fields: [
-    { kind: 'varlist', id: 'variables', label: 'dlg.common.variables', filter: 'numeric', min: 1 },
+    { kind: 'varlist', id: 'variables', label: 'dlg.common.variables', filter: 'numeric', min: 1, prefer: ['scale'] },
     { kind: 'checkbox', id: 'save', label: 'dlg.descriptives.saveZ' },
     {
       kind: 'subdialog',

@@ -1,0 +1,273 @@
+/* Variable View and the variable property dialogs. Tokens only (docs/design-system.md §6). */
+
+/* ---------- type dialog ---------- */
+.vd-type {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--s-5);
+}
+.vd-type-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vd-kind {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 32px;
+  padding: 0 var(--s-2);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-md);
+  text-align: left;
+  cursor: pointer;
+}
+.vd-kind:hover {
+  background: var(--surface-hover);
+}
+.vd-kind[aria-checked='true'] {
+  background: var(--accent-tint-strong);
+  box-shadow: inset 2px 0 0 var(--accent-line);
+}
+.vd-kind .icon {
+  color: var(--ink-3);
+}
+.vd-kind[aria-checked='true'] .icon {
+  color: var(--accent-text);
+}
+.vd-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  min-width: 0;
+}
+.vd-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+.vd-row > * {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+.vd-example {
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.vd-example strong {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: var(--fw-regular);
+}
+.vd-date-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px;
+  max-height: 240px;
+  overflow: auto;
+}
+.vd-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px var(--s-2);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  text-align: left;
+}
+.vd-date:hover {
+  background: var(--surface-hover);
+}
+.vd-date[aria-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+.vd-date span {
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+/* ---------- notes ---------- */
+.vd-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-control);
+  background: var(--info-tint);
+  color: var(--info-ink);
+  font-size: var(--fs-sm);
+}
+.vd-note.warn {
+  background: var(--warning-tint);
+  color: var(--warning-ink);
+}
+.vd-note.error {
+  background: var(--danger-tint);
+  color: var(--danger-ink);
+}
+.vd-note .icon {
+  flex: none;
+  font-size: var(--icon-size-sm);
+}
+
+/* ---------- value labels dialog ---------- */
+.vd-labels-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.vd-labels {
+  display: flex;
+  flex-direction: column;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+.vd-labels-head,
+.vd-labels-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) 72px 32px;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-2);
+}
+.vd-labels-head {
+  min-height: 30px;
+  background: var(--surface-sunken);
+  border-bottom: var(--hairline) solid var(--line);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+.vd-labels-body {
+  max-height: 340px;
+  overflow: auto;
+}
+.vd-labels-row {
+  min-height: 38px;
+  border-bottom: var(--hairline) solid var(--line);
+}
+.vd-labels-row:last-child {
+  border-bottom: 0;
+}
+.vd-labels-row .input {
+  height: 30px;
+}
+.vd-labels-row.unused .vd-count {
+  color: var(--warning-ink);
+}
+.vd-labels-row.suggested {
+  background: var(--accent-tint);
+}
+.vd-count {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.vd-add {
+  align-self: flex-start;
+  margin-top: var(--s-2);
+}
+.vd-footer-note {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+
+/* ---------- missing values dialog ---------- */
+.vd-missing {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.vd-section-title {
+  margin: 0 0 var(--s-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+.vd-codes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 4px 6px;
+  border: var(--hairline) solid var(--line-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.vd-codes:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.vd-codes input {
+  flex: 1 1 80px;
+  min-width: 60px;
+  height: 26px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.vd-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--s-2);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.vd-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s-3);
+}
+.vd-range-dash {
+  padding-bottom: 8px;
+  color: var(--ink-3);
+}
+@media (max-width: 860px) {
+  .vd-type {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+  }
+  .vd-type-kinds {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 600px) {
+  .vd-labels-head,
+  .vd-labels-row {
+    grid-template-columns: 80px minmax(0, 1fr) 48px 32px;
+  }
+  .vd-range {
+    grid-template-columns: 1fr;
+  }
+  .vd-range-dash {
+    display: none;
+  }
+}

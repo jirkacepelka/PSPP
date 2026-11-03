@@ -8,6 +8,7 @@ const NO_ARG = ['N', 'NU'];
 
 export const aggregate: DialogSpec = {
   id: 'aggregate',
+  kind: 'data',
   title: 'dlg.aggregate.title',
   icon: 'merge',
   command: 'AGGREGATE',

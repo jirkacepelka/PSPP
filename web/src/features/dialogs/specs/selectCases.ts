@@ -5,6 +5,7 @@ import { quote } from '../../../lib/variables';
 
 export const selectCases: DialogSpec = {
   id: 'selectCases',
+  kind: 'data',
   title: 'dlg.selectCases.title',
   icon: 'filter_alt',
   command: 'SELECT IF',

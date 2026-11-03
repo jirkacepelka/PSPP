@@ -5,6 +5,7 @@ import { ciCriteria, ttestOptions } from './ttestOneSample';
 
 export const ttestPaired: DialogSpec = {
   id: 'ttestPaired',
+  kind: 'analysis',
   title: 'dlg.ttestPaired.title',
   icon: 'swap_horiz',
   command: 'T-TEST',
