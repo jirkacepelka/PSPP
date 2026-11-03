@@ -122,7 +122,7 @@ export const frequencies: DialogSpec = {
     subs.push(wrap([`VARIABLES=${vars(v, 'variables').join(' ')}`]));
     const tables = bool(v, 'tables');
     const order = str(v, 'order') || 'AVALUE';
-    if (!tables || order !== 'AVALUE') subs.push(`FORMAT=${tables ? '' : 'NOTABLE '}${order}`.replace(' AVALUE', ' AVALUE'));
+    if (!tables || order !== 'AVALUE') subs.push(`FORMAT=${tables ? '' : 'NOTABLE '}${order}`);
     const stats = STATS.filter((s) => bool(v, `st_${s}`));
     if (stats.length === 0) subs.push('STATISTICS=NONE');
     else if (!(stats.length === DEFAULT_STATS.length && DEFAULT_STATS.every((s) => stats.includes(s)))) subs.push(wrap([`STATISTICS=${stats.join(' ')}`]));
