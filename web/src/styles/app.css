@@ -2206,3 +2206,37 @@ button.outline-toggle:hover {
     font-size: 10px;
   }
 }
+
+/* ---------- refinements ---------- */
+.profile-row > span:not(.icon) {
+  flex: 1;
+}
+.profile-row > span.icon {
+  flex: none;
+}
+.drawer-item .menu-label {
+  flex: 1;
+}
+@media (max-width: 600px) {
+  .star-btn,
+  .save-status {
+    display: none;
+  }
+  .tpl-thumb {
+    aspect-ratio: 4 / 3;
+  }
+  .tpl-sheet {
+    inset: 12% 10% auto;
+    gap: 4px;
+  }
+  .statusbar {
+    gap: var(--s-3);
+    padding: 0 var(--s-3);
+  }
+  .statusbar > .status-vars {
+    display: none;
+  }
+  .engine-status .badge {
+    display: none;
+  }
+}

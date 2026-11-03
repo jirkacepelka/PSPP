@@ -5,6 +5,12 @@
 import { create } from 'zustand';
 import type { Cell, Dataset, Variable } from '../engine/types';
 import { caseCount, changeVariableType, makeVariable, nextVarName } from '../lib/variables';
+import { getSettings } from './settings';
+
+function numericDefaults(): Partial<Variable> {
+  const d = getSettings().defaultDecimals;
+  return { print: { type: 'F', w: Math.max(8, d + 2), d }, write: { type: 'F', w: Math.max(8, d + 2), d } };
+}
 
 const MAX_HISTORY = 100;
 
@@ -110,7 +116,7 @@ export const useData = create<DataState>((set, get) => {
       for (let c = variables.length; c <= maxCol; c++) {
         const sample = edits.find((e) => e.col === c && e.value !== null && e.value !== '');
         const isString = typeof sample?.value === 'string';
-        const v = makeVariable(nextVarName(variables.map((x) => x.name)), isString ? { type: 'string', width: 8 } : {});
+        const v = makeVariable(nextVarName(variables.map((x) => x.name)), isString ? { type: 'string', width: 8 } : numericDefaults());
         variables.push(v);
         columns.push([]);
       }
@@ -154,7 +160,7 @@ export const useData = create<DataState>((set, get) => {
       const ds = get().dataset;
       if (!ds) return '';
       const name = init.name ?? nextVarName(ds.variables.map((v) => v.name));
-      const v = makeVariable(name, init);
+      const v = makeVariable(name, init.type === 'string' ? init : { ...numericDefaults(), ...init });
       get().apply((d) => {
         const variables = d.variables.slice();
         const columns = d.columns.slice();

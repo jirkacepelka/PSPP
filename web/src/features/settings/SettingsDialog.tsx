@@ -93,7 +93,7 @@ function ProfileSection() {
       <div className="profile-card">
         <Avatar profile={profile} large />
         <div>
-          <div className="profile-card-name">{profile.name}</div>
+          <div className="profile-card-name">{profile.name || t('profile.defaultName')}</div>
           <div className="set-row-desc">
             <Icon name="lock" size={14} /> {t('profile.localOnlyLong')}
           </div>
@@ -103,6 +103,7 @@ function ProfileSection() {
         <input
           id="pname"
           className="input"
+          placeholder={t('profile.namePlaceholder')}
           value={profile.name}
           onChange={(e) => {
             const name = e.target.value;

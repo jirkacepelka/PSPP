@@ -111,8 +111,8 @@ function includedCases(ds: Dataset): { row: number; w: number }[] {
   return out;
 }
 
-function fmtStat(x: number, d = 2): number | string {
-  return Number.isFinite(x) ? Number(x.toFixed(d)) : '.';
+function fmtStat(x: number, d = 2): TCell {
+  return Number.isFinite(x) ? { v: x.toFixed(d), cls: 'num' } : { v: '.', cls: 'num' };
 }
 
 function cellValue(v: Variable, c: Cell): string {
@@ -256,7 +256,7 @@ function frequencies(ctx: Ctx, toks: Token[]) {
           fmtStat((100 * cum) / validTotal, 1),
         ]);
       });
-      body.push([{ v: 'Total', th: true, cls: 'total' }, validTotal, fmtStat((100 * validTotal) / (total || 1), 1), 100, null]);
+      body.push([{ v: 'Total', th: true, cls: 'total' }, validTotal, fmtStat((100 * validTotal) / (total || 1), 1), fmtStat(100, 1), null]);
       if (miss.length) {
         miss.forEach((e, i) => {
           body.push([
@@ -269,7 +269,7 @@ function frequencies(ctx: Ctx, toks: Token[]) {
           ]);
         });
       }
-      body.push([{ v: 'Total', th: true, colspan: 2, cls: 'total' }, total, 100, null, null]);
+      body.push([{ v: 'Total', th: true, colspan: 2, cls: 'total' }, total, fmtStat(100, 1), null, null]);
       const title = v.label ? `${v.label}` : v.name;
       children.push({
         id: uid('t'),

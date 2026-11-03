@@ -67,7 +67,7 @@ export function StartScreen() {
         <div className="start-inner">
           <div className="start-head">
             <div>
-              <h1>{t('start.greeting', { name: name.split(' ')[0] })}</h1>
+              <h1>{name ? t('start.greeting', { name: name.split(' ')[0] }) : t('start.greetingAnon')}</h1>
               <p>{t('start.subtitle')}</p>
             </div>
             {hasData && (

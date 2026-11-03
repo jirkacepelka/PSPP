@@ -9,7 +9,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "icons": "python3 scripts/subset-icons.py",
+    "i18n:check": "node scripts/i18n-keys.mjs",
+    "samples": "node scripts/make-samples.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

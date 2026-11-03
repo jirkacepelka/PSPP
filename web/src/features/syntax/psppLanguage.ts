@@ -172,6 +172,7 @@ const psppStream = StreamLanguage.define<State>({
     stream.next();
     return 'punctuation';
   },
+  indent: (state) => (state.start && !state.comment ? 0 : 2),
   languageData: {
     commentTokens: { line: '*' },
   },

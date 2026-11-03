@@ -1,0 +1,9 @@
+/* Material Symbols Rounded (Apache 2.0), subset to the icons used by PSPP Studio.
+   Regenerate after adding icons: npm run icons */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('../assets/material-symbols-subset.woff2') format('woff2');
+}

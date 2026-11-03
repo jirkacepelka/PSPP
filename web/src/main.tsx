@@ -11,7 +11,7 @@ import '@fontsource/inter/600.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto-mono/400.css';
-import 'material-symbols/rounded.css';
+import './styles/icons.css';
 import './i18n';
 import './styles/tokens.css';
 import './styles/base.css';

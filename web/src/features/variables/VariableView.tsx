@@ -33,7 +33,7 @@ const COLS: { id: ColId; w: number }[] = [
   { id: 'name', w: 140 },
   { id: 'type', w: 110 },
   { id: 'width', w: 72 },
-  { id: 'decimals', w: 84 },
+  { id: 'decimals', w: 124 },
   { id: 'label', w: 240 },
   { id: 'values', w: 180 },
   { id: 'missing', w: 120 },

@@ -66,7 +66,7 @@ export function initialsOf(name: string): string {
 export const defaultSettings = (): Settings => {
   const lang = detectLanguage();
   return {
-    profile: { name: lang === 'cs' ? 'Místní uživatel' : 'Local user', initials: lang === 'cs' ? 'MU' : 'LU', color: AVATAR_COLORS[0] },
+    profile: { name: '', initials: '', color: AVATAR_COLORS[0] },
     theme: 'system',
     accent: ACCENT_PRESETS[0],
     density: 'comfortable',

@@ -17,7 +17,7 @@ export function StatusBar() {
       {ds ? (
         <>
           <span>{t('status.cases', { count: n })}</span>
-          <span>{t('status.variables', { count: ds.variables.length })}</span>
+          <span className="status-vars">{t('status.variables', { count: ds.variables.length })}</span>
           {ds.filter && (
             <span className="status-flag">
               <Icon name="filter_alt" size={14} />

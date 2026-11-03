@@ -16,7 +16,7 @@ export function Avatar({ profile, large }: { profile: Profile; large?: boolean }
       style={{ backgroundColor: profile.avatar ? 'transparent' : profile.color, backgroundImage: profile.avatar ? `url(${profile.avatar})` : undefined }}
       aria-hidden="true"
     >
-      {profile.avatar ? '' : profile.initials || '?'}
+      {profile.avatar ? '' : profile.initials || <span className="icon filled" style={{ fontSize: large ? 44 : 22 }}>person</span>}
     </span>
   );
 }
@@ -51,8 +51,8 @@ export function ProfileButton() {
         className="avatar-btn"
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={t('profile.open', { name: profile.name })}
-        data-tip={profile.name}
+        aria-label={t('profile.open', { name: profile.name || t('profile.defaultName') })}
+        data-tip={profile.name || t('profile.defaultName')}
         onClick={() => setOpen(!open)}
       >
         <Avatar profile={profile} />
@@ -75,7 +75,7 @@ export function ProfileButton() {
           >
             <div className="profile-head">
               <Avatar profile={profile} large />
-              <div className="profile-name">{t('profile.greeting', { name: profile.name.split(' ')[0] })}</div>
+              <div className="profile-name">{profile.name ? t('profile.greeting', { name: profile.name.split(' ')[0] }) : t('profile.greetingAnon')}</div>
               <div className="profile-sub">
                 <Icon name="lock" size={16} />
                 {t('profile.localOnly')}

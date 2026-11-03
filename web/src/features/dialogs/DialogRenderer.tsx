@@ -471,6 +471,7 @@ export function AnalysisDialog({ spec }: { spec: DialogSpec }) {
         size={spec.size ?? (needsSource ? 'wide' : 'normal')}
         onClose={closeModal}
         className="analysis-dialog"
+        initialFocus={needsSource ? '.var-list.source' : undefined}
         footer={
           <>
             <button type="button" className="btn btn-text" onClick={() => window.open(manualUrl(spec.command), '_blank', 'noopener')}>
