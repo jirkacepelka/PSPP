@@ -1,15 +1,17 @@
-# Auxilliary translation of pspp to Czech
+# Czech translation of PSPP (PSPP Studio).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: pspp-0.7.9\n"
-"Report-Msgid-Bugs-To: pspp-dev@gnu.org\n"
-"PO-Revision-Date: 2011-07-20 21:10+0300\n"
+"Project-Id-Version: pspp 2.1.3\n"
+"Report-Msgid-Bugs-To: bug-gnu-pspp@gnu.org\n"
+"PO-Revision-Date: 2026-11-03 12:00+0100\n"
+"Last-Translator: PSPP Studio contributors\n"
+"Language-Team: Czech\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.2\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: src/ui/gui/gen-dot-desktop.sh:12
 msgid "Statistical Software"
@@ -21,78 +23,78 @@ msgstr "Analyzuj statistická data se svobodnou variantou SPSS"
 
 #: gl/clean-temp.c:230
 msgid "cannot find a temporary directory, try setting $TMPDIR"
-msgstr ""
+msgstr "nelze najít dočasný adresář, zkuste nastavit $TMPDIR"
 
 #: gl/clean-temp.c:245
 #, c-format
 msgid "cannot create a temporary directory using template \"%s\""
-msgstr ""
+msgstr "nelze vytvořit dočasný adresář pomocí šablony \"%s\""
 
 #: gl/clean-temp.c:364
 #, c-format
 msgid "cannot remove temporary directory %s"
-msgstr ""
+msgstr "nelze odstranit dočasný adresář %s"
 
 #: gl/clean-temp-simple.c:266
 #, c-format
 msgid "cannot remove temporary file %s"
-msgstr ""
+msgstr "nelze odstranit dočasný soubor %s"
 
 #: gl/error.c:208
 msgid "Unknown system error"
-msgstr ""
+msgstr "Neznámá systémová chyba"
 
 #: gl/getopt.c:283
 #, c-format
 msgid "%s: option '%s%s' is ambiguous\n"
-msgstr ""
+msgstr "%s: volba '%s%s' je nejednoznačná\n"
 
 #: gl/getopt.c:289
 #, c-format
 msgid "%s: option '%s%s' is ambiguous; possibilities:"
-msgstr ""
+msgstr "%s: volba '%s%s' je nejednoznačná; možnosti:"
 
 #: gl/getopt.c:323
 #, c-format
 msgid "%s: unrecognized option '%s%s'\n"
-msgstr ""
+msgstr "%s: nerozpoznaná volba '%s%s'\n"
 
 #: gl/getopt.c:349
 #, c-format
 msgid "%s: option '%s%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: volba '%s%s' nepřipouští argument\n"
 
 #: gl/getopt.c:364
 #, c-format
 msgid "%s: option '%s%s' requires an argument\n"
-msgstr ""
+msgstr "%s: volba '%s%s' vyžaduje argument\n"
 
 #: gl/getopt.c:624
 #, c-format
 msgid "%s: invalid option -- '%c'\n"
-msgstr ""
+msgstr "%s: neplatná volba -- '%c'\n"
 
 #: gl/getopt.c:639 gl/getopt.c:685
 #, c-format
 msgid "%s: option requires an argument -- '%c'\n"
-msgstr ""
+msgstr "%s: volba vyžaduje argument -- '%c'\n"
 
 #: gl/version-etc.c:74
 #, c-format
 msgid "Packaged by %s (%s)\n"
-msgstr ""
+msgstr "Zabalil %s (%s)\n"
 
 #: gl/version-etc.c:77
 #, c-format
 msgid "Packaged by %s\n"
-msgstr ""
+msgstr "Zabalil %s\n"
 
 #. TRANSLATORS: Translate "(C)" to the copyright symbol
 #. (C-in-a-circle), if this symbol is available in the user's
 #. locale.  Otherwise, do not translate "(C)"; leave it as-is.
 #: gl/version-etc.c:84
 msgid "(C)"
-msgstr ""
+msgstr "©"
 
 #. TRANSLATORS: The %s placeholder is the web address of the GPL license.
 #: gl/version-etc.c:89
@@ -102,24 +104,27 @@ msgid ""
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law.\n"
 msgstr ""
+"Licence GPLv3+: GNU GPL verze 3 nebo novější <%s>.\n"
+"Toto je svobodný software: můžete jej měnit a šířit.\n"
+"NENÍ POSKYTOVÁNA ŽÁDNÁ ZÁRUKA, v rozsahu povoleném zákonem.\n"
 
 #. TRANSLATORS: %s denotes an author name.
 #: gl/version-etc.c:106
 #, c-format
 msgid "Written by %s.\n"
-msgstr ""
+msgstr "Napsal %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #: gl/version-etc.c:110
 #, c-format
 msgid "Written by %s and %s.\n"
-msgstr ""
+msgstr "Napsali %s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #: gl/version-etc.c:114
 #, c-format
 msgid "Written by %s, %s, and %s.\n"
-msgstr ""
+msgstr "Napsali %s, %s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -130,6 +135,8 @@ msgid ""
 "Written by %s, %s, %s,\n"
 "and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s\n"
+"a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -140,6 +147,8 @@ msgid ""
 "Written by %s, %s, %s,\n"
 "%s, and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -150,6 +159,8 @@ msgid ""
 "Written by %s, %s, %s,\n"
 "%s, %s, and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s, %s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -160,6 +171,8 @@ msgid ""
 "Written by %s, %s, %s,\n"
 "%s, %s, %s, and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s, %s, %s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -171,6 +184,9 @@ msgid ""
 "%s, %s, %s, %s,\n"
 "and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s, %s, %s, %s\n"
+"a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -182,6 +198,9 @@ msgid ""
 "%s, %s, %s, %s,\n"
 "%s, and %s.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s a %s.\n"
 
 #. TRANSLATORS: Each %s denotes an author name.
 #. You can use line breaks, estimating that each author name occupies
@@ -193,6 +212,9 @@ msgid ""
 "%s, %s, %s, %s,\n"
 "%s, %s, and others.\n"
 msgstr ""
+"Napsali %s, %s, %s,\n"
+"%s, %s, %s, %s,\n"
+"%s, %s a další.\n"
 
 #. TRANSLATORS: The placeholder indicates the bug-reporting address
 #. for this package.  Please add _another line_ saying
@@ -201,382 +223,394 @@ msgstr ""
 #: gl/version-etc.c:249
 #, c-format
 msgid "Report bugs to: <%s>.\n"
-msgstr ""
+msgstr "Chyby hlaste na: <%s>.\n"
 
 #: gl/version-etc.c:259
 #, c-format
 msgid "Report %s bugs to: %s\n"
-msgstr ""
+msgstr "Chyby v %s hlaste na: %s\n"
 
 #: gl/version-etc.c:263 gl/version-etc.c:265
 #, c-format
 msgid "%s home page: <%s>\n"
-msgstr ""
+msgstr "Domovská stránka %s: <%s>\n"
 
 #: gl/version-etc.c:268
 #, c-format
 msgid "General help using GNU software: <%s>\n"
-msgstr ""
+msgstr "Obecná nápověda k používání softwaru GNU: <%s>\n"
 
 #: gl/xalloc-die.c:34
 msgid "memory exhausted"
-msgstr ""
+msgstr "paměť vyčerpána"
 
 #: gl/xbinary-io.c:35
 msgid "failed to set file descriptor text/binary mode"
-msgstr ""
+msgstr "nepodařilo se nastavit textový/binární režim popisovače souboru"
 
 #: gl/regcomp.c:128
 msgid "Success"
-msgstr ""
+msgstr "Úspěch"
 
 #: gl/regcomp.c:131
 msgid "No match"
-msgstr ""
+msgstr "Žádná shoda"
 
 #: gl/regcomp.c:134
 msgid "Invalid regular expression"
-msgstr ""
+msgstr "Neplatný regulární výraz"
 
 #: gl/regcomp.c:137
 msgid "Invalid collation character"
-msgstr ""
+msgstr "Neplatný řadicí znak"
 
 #: gl/regcomp.c:140
 msgid "Invalid character class name"
-msgstr ""
+msgstr "Neplatný název třídy znaků"
 
 #: gl/regcomp.c:143
 msgid "Trailing backslash"
-msgstr ""
+msgstr "Zpětné lomítko na konci"
 
 #: gl/regcomp.c:146
 msgid "Invalid back reference"
-msgstr ""
+msgstr "Neplatný zpětný odkaz"
 
 #: gl/regcomp.c:149
 msgid "Unmatched [, [^, [:, [., or [="
-msgstr ""
+msgstr "Nepárová [, [^, [:, [. nebo [="
 
 #: gl/regcomp.c:152
 msgid "Unmatched ( or \\("
-msgstr ""
+msgstr "Nepárová ( nebo \\("
 
 #: gl/regcomp.c:155
 msgid "Unmatched \\{"
-msgstr ""
+msgstr "Nepárová \\{"
 
 #: gl/regcomp.c:158
 msgid "Invalid content of \\{\\}"
-msgstr ""
+msgstr "Neplatný obsah \\{\\}"
 
 #: gl/regcomp.c:161
 msgid "Invalid range end"
-msgstr ""
+msgstr "Neplatný konec rozsahu"
 
 #: gl/regcomp.c:164
 msgid "Memory exhausted"
-msgstr ""
+msgstr "Paměť vyčerpána"
 
 #: gl/regcomp.c:167
 msgid "Invalid preceding regular expression"
-msgstr ""
+msgstr "Neplatný předchozí regulární výraz"
 
 #: gl/regcomp.c:170
 msgid "Premature end of regular expression"
-msgstr ""
+msgstr "Předčasný konec regulárního výrazu"
 
 #: gl/regcomp.c:173
 msgid "Regular expression too big"
-msgstr ""
+msgstr "Regulární výraz je příliš velký"
 
 #: gl/regcomp.c:176
 msgid "Unmatched ) or \\)"
-msgstr ""
+msgstr "Nepárová ) nebo \\)"
 
 #: gl/regcomp.c:669
 msgid "No previous regular expression"
-msgstr ""
+msgstr "Žádný předchozí regulární výraz"
 
 #: src/data/any-reader.c:72 src/data/encrypted-file.c:78
 #, c-format
 msgid "An error occurred while opening `%s': %s."
-msgstr ""
+msgstr "Při otevírání `%s' došlo k chybě: %s."
 
 #: src/data/any-reader.c:93 src/language/lexer/lexer.c:2690
 #, c-format
 msgid "Error reading `%s': %s."
-msgstr ""
+msgstr "Chyba při čtení `%s': %s."
 
 #: src/data/any-reader.c:114
 #, c-format
 msgid "`%s' is not a system or portable file."
-msgstr ""
+msgstr "`%s' není systémový ani přenosný soubor."
 
 #: src/data/any-reader.c:123 src/data/any-writer.c:67
 msgid "The inline file is not allowed here."
-msgstr ""
+msgstr "Vložený soubor zde není povolen."
 
 #: src/data/any-reader.c:205
 #, c-format
 msgid ""
-"Cannot read from dataset %s because no dictionary or data has been written "
-"to it yet."
+"Cannot read from dataset %s because no dictionary or data has been written to"
+" it yet."
 msgstr ""
+"Z datového souboru %s nelze číst, protože do něj zatím nebyl zapsán žádný "
+"slovník ani data."
 
 #: src/data/any-reader.c:260 src/language/commands/dataset.c:255
 msgid "Dataset"
-msgstr ""
+msgstr "Datový soubor"
 
 #: src/data/calendar.c:130 src/language/expressions/helpers.c:49
 #, c-format
 msgid "Date %04d-%d-%d is before the earliest supported date 1582-10-15."
 msgstr ""
+"Datum %04d-%d-%d je dřívější než nejstarší podporované datum 1582-10-15."
 
 #: src/data/calendar.c:133 src/language/expressions/helpers.c:53
 #, c-format
 msgid "Month %d is not in the acceptable range of 0 to 13."
-msgstr ""
+msgstr "Měsíc %d není v přípustném rozsahu 0 až 13."
 
 #: src/data/calendar.c:136 src/language/expressions/helpers.c:56
 #, c-format
 msgid "Day %d is not in the acceptable range of 0 to 31."
-msgstr ""
+msgstr "Den %d není v přípustném rozsahu 0 až 31."
 
 #: src/data/casereader-filter.c:221
 msgid ""
 "At least one case in the data read had a weight value that was user-missing, "
 "system-missing, zero, or negative.  These case(s) were ignored."
 msgstr ""
+"Alespoň jeden případ v načtených datech měl hodnotu váhy, která byla "
+"uživatelsky chybějící, systémově chybějící, nulová nebo záporná. Tyto případy"
+" byly ignorovány."
 
 #. TRANSLATORS: this fragment will be interpolated into messages in fh_lock()
 #. that identify types of files.
 #: src/data/csv-file-writer.c:138
 msgid "CSV file"
-msgstr ""
+msgstr "soubor CSV"
 
 #: src/data/csv-file-writer.c:146
 #, c-format
 msgid "Error opening `%s' for writing as a CSV file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro zápis jako soubor CSV: %s."
 
 #: src/data/csv-file-writer.c:454
 #, c-format
 msgid "An I/O error occurred writing CSV file `%s'."
-msgstr ""
+msgstr "Při zápisu souboru CSV `%s' došlo k chybě vstupu/výstupu."
 
 #: src/data/data-in.c:179
 #, c-format
 msgid "Data is not valid as format %s: %s"
-msgstr ""
+msgstr "Data nejsou platná pro formát %s: %s"
 
 #: src/data/data-in.c:381 src/data/data-in.c:557
 msgid "Field contents are not numeric."
-msgstr ""
+msgstr "Obsah pole není číselný."
 
 #: src/data/data-in.c:383 src/data/data-in.c:559
 msgid "Number followed by garbage."
-msgstr ""
+msgstr "Za číslem následují nesmyslné znaky."
 
 #: src/data/data-in.c:396
 msgid "Invalid numeric syntax."
-msgstr ""
+msgstr "Neplatná syntaxe čísla."
 
 #: src/data/data-in.c:404 src/data/data-in.c:575
 msgid "Too-large number set to system-missing."
-msgstr ""
+msgstr "Příliš velké číslo nastaveno na systémově chybějící hodnotu."
 
 #: src/data/data-in.c:410 src/data/data-in.c:581
 msgid "Too-small number set to zero."
-msgstr ""
+msgstr "Příliš malé číslo nastaveno na nulu."
 
 #: src/data/data-in.c:430
 msgid "All characters in field must be digits."
-msgstr ""
+msgstr "Všechny znaky v poli musí být číslice."
 
 #: src/data/data-in.c:449
 msgid "Unrecognized character in field."
-msgstr ""
+msgstr "Nerozpoznaný znak v poli."
 
 #: src/data/data-in.c:470 src/data/data-in.c:733
 msgid "Field must have even length."
-msgstr ""
+msgstr "Pole musí mít sudou délku."
 
 #: src/data/data-in.c:472 src/data/data-in.c:736
 msgid "Field must contain only hex digits."
-msgstr ""
+msgstr "Pole smí obsahovat pouze šestnáctkové číslice."
 
 #: src/data/data-in.c:548
 msgid "Invalid zoned decimal syntax."
-msgstr ""
+msgstr "Neplatná syntaxe zónového desítkového čísla."
 
 #: src/data/data-in.c:648 src/data/data-in.c:654
 msgid "Invalid syntax for P field."
-msgstr ""
+msgstr "Neplatná syntaxe pole P."
 
 #: src/data/data-in.c:772 src/data/data-in.c:822
 msgid "Syntax error in date field."
-msgstr ""
+msgstr "Syntaktická chyba v poli data."
 
 #: src/data/data-in.c:787
 #, c-format
 msgid "Day (%ld) must be between 1 and 31."
-msgstr ""
+msgstr "Den (%ld) musí být mezi 1 a 31."
 
 #: src/data/data-in.c:836
 msgid "Delimiter expected between fields in date."
-msgstr ""
+msgstr "Mezi poli data se očekává oddělovač."
 
 #: src/data/data-in.c:910
 msgid ""
 "Unrecognized month format.  Months may be specified as Arabic or Roman "
 "numerals or as at least 3 letters of their English names."
 msgstr ""
+"Nerozpoznaný formát měsíce. Měsíce lze zadat arabskými nebo římskými "
+"číslicemi nebo alespoň 3 písmeny jejich anglického názvu."
 
 #: src/data/data-in.c:937
 #, c-format
 msgid "Year (%ld) must be between 1582 and 19999."
-msgstr ""
+msgstr "Rok (%ld) musí být mezi 1582 a 19999."
 
 #: src/data/data-in.c:948
 #, c-format
 msgid "Trailing garbage `%.*s' following date."
-msgstr ""
+msgstr "Nesmyslné znaky `%.*s' za datem."
 
 #: src/data/data-in.c:962
 msgid "Julian day must have exactly three digits."
-msgstr ""
+msgstr "Juliánský den musí mít přesně tři číslice."
 
 #: src/data/data-in.c:964
 #, c-format
 msgid "Julian day (%ld) must be between 1 and 366."
-msgstr ""
+msgstr "Juliánský den (%ld) musí být mezi 1 a 366."
 
 #: src/data/data-in.c:988
 #, c-format
 msgid "Quarter (%ld) must be between 1 and 4."
-msgstr ""
+msgstr "Čtvrtletí (%ld) musí být mezi 1 a 4."
 
 #: src/data/data-in.c:1009
 #, c-format
 msgid "Week (%ld) must be between 1 and 53."
-msgstr ""
+msgstr "Týden (%ld) musí být mezi 1 a 53."
 
 #: src/data/data-in.c:1021
 msgid "Delimiter expected between fields in time."
-msgstr ""
+msgstr "Mezi poli času se očekává oddělovač."
 
 #: src/data/data-in.c:1041
 #, c-format
 msgid "Minute (%ld) must be between 0 and 59."
-msgstr ""
+msgstr "Minuta (%ld) musí být mezi 0 a 59."
 
 #: src/data/data-in.c:1079
 msgid ""
 "Unrecognized weekday name.  At least the first two letters of an English "
 "weekday name must be specified."
 msgstr ""
+"Nerozpoznaný název dne v týdnu. Je nutné zadat alespoň první dvě písmena "
+"anglického názvu dne."
 
 #: src/data/data-in.c:1214
 #, c-format
 msgid "`%c' expected in date field."
-msgstr ""
+msgstr "V poli data se očekává `%c'."
 
 #: src/data/data-out.c:585
 #, c-format
 msgid "Weekday number %f is not between 1 and 7."
-msgstr ""
+msgstr "Číslo dne v týdnu %f není mezi 1 a 7."
 
 #: src/data/data-out.c:610
 #, c-format
 msgid "Month number %f is not between 1 and 12."
-msgstr ""
+msgstr "Číslo měsíce %f není mezi 1 a 12."
 
 #. TRANSLATORS: this fragment will be interpolated into
 #. messages in fh_lock() that identify types of files.
 #: src/data/dataset-writer.c:65 src/language/commands/file-handle.c:315
 msgid "dataset"
-msgstr ""
+msgstr "datový soubor"
 
 #: src/data/dict-class.c:52
 msgid "ordinary"
-msgstr ""
+msgstr "běžná"
 
 #: src/data/dict-class.c:54
 msgid "system"
-msgstr ""
+msgstr "systémová"
 
 #: src/data/dict-class.c:56
 msgid "scratch"
-msgstr ""
+msgstr "pomocná"
 
 #. TRANSLATORS: "bytes" is correct, not characters due to UTF encoding
 #: src/data/dictionary.c:1463
 #, c-format
 msgid "Truncating document line to %d bytes."
-msgstr ""
+msgstr "Řádek dokumentu zkrácen na %d bajtů."
 
 #: src/data/encrypted-file.c:89
 #, c-format
 msgid "An error occurred while reading `%s': %s."
-msgstr ""
+msgstr "Při čtení `%s' došlo k chybě: %s."
 
 #: src/data/encrypted-file.c:430
 #, c-format
 msgid ""
 "%s: encrypted file corrupted (ends in incomplete %u-byte ciphertext block)"
 msgstr ""
+"%s: šifrovaný soubor je poškozen (končí neúplným %u bajtovým blokem šifrového"
+" textu)"
 
 #: src/data/encrypted-file.c:449
 #, c-format
 msgid "%s: encrypted file corrupted (ends with bad padding)"
-msgstr ""
+msgstr "%s: šifrovaný soubor je poškozen (končí chybným zarovnáním)"
 
 #: src/data/file-handle-def.c:281 src/language/commands/dataset.c:268
 msgid "active dataset"
-msgstr ""
+msgstr "aktivní datový soubor"
 
 #: src/data/file-handle-def.c:550
 #, c-format
 msgid "Can't read from %s as a %s because it is already being read as a %s."
-msgstr ""
+msgstr "Nelze číst z %s jako %s, protože se již čte jako %s."
 
 #: src/data/file-handle-def.c:554
 #, c-format
 msgid "Can't write to %s as a %s because it is already being written as a %s."
-msgstr ""
+msgstr "Nelze zapisovat do %s jako %s, protože se do něj již zapisuje jako %s."
 
 #: src/data/file-handle-def.c:561
 #, c-format
 msgid "Can't re-open %s as a %s."
-msgstr ""
+msgstr "Nelze znovu otevřít %s jako %s."
 
 #: src/data/file-name.c:134
 #, c-format
 msgid "Not opening pipe file `%s' because %s option set."
-msgstr ""
+msgstr "Soubor roury `%s' se neotevře, protože je nastavena volba %s."
 
 #: src/data/format.c:364
 #, c-format
 msgid "Format %s may not be used for input."
-msgstr ""
+msgstr "Formát %s nelze použít pro vstup."
 
 #: src/data/format.c:370
 #, c-format
 msgid "Input format %s specifies width %d, but %s requires an even width."
-msgstr ""
+msgstr "Vstupní formát %s určuje šířku %d, ale %s vyžaduje sudou šířku."
 
 #: src/data/format.c:373
 #, c-format
 msgid "Output format %s specifies width %d, but %s requires an even width."
-msgstr ""
+msgstr "Výstupní formát %s určuje šířku %d, ale %s vyžaduje sudou šířku."
 
 #: src/data/format.c:382
 #, c-format
 msgid ""
 "Input format %s specifies width %d, but %s requires a width between %d and "
 "%d."
-msgstr ""
+msgstr "Vstupní formát %s určuje šířku %d, ale %s vyžaduje šířku mezi %d a %d."
 
 #: src/data/format.c:385
 #, c-format
@@ -584,6 +618,7 @@ msgid ""
 "Output format %s specifies width %d, but %s requires a width between %d and "
 "%d."
 msgstr ""
+"Výstupní formát %s určuje šířku %d, ale %s vyžaduje šířku mezi %d a %d."
 
 #: src/data/format.c:393
 #, c-format
@@ -594,7 +629,14 @@ msgid_plural ""
 "Input format %s specifies %d decimal places, but %s does not allow any "
 "decimals."
 msgstr[0] ""
+"Vstupní formát %s určuje %d desetinné místo, ale %s nepřipouští žádná "
+"desetinná místa."
 msgstr[1] ""
+"Vstupní formát %s určuje %d desetinná místa, ale %s nepřipouští žádná "
+"desetinná místa."
+msgstr[2] ""
+"Vstupní formát %s určuje %d desetinných míst, ale %s nepřipouští žádná "
+"desetinná místa."
 
 #: src/data/format.c:401
 #, c-format
@@ -605,7 +647,14 @@ msgid_plural ""
 "Output format %s specifies %d decimal places, but %s does not allow any "
 "decimals."
 msgstr[0] ""
+"Výstupní formát %s určuje %d desetinné místo, ale %s nepřipouští žádná "
+"desetinná místa."
 msgstr[1] ""
+"Výstupní formát %s určuje %d desetinná místa, ale %s nepřipouští žádná "
+"desetinná místa."
+msgstr[2] ""
+"Výstupní formát %s určuje %d desetinných míst, ale %s nepřipouští žádná "
+"desetinná místa."
 
 #: src/data/format.c:412
 #, c-format
@@ -616,7 +665,14 @@ msgid_plural ""
 "Input format %s specifies %d decimal places, but width %d allows at most %d "
 "decimals."
 msgstr[0] ""
+"Vstupní formát %s určuje %d desetinné místo, ale šířka %d připouští nejvýše "
+"%d desetinných míst."
 msgstr[1] ""
+"Vstupní formát %s určuje %d desetinná místa, ale šířka %d připouští nejvýše "
+"%d desetinných míst."
+msgstr[2] ""
+"Vstupní formát %s určuje %d desetinných míst, ale šířka %d připouští nejvýše "
+"%d desetinných míst."
 
 #: src/data/format.c:419
 #, c-format
@@ -627,7 +683,14 @@ msgid_plural ""
 "Output format %s specifies %d decimal places, but width %d allows at most %d "
 "decimals."
 msgstr[0] ""
+"Výstupní formát %s určuje %d desetinné místo, ale šířka %d připouští nejvýše "
+"%d desetinných míst."
 msgstr[1] ""
+"Výstupní formát %s určuje %d desetinná místa, ale šířka %d připouští nejvýše "
+"%d desetinných míst."
+msgstr[2] ""
+"Výstupní formát %s určuje %d desetinných míst, ale šířka %d připouští nejvýše"
+" %d desetinných míst."
 
 #: src/data/format.c:428
 #, c-format
@@ -638,7 +701,14 @@ msgid_plural ""
 "Input format %s specifies %d decimal places, but width %d does not allow for "
 "any decimals."
 msgstr[0] ""
+"Vstupní formát %s určuje %d desetinné místo, ale šířka %d nepřipouští žádná "
+"desetinná místa."
 msgstr[1] ""
+"Vstupní formát %s určuje %d desetinná místa, ale šířka %d nepřipouští žádná "
+"desetinná místa."
+msgstr[2] ""
+"Vstupní formát %s určuje %d desetinných míst, ale šířka %d nepřipouští žádná "
+"desetinná místa."
 
 #: src/data/format.c:435
 #, c-format
@@ -646,30 +716,37 @@ msgid ""
 "Output format %s specifies %d decimal place, but width %d does not allow for "
 "any decimals."
 msgid_plural ""
-"Output format %s specifies %d decimal places, but width %d does not allow "
-"for any decimals."
+"Output format %s specifies %d decimal places, but width %d does not allow for"
+" any decimals."
 msgstr[0] ""
+"Výstupní formát %s určuje %d desetinné místo, ale šířka %d nepřipouští žádná "
+"desetinná místa."
 msgstr[1] ""
+"Výstupní formát %s určuje %d desetinná místa, ale šířka %d nepřipouští žádná "
+"desetinná místa."
+msgstr[2] ""
+"Výstupní formát %s určuje %d desetinných míst, ale šířka %d nepřipouští žádná"
+" desetinná místa."
 
 #: src/data/format.c:507
 #, c-format
 msgid "String variable %s is not compatible with numeric format %s."
-msgstr ""
+msgstr "Textová proměnná %s není kompatibilní s číselným formátem %s."
 
 #: src/data/format.c:510
 #, c-format
 msgid "String variables are not compatible with numeric format %s."
-msgstr ""
+msgstr "Textové proměnné nejsou kompatibilní s číselným formátem %s."
 
 #: src/data/format.c:516
 #, c-format
 msgid "Numeric variable %s is not compatible with string format %s."
-msgstr ""
+msgstr "Číselná proměnná %s není kompatibilní s textovým formátem %s."
 
 #: src/data/format.c:519
 #, c-format
 msgid "Numeric variables are not compatible with string format %s."
-msgstr ""
+msgstr "Číselné proměnné nejsou kompatibilní s textovým formátem %s."
 
 #: src/data/format.c:559
 #, c-format
@@ -677,6 +754,8 @@ msgid ""
 "String variable %s with width %d is not compatible with format %s.  Use "
 "format %s instead."
 msgstr ""
+"Textová proměnná %s o šířce %d není kompatibilní s formátem %s. Použijte "
+"místo toho formát %s."
 
 #: src/data/format.c:564
 #, c-format
@@ -684,62 +763,64 @@ msgid ""
 "String variable with width %d is not compatible with format %s.  Use format "
 "%s instead."
 msgstr ""
+"Textová proměnná o šířce %d není kompatibilní s formátem %s. Použijte místo "
+"toho formát %s."
 
 #: src/data/format.c:1159 src/language/command.def:101
 #: src/ui/gui/var-type-dialog.ui:48
 msgid "Numeric"
-msgstr ""
+msgstr "Číselný"
 
 #: src/data/format.c:1162 src/ui/gui/var-type-dialog.ui:65
 msgid "Comma"
-msgstr ""
+msgstr "Čárka"
 
 #: src/data/format.c:1165 src/ui/gui/var-type-dialog.ui:82
 msgid "Dot"
-msgstr ""
+msgstr "Tečka"
 
 #: src/data/format.c:1168
 msgid "Scientific"
-msgstr ""
+msgstr "Vědecký"
 
 #: src/data/format.c:1185 src/ui/gui/var-type-dialog.ui:116
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: src/data/format.c:1188 src/ui/gui/var-type-dialog.ui:133
 msgid "Dollar"
-msgstr ""
+msgstr "Dolar"
 
 #: src/data/format.c:1195 src/ui/gui/options.ui:361
 msgid "Custom"
-msgstr ""
+msgstr "Vlastní"
 
 #: src/data/format.c:1198 src/language/command.def:106
 #: src/ui/gui/var-type-dialog.ui:167
 msgid "String"
-msgstr ""
+msgstr "Textový"
 
 #: src/data/gnumeric-reader.c:649 src/data/ods-reader.c:612
 #, c-format
 msgid "Cannot convert the value in the spreadsheet cell %s to format (%s): %s"
-msgstr ""
+msgstr "Hodnotu v buňce tabulky %s nelze převést na formát (%s): %s"
 
 #: src/data/gnumeric-reader.c:673 src/data/ods-reader.c:683
 #, c-format
 msgid ""
 "There was a problem whilst reading the %s file `%s' (near line %d): `%s'"
-msgstr ""
+msgstr "Při čtení souboru %s `%s' došlo k problému (poblíž řádku %d): `%s'"
 
 #: src/data/gnumeric-reader.c:703 src/data/ods-reader.c:722
 #, c-format
 msgid "Invalid cell range `%s'"
-msgstr ""
+msgstr "Neplatný rozsah buněk `%s'"
 
 #: src/data/gnumeric-reader.c:873 src/data/ods-reader.c:744
 #: src/data/ods-reader.c:868
 #, c-format
 msgid "Selected sheet or range of spreadsheet `%s' is empty."
-msgstr ""
+msgstr "Vybraný list nebo rozsah tabulky `%s' je prázdný."
 
 #: src/data/gnumeric-reader.c:1103
 #, c-format
@@ -747,157 +828,166 @@ msgid ""
 "The gnumeric file `%s' is encoded as %s instead of the usual UTF-8 encoding. "
 "Any non-ascii characters will be incorrectly imported."
 msgstr ""
+"Soubor gnumeric `%s' je kódován jako %s namísto obvyklého UTF-8. Všechny "
+"znaky mimo ASCII budou importovány nesprávně."
 
 #: src/data/identifier2.c:73
 #, c-format
 msgid "Identifier `%s' is not valid in encoding `%s' used for this dictionary."
 msgstr ""
+"Identifikátor `%s' není platný v kódování `%s' použitém pro tento slovník."
 
 #: src/data/identifier2.c:88
 #, c-format
 msgid "`%s' is not valid here because this identifier must start with `$'."
 msgstr ""
+"`%s' zde není platný, protože tento identifikátor musí začínat znakem `$'."
 
 #: src/data/identifier2.c:92
 #, c-format
 msgid "`%s' is not valid here because this identifier must start with `#'."
 msgstr ""
+"`%s' zde není platný, protože tento identifikátor musí začínat znakem `#'."
 
 #: src/data/identifier2.c:96
 #, c-format
 msgid ""
 "`%s' is not valid here because this identifier must start with `$' or `#'."
 msgstr ""
+"`%s' zde není platný, protože tento identifikátor musí začínat znakem `$' "
+"nebo `#'."
 
 #: src/data/identifier2.c:107
 #, c-format
 msgid "`%s' and other identifiers starting with `$' are not valid here."
-msgstr ""
+msgstr "`%s' a další identifikátory začínající znakem `$' zde nejsou platné."
 
 #: src/data/identifier2.c:111
 #, c-format
 msgid "`%s' and other identifiers starting with `#' are not valid here."
-msgstr ""
+msgstr "`%s' a další identifikátory začínající znakem `#' zde nejsou platné."
 
 #: src/data/identifier2.c:117
 #, c-format
 msgid "Identifier `%s' exceeds %d-byte limit."
-msgstr ""
+msgstr "Identifikátor `%s' překračuje limit %d bajtů."
 
 #: src/data/identifier2.c:139
 msgid "Identifier cannot be empty string."
-msgstr ""
+msgstr "Identifikátor nemůže být prázdný řetězec."
 
 #: src/data/identifier2.c:143
 #, c-format
 msgid "`%s' may not be used as an identifier because it is a reserved word."
-msgstr ""
+msgstr "`%s' nelze použít jako identifikátor, protože jde o vyhrazené slovo."
 
 #: src/data/identifier2.c:152
 #, c-format
 msgid ""
-"`%s' may not be used as an identifier because it contains ill-formed UTF-8 "
-"at byte offset %tu."
+"`%s' may not be used as an identifier because it contains ill-formed UTF-8 at"
+" byte offset %tu."
 msgstr ""
+"`%s' nelze použít jako identifikátor, protože obsahuje chybně utvořené UTF-8 "
+"na pozici bajtu %tu."
 
 #: src/data/identifier2.c:163
 #, c-format
 msgid ""
 "Character %s (in `%s') may not appear as the first character in an "
 "identifier."
-msgstr ""
+msgstr "Znak %s (v `%s') se nesmí vyskytovat jako první znak identifikátoru."
 
 #: src/data/identifier2.c:174
 #, c-format
 msgid "Character %s (in `%s') may not appear in an identifier."
-msgstr ""
+msgstr "Znak %s (v `%s') se nesmí vyskytovat v identifikátoru."
 
 #: src/data/mdd-writer.c:241
 #, c-format
 msgid "An I/O error occurred writing metadata file `%s'."
-msgstr ""
+msgstr "Při zápisu souboru metadat `%s' došlo k chybě vstupu/výstupu."
 
 #. TRANSLATORS: this fragment will be interpolated into
 #. messages in fh_lock() that identify types of files.
 #: src/data/mdd-writer.c:456
 msgid "metadata file"
-msgstr ""
+msgstr "soubor metadat"
 
 #: src/data/mdd-writer.c:464
 #, c-format
 msgid "Error opening `%s' for writing as a metadata file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro zápis jako soubor metadat: %s."
 
 #: src/data/mdd-writer.c:472
 #, c-format
 msgid "Internal error creating xmlTextWriter.  Please report this to %s."
-msgstr ""
+msgstr "Vnitřní chyba při vytváření xmlTextWriter. Nahlaste ji prosím na %s."
 
 #: src/data/make-file.c:217
 #, c-format
 msgid "Opening %s for writing: %s."
-msgstr ""
+msgstr "Otevírání %s pro zápis: %s."
 
 #: src/data/make-file.c:228
 #, c-format
 msgid "Opening stream for %s: %s."
-msgstr ""
+msgstr "Otevírání proudu pro %s: %s."
 
 #: src/data/make-file.c:260
 #, c-format
 msgid "Creating temporary file to replace %s: %s."
-msgstr ""
+msgstr "Vytváření dočasného souboru pro nahrazení %s: %s."
 
 #: src/data/make-file.c:277
 #, c-format
 msgid "Creating temporary file %s: %s."
-msgstr ""
+msgstr "Vytváření dočasného souboru %s: %s."
 
 #: src/data/make-file.c:289
 #, c-format
 msgid "Opening stream for temporary file %s: %s."
-msgstr ""
+msgstr "Otevírání proudu pro dočasný soubor %s: %s."
 
 #: src/data/make-file.c:326
 #, c-format
 msgid "Replacing %s by %s: %s."
-msgstr ""
+msgstr "Nahrazování %s souborem %s: %s."
 
 #: src/data/make-file.c:354
 #, c-format
 msgid "Removing %s: %s."
-msgstr ""
+msgstr "Odstraňování %s: %s."
 
 #: src/data/ods-reader.c:1064
 #, c-format
 msgid "Cannot open %s as a OpenDocument file: %s"
-msgstr ""
+msgstr "%s nelze otevřít jako soubor OpenDocument: %s"
 
 #: src/data/ods-reader.c:1073
 #, c-format
 msgid "%s is not an OpenDocument file."
-msgstr ""
+msgstr "%s není soubor OpenDocument."
 
 #. TRANSLATORS: this fragment will be interpolated into
 #. messages in fh_lock() that identify types of files.
 #: src/data/pc+-file-reader.c:206
 msgid "SPSS/PC+ system file"
-msgstr ""
+msgstr "systémový soubor SPSS/PC+"
 
 #: src/data/pc+-file-reader.c:215
 #, c-format
 msgid "Error opening `%s' for reading as an SPSS/PC+ system file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro čtení jako systémový soubor SPSS/PC+: %s."
 
 #: src/data/pc+-file-reader.c:224 src/data/sys-file-reader.c:3600
 #, c-format
 msgid "%s: stat failed (%s)."
-msgstr ""
+msgstr "%s: volání stat selhalo (%s)."
 
 #: src/data/pc+-file-reader.c:230
 #, c-format
 msgid "%s: file too large."
-msgstr ""
+msgstr "%s: soubor je příliš velký."
 
 #: src/data/pc+-file-reader.c:257
 #, c-format
@@ -905,44 +995,46 @@ msgid ""
 "Directory entry is for a %u-byte record starting at offset %u but file is "
 "only %u bytes long."
 msgstr ""
+"Položka adresáře je pro záznam o %u bajtech začínající na pozici %u, ale "
+"soubor má délku pouze %u bajtů."
 
 #: src/data/pc+-file-reader.c:275
 #, c-format
 msgid "Directory fields have unexpected values (%u,%u)."
-msgstr ""
+msgstr "Pole adresáře mají neočekávané hodnoty (%u,%u)."
 
 #: src/data/pc+-file-reader.c:372 src/data/sys-file-reader.c:682
 #, c-format
 msgid "Variable %zu"
-msgstr ""
+msgstr "Proměnná %zu"
 
 #: src/data/pc+-file-reader.c:380 src/data/sys-file-reader.c:690
 #, c-format
 msgid "Variable %zu Label"
-msgstr ""
+msgstr "Popisek proměnné %zu"
 
 #: src/data/pc+-file-reader.c:385
 #, c-format
 msgid "Variable %zu Value Label %zu"
-msgstr ""
+msgstr "Proměnná %zu, popisek hodnoty %zu"
 
 #: src/data/pc+-file-reader.c:388 src/data/sys-file-reader.c:700
 msgid "Creation Date"
-msgstr ""
+msgstr "Datum vytvoření"
 
 #: src/data/pc+-file-reader.c:389 src/data/sys-file-reader.c:701
 msgid "Creation Time"
-msgstr ""
+msgstr "Čas vytvoření"
 
 #: src/data/pc+-file-reader.c:390 src/data/sys-file-reader.c:702
 #: src/language/commands/sys-file-info.c:201
 msgid "Product"
-msgstr ""
+msgstr "Produkt"
 
 #: src/data/pc+-file-reader.c:391 src/data/sys-file-reader.c:703
 #: src/language/command.def:29 src/language/commands/sys-file-info.c:295
 msgid "File Label"
-msgstr ""
+msgstr "Popisek souboru"
 
 #: src/data/pc+-file-reader.c:419
 #, c-format
@@ -951,40 +1043,43 @@ msgid ""
 "results, specify an encoding explicitly.  Use SYSFILE INFO with "
 "ENCODING=\"DETECT\" to analyze the possible encodings."
 msgstr ""
+"Pro čtení tohoto systémového souboru SPSS/PC+ se používá výchozí kódování %s."
+" Pro nejlepší výsledky zadejte kódování explicitně. K analýze možných "
+"kódování použijte SYSFILE INFO s ENCODING=\"DETECT\"."
 
 #: src/data/pc+-file-reader.c:471 src/data/sys-file-reader.c:901
 #, c-format
 msgid "Error closing system file `%s': %s."
-msgstr ""
+msgstr "Chyba při zavírání systémového souboru `%s': %s."
 
 #: src/data/pc+-file-reader.c:532
 msgid "This is not an SPSS/PC+ system file."
-msgstr ""
+msgstr "Toto není systémový soubor SPSS/PC+."
 
 #: src/data/pc+-file-reader.c:536
 #, c-format
 msgid "Record 0 has unexpected length %u."
-msgstr ""
+msgstr "Záznam 0 má neočekávanou délku %u."
 
 #: src/data/pc+-file-reader.c:560
 #, c-format
 msgid "Record 0 specifies unexpected system missing value %g (%a)."
-msgstr ""
+msgstr "Záznam 0 udává neočekávanou systémově chybějící hodnotu %g (%a)."
 
 #: src/data/pc+-file-reader.c:565
 #, c-format
 msgid "Record 0 reserved fields have unexpected values (%u,%u,%u,%u,%u,%u)."
-msgstr ""
+msgstr "Vyhrazená pole záznamu 0 mají neočekávané hodnoty (%u,%u,%u,%u,%u,%u)."
 
 #: src/data/pc+-file-reader.c:569
 #, c-format
 msgid "Record 0 case counts differ (%u versus %u)."
-msgstr ""
+msgstr "Počty případů v záznamu 0 se liší (%u oproti %u)."
 
 #: src/data/pc+-file-reader.c:573
 #, c-format
 msgid "Invalid compression type %u."
-msgstr ""
+msgstr "Neplatný typ komprese %u."
 
 #: src/data/pc+-file-reader.c:584
 #, c-format
@@ -992,6 +1087,8 @@ msgid ""
 "Record 0 claims %u cases with %u values per case (requiring at least %zu "
 "bytes) but data record is only %u bytes long."
 msgstr ""
+"Záznam 0 udává %u případů s %u hodnotami na případ (vyžaduje alespoň %zu "
+"bajtů), ale datový záznam má délku pouze %u bajtů."
 
 #: src/data/pc+-file-reader.c:606
 #, c-format
@@ -999,6 +1096,8 @@ msgid ""
 "Value labels claimed to end at offset %u in labels record but labels record "
 "is only %u bytes."
 msgstr ""
+"Popisky hodnot mají údajně končit na pozici %u v záznamu popisků, ale záznam "
+"popisků má pouze %u bajtů."
 
 #: src/data/pc+-file-reader.c:617
 #, c-format
@@ -1006,6 +1105,8 @@ msgid ""
 "Value labels claimed to be at offset %u with length %u but file size is only "
 "%u bytes."
 msgstr ""
+"Popisky hodnot mají údajně být na pozici %u s délkou %u, ale soubor má "
+"velikost pouze %u bajtů."
 
 #: src/data/pc+-file-reader.c:644
 #, c-format
@@ -1013,11 +1114,13 @@ msgid ""
 "Value labels end with partial label (%u bytes left in record, label length "
 "%<PRIu8>)."
 msgstr ""
+"Popisky hodnot končí neúplným popiskem (v záznamu zbývá %u bajtů, délka "
+"popisku %<PRIu8>)."
 
 #: src/data/pc+-file-reader.c:657
 #, c-format
 msgid "%u leftover bytes following value labels."
-msgstr ""
+msgstr "Za popisky hodnot zbývá %u bajtů."
 
 #: src/data/pc+-file-reader.c:673
 #, c-format
@@ -1025,47 +1128,51 @@ msgid ""
 "Variable label claimed to start at offset %u in labels record but labels "
 "record is only %u bytes."
 msgstr ""
+"Popisek proměnné má údajně začínat na pozici %u v záznamu popisků, ale záznam"
+" popisků má pouze %u bajtů."
 
 #: src/data/pc+-file-reader.c:685
 #, c-format
 msgid ""
-"Variable label with length %u starting at offset %u in labels record "
-"overruns end of %u-byte labels record."
+"Variable label with length %u starting at offset %u in labels record overruns"
+" end of %u-byte labels record."
 msgstr ""
+"Popisek proměnné o délce %u začínající na pozici %u v záznamu popisků "
+"přesahuje konec záznamu popisků o velikosti %u bajtů."
 
 #: src/data/pc+-file-reader.c:707
 #, c-format
 msgid "Record 1 has length %u (expected %u)."
-msgstr ""
+msgstr "Záznam 1 má délku %u (očekáváno %u)."
 
 #: src/data/pc+-file-reader.c:739
 #, c-format
 msgid "Variable %u has invalid type %<PRIu8>."
-msgstr ""
+msgstr "Proměnná %u má neplatný typ %<PRIu8>."
 
 #: src/data/pc+-file-reader.c:775
 #, c-format
 msgid "Invalid weight index %u."
-msgstr ""
+msgstr "Neplatný index váhy %u."
 
 #: src/data/pc+-file-reader.c:848
 #, c-format
 msgid "Invalid variable name `%s'."
-msgstr ""
+msgstr "Neplatný název proměnné `%s'."
 
 #: src/data/pc+-file-reader.c:856
 #, c-format
 msgid "Renaming variable with duplicate name `%s' to `%s'."
-msgstr ""
+msgstr "Přejmenování proměnné s duplicitním názvem `%s' na `%s'."
 
 #: src/data/pc+-file-reader.c:866
 #, c-format
 msgid "Cannot weight by string variable `%s'."
-msgstr ""
+msgstr "Nelze vážit textovou proměnnou `%s'."
 
 #: src/data/pc+-file-reader.c:963 src/data/sys-file-reader.c:2820
 msgid "File ends in partial case."
-msgstr ""
+msgstr "Soubor končí neúplným případem."
 
 #: src/data/pc+-file-reader.c:969
 #, c-format
@@ -1073,11 +1180,13 @@ msgid ""
 "Case beginning at offset 0x%08x extends past end of data record at offset "
 "0x%08x."
 msgstr ""
+"Případ začínající na pozici 0x%08x přesahuje konec datového záznamu na pozici"
+" 0x%08x."
 
 #: src/data/pc+-file-reader.c:988 src/data/sys-file-reader.c:2828
 #, c-format
 msgid "Error reading case from file %s."
-msgstr ""
+msgstr "Chyba při čtení případu ze souboru %s."
 
 #: src/data/pc+-file-reader.c:1104 src/data/sys-file-reader.c:2991
 #, c-format
@@ -1085,116 +1194,118 @@ msgid ""
 "Possible compressed data corruption: string contains compressed integer "
 "(opcode %d)."
 msgstr ""
+"Možné poškození komprimovaných dat: řetězec obsahuje komprimované celé číslo "
+"(operační kód %d)."
 
 #: src/data/pc+-file-reader.c:1146 src/data/sys-file-reader.c:3292
 #, c-format
 msgid "`%s' near offset 0x%llx: "
-msgstr ""
+msgstr "`%s' poblíž pozice 0x%llx: "
 
 #: src/data/pc+-file-reader.c:1149 src/data/sys-file-reader.c:3295
 #, c-format
 msgid "`%s': "
-msgstr ""
+msgstr "`%s': "
 
 #: src/data/pc+-file-reader.c:1202 src/data/sys-file-reader.c:3347
 #, c-format
 msgid "System error: %s."
-msgstr ""
+msgstr "Systémová chyba: %s."
 
 #: src/data/pc+-file-reader.c:1207 src/data/sys-file-reader.c:3352
 msgid "Unexpected end of file."
-msgstr ""
+msgstr "Neočekávaný konec souboru."
 
 #: src/data/pc+-file-reader.c:1292 src/data/sys-file-reader.c:3577
 #, c-format
 msgid "%s: seek failed (%s)."
-msgstr ""
+msgstr "%s: přesun v souboru selhal (%s)."
 
 #: src/data/pc+-file-reader.c:1342
 msgid "SPSS/PC+ System File"
-msgstr ""
+msgstr "Systémový soubor SPSS/PC+"
 
 #: src/data/por-file-reader.c:109
 #, c-format
 msgid "portable file %s corrupt at offset 0x%llx: "
-msgstr ""
+msgstr "přenosný soubor %s je poškozen na pozici 0x%llx: "
 
 #: src/data/por-file-reader.c:137
 #, c-format
 msgid "reading portable file %s at offset 0x%llx: "
-msgstr ""
+msgstr "čtení přenosného souboru %s na pozici 0x%llx: "
 
 #: src/data/por-file-reader.c:166
 #, c-format
 msgid "Error closing portable file `%s': %s."
-msgstr ""
+msgstr "Chyba při zavírání přenosného souboru `%s': %s."
 
 #: src/data/por-file-reader.c:218
 msgid "Unexpected end of file"
-msgstr ""
+msgstr "Neočekávaný konec souboru"
 
 #. TRANSLATORS: this fragment will be interpolated into
 #. messages in fh_lock() that identify types of files.
 #: src/data/por-file-reader.c:277 src/data/por-file-writer.c:147
 msgid "portable file"
-msgstr ""
+msgstr "přenosný soubor"
 
 #: src/data/por-file-reader.c:285
 #, c-format
 msgid ""
 "An error occurred while opening `%s' for reading as a portable file: %s."
-msgstr ""
+msgstr "Při otevírání `%s' pro čtení jako přenosný soubor došlo k chybě: %s."
 
 #: src/data/por-file-reader.c:306
 msgid "Data record expected."
-msgstr ""
+msgstr "Očekáván datový záznam."
 
 #: src/data/por-file-reader.c:404
 msgid "Number expected."
-msgstr ""
+msgstr "Očekáváno číslo."
 
 #: src/data/por-file-reader.c:432
 msgid "Missing numeric terminator."
-msgstr ""
+msgstr "Chybí ukončovač čísla."
 
 #: src/data/por-file-reader.c:455
 msgid "Invalid integer."
-msgstr ""
+msgstr "Neplatné celé číslo."
 
 #: src/data/por-file-reader.c:466 src/data/por-file-reader.c:486
 #, c-format
 msgid "Bad string length %d."
-msgstr ""
+msgstr "Chybná délka řetězce %d."
 
 #: src/data/por-file-reader.c:549
 #, c-format
 msgid "%s: Not a portable file."
-msgstr ""
+msgstr "%s: Nejde o přenosný soubor."
 
 #: src/data/por-file-reader.c:566
 #, c-format
 msgid "Unrecognized version code `%c'."
-msgstr ""
+msgstr "Nerozpoznaný kód verze `%c'."
 
 #: src/data/por-file-reader.c:579
 #, c-format
 msgid "Bad date string length %zu."
-msgstr ""
+msgstr "Chybná délka řetězce data %zu."
 
 #: src/data/por-file-reader.c:581
 #, c-format
 msgid "Bad time string length %zu."
-msgstr ""
+msgstr "Chybná délka řetězce času %zu."
 
 #: src/data/por-file-reader.c:644
 #, c-format
 msgid "Numeric variable %s has invalid format specifier %s."
-msgstr ""
+msgstr "Číselná proměnná %s má neplatné určení formátu %s."
 
 #: src/data/por-file-reader.c:648
 #, c-format
 msgid "String variable %s with width %d has invalid format specifier %s."
-msgstr ""
+msgstr "Textová proměnná %s o šířce %d má neplatné určení formátu %s."
 
 #: src/data/por-file-reader.c:656
 #, c-format
@@ -1202,89 +1313,94 @@ msgid ""
 "%s: Bad format specifier byte (%d).  Variable will be assigned a default "
 "format."
 msgstr ""
+"%s: Chybný bajt určení formátu (%d). Proměnné bude přiřazen výchozí formát."
 
 #: src/data/por-file-reader.c:675
 msgid "Expected variable count record."
-msgstr ""
+msgstr "Očekáván záznam s počtem proměnných."
 
 #: src/data/por-file-reader.c:679
 #, c-format
 msgid "Invalid number of variables %d."
-msgstr ""
+msgstr "Neplatný počet proměnných %d."
 
 #: src/data/por-file-reader.c:688
 #, c-format
 msgid "Weight variable name (%s) truncated."
-msgstr ""
+msgstr "Název váhové proměnné (%s) byl zkrácen."
 
 #: src/data/por-file-reader.c:703
 msgid "Expected variable record."
-msgstr ""
+msgstr "Očekáván záznam proměnné."
 
 #: src/data/por-file-reader.c:707
 #, c-format
 msgid "Invalid variable width %d."
-msgstr ""
+msgstr "Neplatná šířka proměnné %d."
 
 #: src/data/por-file-reader.c:714 src/data/sys-file-reader.c:1426
 #, c-format
 msgid "Bad width %d for variable %s."
-msgstr ""
+msgstr "Chybná šířka %d pro proměnnou %s."
 
 #: src/data/por-file-reader.c:718
 #, c-format
 msgid "Invalid or duplicate variable name %s in position %d renamed to %s."
 msgstr ""
+"Neplatný nebo duplicitní název proměnné %s na pozici %d byl přejmenován na "
+"%s."
 
 #: src/data/por-file-reader.c:766
 #, c-format
 msgid "Weighting variable %s not present in dictionary."
-msgstr ""
+msgstr "Váhová proměnná %s není ve slovníku."
 
 #: src/data/por-file-reader.c:810
 #, c-format
 msgid "Unknown variable %s while parsing value labels."
-msgstr ""
+msgstr "Neznámá proměnná %s při zpracování popisků hodnot."
 
 #: src/data/por-file-reader.c:813
 #, c-format
 msgid ""
 "Cannot assign value labels to %s and %s, which have different variable types."
 msgstr ""
+"Proměnným %s a %s, které mají různé typy, nelze přiřadit popisky hodnot."
 
 #: src/data/por-file-reader.c:949
 msgid "SPSS Portable File"
-msgstr ""
+msgstr "Přenosný soubor SPSS"
 
 #: src/data/por-file-writer.c:139
 #, c-format
 msgid "Invalid decimal digits count %d.  Treating as %d."
-msgstr ""
+msgstr "Neplatný počet desetinných číslic %d. Bude použito %d."
 
 #: src/data/por-file-writer.c:159
 #, c-format
 msgid "Error opening `%s' for writing as a portable file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro zápis jako přenosný soubor: %s."
 
 #: src/data/por-file-writer.c:505
 #, c-format
 msgid "An I/O error occurred writing portable file `%s'."
-msgstr ""
+msgstr "Při zápisu přenosného souboru `%s' došlo k chybě vstupu/výstupu."
 
 #: src/data/psql-reader.c:48
 msgid ""
 "Support for reading postgres databases was not compiled into this "
 "installation of PSPP"
 msgstr ""
+"Podpora čtení databází postgres nebyla do této instalace PSPP zakompilována"
 
 #: src/data/psql-reader.c:236
 msgid "Memory error whilst opening psql source"
-msgstr ""
+msgstr "Chyba paměti při otevírání zdroje psql"
 
 #: src/data/psql-reader.c:242
 #, c-format
 msgid "Error opening psql source: %s."
-msgstr ""
+msgstr "Chyba při otevírání zdroje psql: %s."
 
 #: src/data/psql-reader.c:257
 #, c-format
@@ -1292,29 +1408,32 @@ msgid ""
 "Postgres server is version %s. Reading from versions earlier than 8.0 is not "
 "supported."
 msgstr ""
+"Server Postgres má verzi %s. Čtení z verzí starších než 8.0 není podporováno."
 
 #: src/data/psql-reader.c:277
 msgid ""
 "Connection is unencrypted, but unencrypted connections have not been "
 "permitted."
-msgstr ""
+msgstr "Připojení není šifrované, ale nešifrovaná připojení nebyla povolena."
 
 #: src/data/psql-reader.c:317 src/data/psql-reader.c:341
 #: src/data/psql-reader.c:351
 #, c-format
 msgid "Error from psql source: %s."
-msgstr ""
+msgstr "Chyba ze zdroje psql: %s."
 
 #: src/data/psql-reader.c:446
 #, c-format
 msgid "Unsupported OID %d.  SYSMIS values will be inserted."
-msgstr ""
+msgstr "Nepodporované OID %d. Budou vloženy hodnoty SYSMIS."
 
 #: src/data/settings.c:401
 msgid ""
-"MXWARNS set to zero.  No further warnings will be given even when "
-"potentially problematic situations are encountered."
+"MXWARNS set to zero.  No further warnings will be given even when potentially"
+" problematic situations are encountered."
 msgstr ""
+"MXWARNS nastaveno na nulu. Nebudou vydána žádná další upozornění, ani když "
+"nastanou potenciálně problematické situace."
 
 #: src/data/settings.c:408
 #, c-format
@@ -1322,6 +1441,8 @@ msgid ""
 "Warnings re-enabled. %d warnings will be issued before aborting syntax "
 "processing."
 msgstr ""
+"Upozornění znovu zapnuta. Před přerušením zpracování syntaxe bude vydáno %d "
+"upozornění."
 
 #: src/data/settings.c:620
 #, c-format
@@ -1329,25 +1450,27 @@ msgid ""
 "Custom currency string `%s' for %s does not contain exactly three periods or "
 "commas (or it contains both)."
 msgstr ""
+"Vlastní měnový řetězec `%s' pro %s neobsahuje přesně tři tečky nebo čárky "
+"(nebo obsahuje obojí)."
 
 #. TRANSLATORS: this fragment will be interpolated into
 #. messages in fh_lock() that identify types of files.
 #: src/data/sys-file-reader.c:410 src/data/sys-file-writer.c:245
 msgid "system file"
-msgstr ""
+msgstr "systémový soubor"
 
 #: src/data/sys-file-reader.c:417
 #, c-format
 msgid "Error opening `%s' for reading as a system file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro čtení jako systémový soubor: %s."
 
 #: src/data/sys-file-reader.c:494
 msgid "Misplaced type 4 record."
-msgstr ""
+msgstr "Chybně umístěný záznam typu 4."
 
 #: src/data/sys-file-reader.c:499
 msgid "Duplicate type 6 (document) record."
-msgstr ""
+msgstr "Duplicitní záznam typu 6 (dokument)."
 
 #: src/data/sys-file-reader.c:509 src/data/sys-file-reader.c:1354
 #, c-format
@@ -1355,6 +1478,8 @@ msgid ""
 "Unrecognized record type 7, subtype %d.  For help, please send this file to "
 "%s and mention that you were using %s."
 msgstr ""
+"Nerozpoznaný záznam typu 7, podtyp %d. Pro pomoc prosím pošlete tento soubor "
+"na %s a uveďte, že jste používali %s."
 
 #: src/data/sys-file-reader.c:529
 #, c-format
@@ -1363,86 +1488,98 @@ msgid ""
 "near offset 0x%llx.  For help, please send this file to %s and mention that "
 "you were using %s."
 msgstr ""
+"Zde nalezený záznam typu 7, podtyp %d má stejný typ jako záznam nalezený "
+"poblíž pozice 0x%llx. Pro pomoc prosím pošlete tento soubor na %s a uveďte, "
+"že jste používali %s."
 
 #: src/data/sys-file-reader.c:541
 #, c-format
 msgid "Unrecognized record type %d."
-msgstr ""
+msgstr "Nerozpoznaný typ záznamu %d."
 
 #: src/data/sys-file-reader.c:698
 #, c-format
 msgid "Value Label %zu"
-msgstr ""
+msgstr "Popisek hodnoty %zu"
 
 #: src/data/sys-file-reader.c:707
 msgid "Extra Product Info"
-msgstr ""
+msgstr "Doplňující informace o produktu"
 
 #: src/data/sys-file-reader.c:720
 #, c-format
 msgid "Document Line %zu"
-msgstr ""
+msgstr "Řádek dokumentu %zu"
 
 #: src/data/sys-file-reader.c:728
 #, c-format
 msgid "MRSET %zu"
-msgstr ""
+msgstr "MRSET %zu"
 
 #: src/data/sys-file-reader.c:730
 #, c-format
 msgid "MRSET %zu Label"
-msgstr ""
+msgstr "Popisek MRSET %zu"
 
 #: src/data/sys-file-reader.c:735
 #, c-format
 msgid "MRSET %zu Counted Value"
-msgstr ""
+msgstr "Počítaná hodnota MRSET %zu"
 
 #: src/data/sys-file-reader.c:773
 #, c-format
 msgid ""
-"This system file does not indicate its own character encoding.  Using "
-"default encoding %s.  For best results, specify an encoding explicitly.  Use "
-"SYSFILE INFO with ENCODING=\"DETECT\" to analyze the possible encodings."
+"This system file does not indicate its own character encoding.  Using default"
+" encoding %s.  For best results, specify an encoding explicitly.  Use SYSFILE"
+" INFO with ENCODING=\"DETECT\" to analyze the possible encodings."
 msgstr ""
+"Tento systémový soubor neuvádí své vlastní kódování znaků. Používá se výchozí"
+" kódování %s. Pro nejlepší výsledky zadejte kódování explicitně. K analýze "
+"možných kódování použijte SYSFILE INFO s ENCODING=\"DETECT\"."
 
 #: src/data/sys-file-reader.c:857
 #, c-format
 msgid "File header claims %d variable positions but %zu were read from file."
 msgstr ""
+"Hlavička souboru udává %d pozic proměnných, ale ze souboru bylo načteno %zu."
 
 #: src/data/sys-file-reader.c:969 src/data/sys-file-reader.c:983
 msgid "This is not an SPSS system file."
-msgstr ""
+msgstr "Toto není systémový soubor SPSS."
 
 #: src/data/sys-file-reader.c:1038
 msgid ""
 "Compression bias is not the usual value of 100, or system file uses "
 "unrecognized floating-point format."
 msgstr ""
+"Kompresní posun nemá obvyklou hodnotu 100, nebo systémový soubor používá "
+"nerozpoznaný formát čísel s plovoucí čárkou."
 
 #: src/data/sys-file-reader.c:1113
 msgid "Variable label indicator field is not 0 or 1."
-msgstr ""
+msgstr "Pole indikátoru popisku proměnné není 0 ani 1."
 
 #: src/data/sys-file-reader.c:1126
 msgid "Numeric missing value indicator field is not -3, -2, 0, 1, 2, or 3."
 msgstr ""
+"Pole indikátoru číselných chybějících hodnot není -3, -2, 0, 1, 2 ani 3."
 
 #: src/data/sys-file-reader.c:1136
 msgid "String missing value indicator field is not 0, 1, 2, or 3."
-msgstr ""
+msgstr "Pole indikátoru textových chybějících hodnot není 0, 1, 2 ani 3."
 
 #: src/data/sys-file-reader.c:1163
 #, c-format
 msgid "Invalid number of labels %u."
-msgstr ""
+msgstr "Neplatný počet popisků %u."
 
 #: src/data/sys-file-reader.c:1196
 msgid ""
-"Variable index record (type 4) does not immediately follow value label "
-"record (type 3) as it should."
+"Variable index record (type 4) does not immediately follow value label record"
+" (type 3) as it should."
 msgstr ""
+"Záznam indexů proměnných (typ 4) nenásleduje bezprostředně po záznamu popisků"
+" hodnot (typ 3), jak by měl."
 
 #: src/data/sys-file-reader.c:1208
 #, c-format
@@ -1450,44 +1587,47 @@ msgid ""
 "Number of variables associated with a value label (%u) is not between 1 and "
 "the number of variables (%zu)."
 msgstr ""
+"Počet proměnných přiřazených k popisku hodnoty (%u) není mezi 1 a počtem "
+"proměnných (%zu)."
 
 #: src/data/sys-file-reader.c:1235
 #, c-format
 msgid "Number of document lines (%d) must be greater than 0 and less than %d."
-msgstr ""
+msgstr "Počet řádků dokumentu (%d) musí být větší než 0 a menší než %d."
 
 #: src/data/sys-file-reader.c:1328
 #, c-format
 msgid "Record type 7, subtype %d has bad size %u (expected %d)."
-msgstr ""
+msgstr "Záznam typu 7, podtyp %d má chybnou velikost %u (očekáváno %d)."
 
 #: src/data/sys-file-reader.c:1332
 #, c-format
 msgid "Record type 7, subtype %d has bad count %u (expected %d)."
-msgstr ""
+msgstr "Záznam typu 7, podtyp %d má chybný počet %u (očekáváno %d)."
 
 #: src/data/sys-file-reader.c:1434
 #, c-format
 msgid "Renaming variable with invalid or duplicate name `%s' to `%s'."
 msgstr ""
+"Přejmenování proměnné s neplatným nebo duplicitním názvem `%s' na `%s'."
 
 #: src/data/sys-file-reader.c:1504
 msgid "Missing string continuation record."
-msgstr ""
+msgstr "Chybí pokračovací záznam řetězce."
 
 #: src/data/sys-file-reader.c:1537
 #, c-format
 msgid "Variable %s with width %d has invalid print format 0x%x."
-msgstr ""
+msgstr "Proměnná %s o šířce %d má neplatný formát zobrazení 0x%x."
 
 #: src/data/sys-file-reader.c:1541
 #, c-format
 msgid "Variable %s with width %d has invalid write format 0x%x."
-msgstr ""
+msgstr "Proměnná %s o šířce %d má neplatný formát zápisu 0x%x."
 
 #: src/data/sys-file-reader.c:1546
 msgid "Suppressing further invalid format warnings."
-msgstr ""
+msgstr "Další upozornění na neplatný formát se potlačují."
 
 #: src/data/sys-file-reader.c:1600
 #, c-format
@@ -1495,80 +1635,89 @@ msgid ""
 "Floating-point representation indicated by system file (%d) differs from "
 "expected (%d)."
 msgstr ""
+"Reprezentace čísel s plovoucí čárkou uvedená systémovým souborem (%d) se liší"
+" od očekávané (%d)."
 
 #: src/data/sys-file-reader.c:1616
 #, c-format
 msgid ""
 "Integer format indicated by system file (%d) differs from expected (%d)."
 msgstr ""
+"Formát celých čísel uvedený systémovým souborem (%d) se liší od očekávaného "
+"(%d)."
 
 #: src/data/sys-file-reader.c:1634 src/data/sys-file-reader.c:1640
 #, c-format
 msgid "File specifies unexpected value %g (%a) as %s, instead of %g (%a)."
-msgstr ""
+msgstr "Soubor uvádí neočekávanou hodnotu %g (%a) jako %s namísto %g (%a)."
 
 #: src/data/sys-file-reader.c:1649
 #, c-format
 msgid ""
 "File specifies unexpected value %g (%a) as %s, instead of %g (%a) or %g (%a)."
 msgstr ""
+"Soubor uvádí neočekávanou hodnotu %g (%a) jako %s namísto %g (%a) nebo %g "
+"(%a)."
 
 #: src/data/sys-file-reader.c:1701 src/data/sys-file-reader.c:1720
 #, c-format
 msgid "Missing space following `%c' at offset %zu in MRSETS record."
-msgstr ""
+msgstr "Chybí mezera za `%c' na pozici %zu v záznamu MRSETS."
 
 #: src/data/sys-file-reader.c:1728
 #, c-format
 msgid ""
 "Missing label source value following `E' at offset %zu in MRSETS record."
-msgstr ""
+msgstr "Chybí zdrojová hodnota popisku za `E' na pozici %zu v záznamu MRSETS."
 
 #: src/data/sys-file-reader.c:1735
 #, c-format
 msgid ""
 "Unexpected label source value following `E' at offset %zu in MRSETS record."
 msgstr ""
+"Neočekávaná zdrojová hodnota popisku za `E' na pozici %zu v záznamu MRSETS."
 
 #: src/data/sys-file-reader.c:1742
 #, c-format
 msgid "Missing `C', `D', or `E' at offset %zu in MRSETS record."
-msgstr ""
+msgstr "Chybí `C', `D' nebo `E' na pozici %zu v záznamu MRSETS."
 
 #: src/data/sys-file-reader.c:1769
 #, c-format
 msgid "Missing new-line parsing variable names at offset %zu in MRSETS record."
 msgstr ""
+"Při zpracování názvů proměnných chybí konec řádku na pozici %zu v záznamu "
+"MRSETS."
 
 #: src/data/sys-file-reader.c:1804
 #, c-format
 msgid "Invalid multiple response set name `%s'."
-msgstr ""
+msgstr "Neplatný název sady vícenásobných odpovědí `%s'."
 
 #: src/data/sys-file-reader.c:1837
 #, c-format
 msgid "MRSET %s contains duplicate variable name %s."
-msgstr ""
+msgstr "MRSET %s obsahuje duplicitní název proměnné %s."
 
 #: src/data/sys-file-reader.c:1852
 #, c-format
 msgid "MRSET %s contains both string and numeric variables."
-msgstr ""
+msgstr "MRSET %s obsahuje textové i číselné proměnné."
 
 #: src/data/sys-file-reader.c:1864
 #, c-format
 msgid "MRSET %s has no variables."
-msgstr ""
+msgstr "MRSET %s nemá žádné proměnné."
 
 #: src/data/sys-file-reader.c:1866
 #, c-format
 msgid "MRSET %s has only one variable."
-msgstr ""
+msgstr "MRSET %s má pouze jednu proměnnou."
 
 #: src/data/sys-file-reader.c:1910
 #, c-format
 msgid "Extension 11 has bad count %u (for %zu variables)."
-msgstr ""
+msgstr "Rozšíření 11 má chybný počet %u (pro %zu proměnných)."
 
 #: src/data/sys-file-reader.c:1943
 #, c-format
@@ -1576,21 +1725,25 @@ msgid ""
 "Invalid variable display parameters for variable %zu (%s).  Default "
 "parameters substituted."
 msgstr ""
+"Neplatné parametry zobrazení proměnné %zu (%s). Nahrazeny výchozími "
+"parametry."
 
 #: src/data/sys-file-reader.c:1987
 #, c-format
 msgid "Duplicate long variable name `%s'."
-msgstr ""
+msgstr "Duplicitní dlouhý název proměnné `%s'."
 
 #: src/data/sys-file-reader.c:2039
 #, c-format
 msgid "Long variable mapping from %s to invalid variable name `%s'."
-msgstr ""
+msgstr "Mapování dlouhého názvu proměnné z %s na neplatný název proměnné `%s'."
 
 #: src/data/sys-file-reader.c:2073
 #, c-format
 msgid "%s listed as string of invalid length %s in very long string record."
 msgstr ""
+"%s je v záznamu velmi dlouhých řetězců uvedena jako řetězec neplatné délky "
+"%s."
 
 #: src/data/sys-file-reader.c:2084
 #, c-format
@@ -1598,27 +1751,31 @@ msgid ""
 "%s listed in very long string record with width %s, which requires only one "
 "segment."
 msgstr ""
+"%s je v záznamu velmi dlouhých řetězců uvedena se šířkou %s, která vyžaduje "
+"pouze jeden segment."
 
 #: src/data/sys-file-reader.c:2092
 #, c-format
 msgid "Very long string %s overflows dictionary."
-msgstr ""
+msgstr "Velmi dlouhý řetězec %s přesahuje slovník."
 
 #: src/data/sys-file-reader.c:2110
 #, c-format
 msgid ""
 "Very long string with width %ld has segment %d of width %d (expected %d)."
 msgstr ""
+"Velmi dlouhý řetězec o šířce %ld má segment %d o šířce %d (očekáváno %d)."
 
 #: src/data/sys-file-reader.c:2167
 #, c-format
 msgid "Value label variable index %d not in valid range 1...%zu."
-msgstr ""
+msgstr "Index proměnné popisku hodnoty %d není v platném rozsahu 1...%zu."
 
 #: src/data/sys-file-reader.c:2177
 #, c-format
 msgid "Value label variable index %d refers to long string continuation."
 msgstr ""
+"Index proměnné popisku hodnoty %d odkazuje na pokračování dlouhého řetězce."
 
 #: src/data/sys-file-reader.c:2192
 #, c-format
@@ -1626,18 +1783,20 @@ msgid ""
 "Variables associated with value label are not all of identical type.  "
 "Variable %s is %s, but variable %s is %s."
 msgstr ""
+"Proměnné přiřazené k popisku hodnoty nemají všechny stejný typ. Proměnná %s "
+"je %s, ale proměnná %s je %s."
 
 #: src/data/sys-file-reader.c:2196 src/data/sys-file-reader.c:2198
 #: src/language/commands/apply-dictionary.c:74
 #: src/language/commands/apply-dictionary.c:75
 msgid "numeric"
-msgstr ""
+msgstr "číselná"
 
 #: src/data/sys-file-reader.c:2196 src/data/sys-file-reader.c:2198
 #: src/language/commands/apply-dictionary.c:74
 #: src/language/commands/apply-dictionary.c:75
 msgid "string"
-msgstr ""
+msgstr "textová"
 
 #: src/data/sys-file-reader.c:2210
 #, c-format
@@ -1645,21 +1804,23 @@ msgid ""
 "Value labels may not be added to long string variables (e.g. %s) using "
 "records types 3 and 4."
 msgstr ""
+"K dlouhým textovým proměnným (např. %s) nelze přidávat popisky hodnot pomocí "
+"záznamů typu 3 a 4."
 
 #: src/data/sys-file-reader.c:2239
 #, c-format
 msgid "Duplicate value label for %g on %s."
-msgstr ""
+msgstr "Duplicitní popisek hodnoty pro %g u %s."
 
 #: src/data/sys-file-reader.c:2244 src/data/sys-file-reader.c:2591
 #, c-format
 msgid "Duplicate value label for `%.*s' on %s."
-msgstr ""
+msgstr "Duplicitní popisek hodnoty pro `%.*s' u %s."
 
 #: src/data/sys-file-reader.c:2267
 #, c-format
 msgid "Suppressed %d additional warnings for value labels."
-msgstr ""
+msgstr "Potlačeno %d dalších upozornění k popiskům hodnot."
 
 #: src/data/sys-file-reader.c:2281
 #, c-format
@@ -1667,6 +1828,8 @@ msgid ""
 "Weight variable index %d not in valid range 1...%zu.  Treating file as "
 "unweighted."
 msgstr ""
+"Index váhové proměnné %d není v platném rozsahu 1...%zu. Soubor bude "
+"považován za nevážený."
 
 #: src/data/sys-file-reader.c:2291
 #, c-format
@@ -1674,51 +1837,55 @@ msgid ""
 "Weight variable index %d refers to long string continuation.  Treating file "
 "as unweighted."
 msgstr ""
+"Index váhové proměnné %d odkazuje na pokračování dlouhého řetězce. Soubor "
+"bude považován za nevážený."
 
 #: src/data/sys-file-reader.c:2299
 #, c-format
 msgid "Ignoring string variable `%s' set as weighting variable."
-msgstr ""
+msgstr "Textová proměnná `%s' nastavená jako váhová proměnná se ignoruje."
 
 #: src/data/sys-file-reader.c:2336
 #, c-format
 msgid "Error parsing attribute value %s[%d]."
-msgstr ""
+msgstr "Chyba při zpracování hodnoty atributu %s[%d]."
 
 #: src/data/sys-file-reader.c:2350
 #, c-format
 msgid "Attribute value %s[%d] is not quoted: %s."
-msgstr ""
+msgstr "Hodnota atributu %s[%d] není v uvozovkách: %s."
 
 #: src/data/sys-file-reader.c:2363
 #, c-format
 msgid "Duplicate attribute %s."
-msgstr ""
+msgstr "Duplicitní atribut %s."
 
 #: src/data/sys-file-reader.c:2447
 #, c-format
 msgid "Invalid role for variable %s."
-msgstr ""
+msgstr "Neplatná role proměnné %s."
 
 #: src/data/sys-file-reader.c:2456
 #, c-format
 msgid "%zu other variables had invalid roles."
-msgstr ""
+msgstr "%zu dalších proměnných mělo neplatné role."
 
 #: src/data/sys-file-reader.c:2478
 #, c-format
 msgid "Extension record subtype %d ends unexpectedly."
-msgstr ""
+msgstr "Rozšiřující záznam podtypu %d neočekávaně končí."
 
 #: src/data/sys-file-reader.c:2522
 #, c-format
 msgid "Ignoring long string value label record for unknown variable %s."
 msgstr ""
+"Záznam popisků hodnot dlouhých řetězců pro neznámou proměnnou %s se ignoruje."
 
 #: src/data/sys-file-reader.c:2527
 #, c-format
 msgid "Ignoring long string value label record for numeric variable %s."
 msgstr ""
+"Záznam popisků hodnot dlouhých řetězců pro číselnou proměnnou %s se ignoruje."
 
 #: src/data/sys-file-reader.c:2534
 #, c-format
@@ -1726,36 +1893,48 @@ msgid ""
 "Ignoring long string value label record for variable %s because the record's "
 "width (%d) does not match the variable's width (%d)."
 msgstr ""
+"Záznam popisků hodnot dlouhých řetězců pro proměnnou %s se ignoruje, protože "
+"šířka záznamu (%d) neodpovídá šířce proměnné (%d)."
 
 #: src/data/sys-file-reader.c:2564
 #, c-format
 msgid ""
-"Ignoring long string value label %zu for variable %s, with width %d, that "
-"has bad value width %zu."
+"Ignoring long string value label %zu for variable %s, with width %d, that has"
+" bad value width %zu."
 msgstr ""
+"Popisek hodnoty dlouhého řetězce %zu pro proměnnou %s o šířce %d, který má "
+"chybnou šířku hodnoty %zu, se ignoruje."
 
 #: src/data/sys-file-reader.c:2638
 #, c-format
 msgid ""
-"Long string missing values record says variable %s has %d missing values, "
-"but only 1 to 3 missing values are allowed."
+"Long string missing values record says variable %s has %d missing values, but"
+" only 1 to 3 missing values are allowed."
 msgstr ""
+"Záznam chybějících hodnot dlouhých řetězců uvádí, že proměnná %s má %d "
+"chybějících hodnot, ale povoleny jsou pouze 1 až 3 chybějící hodnoty."
 
 #: src/data/sys-file-reader.c:2648
 #, c-format
 msgid "Ignoring long string missing value record for unknown variable %s."
 msgstr ""
+"Záznam chybějících hodnot dlouhých řetězců pro neznámou proměnnou %s se "
+"ignoruje."
 
 #: src/data/sys-file-reader.c:2653
 #, c-format
 msgid "Ignoring long string missing value record for numeric variable %s."
 msgstr ""
+"Záznam chybějících hodnot dlouhých řetězců pro číselnou proměnnou %s se "
+"ignoruje."
 
 #: src/data/sys-file-reader.c:2677
 msgid ""
 "This file has corrupted metadata written by a buggy version of PSPP.  To fix "
 "it, save a new copy of the file."
 msgstr ""
+"Tento soubor obsahuje poškozená metadata zapsaná chybnou verzí PSPP. Pro "
+"opravu uložte novou kopii souboru."
 
 #: src/data/sys-file-reader.c:2693
 #, c-format
@@ -1763,91 +1942,98 @@ msgid ""
 "Ignoring long string missing value %zu for variable %s, with width %d, that "
 "has bad value width %zu."
 msgstr ""
+"Chybějící hodnota dlouhého řetězce %zu pro proměnnou %s o šířce %d, která má "
+"chybnou šířku hodnoty %zu, se ignoruje."
 
 #: src/data/sys-file-reader.c:2745
 #, c-format
 msgid "Variable set %s contains unknown variable %s."
-msgstr ""
+msgstr "Sada proměnných %s obsahuje neznámou proměnnou %s."
 
 #: src/data/sys-file-reader.c:2798
 msgid "File ends in partial string value."
-msgstr ""
+msgstr "Soubor končí neúplnou textovou hodnotou."
 
 #: src/data/sys-file-reader.c:2937
 msgid ""
 "Possible compressed data corruption: compressed spaces appear in numeric "
 "field."
 msgstr ""
+"Možné poškození komprimovaných dat: v číselném poli se vyskytují komprimované"
+" mezery."
 
 #: src/data/sys-file-reader.c:3088
 #, c-format
 msgid "Suppressed %d additional related warnings."
-msgstr ""
+msgstr "Potlačeno %d dalších souvisejících upozornění."
 
 #: src/data/sys-file-reader.c:3134 src/data/sys-file-reader.c:3151
 #, c-format
 msgid "Dictionary record refers to unknown variable %s."
-msgstr ""
+msgstr "Záznam slovníku odkazuje na neznámou proměnnou %s."
 
 #: src/data/sys-file-reader.c:3217
 #, c-format
 msgid "Expecting digit at offset %zu in MRSETS record."
-msgstr ""
+msgstr "Na pozici %zu v záznamu MRSETS se očekává číslice."
 
 #: src/data/sys-file-reader.c:3225
 #, c-format
 msgid "Expecting space at offset %zu in MRSETS record."
-msgstr ""
+msgstr "Na pozici %zu v záznamu MRSETS se očekává mezera."
 
 #: src/data/sys-file-reader.c:3233
 #, c-format
 msgid "%zu-byte string starting at offset %zu exceeds record length %zu."
 msgstr ""
+"Řetězec o %zu bajtech začínající na pozici %zu přesahuje délku záznamu %zu."
 
 #: src/data/sys-file-reader.c:3243
 #, c-format
 msgid "Expecting space at offset %zu following %zu-byte string."
-msgstr ""
+msgstr "Na pozici %zu za řetězcem o %zu bajtech se očekává mezera."
 
 #: src/data/sys-file-reader.c:3535
 #, c-format
 msgid "Wrong ZLIB data header offset %#llx (expected %#llx)."
-msgstr ""
+msgstr "Chybná pozice hlavičky dat ZLIB %#llx (očekáváno %#llx)."
 
 #: src/data/sys-file-reader.c:3543
 #, c-format
 msgid "Impossible ZLIB trailer offset 0x%llx."
-msgstr ""
+msgstr "Nemožná pozice zakončení ZLIB 0x%llx."
 
 #: src/data/sys-file-reader.c:3550
 #, c-format
 msgid "Invalid ZLIB trailer length %lld."
-msgstr ""
+msgstr "Neplatná délka zakončení ZLIB %lld."
 
 #: src/data/sys-file-reader.c:3614
 #, c-format
 msgid "End of ZLIB trailer (0x%llx) is not file size (0x%llx)."
-msgstr ""
+msgstr "Konec zakončení ZLIB (0x%llx) neodpovídá velikosti souboru (0x%llx)."
 
 #: src/data/sys-file-reader.c:3624
 #, c-format
 msgid "ZLIB trailer bias (%lld) differs from file header bias (%.2f)."
 msgstr ""
+"Posun v zakončení ZLIB (%lld) se liší od posunu v hlavičce souboru (%.2f)."
 
 #: src/data/sys-file-reader.c:3634
 #, c-format
 msgid "ZLIB trailer \"zero\" field has nonzero value %lld."
-msgstr ""
+msgstr "Pole „zero“ v zakončení ZLIB má nenulovou hodnotu %lld."
 
 #: src/data/sys-file-reader.c:3640
 #, c-format
 msgid "ZLIB trailer specifies unexpected %u-byte block size."
-msgstr ""
+msgstr "Zakončení ZLIB udává neočekávanou velikost bloku %u bajtů."
 
 #: src/data/sys-file-reader.c:3648
 #, c-format
 msgid "%lld-byte ZLIB trailer specifies %u data blocks (expected %lld)."
 msgstr ""
+"Zakončení ZLIB o %lld bajtech udává %u datových bloků (očekáváno %lld)."
 
 #: src/data/sys-file-reader.c:3673
 #, c-format
@@ -1855,6 +2041,8 @@ msgid ""
 "ZLIB block descriptor %u reported uncompressed data offset %#llx, when %#llx "
 "was expected."
 msgstr ""
+"Popisovač bloku ZLIB %u uvádí pozici nekomprimovaných dat %#llx, přičemž bylo"
+" očekáváno %#llx."
 
 #: src/data/sys-file-reader.c:3682
 #, c-format
@@ -1862,12 +2050,15 @@ msgid ""
 "ZLIB block descriptor %u reported compressed data offset %#llx, when %#llx "
 "was expected."
 msgstr ""
+"Popisovač bloku ZLIB %u uvádí pozici komprimovaných dat %#llx, přičemž bylo "
+"očekáváno %#llx."
 
 #: src/data/sys-file-reader.c:3692
 #, c-format
 msgid ""
 "ZLIB block descriptor %u reported block size %#x, when %#x was expected."
 msgstr ""
+"Popisovač bloku ZLIB %u uvádí velikost bloku %#x, přičemž bylo očekáváno %#x."
 
 #: src/data/sys-file-reader.c:3700
 #, c-format
@@ -1875,12 +2066,16 @@ msgid ""
 "ZLIB block descriptor %u reported block size %#x, when at most %#x was "
 "expected."
 msgstr ""
+"Popisovač bloku ZLIB %u uvádí velikost bloku %#x, přičemž bylo očekáváno "
+"nejvýše %#x."
 
 #: src/data/sys-file-reader.c:3712
 #, c-format
 msgid ""
 "ZLIB block descriptor %u reports compressed size %u and uncompressed size %u."
 msgstr ""
+"Popisovač bloku ZLIB %u uvádí komprimovanou velikost %u a nekomprimovanou "
+"velikost %u."
 
 #: src/data/sys-file-reader.c:3724
 #, c-format
@@ -1888,109 +2083,111 @@ msgid ""
 "ZLIB trailer is at offset %#llx but %#llx would be expected from block "
 "descriptors."
 msgstr ""
+"Zakončení ZLIB je na pozici %#llx, ale podle popisovačů bloků by se očekávalo"
+" %#llx."
 
 #: src/data/sys-file-reader.c:3743
 #, c-format
 msgid "ZLIB initialization failed (%s)."
-msgstr ""
+msgstr "Inicializace ZLIB selhala (%s)."
 
 #: src/data/sys-file-reader.c:3758
 #, c-format
 msgid "Inconsistency at end of ZLIB stream (%s)."
-msgstr ""
+msgstr "Nekonzistence na konci proudu ZLIB (%s)."
 
 #: src/data/sys-file-reader.c:3817
 #, c-format
 msgid "ZLIB stream inconsistency (%s)."
-msgstr ""
+msgstr "Nekonzistence proudu ZLIB (%s)."
 
 #: src/data/sys-file-reader.c:3841
 msgid "Unexpected end of ZLIB compressed data."
-msgstr ""
+msgstr "Neočekávaný konec dat komprimovaných ZLIB."
 
 #: src/data/sys-file-reader.c:3879
 msgid "SPSS System File"
-msgstr ""
+msgstr "Systémový soubor SPSS"
 
 #: src/data/sys-file-writer.c:211
 #, c-format
 msgid "Unknown system file version %d. Treating as version %d."
-msgstr ""
+msgstr "Neznámá verze systémového souboru %d. Bude použita verze %d."
 
 #: src/data/sys-file-writer.c:256
 #, c-format
 msgid "Error opening `%s' for writing as a system file: %s."
-msgstr ""
+msgstr "Chyba při otevírání `%s' pro zápis jako systémový soubor: %s."
 
 #: src/data/sys-file-writer.c:1316
 #, c-format
 msgid "An I/O error occurred writing system file `%s'."
-msgstr ""
+msgstr "Při zápisu systémového souboru `%s' došlo k chybě vstupu/výstupu."
 
 #: src/data/sys-file-writer.c:1423
 #, c-format
 msgid "Failed to initialize ZLIB for compression (%s)."
-msgstr ""
+msgstr "Nepodařilo se inicializovat ZLIB pro kompresi (%s)."
 
 #: src/data/sys-file-writer.c:1452
 #, c-format
 msgid "Failed to complete ZLIB stream compression (%s)."
-msgstr ""
+msgstr "Nepodařilo se dokončit kompresi proudu ZLIB (%s)."
 
 #: src/data/sys-file-writer.c:1494
 #, c-format
 msgid "ZLIB stream compression failed (%s)."
-msgstr ""
+msgstr "Komprese proudu ZLIB selhala (%s)."
 
 #: src/data/sys-file-writer.c:1536
 #, c-format
 msgid "%s: Seek failed (%s)."
-msgstr ""
+msgstr "%s: Přesun v souboru selhal (%s)."
 
 #: src/data/variable.c:58
 msgid "Left"
-msgstr ""
+msgstr "Vlevo"
 
 #: src/data/variable.c:59
 msgid "Right"
-msgstr ""
+msgstr "Vpravo"
 
 #: src/data/variable.c:60
 msgid "Center"
-msgstr ""
+msgstr "Na střed"
 
 #: src/data/variable.c:66 src/language/commands/set.c:1241
 #: src/language/commands/sys-file-info.c:208
 #: src/language/commands/sys-file-info.c:217
 #: src/language/commands/sys-file-info.c:224
 msgid "Unknown"
-msgstr ""
+msgstr "Neznámá"
 
 #: src/data/variable.c:67
 msgid "Nominal"
-msgstr ""
+msgstr "Nominální"
 
 #: src/data/variable.c:68
 msgid "Ordinal"
-msgstr ""
+msgstr "Ordinální"
 
 #: src/data/variable.c:69 src/language/commands/ks-one-sample.c:300
 msgid "Scale"
-msgstr ""
+msgstr "Škálová"
 
 #: src/data/variable.c:75
 msgid "Input"
-msgstr ""
+msgstr "Vstup"
 
 #. TRANSLATORS: This will be part of a filename.  Please avoid whitespace.
 #: src/data/variable.c:76 src/output/output-item.c:470
 #: src/output/spv/spv-writer.c:211 src/ui/gui/psppire-output-window.c:519
 msgid "Output"
-msgstr ""
+msgstr "Výstup"
 
 #: src/data/variable.c:77 src/ui/gui/examine.ui:269
 msgid "Both"
-msgstr ""
+msgstr "Obojí"
 
 #: src/data/variable.c:78 src/language/commands/sys-file-info.c:238
 #: src/ui/gui/psppire-dialog-action-crosstabs.c:86
@@ -2001,26 +2198,29 @@ msgstr ""
 #: src/ui/gui/examine.ui:598 src/ui/gui/examine.ui:691
 #: src/ui/gui/options.ui:304 src/ui/gui/text-data-import.ui:494
 msgid "None"
-msgstr ""
+msgstr "Žádná"
 
 #: src/data/variable.c:79
 msgid "Partition"
-msgstr ""
+msgstr "Oddíl"
 
 #: src/data/variable.c:80 src/ui/gui/reliability.ui:33
 msgid "Split"
-msgstr ""
+msgstr "Rozdělení"
 
 #: src/data/variable.c:726
 #, c-format
 msgid "%s (%s)"
-msgstr ""
+msgstr "%s (%s)"
 
 #: src/data/variable.c:1351
 msgid ""
 "At least one case in the data file had a weight value that was user-missing, "
 "system-missing, zero, or negative.  These case(s) were ignored."
 msgstr ""
+"Alespoň jeden případ v datovém souboru měl hodnotu váhy, která byla "
+"uživatelsky chybějící, systémově chybějící, nulová nebo záporná. Tyto případy"
+" byly ignorovány."
 
 #: src/language/command.c:212 src/language/commands/graph.c:698
 #: src/language/commands/graph.c:705 src/language/commands/graph.c:712
@@ -2032,58 +2232,61 @@ msgstr ""
 #: src/language/commands/set.c:311
 #, c-format
 msgid "%s is not yet implemented."
-msgstr ""
+msgstr "%s zatím není implementováno."
 
 #: src/language/command.c:218
 #, c-format
 msgid "%s may be used only in testing mode."
-msgstr ""
+msgstr "%s lze použít pouze v testovacím režimu."
 
 #: src/language/command.c:225
 #, c-format
 msgid "%s may be used only in enhanced syntax mode."
-msgstr ""
+msgstr "%s lze použít pouze v režimu rozšířené syntaxe."
 
 #: src/language/command.c:357
 msgid "Syntax error expecting command name."
-msgstr ""
+msgstr "Syntaktická chyba: očekáván název příkazu."
 
 #: src/language/command.c:360
 #, c-format
 msgid "Unknown command `%s'."
-msgstr ""
+msgstr "Neznámý příkaz `%s'."
 
 #: src/language/command.c:392
 #, c-format
 msgid "%s is allowed only before the active dataset has been defined."
-msgstr ""
+msgstr "%s je povoleno pouze před definováním aktivního datového souboru."
 
 #: src/language/command.c:395
 #, c-format
 msgid "%s is allowed only after the active dataset has been defined."
-msgstr ""
+msgstr "%s je povoleno pouze po definování aktivního datového souboru."
 
 #: src/language/command.c:398 src/language/command.c:401
 #, c-format
 msgid "%s is allowed only inside %s."
-msgstr ""
+msgstr "%s je povoleno pouze uvnitř %s."
 
 #: src/language/command.c:407 src/language/command.c:411
 #, c-format
 msgid ""
 "%s is allowed only before the active dataset has been defined or inside %s."
 msgstr ""
+"%s je povoleno pouze před definováním aktivního datového souboru nebo uvnitř "
+"%s."
 
 #: src/language/command.c:415 src/language/command.c:419
 #, c-format
 msgid ""
 "%s is allowed only after the active dataset has been defined or inside %s."
 msgstr ""
+"%s je povoleno pouze po definování aktivního datového souboru nebo uvnitř %s."
 
 #: src/language/command.c:423
 #, c-format
 msgid "%s is allowed only inside %s or inside %s."
-msgstr ""
+msgstr "%s je povoleno pouze uvnitř %s nebo uvnitř %s."
 
 #: src/language/command.c:428
 #, c-format
@@ -2091,6 +2294,8 @@ msgid ""
 "%s is allowed only after the active dataset has been defined, inside INPUT "
 "PROGRAM, or inside FILE TYPE."
 msgstr ""
+"%s je povoleno pouze po definování aktivního datového souboru, uvnitř INPUT "
+"PROGRAM nebo uvnitř FILE TYPE."
 
 #: src/language/command.c:432
 #, c-format
@@ -2098,101 +2303,104 @@ msgid ""
 "%s is allowed only before the active dataset has been defined, inside INPUT "
 "PROGRAM, or inside FILE TYPE."
 msgstr ""
+"%s je povoleno pouze před definováním aktivního datového souboru, uvnitř "
+"INPUT PROGRAM nebo uvnitř FILE TYPE."
 
 #: src/language/command.c:450 src/language/command.c:454
 #, c-format
 msgid "%s is not allowed inside %s."
-msgstr ""
+msgstr "%s není povoleno uvnitř %s."
 
 #: src/language/command.c:462
 #, c-format
 msgid "%s is not allowed inside DO IF or LOOP."
-msgstr ""
+msgstr "%s není povoleno uvnitř DO IF nebo LOOP."
 
 #: src/language/command.c:466
 #, c-format
 msgid "In INPUT PROGRAM, %s is not allowed inside DO IF or LOOP."
-msgstr ""
+msgstr "V INPUT PROGRAM není %s povoleno uvnitř DO IF nebo LOOP."
 
 #: src/language/command.c:471
 #, c-format
 msgid "%s is not allowed inside DO IF or LOOP (except inside INPUT PROGRAM)."
 msgstr ""
+"%s není povoleno uvnitř DO IF nebo LOOP (s výjimkou uvnitř INPUT PROGRAM)."
 
 #: src/language/command.c:558 src/language/commands/host.c:291
 #: src/language/commands/permissions.c:49
 #, c-format
 msgid "This command not allowed when the %s option is set."
-msgstr ""
+msgstr "Tento příkaz není povolen, je-li nastavena volba %s."
 
 #: src/language/command.c:575
 #, c-format
 msgid "Error removing `%s': %s."
-msgstr ""
+msgstr "Chyba při odstraňování `%s': %s."
 
 #: src/language/command.def:18
 msgid "Close File Handle"
-msgstr ""
+msgstr "Zavřít popisovač souboru"
 
 #: src/language/command.def:19
 msgid "Cache"
-msgstr ""
+msgstr "Mezipaměť"
 
 #: src/language/command.def:20
 msgid "CD"
-msgstr ""
+msgstr "Změna adresáře"
 
 #: src/language/command.def:21
 msgid "Define"
-msgstr ""
+msgstr "Definice makra"
 
 #: src/language/command.def:22
 msgid "Display Macros"
-msgstr ""
+msgstr "Zobrazit makra"
 
 #: src/language/command.def:23
 msgid "Do Repeat"
-msgstr ""
+msgstr "Opakování (Do Repeat)"
 
 #: src/language/command.def:24
 msgid "End Repeat"
-msgstr ""
+msgstr "Konec opakování"
 
 #: src/language/command.def:25
 msgid "Echo"
-msgstr ""
+msgstr "Výpis textu"
 
 #: src/language/command.def:26
 msgid "Erase"
-msgstr ""
+msgstr "Smazat"
 
 #: src/language/command.def:27
 msgid "Exit"
-msgstr ""
+msgstr "Ukončit"
 
 #: src/language/command.def:28
 msgid "File Handle"
-msgstr ""
+msgstr "Popisovač souboru"
 
 #: src/language/command.def:30
 msgid "Finish"
-msgstr ""
+msgstr "Dokončit"
 
 #: src/language/command.def:31
 msgid "Host"
-msgstr ""
+msgstr "Hostitelský příkaz"
 
 #: src/language/command.def:32
 msgid "Include"
-msgstr ""
+msgstr "Zahrnout"
 
 #: src/language/command.def:33
 msgid "Insert"
-msgstr ""
+msgstr "Vložit"
 
 #: src/language/command.def:34
 msgid "N of Cases"
-msgstr ""
+msgstr "Počet případů"
 
 #: src/language/command.def:35 src/language/commands/binomial.c:188
 #: src/language/commands/cochran.c:189 src/language/commands/correlations.c:91
@@ -2216,285 +2424,285 @@ msgstr ""
 #: src/language/commands/t-test-paired.c:194
 #: src/language/commands/wilcoxon.c:233
 msgid "N"
-msgstr ""
+msgstr "N"
 
 #: src/language/command.def:36
 msgid "New File"
-msgstr ""
+msgstr "Nový soubor"
 
 #: src/language/command.def:37
 msgid "Output Modify"
-msgstr ""
+msgstr "Úprava výstupu"
 
 #: src/language/command.def:38
 msgid "Permissions"
-msgstr ""
+msgstr "Oprávnění"
 
 #: src/language/command.def:39
 msgid "Preserve"
-msgstr ""
+msgstr "Uchovat nastavení"
 
 #: src/language/command.def:40 src/language/command.def:41
 msgid "Quit"
-msgstr ""
+msgstr "Ukončit"
 
 #: src/language/command.def:42
 msgid "Restore"
-msgstr ""
+msgstr "Obnovit nastavení"
 
 #: src/language/command.def:43
 msgid "Set"
-msgstr ""
+msgstr "Nastavení"
 
 #: src/language/command.def:44
 msgid "Show"
-msgstr ""
+msgstr "Zobrazit nastavení"
 
 #: src/language/command.def:45
 msgid "Subtitle"
-msgstr ""
+msgstr "Podtitul"
 
 #: src/language/command.def:46
 msgid "Sysfile Info"
-msgstr ""
+msgstr "Informace o systémovém souboru"
 
 #: src/language/command.def:47 src/output/output-item.c:737
 msgid "Title"
-msgstr ""
+msgstr "Titul"
 
 #: src/language/command.def:50
 msgid "Add Files"
-msgstr ""
+msgstr "Přidat soubory"
 
 #: src/language/command.def:52 src/language/commands/list.c:81
 msgid "Data List"
-msgstr ""
+msgstr "Seznam dat"
 
 #: src/language/command.def:53
 msgid "Get"
-msgstr ""
+msgstr "Načíst"
 
 #: src/language/command.def:54
 msgid "Get Data"
-msgstr ""
+msgstr "Načíst data"
 
 #: src/language/command.def:55
 msgid "Import"
-msgstr ""
+msgstr "Import"
 
 #: src/language/command.def:56
 msgid "Input Program"
-msgstr ""
+msgstr "Vstupní program"
 
 #: src/language/command.def:57
 msgid "Match Files"
-msgstr ""
+msgstr "Spojit soubory"
 
 #: src/language/command.def:58
 msgid "Matrix Data"
-msgstr ""
+msgstr "Maticová data"
 
 #: src/language/command.def:59
 msgid "Update"
-msgstr ""
+msgstr "Aktualizovat"
 
 #: src/language/command.def:60
 msgid "Dataset Activate"
-msgstr ""
+msgstr "Aktivovat datový soubor"
 
 #: src/language/command.def:61
 msgid "Dataset Declare"
-msgstr ""
+msgstr "Deklarovat datový soubor"
 
 #: src/language/command.def:62
 msgid "Dataset Close"
-msgstr ""
+msgstr "Zavřít datový soubor"
 
 #: src/language/command.def:63
 msgid "Dataset Copy"
-msgstr ""
+msgstr "Kopírovat datový soubor"
 
 #: src/language/command.def:64
 msgid "Dataset Name"
-msgstr ""
+msgstr "Pojmenovat datový soubor"
 
 #: src/language/command.def:65
 msgid "Dataset Display"
-msgstr ""
+msgstr "Zobrazit datové soubory"
 
 #: src/language/command.def:66
 msgid "Matrix"
-msgstr ""
+msgstr "Matice"
 
 #: src/language/command.def:67
 msgid "Matrix Convert"
-msgstr ""
+msgstr "Převod matice"
 
 #: src/language/command.def:70
 msgid "Add Value Labels"
-msgstr ""
+msgstr "Přidat popisky hodnot"
 
 #: src/language/command.def:71
 msgid "Add Document"
-msgstr ""
+msgstr "Přidat dokument"
 
 #: src/language/command.def:72
 msgid "Apply Dictionary"
-msgstr ""
+msgstr "Použít slovník"
 
 #: src/language/command.def:73
 msgid "Datafile Attribute"
-msgstr ""
+msgstr "Atribut datového souboru"
 
 #: src/language/command.def:74 src/ui/gui/examine.ui:317
 #: src/ui/gui/factor.ui:444 src/ui/gui/histogram.ui:146 src/ui/gui/roc.ui:329
 msgid "Display"
-msgstr ""
+msgstr "Zobrazit"
 
 #: src/language/command.def:75
 msgid "Display Variable Sets"
-msgstr ""
+msgstr "Zobrazit sady proměnných"
 
 #: src/language/command.def:76 src/language/commands/sys-file-info.c:529
 msgid "Document"
-msgstr ""
+msgstr "Dokument"
 
 #: src/language/command.def:77
 msgid "Drop Documents"
-msgstr ""
+msgstr "Odstranit dokumenty"
 
 #: src/language/command.def:78
 msgid "Formats"
-msgstr ""
+msgstr "Formáty"
 
 #: src/language/command.def:79
 msgid "Leave"
-msgstr ""
+msgstr "Ponechat"
 
 #: src/language/command.def:80 src/language/commands/sys-file-info.c:565
 #: src/ui/gui/psppire-var-info.c:53 src/ui/gui/psppire-var-sheet-header.c:73
 #: src/ui/gui/missing-val-dialog.c:380 src/ui/gui/examine.ui:498
 #: src/ui/gui/t-test.ui:104
 msgid "Missing Values"
-msgstr ""
+msgstr "Chybějící hodnoty"
 
 #: src/language/command.def:81 src/language/commands/mrsets.c:576
 msgid "Multiple Response Sets"
-msgstr ""
+msgstr "Sady vícenásobných odpovědí"
 
 #: src/language/command.def:82
 msgid "Print Formats"
-msgstr ""
+msgstr "Formáty zobrazení"
 
 #: src/language/command.def:83 src/ui/gui/split-file.ui:25
 msgid "Split File"
-msgstr ""
+msgstr "Rozdělení souboru"
 
 #: src/language/command.def:84 src/language/commands/sys-file-info.c:670
 #: src/ui/gui/psppire-var-info.c:54 src/ui/gui/psppire-var-sheet-header.c:70
 #: src/ui/gui/val-labs-dialog.c:489 src/ui/gui/val-labs-dialog.ui:194
 msgid "Value Labels"
-msgstr ""
+msgstr "Popisky hodnot"
 
 #: src/language/command.def:85
 msgid "Variable Alignment"
-msgstr ""
+msgstr "Zarovnání proměnných"
 
 #: src/language/command.def:86
 msgid "Variable Attribute"
-msgstr ""
+msgstr "Atribut proměnné"
 
 #: src/language/command.def:87
 msgid "Variable Labels"
-msgstr ""
+msgstr "Popisky proměnných"
 
 #: src/language/command.def:88
 msgid "Variable Level"
-msgstr ""
+msgstr "Úroveň měření proměnných"
 
 #: src/language/command.def:89
 msgid "Variable Role"
-msgstr ""
+msgstr "Role proměnných"
 
 #: src/language/command.def:90
 msgid "Variable Width"
-msgstr ""
+msgstr "Šířka proměnných"
 
 #: src/language/command.def:91
 msgid "Vector"
-msgstr ""
+msgstr "Vektor"
 
 #: src/language/command.def:92 src/language/commands/sys-file-info.c:231
 msgid "Weight"
-msgstr ""
+msgstr "Váha"
 
 #: src/language/command.def:93
 msgid "Write Formats"
-msgstr ""
+msgstr "Formáty zápisu"
 
 #: src/language/command.def:96
 msgid "Break"
-msgstr ""
+msgstr "Přerušit"
 
 #: src/language/command.def:97
 msgid "Compute"
-msgstr ""
+msgstr "Výpočet"
 
 #: src/language/command.def:98
 msgid "Do If"
-msgstr ""
+msgstr "Podmínka (Do If)"
 
 #: src/language/command.def:99
 msgid "If"
-msgstr ""
+msgstr "Podmínka (If)"
 
 #: src/language/command.def:100
 msgid "Loop"
-msgstr ""
+msgstr "Cyklus"
 
 #: src/language/command.def:102
 msgid "Print Eject"
-msgstr ""
+msgstr "Nová stránka tisku"
 
 #: src/language/command.def:103
 msgid "Print Space"
-msgstr ""
+msgstr "Mezera v tisku"
 
 #: src/language/command.def:104
 msgid "Print"
-msgstr ""
+msgstr "Tisk"
 
 #: src/language/command.def:105
 msgid "Recode"
-msgstr ""
+msgstr "Překódování"
 
 #: src/language/command.def:107
 msgid "Write"
-msgstr ""
+msgstr "Zápis"
 
 #: src/language/command.def:108
 msgid "XExport"
-msgstr ""
+msgstr "XExport"
 
 #: src/language/command.def:109
 msgid "XSave"
-msgstr ""
+msgstr "XSave"
 
 #: src/language/command.def:112
 msgid "Select If"
-msgstr ""
+msgstr "Výběr případů"
 
 #: src/language/command.def:115
 msgid "Aggregate"
-msgstr ""
+msgstr "Agregace"
 
 #: src/language/command.def:116
 msgid "Autorecode"
-msgstr ""
+msgstr "Automatické překódování"
 
 #: src/language/command.def:117
 msgid "Begin Data"
-msgstr ""
+msgstr "Začátek dat"
 
 #: src/language/command.def:118 src/language/commands/crosstabs.c:73
 #: src/language/commands/crosstabs.c:939 src/language/commands/ctables.c:330
@@ -2503,120 +2711,120 @@ msgstr ""
 #: src/ui/gui/psppire-dialog-action-crosstabs.c:90
 #: src/ui/gui/psppire-dialog-action-ctables.c:190
 msgid "Count"
-msgstr ""
+msgstr "Počet výskytů"
 
 #: src/language/command.def:119 src/ui/gui/crosstabs.ui:99
 msgid "Crosstabs"
-msgstr ""
+msgstr "Kontingenční tabulky"
 
 #: src/language/command.def:120
 msgid "Ctables"
-msgstr ""
+msgstr "Vlastní tabulky"
 
 #: src/language/command.def:121 src/language/commands/correlations.c:120
 msgid "Correlations"
-msgstr ""
+msgstr "Korelace"
 
 #: src/language/command.def:122
 msgid "Delete Variables"
-msgstr ""
+msgstr "Odstranit proměnné"
 
 #: src/language/command.def:123 src/language/commands/examine.c:722
 #: src/language/commands/oneway.c:974 src/ui/gui/descriptives.ui:25
 msgid "Descriptives"
-msgstr ""
+msgstr "Popisné statistiky"
 
 #: src/language/command.def:124
 msgid "Examine"
-msgstr ""
+msgstr "Explorace"
 
 #: src/language/command.def:125
 msgid "Execute"
-msgstr ""
+msgstr "Provést"
 
 #: src/language/command.def:126
 msgid "Export"
-msgstr ""
+msgstr "Export"
 
 #: src/language/command.def:127 src/language/commands/factor.c:1559
 #: src/language/commands/factor.c:1638 src/language/commands/factor.c:1700
 msgid "Factor"
-msgstr ""
+msgstr "Faktorová analýza"
 
 #: src/language/command.def:128
 msgid "Filter"
-msgstr ""
+msgstr "Filtr"
 
 #: src/language/command.def:129
 msgid "Flip"
-msgstr ""
+msgstr "Transpozice"
 
 #: src/language/command.def:130 src/language/commands/chisquare.c:235
 #: src/language/commands/cochran.c:150 src/language/commands/median.c:305
 #: src/language/commands/sign.c:66 src/ui/gui/frequencies.ui:675
 msgid "Frequencies"
-msgstr ""
+msgstr "Četnosti"
 
 #: src/language/command.def:131
 msgid "GLM"
-msgstr ""
+msgstr "GLM"
 
 #: src/language/command.def:132
 msgid "Graph"
-msgstr ""
+msgstr "Graf"
 
 #: src/language/command.def:133
 msgid "List"
-msgstr ""
+msgstr "Výpis"
 
 #: src/language/command.def:134 src/ui/gui/logistic.ui:219
 msgid "Logistic Regression"
-msgstr ""
+msgstr "Logistická regrese"
 
 #: src/language/command.def:135 src/ui/gui/means.ui:25
 msgid "Means"
-msgstr ""
+msgstr "Průměry"
 
 #: src/language/command.def:136
 msgid "Nonparametric Tests"
-msgstr ""
+msgstr "Neparametrické testy"
 
 #: src/language/command.def:137
 msgid "Oneway"
-msgstr ""
+msgstr "Jednofaktorová ANOVA"
 
 #: src/language/command.def:138
 msgid "Pearson Correlations"
-msgstr ""
+msgstr "Pearsonovy korelace"
 
 #: src/language/command.def:139
 msgid "Quick Cluster"
-msgstr ""
+msgstr "Rychlé shlukování"
 
 #: src/language/command.def:140
 msgid "Rank"
-msgstr ""
+msgstr "Pořadí"
 
 #: src/language/command.def:141 src/language/commands/regression.c:939
 #: src/ui/gui/regression.ui:20
 msgid "Regression"
-msgstr ""
+msgstr "Regrese"
 
 #: src/language/command.def:142
 msgid "Reliability"
-msgstr ""
+msgstr "Reliabilita"
 
 #: src/language/command.def:143
 msgid "Rename Variables"
-msgstr ""
+msgstr "Přejmenovat proměnné"
 
 #: src/language/command.def:144
 msgid "ROC"
-msgstr ""
+msgstr "ROC"
 
 #: src/language/command.def:145 src/ui/gui/var-type-dialog.ui:293
 msgid "Sample"
-msgstr ""
+msgstr "Výběr vzorku"
 
 #: src/language/command.def:146
 #: src/ui/gui/psppire-dialog-action-aggregate.c:211
@@ -2625,152 +2833,152 @@ msgstr ""
 #: src/ui/gui/psppire-syntax-window.c:670 src/ui/gui/psppire-window.c:441
 #: src/ui/gui/aggregate.ui:552
 msgid "Save"
-msgstr ""
+msgstr "Uložit"
 
 #: src/language/command.def:147
 msgid "Save Data Collection"
-msgstr ""
+msgstr "Uložit Data Collection"
 
 #: src/language/command.def:148
 msgid "Save Translate"
-msgstr ""
+msgstr "Uložit s převodem"
 
 #: src/language/command.def:149 src/ui/gui/sort.ui:25
 msgid "Sort Cases"
-msgstr ""
+msgstr "Seřadit případy"
 
 #: src/language/command.def:150
 msgid "Sort Variables"
-msgstr ""
+msgstr "Seřadit proměnné"
 
 #: src/language/command.def:151
 msgid "T-Test"
-msgstr ""
+msgstr "T-test"
 
 #: src/language/command.def:152
 msgid "Temporary"
-msgstr ""
+msgstr "Dočasně"
 
 #: src/language/command.def:153
 msgid "Use"
-msgstr ""
+msgstr "Použít"
 
 #: src/language/command.def:156
 msgid "End Case"
-msgstr ""
+msgstr "Konec případu"
 
 #: src/language/command.def:157
 msgid "End File"
-msgstr ""
+msgstr "Konec souboru"
 
 #: src/language/command.def:158
 msgid "Reread"
-msgstr ""
+msgstr "Znovu načíst"
 
 #: src/language/command.def:161
 msgid "Else If"
-msgstr ""
+msgstr "Jinak, pokud"
 
 #: src/language/command.def:162
 msgid "Else"
-msgstr ""
+msgstr "Jinak"
 
 #: src/language/command.def:163
 msgid "End If"
-msgstr ""
+msgstr "Konec podmínky"
 
 #: src/language/command.def:164
 msgid "End Loop"
-msgstr ""
+msgstr "Konec cyklu"
 
 #: src/language/lexer/lexer.c:566
 #, c-format
 msgid "Syntax error expecting %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s."
 
 #: src/language/lexer/lexer.c:570
 #, c-format
 msgid "Syntax error expecting %s or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s nebo %s."
 
 #: src/language/lexer/lexer.c:575
 #, c-format
 msgid "Syntax error expecting %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:580
 #, c-format
 msgid "Syntax error expecting %s, %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:585
 #, c-format
 msgid "Syntax error expecting %s, %s, %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:590
 #, c-format
 msgid "Syntax error expecting %s, %s, %s, %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s, %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:596
 #, c-format
 msgid "Syntax error expecting %s, %s, %s, %s, %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s, %s, %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:603
 #, c-format
 msgid "Syntax error expecting %s, %s, %s, %s, %s, %s, %s, or %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %s, %s, %s, %s, %s, %s, %s nebo %s."
 
 #: src/language/lexer/lexer.c:618
 #, c-format
 msgid "Syntax error expecting one of the following: %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno jedno z následujících: %s."
 
 #: src/language/lexer/lexer.c:639 src/language/lexer/lexer.c:641
 #, c-format
 msgid "Subcommand %s may only be specified once."
-msgstr ""
+msgstr "Podpříkaz %s lze zadat pouze jednou."
 
 #: src/language/lexer/lexer.c:654
 #, c-format
 msgid "Required subcommand %s was not specified."
-msgstr ""
+msgstr "Povinný podpříkaz %s nebyl zadán."
 
 #: src/language/lexer/lexer.c:662
 #, c-format
 msgid "%s may only be specified once within subcommand %s."
-msgstr ""
+msgstr "%s lze v rámci podpříkazu %s zadat pouze jednou."
 
 #: src/language/lexer/lexer.c:671
 #, c-format
 msgid "Required %s specification missing from %s subcommand."
-msgstr ""
+msgstr "V podpříkazu %s chybí povinné určení %s."
 
 #: src/language/lexer/lexer.c:694 src/language/commands/autorecode.c:211
 #: src/language/commands/print-space.c:88 src/language/commands/select-if.c:59
 msgid "Syntax error expecting end of command."
-msgstr ""
+msgstr "Syntaktická chyba: očekáván konec příkazu."
 
 #: src/language/lexer/lexer.c:896
 msgid "Syntax error expecting string."
-msgstr ""
+msgstr "Syntaktická chyba: očekáván řetězec."
 
 #: src/language/lexer/lexer.c:925 src/language/lexer/lexer.c:957
 #: src/language/lexer/lexer.c:1043
 msgid "Syntax error expecting integer."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno celé číslo."
 
 #: src/language/lexer/lexer.c:955 src/language/lexer/lexer.c:1040
 #, c-format
 msgid "Syntax error expecting integer for %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno celé číslo pro %s."
 
 #: src/language/lexer/lexer.c:962
 #, c-format
 msgid "Syntax error expecting %ld for %s."
-msgstr ""
+msgstr "Syntaktická chyba: očekáváno %ld pro %s."
 
 #: src/language/lexer/lexer.c:964
 #, c-format
@@ -3297,8 +3505,8 @@ msgstr ""
 #: src/language/lexer/variable-parser.c:215
 #, c-format
 msgid ""
-"%s and %s are not the same type.  All variables in this variable list must "
-"be of the same type.  %s will be omitted from the list."
+"%s and %s are not the same type.  All variables in this variable list must be"
+" of the same type.  %s will be omitted from the list."
 msgstr ""
 
 #: src/language/lexer/variable-parser.c:222
@@ -3438,8 +3646,8 @@ msgstr ""
 #: src/language/commands/aggregate.c:571
 #, c-format
 msgid ""
-"The value arguments passed to the %s function are out of order.  They will "
-"be treated as if they had been specified in the correct order."
+"The value arguments passed to the %s function are out of order.  They will be"
+" treated as if they had been specified in the correct order."
 msgstr ""
 
 #: src/language/commands/aggregate.c:587
@@ -3779,8 +3987,8 @@ msgstr ""
 #: src/language/commands/chisquare.c:171
 #, c-format
 msgid ""
-"CHISQUARE test specified %d expected values, but variable %s has %zu "
-"distinct values."
+"CHISQUARE test specified %d expected values, but variable %s has %zu distinct"
+" values."
 msgstr ""
 
 #: src/language/commands/chisquare.c:184 src/language/commands/chisquare.c:241
@@ -4773,13 +4981,13 @@ msgstr ""
 #: src/language/commands/ctables.c:2247
 #, c-format
 msgid ""
-"These categories include %zu instance of SUBTOTAL or HSUBTOTAL, so "
-"references from computed categories must refer to subtotals by position, "
-"e.g. SUBTOTAL[1]."
+"These categories include %zu instance of SUBTOTAL or HSUBTOTAL, so references"
+" from computed categories must refer to subtotals by position, e.g. "
+"SUBTOTAL[1]."
 msgid_plural ""
 "These categories include %zu instances of SUBTOTAL or HSUBTOTAL, so "
-"references from computed categories must refer to subtotals by position, "
-"e.g. SUBTOTAL[1]."
+"references from computed categories must refer to subtotals by position, e.g."
+" SUBTOTAL[1]."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -4815,8 +5023,8 @@ msgstr ""
 #: src/language/commands/ctables.c:4038
 #, c-format
 msgid ""
-"This category specification may be applied only to string variables, but "
-"this subcommand tries to apply it to numeric variable %s."
+"This category specification may be applied only to string variables, but this"
+" subcommand tries to apply it to numeric variable %s."
 msgstr ""
 
 #: src/language/commands/ctables.c:4178
@@ -4901,8 +5109,8 @@ msgstr ""
 #, c-format
 msgid ""
 "To move category labels from one axis to another, the variables whose labels "
-"are to be moved must all have the same category specifications, but %s and "
-"%s have different category specifications."
+"are to be moved must all have the same category specifications, but %s and %s"
+" have different category specifications."
 msgstr ""
 
 #: src/language/commands/ctables.c:5770
@@ -5072,8 +5280,8 @@ msgstr ""
 #: src/language/commands/data-parser.c:680
 #, c-format
 msgid ""
-"Missing value(s) for all variables from %s onward.  These will be filled "
-"with the system-missing value or blanks, as appropriate."
+"Missing value(s) for all variables from %s onward.  These will be filled with"
+" the system-missing value or blanks, as appropriate."
 msgstr ""
 
 #: src/language/commands/data-parser.c:702
@@ -5221,8 +5429,7 @@ msgid "Here is a previous keyword parameter."
 msgstr ""
 
 #: src/language/commands/define.c:228
-msgid ""
-"Keyword macro parameter must be named in definition without \"!\" prefix."
+msgid "Keyword macro parameter must be named in definition without \"!\" prefix."
 msgstr ""
 
 #: src/language/commands/define.c:237
@@ -6135,8 +6342,8 @@ msgstr ""
 #: src/language/commands/logistic.c:686
 #, c-format
 msgid ""
-"Estimation terminated at iteration number %d because Log Likelihood "
-"decreased by less than %g%%"
+"Estimation terminated at iteration number %d because Log Likelihood decreased"
+" by less than %g%%"
 msgstr ""
 
 #: src/language/commands/logistic.c:701
@@ -6346,8 +6553,8 @@ msgstr ""
 
 #: src/language/commands/matrix-data.c:1166
 msgid ""
-"CONTENTS was not specified and VARIABLES does not include ROWTYPE_.  "
-"Assuming CONTENTS=CORR."
+"CONTENTS was not specified and VARIABLES does not include ROWTYPE_.  Assuming"
+" CONTENTS=CORR."
 msgstr ""
 
 #: src/language/commands/matrix-data.c:1186
@@ -6481,8 +6688,8 @@ msgstr ""
 
 #: src/language/commands/matrix.c:2463
 msgid ""
-"Scalar argument to SWEEP must be integer less than or equal to the smaller "
-"of the matrix argument's rows and columns."
+"Scalar argument to SWEEP must be integer less than or equal to the smaller of"
+" the matrix argument's rows and columns."
 msgstr ""
 
 #: src/language/commands/matrix.c:2545
@@ -6519,8 +6726,8 @@ msgstr ""
 #: src/language/commands/matrix.c:3438
 #, c-format
 msgid ""
-"Matrix exponentiation with ** requires a scalar on the right-hand side, not "
-"a matrix with dimensions %zu×%zu."
+"Matrix exponentiation with ** requires a scalar on the right-hand side, not a"
+" matrix with dimensions %zu×%zu."
 msgstr ""
 
 #: src/language/commands/matrix.c:3447
@@ -6556,8 +6763,8 @@ msgstr ""
 
 #: src/language/commands/matrix.c:3590
 msgid ""
-"This expression tries to horizontally join matrices with differing numbers "
-"of rows."
+"This expression tries to horizontally join matrices with differing numbers of"
+" rows."
 msgstr ""
 
 #: src/language/commands/matrix.c:3620
@@ -6708,8 +6915,8 @@ msgstr ""
 #, c-format
 msgid ""
 "Arguments 1 and 2 to %s have dimensions %zu×%zu and %zu×%zu, but %s requires "
-"these arguments either to have the same dimensions or for one of them to be "
-"a scalar."
+"these arguments either to have the same dimensions or for one of them to be a"
+" scalar."
 msgstr ""
 
 #: src/language/commands/matrix.c:4582
@@ -7391,17 +7598,17 @@ msgstr ""
 #: src/language/commands/mrsets.c:358
 #, c-format
 msgid ""
-"Variables %s and %s specified as part of multiple dichotomy group %s have "
-"the same variable label.  Categories represented by these variables will not "
-"be distinguishable in output."
+"Variables %s and %s specified as part of multiple dichotomy group %s have the"
+" same variable label.  Categories represented by these variables will not be "
+"distinguishable in output."
 msgstr ""
 
 #: src/language/commands/mrsets.c:384
 #, c-format
 msgid ""
 "Variable %s specified as part of multiple dichotomy group %s (which has "
-"CATEGORYLABELS=COUNTEDVALUES) has no value label for its counted value.  "
-"This category will not be distinguishable in output."
+"CATEGORYLABELS=COUNTEDVALUES) has no value label for its counted value.  This"
+" category will not be distinguishable in output."
 msgstr ""
 
 #: src/language/commands/mrsets.c:398
@@ -7415,8 +7622,8 @@ msgstr ""
 #: src/language/commands/mrsets.c:455
 #, c-format
 msgid ""
-"Variables specified on MCGROUP should have the same categories, but %s and "
-"%s (and possibly others) in multiple category group %s have different value "
+"Variables specified on MCGROUP should have the same categories, but %s and %s"
+" (and possibly others) in multiple category group %s have different value "
 "labels for value %s."
 msgstr ""
 
@@ -8863,8 +9070,8 @@ msgstr ""
 #: src/language/expressions/helpers.c:519
 #, c-format
 msgid ""
-"Index outside valid range 1 to %zu, inclusive, for vector %s.  The value "
-"will be treated as system-missing."
+"Index outside valid range 1 to %zu, inclusive, for vector %s.  The value will"
+" be treated as system-missing."
 msgstr ""
 
 #: src/language/expressions/helpers.c:524
@@ -8885,8 +9092,8 @@ msgstr ""
 #: src/language/expressions/parse.c:148
 #, c-format
 msgid ""
-"This command tries to create a new variable %s by assigning a string value "
-"to it, but this is not supported.  Use the STRING command to create the new "
+"This command tries to create a new variable %s by assigning a string value to"
+" it, but this is not supported.  Use the STRING command to create the new "
 "variable with the correct width before assigning to it, e.g. STRING %s(A20)."
 msgstr ""
 
@@ -9265,24 +9472,18 @@ msgstr ""
 #. TRANSLATORS: This is a format string which, when presented to
 #. printf like functions, will create a pango markup string to
 #. display real number in scientific  notation.
-#.
 #. In its untranslated form, it will display similar to "1.23 x 10^4". You
 #. can leave it untranslated if this is how scientific notation is usually
 #. presented in your language.
-#.
 #. Some locales (such as German) prefer the centered dot rather than the
 #. multiplication sign between the mantissa an exponent. In which
 #. case, you can change "#215;" to "#8901;" or other unicode code
 #. point as appropriate.
-#.
 #. The . in this string does not and should not be changed, since
 #. that is taken care of by the stdc library.
-#.
 #. For information on Pango markup, see
 #. http://developer.gnome.org/pango/stable/PangoMarkupFormat.html
-#.
 #. For tables of unicode code points, see http://unicode.org/charts
-#.
 #: src/math/chart-geometry.c:137
 #, c-format
 msgid "%%.%dlf&#215;10<sup>%d</sup>"
@@ -9312,8 +9513,8 @@ msgstr ""
 #: src/output/ascii.c:495
 #, c-format
 msgid ""
-"ascii: page must be at least %d characters wide, but as configured is only "
-"%d characters"
+"ascii: page must be at least %d characters wide, but as configured is only %d"
+" characters"
 msgstr ""
 
 #: src/output/ascii.c:603
@@ -10042,7 +10243,6 @@ msgstr ""
 #. - The first character may not be '$'
 #. - The first character may not be a digit
 #. - The final character may not be '.' or '_'
-#.
 #: src/ui/gui/psppire-dict.c:402
 #, c-format
 msgid "Var%04d"
@@ -10290,7 +10490,8 @@ msgstr ""
 msgid "A program for the analysis of sampled data"
 msgstr ""
 
-#. TRANSLATORS: Do not translate this string.  Instead, put the names of the people
+#. TRANSLATORS: Do not translate this string.  Instead, put the names of the
+#. people
 #. who have helped in the translation.
 #: src/ui/gui/help-menu.c:175
 msgid "translator-credits"
@@ -10325,8 +10526,8 @@ msgstr ""
 
 #: src/ui/gui/main.c:182
 msgid ""
-"PSPP runs best on free platforms such as GNU and GNU/Linux.  This computer "
-"is running a non-free operating system, so some features might work sub-"
+"PSPP runs best on free platforms such as GNU and GNU/Linux.  This computer is"
+" running a non-free operating system, so some features might work sub-"
 "optimally.  For best results, use a free system instead."
 msgstr ""
 
@@ -10344,8 +10545,7 @@ msgid ""
 msgstr ""
 
 #: src/ui/gui/main.c:186
-msgid ""
-"Directly import your spreadsheets using the \"File | Import Data\" menu."
+msgid "Directly import your spreadsheets using the \"File | Import Data\" menu."
 msgstr ""
 
 #: src/ui/gui/main.c:187
@@ -10403,8 +10603,8 @@ msgstr ""
 #: src/ui/gui/main.c:416
 #, c-format
 msgid ""
-"You have discovered a bug in PSPP.  Please report this to %s including all "
-"of the following information, and a description of what you were doing when "
+"You have discovered a bug in PSPP.  Please report this to %s including all of"
+" the following information, and a description of what you were doing when "
 "this happened."
 msgstr ""
 
@@ -10756,9 +10956,7 @@ msgstr ""
 
 #: src/ui/gui/psppire-import-textfile.c:322
 msgid ""
-"This assistant will guide you through the process of importing data into "
-"PSPP from a text file with one line per case,  in which fields are separated "
-"by tabs, commas, or other delimiters.\n"
+"This assistant will guide you through the process of importing data into PSPP from a text file with one line per case,  in which fields are separated by tabs, commas, or other delimiters.\n"
 "\n"
 msgstr ""
 
@@ -10779,8 +10977,8 @@ msgstr[1] ""
 #: src/ui/gui/psppire-import-textfile.c:347
 #, c-format
 msgid ""
-"Only the first %zu line of the file will be shown for preview purposes in "
-"the following screens.  "
+"Only the first %zu line of the file will be shown for preview purposes in the"
+" following screens.  "
 msgid_plural ""
 "Only the first %zu lines of the file will be shown for preview purposes in "
 "the following screens.  "
@@ -12540,13 +12738,9 @@ msgstr ""
 
 #: src/ui/gui/text-data-import.ui:171
 msgid ""
-"This assistant will guide you through the process of importing data into "
-"PSPP from a text file with one line per case,  in which fields are separated "
-"by tabs, commas, or other delimiters.\n"
+"This assistant will guide you through the process of importing data into PSPP from a text file with one line per case,  in which fields are separated by tabs, commas, or other delimiters.\n"
 "\n"
-"\tThe selected file contains N lines of text.  Only the first M of these "
-"will be shown for preview purposes in the following screens.  You may choose "
-"below how much of the file should actually be imported."
+"\tThe selected file contains N lines of text.  Only the first M of these will be shown for preview purposes in the following screens.  You may choose below how much of the file should actually be imported."
 msgstr ""
 
 #: src/ui/gui/text-data-import.ui:239
@@ -13030,8 +13224,8 @@ msgstr ""
 msgid ""
 "GNU PSPP is a program for the statistical analysis of sampled data. It is a "
 "Free replacement for the proprietary program SPSS, and appears very similar "
-"to it with a few exceptions. The most important of these exceptions are, "
-"that there are no “time bombs”; your copy of PSPP will not “expire” or "
+"to it with a few exceptions. The most important of these exceptions are, that"
+" there are no “time bombs”; your copy of PSPP will not “expire” or "
 "deliberately stop working in the future. Neither are there any artificial "
 "limits on the number of cases or variables which you can use. There are no "
 "additional packages to purchase in order to get “advanced” functions; all "
@@ -13043,9 +13237,9 @@ msgid ""
 "PSPP is a stable and reliable application. It can perform descriptive "
 "statistics, T-tests, anova, linear and logistic regression, measures of "
 "association, cluster analysis, reliability and factor analysis, non-"
-"parametric tests and more. Its backend is designed to perform its analyses "
-"as fast as possible, regardless of the size of the input data. You can use "
-"PSPP with its graphical interface or the more traditional syntax commands."
+"parametric tests and more. Its backend is designed to perform its analyses as"
+" fast as possible, regardless of the size of the input data. You can use PSPP"
+" with its graphical interface or the more traditional syntax commands."
 msgstr ""
 
 #: doc/org.gnu.pspp.metainfo.xml.in:12
