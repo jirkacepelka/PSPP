@@ -18,6 +18,9 @@ the engine left behind.
    (discovered by `import.meta.glob`, no registry edit).
 3. `run(cmd, ctx)` returns `OutputItem[]`: usually one `groupItem(title, NAME, [tables…, charts…])`.
    Throw `ExtError('…')` for syntax/data errors – it becomes an error message at the command line.
+   A command that changes the active dataset (e.g. `/SAVE` variables) returns `{ items, dataset }`
+   with a NEW dataset object (never mutate `ctx.dataset`); it replaces the active dataset for the
+   following commands and in the app (`runWithExtensions` returns it, flagged `engineStale`).
 
 ## Rules
 - **Data** (`data.ts`): always go through `splitGroups(ds)` (FILTER, positive WEIGHT, SPLIT FILE
