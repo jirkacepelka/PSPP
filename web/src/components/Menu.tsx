@@ -18,6 +18,8 @@ export interface Anchor {
   y: number;
   /** alternative position if the menu does not fit (e.g. left edge of parent for submenus) */
   altX?: number;
+  /** align the menu's right edge to altX (menus opened from right-aligned buttons) */
+  alignEnd?: boolean;
 }
 
 interface MenuProps {
@@ -43,13 +45,13 @@ export function Menu({ items, anchor, onClose, label, autoFocus = true, level = 
     const r = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    let left = anchor.x;
+    let left = anchor.alignEnd && anchor.altX !== undefined ? anchor.altX - r.width : anchor.x;
     if (left + r.width > vw - 8) left = anchor.altX !== undefined ? anchor.altX - r.width : vw - r.width - 8;
     left = Math.max(8, left);
     let top = anchor.y;
     if (top + r.height > vh - 8) top = Math.max(8, vh - r.height - 8);
     setPos({ left, top });
-  }, [anchor.x, anchor.y, anchor.altX]);
+  }, [anchor.x, anchor.y, anchor.altX, anchor.alignEnd]);
 
   useEffect(() => {
     if (autoFocus) {

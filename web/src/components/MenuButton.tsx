@@ -19,16 +19,18 @@ interface MenuButtonProps {
   menuLabel?: string;
   disabled?: boolean;
   className?: string;
+  /** open the menu aligned to the button's right edge */
+  alignEnd?: boolean;
 }
 
-export function MenuButton({ items, label, icon, iconOnly, variant = 'secondary', size = 'md', menuLabel, disabled, className = '' }: MenuButtonProps) {
+export function MenuButton({ items, label, icon, iconOnly, variant = 'secondary', size = 'md', menuLabel, disabled, className = '', alignEnd }: MenuButtonProps) {
   const trigger = useRef<HTMLButtonElement>(null);
   const [anchor, setAnchor] = useState<(Anchor & { focus: boolean }) | null>(null);
 
   const open = (focus: boolean) => {
     const r = trigger.current?.getBoundingClientRect();
     if (!r) return;
-    setAnchor({ x: r.left, y: r.bottom + 4, altX: r.right, focus });
+    setAnchor({ x: r.left, y: r.bottom + 4, altX: r.right, alignEnd, focus });
   };
   const toggle = () => (anchor ? setAnchor(null) : open(true));
   const onKeyDown = (e: KeyboardEvent) => {
