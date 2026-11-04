@@ -2,6 +2,7 @@
  * Engine orchestration: initialisation and running syntax against the active dataset.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import { hasExtCommand, runWithExtensions } from '../ext/runner';
 import i18n from '../i18n';
 import { getEngineHandle, markSynced } from '../engine/client';
 import type { OutputItem } from '../engine/types';
@@ -102,7 +103,11 @@ export async function runSyntaxDetailed(syntax: string, opts: RunOptions = {}): 
   try {
     const { api } = await getEngineHandle();
     const data = useData.getState();
-    const result = await api.run(text.endsWith('.') ? text : `${text}.`, data.dataset);
+    const full = text.endsWith('.') ? text : `${text}.`;
+    const st = useSettings.getState();
+    const result = hasExtCommand(full)
+      ? await runWithExtensions(api, full, data.dataset, { lang: st.language, decimal: st.decimalSeparator, t: (k, a) => i18n.t(k, a) as string })
+      : await api.run(full, data.dataset);
     const offset = (opts.lineOffset ?? 1) - 1;
     const shift = (items: OutputItem[]): OutputItem[] =>
       items.map((it) => {

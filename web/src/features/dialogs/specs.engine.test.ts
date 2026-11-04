@@ -11,6 +11,7 @@ import { DIALOG_SPECS } from './specs';
 import { defaultValues, type DialogContext, type Values } from './types';
 import type { Dataset, OutputItem } from '../../engine/types';
 import students from '../../samples/students.json';
+import { runWithExtensions } from '../../ext/runner';
 
 const ENGINE = path.resolve(__dirname, '../../../public/engine/pspp.js');
 const WRAPPER = path.resolve(__dirname, '../../../../engine/js/engine.mjs');
@@ -89,7 +90,7 @@ describe.skipIf(!have)('dialog syntax runs in PSPP', () => {
       const patch = FILLED[spec.id];
       expect(patch, `engine test data for ${spec.id}`).toBeDefined();
       const syntax = spec.toSyntax({ ...defaultValues(spec), ...patch }, ctx);
-      const r = await engine.run((PRELUDE[spec.id] ?? '') + syntax, structuredClone(ds));
+      const r = await runWithExtensions(engine, (PRELUDE[spec.id] ?? '') + syntax, structuredClone(ds), { lang: 'en', decimal: '.', t: (k) => k });
       const errs = flat(r.items).filter((i) => i.kind === 'message' && i.severity === 'error');
       if (process.env.SHOW) console.log(spec.id, flat(r.items).map((i) => i.kind === "message" ? "MSG:" + (i as { text: string }).text : i.kind).join(","));
       if (errs.length) failures.push(`${spec.id}: ${syntax}\n  → ${errs.map((e) => (e as { text: string }).text).join(' | ')}`);
