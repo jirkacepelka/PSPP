@@ -2,7 +2,7 @@
  * Syntax editor (CodeMirror 6) with PSPP highlighting, completion and engine diagnostics.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EditorState, Compartment, type Extension } from '@codemirror/state';
 import {
@@ -39,7 +39,7 @@ import { formatShortcut } from '../../app/actions';
 import { saveSyntaxFile } from '../../app/files';
 import { runSyntax } from '../../app/engine';
 import { splitCommands } from '../../lib/syntax';
-import { JournalPanel } from './JournalPanel';
+import { useLayout } from '../shell/layout';
 import './syntax.css';
 
 /* ---- gutter ▶ next to the first line of each command (SY-2) ---- */
@@ -230,7 +230,8 @@ export function SyntaxView() {
 
   const errors = tab?.diagnostics.filter((d) => d.severity === 'error') ?? [];
   const running = engineStatus === 'running';
-  const [journalOpen, setJournalOpen] = useState(false);
+  const journalOpen = useLayout((s) => s.journalOpen);
+  const setJournalOpen = useLayout((s) => s.setJournal);
   const gotoLine = (n: number) => {
     const view = viewRef.current;
     if (!view) return;
@@ -278,16 +279,6 @@ export function SyntaxView() {
       </div>
       <div className="syntax-main">
         <div className="syntax-editor" ref={host} />
-        {journalOpen && <JournalPanel onClose={() => setJournalOpen(false)} onInsert={(text) => {
-          const view = viewRef.current;
-          if (!view) return;
-          const pos = view.state.selection.main.head;
-          const line = view.state.doc.lineAt(pos);
-          const at = line.length ? line.to : line.from;
-          const ins = `${line.length ? '\n' : ''}${text.trim()}\n`;
-          view.dispatch({ changes: { from: at, insert: ins }, selection: { anchor: at + ins.length }, scrollIntoView: true });
-          view.focus();
-        }} />}
       </div>
     </div>
   );

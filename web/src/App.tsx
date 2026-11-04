@@ -30,6 +30,7 @@ import { SPECS_BY_ID } from './features/dialogs/specs';
 import { AnalysisDialog } from './features/dialogs/DialogRenderer';
 import { AssistantDialog } from './features/assistant/AssistantDialog';
 import { SettingsDialog } from './features/settings/SettingsDialog';
+import { OnboardingGate } from './features/onboarding/Onboarding';
 import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
 import { ConfirmDialog, FindDialog, GotoDialog, SaveAsDialog } from './features/misc/SmallDialogs';
@@ -272,6 +273,7 @@ export function App() {
       <CommandPalette />
       <MobileMenu />
       <ShellToasts />
+      <OnboardingGate />
       {dragging && (
         <div className="sh-drop" aria-hidden="true">
           <div className="sh-drop-card">
