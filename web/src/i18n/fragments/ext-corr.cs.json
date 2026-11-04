@@ -1,0 +1,57 @@
+{
+  "ext": {
+    "corr": {
+      "titleNonpar": "Neparametrické korelace",
+      "titlePartial": "Parciální korelace",
+      "correlations": "Korelace",
+      "descriptives": "Popisné statistiky",
+      "kendall": "Kendallovo tau_b",
+      "spearman": "Spearmanovo rho",
+      "coefficient": "Korelační koeficient",
+      "sig2": "Sig. (oboustranná)",
+      "sig1": "Sig. (jednostranná)",
+      "n": "N",
+      "flag05_2": "Korelace je významná na hladině 0,05 (oboustranný test).",
+      "flag01_2": "Korelace je významná na hladině 0,01 (oboustranný test).",
+      "flag05_1": "Korelace je významná na hladině 0,05 (jednostranný test).",
+      "flag01_1": "Korelace je významná na hladině 0,01 (jednostranný test).",
+      "controlVariables": "Kontrolní proměnné",
+      "none": "-žádné-",
+      "zeroOrder": "Buňky obsahují korelace nultého řádu (Pearsonovy).",
+      "correlation": "Korelace",
+      "significance2": "Významnost (oboustranná)",
+      "significance1": "Významnost (jednostranná)",
+      "df": "df",
+      "mean": "Průměr",
+      "sd": "Směrodatná odchylka",
+      "weightsIgnored": "NONPAR CORR nemůže použít neceločíselné váhy případů; váhy byly ignorovány.",
+      "cannotCompute": "Některé koeficienty nelze spočítat, protože proměnná je konstantní, kontrolní proměnné jsou kolineární nebo je příliš málo případů; jejich buňky zůstaly prázdné.",
+      "err": {
+        "string": "{{name}} je textová proměnná; je třeba numerická proměnná.",
+        "noVariables": "Chybí seznam proměnných.",
+        "twoVariables": "Jsou potřeba alespoň dvě proměnné.",
+        "withList": "Za WITH se očekává seznam proměnných.",
+        "needBy": "Za BY musí následovat kontrolní proměnné.",
+        "overlap": "{{name}} nemůže být zároveň analyzovaná a kontrolní proměnná.",
+        "unexpected": "Neočekávané „{{token}}“ v seznamu proměnných.",
+        "subcommand": "Neznámý podpříkaz {{name}}.",
+        "matrix": "Podpříkaz MATRIX není podporován.",
+        "oneList": "Je povolen jen jeden seznam VARIABLES."
+      }
+    }
+  },
+  "dlg": {
+    "correlations": {
+      "both": "Kendall + Spearman"
+    },
+    "partialCorr": {
+      "title": "Parciální korelace",
+      "variables": "Proměnné",
+      "controls": "Kontrolní proměnné",
+      "showSig": "Zobrazit přesnou hladinu významnosti",
+      "descriptives": "Průměry a směrodatné odchylky",
+      "zeroOrder": "Korelace nultého řádu",
+      "errorOverlap": "Proměnná nemůže být zároveň analyzovaná i kontrolní."
+    }
+  }
+}

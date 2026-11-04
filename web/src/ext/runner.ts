@@ -12,7 +12,7 @@ import { parseCommand } from './parse';
 import { messageItem } from './table';
 import { ExtError, type ExtCommand, type ExtContext } from './types';
 
-const modules = import.meta.glob<{ commands: ExtCommand[] }>('./commands/*.ts', { eager: true });
+const modules = import.meta.glob<{ commands: ExtCommand[] }>(['./commands/*.ts', '!./commands/*.test.ts'], { eager: true });
 export const EXT_COMMANDS: Record<string, ExtCommand> = Object.fromEntries(
   Object.values(modules)
     .flatMap((m) => m.commands ?? [])
@@ -28,14 +28,20 @@ export function hasExtCommand(syntax: string): boolean {
 
 /** Runs one extension command; errors become messages, never exceptions. */
 export function runExtCommand(name: string, text: string, ctx: ExtContext): OutputItem[] {
+  return runExtCommandFull(name, text, ctx).items;
+}
+
+/** Like runExtCommand, but also returns the dataset the command produced (null = unchanged). */
+export function runExtCommandFull(name: string, text: string, ctx: ExtContext): { items: OutputItem[]; dataset: Dataset | null } {
   const cmd = EXT_COMMANDS[name];
-  if (!cmd) return [messageItem('error', `${name} is not available.`, ctx.line)];
+  if (!cmd) return { items: [messageItem('error', `${name} is not available.`, ctx.line)], dataset: null };
   try {
-    return cmd.run(parseCommand(text, name), ctx);
+    const r = cmd.run(parseCommand(text, name), ctx);
+    return Array.isArray(r) ? { items: r, dataset: null } : { items: r.items, dataset: r.dataset ?? null };
   } catch (e) {
-    if (e instanceof ExtError) return [messageItem('error', `${name}: ${e.message}`, ctx.line)];
+    if (e instanceof ExtError) return { items: [messageItem('error', `${name}: ${e.message}`, ctx.line)], dataset: null };
     console.error(e);
-    return [messageItem('error', `${name}: ${e instanceof Error ? e.message : String(e)}`, ctx.line)];
+    return { items: [messageItem('error', `${name}: ${e instanceof Error ? e.message : String(e)}`, ctx.line)], dataset: null };
   }
 }
 
@@ -44,12 +50,15 @@ export async function runWithExtensions(
   syntax: string,
   dataset: Dataset | null,
   env: Omit<ExtContext, 'dataset' | 'line'>,
-): Promise<RunResult> {
+): Promise<RunResult & { engineStale?: boolean }> {
   const spans = splitCommands(syntax);
   const lines = syntax.split('\n');
   const items: OutputItem[] = [];
   let ok = true;
   let ds = dataset;
+  // true while the dataset was last changed by an extension command (the engine worker still
+  // holds the older copy, so the app must send the new one with the next run)
+  let engineStale = false;
   let chunkStart = -1; // index of first span in the pending PSPP chunk
   const flush = async (endIdx: number) => {
     if (chunkStart < 0) return;
@@ -61,6 +70,7 @@ export async function runWithExtensions(
     items.push(...r.items);
     ok &&= r.ok;
     if (r.dataset) ds = r.dataset;
+    engineStale = false;
     chunkStart = -1;
   };
   for (let i = 0; i < spans.length; i++) {
@@ -72,11 +82,15 @@ export async function runWithExtensions(
         ok = false;
         continue;
       }
-      const out = runExtCommand(name, spans[i].text, { ...env, dataset: ds, line: spans[i].startLine });
+      const { items: out, dataset: changed } = runExtCommandFull(name, spans[i].text, { ...env, dataset: ds, line: spans[i].startLine });
+      if (changed) {
+        ds = changed;
+        engineStale = true;
+      }
       if (out.some((o) => o.kind === 'message' && o.severity === 'error')) ok = false;
       items.push(...out);
     } else if (chunkStart < 0) chunkStart = i;
   }
   await flush(spans.length);
-  return { items, ok, dataset: ds };
+  return { items, ok, dataset: ds, engineStale };
 }

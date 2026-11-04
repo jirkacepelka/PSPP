@@ -42,6 +42,7 @@ const NEW_FILLED: Record<string, Values> = {
   scatter: { y: ['score'], x: ['age'] },
   boxplot: { variables: ['score'], factor: ['group'] },
   variableProperties: { variables: ['gender'], measure: 'NOMINAL' },
+  partialCorr: { variables: ['age', 'score'], controls: ['income'] },
 };
 
 function gen(id: string, patch: Values): string {
@@ -176,7 +177,7 @@ describe('Compare means', () => {
 describe('Correlate & regression', () => {
   it('CORRELATIONS', () => {
     expect(gen('correlations', { variables: ['age', 'income', 'score'], descriptives: true })).toBe(
-      'CORRELATIONS\n  /VARIABLES=age income score\n  /PRINT=TWOTAIL SIG\n  /STATISTICS=DESCRIPTIVES\n  /MISSING=PAIRWISE.',
+      'CORRELATIONS\n  /VARIABLES=age income score\n  /PRINT=TWOTAIL NOSIG\n  /STATISTICS=DESCRIPTIVES\n  /MISSING=PAIRWISE.',
     );
   });
   it('REGRESSION', () => {
@@ -322,6 +323,10 @@ describe('New dialogs (WP3)', () => {
     expect(errors('variableProperties', { variables: ['age'] })).toBe('dlg.errors.nothingToDo');
   });
   it('correlation methods', () => {
-    expect(gen('correlations', { variables: ['age', 'score'], method: 'SPEARMAN' })).toBe('NONPAR CORR\n  /VARIABLES=age score\n  /PRINT=SPEARMAN TWOTAIL SIG\n  /MISSING=PAIRWISE.');
+    expect(gen('correlations', { variables: ['age', 'score'], method: 'SPEARMAN' })).toBe('NONPAR CORR\n  /VARIABLES=age score\n  /PRINT=SPEARMAN TWOTAIL NOSIG\n  /MISSING=PAIRWISE.');
+    expect(gen('correlations', { variables: ['age', 'score'], method: 'BOTH', flag: false, missing: 'LISTWISE' })).toBe('NONPAR CORR\n  /VARIABLES=age score\n  /PRINT=BOTH TWOTAIL SIG\n  /MISSING=LISTWISE.');
+    expect(gen('partialCorr', { variables: ['age', 'score'], controls: ['income'] })).toBe('PARTIAL CORR\n  /VARIABLES=age score BY income\n  /SIGNIFICANCE=TWOTAIL\n  /MISSING=LISTWISE.');
+    expect(gen('partialCorr', { variables: ['age', 'score'], controls: ['income', 'gender'], tails: 'ONETAIL', showSig: false, descriptives: true, zeroOrder: true, missing: 'ANALYSIS' })).toBe('PARTIAL CORR\n  /VARIABLES=age score BY income gender\n  /SIGNIFICANCE=ONETAIL\n  /STATISTICS=DESCRIPTIVES CORR\n  /FORMAT=CONDENSED\n  /MISSING=ANALYSIS.');
+    expect(errors('partialCorr', { variables: ['age', 'score'] })).toBe('dlg.errors.needVariables');
   });
 });

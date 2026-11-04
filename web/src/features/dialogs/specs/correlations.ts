@@ -21,6 +21,7 @@ export const correlations: DialogSpec = {
         { value: 'PEARSON', label: 'dlg.correlations.pearson' },
         { value: 'SPEARMAN', label: 'dlg.correlations.spearman' },
         { value: 'KENDALL', label: 'dlg.correlations.kendall' },
+        { value: 'BOTH', label: 'dlg.correlations.both' },
       ],
     },
     {
@@ -63,18 +64,19 @@ export const correlations: DialogSpec = {
       ? [{ level: 'info', text: 'dlg.hints.ordinalSpearman', args: { names: ord.join(', ') }, action: { label: 'dlg.hints.useSpearman', patch: { method: 'SPEARMAN' } } }]
       : [];
   },
+  // PRINT=NOSIG flags significant coefficients with asterisks (SPSS and PSPP), SIG does not
   toSyntax: (v) => {
     const method = str(v, 'method') || 'PEARSON';
     if (method !== 'PEARSON')
       return command('NONPAR CORR', '', [
         wrap([`VARIABLES=${vars(v, 'variables').join(' ')}`]),
-        `PRINT=${method} ${str(v, 'tails') || 'TWOTAIL'} ${bool(v, 'flag') ? 'SIG' : 'NOSIG'}`,
+        `PRINT=${method} ${str(v, 'tails') || 'TWOTAIL'} ${bool(v, 'flag') ? 'NOSIG' : 'SIG'}`,
         `MISSING=${str(v, 'missing') || 'PAIRWISE'}`,
       ]);
     const stats = [bool(v, 'descriptives') && 'DESCRIPTIVES', bool(v, 'xprod') && 'XPROD'].filter(Boolean);
     return command('CORRELATIONS', '', [
       wrap([`VARIABLES=${vars(v, 'variables').join(' ')}`]),
-      `PRINT=${str(v, 'tails') || 'TWOTAIL'} ${bool(v, 'flag') ? 'SIG' : 'NOSIG'}`,
+      `PRINT=${str(v, 'tails') || 'TWOTAIL'} ${bool(v, 'flag') ? 'NOSIG' : 'SIG'}`,
       stats.length > 0 && `STATISTICS=${stats.join(' ')}`,
       `MISSING=${str(v, 'missing') || 'PAIRWISE'}`,
     ]);

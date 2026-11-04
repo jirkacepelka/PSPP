@@ -34,6 +34,7 @@ const FILLED: Record<string, Values> = {
   oneway: { dependents: ['stress'], factor: ['faculty'], ph_TUKEY: true },
   glm: { dependent: ['stress'], factors: ['faculty', 'gender'] },
   correlations: { variables: ['hours', 'gpa'] },
+  partialCorr: { variables: ['hours', 'stress', 'gpa'], controls: ['sleep'], descriptives: true, zeroOrder: true },
   regressionLinear: { dependent: ['gpa'], independents: ['hours', 'sleep'] },
   logistic: { dependent: ['job'], covariates: ['gpa'], categorical: ['gender'] },
   factor: { variables: ['hours', 'sleep', 'stress', 'gpa'] },

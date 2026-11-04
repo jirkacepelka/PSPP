@@ -19,10 +19,17 @@ export interface ExtContext {
   t: (key: string, args?: Record<string, unknown>) => string;
 }
 
+/**
+ * What `run` returns: output items, or output items plus a changed active dataset (e.g. variables
+ * added by /SAVE). A returned dataset replaces the active one for the following commands and is
+ * handed back to the app; return a new object, never mutate `ctx.dataset`.
+ */
+export type ExtResult = OutputItem[] | { items: OutputItem[]; dataset?: Dataset };
+
 export interface ExtCommand {
   /** canonical SPSS command name, e.g. 'NONPAR CORR' */
   name: string;
-  run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[];
+  run(cmd: ParsedCommand, ctx: ExtContext): ExtResult;
 }
 
 /** Thrown for syntax or data errors; becomes an error message item at the command's line. */

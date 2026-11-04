@@ -214,8 +214,11 @@ function correlations(tables: PivotTable[]): Fact[] {
   const sw = stubCount(dataRows(t)[0] ?? []);
   const names = header.slice(sw).map((c) => c.text);
   const rows = rowsOf(t);
-  // rows come in triples (r, p, N) per variable; Spearman/Kendall tables have the same layout
-  const per = rows.length / Math.max(1, names.length);
+  // rows come in triples (r, p, N) per variable; NONPAR CORR (SPSS layout) adds a leading method
+  // column (Kendall's tau_b / Spearman's rho) and with PRINT=BOTH repeats the rows per method:
+  // the first method block is read
+  const blocks = sw >= 3 ? Math.max(1, new Set(rows.map((r) => r.stub[0])).size) : 1;
+  const per = rows.length / blocks / Math.max(1, names.length);
   if (!Number.isInteger(per) || per < 1) return [];
   const pairs: { a: string; b: string; r: number; p: number | null; n: number | null }[] = [];
   for (let i = 0; i < names.length; i++) {
@@ -225,7 +228,7 @@ function correlations(tables: PivotTable[]): Fact[] {
     for (let j = i + 1; j < names.length; j++) {
       const r = rRow?.vals[j];
       if (!num(r)) continue;
-      pairs.push({ a: rRow.stub[0], b: names[j], r, p: pRow?.vals[j] ?? null, n: nRow?.vals[j] ?? null });
+      pairs.push({ a: rRow.stub[sw >= 3 ? 1 : 0], b: names[j], r, p: pRow?.vals[j] ?? null, n: nRow?.vals[j] ?? null });
     }
   }
   pairs.sort((x, y) => Math.abs(y.r) - Math.abs(x.r));

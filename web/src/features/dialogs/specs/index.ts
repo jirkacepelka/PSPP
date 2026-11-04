@@ -13,6 +13,7 @@ import { ttestIndependent } from './ttestIndependent';
 import { ttestPaired } from './ttestPaired';
 import { oneway } from './oneway';
 import { correlations } from './correlations';
+import { partialCorr } from './partialCorr';
 import { regressionLinear } from './regressionLinear';
 import { compute } from './compute';
 import { recodeSame } from './recodeSame';
@@ -36,7 +37,7 @@ import { barChart, boxplot, histogram, scatter } from './graphs';
 export const DIALOG_SPECS: DialogSpec[] = [
   frequencies, descriptives, explore, crosstabs, ctables,
   means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm,
-  correlations, regressionLinear, logistic,
+  correlations, partialCorr, regressionLinear, logistic,
   factor, reliability, quickCluster,
   chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc,
   histogram, barChart, scatter, boxplot,

@@ -1,0 +1,57 @@
+{
+  "ext": {
+    "corr": {
+      "titleNonpar": "Nonparametric Correlations",
+      "titlePartial": "Partial Correlations",
+      "correlations": "Correlations",
+      "descriptives": "Descriptive Statistics",
+      "kendall": "Kendall's tau_b",
+      "spearman": "Spearman's rho",
+      "coefficient": "Correlation Coefficient",
+      "sig2": "Sig. (2-tailed)",
+      "sig1": "Sig. (1-tailed)",
+      "n": "N",
+      "flag05_2": "Correlation is significant at the 0.05 level (2-tailed).",
+      "flag01_2": "Correlation is significant at the 0.01 level (2-tailed).",
+      "flag05_1": "Correlation is significant at the 0.05 level (1-tailed).",
+      "flag01_1": "Correlation is significant at the 0.01 level (1-tailed).",
+      "controlVariables": "Control Variables",
+      "none": "-none-",
+      "zeroOrder": "Cells contain zero-order (Pearson) correlations.",
+      "correlation": "Correlation",
+      "significance2": "Significance (2-tailed)",
+      "significance1": "Significance (1-tailed)",
+      "df": "df",
+      "mean": "Mean",
+      "sd": "Std. Deviation",
+      "weightsIgnored": "Non-integer case weights cannot be used by NONPAR CORR; the weights were ignored.",
+      "cannotCompute": "Some coefficients cannot be computed because a variable is constant, the control variables are collinear or there are too few cases; their cells are left empty.",
+      "err": {
+        "string": "{{name}} is a string variable; a numeric variable is required.",
+        "noVariables": "A variable list is required.",
+        "twoVariables": "At least two variables are required.",
+        "withList": "A variable list is expected after WITH.",
+        "needBy": "Control variables are required after BY.",
+        "overlap": "{{name}} cannot be both an analysis and a control variable.",
+        "unexpected": "Unexpected '{{token}}' in the variable list.",
+        "subcommand": "Unrecognized subcommand {{name}}.",
+        "matrix": "The MATRIX subcommand is not supported.",
+        "oneList": "Only one VARIABLES list is allowed."
+      }
+    }
+  },
+  "dlg": {
+    "correlations": {
+      "both": "Kendall + Spearman"
+    },
+    "partialCorr": {
+      "title": "Partial correlations",
+      "variables": "Variables",
+      "controls": "Controlling for",
+      "showSig": "Display actual significance level",
+      "descriptives": "Means and standard deviations",
+      "zeroOrder": "Zero-order correlations",
+      "errorOverlap": "A variable cannot be both analysed and controlled for."
+    }
+  }
+}

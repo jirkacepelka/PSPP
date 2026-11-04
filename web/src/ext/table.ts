@@ -13,6 +13,8 @@ export interface Cell {
   th?: boolean;
   colspan?: number;
   rowspan?: number;
+  /** footnote/flag marker shown as <sup> after the text (e.g. 'a', '*', '**'); ignored by parsePivot */
+  sup?: string;
 }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -20,6 +22,7 @@ const HEAD = "style='text-align: center; vertical-align: bottom'";
 const CORNER = "style='text-align: center; vertical-align: middle; font-weight: bold'";
 const NUM = "style='text-align: right'";
 
+const sup = (c: Cell) => (c.sup ? `<sup>${esc(c.sup)}</sup>` : '');
 const span = (c: Cell) => `${c.colspan && c.colspan > 1 ? ` colspan="${c.colspan}"` : ''}${c.rowspan && c.rowspan > 1 ? ` rowspan="${c.rowspan}"` : ''}`;
 
 /** Shorthands for building rows. */
@@ -32,28 +35,32 @@ export interface TableSpec {
   head: Cell[][];
   /** body rows: stub <th> cells first, then <td> values */
   body: Cell[][];
-  footnotes?: string[];
+  /** footnotes; plain strings get markers a, b, c…; {mark, text} uses the given marker (e.g. '**') */
+  footnotes?: (string | { mark: string; text: string })[];
 }
 
 export function tableHtml(t: TableSpec): string {
   const out: string[] = ['<table>', `<caption ${CORNER}>${esc(t.caption)}</caption>`, '<tbody>'];
   for (const row of t.head) {
     out.push('<tr>');
-    for (const c of row) out.push(`<th ${c.text ? HEAD : CORNER}${span(c)}>${esc(c.text)}</th>`);
+    for (const c of row) out.push(`<th ${c.text ? HEAD : CORNER}${span(c)}>${esc(c.text)}${sup(c)}</th>`);
     out.push('</tr>');
   }
   for (const row of t.body) {
     out.push('<tr>');
     for (const c of row) {
-      if (c.th) out.push(`<th${span(c)}>${esc(c.text)}</th>`);
-      else out.push(c.text === '' ? `<td${span(c)}></td>` : `<td ${NUM}${span(c)}>${esc(c.text)}</td>`);
+      if (c.th) out.push(`<th${span(c)}>${esc(c.text)}${sup(c)}</th>`);
+      else out.push(c.text === '' ? `<td${span(c)}></td>` : `<td ${NUM}${span(c)}>${esc(c.text)}${sup(c)}</td>`);
     }
     out.push('</tr>');
   }
   out.push('</tbody>');
   if (t.footnotes?.length) {
     out.push('<tfoot>');
-    t.footnotes.forEach((f, i) => out.push(`<tr><td colspan="99"><sup>${String.fromCharCode(97 + i)}</sup> ${esc(f)}</td></tr>`));
+    t.footnotes.forEach((f, i) => {
+      const [mark, text] = typeof f === 'string' ? [String.fromCharCode(97 + i), f] : [f.mark, f.text];
+      out.push(`<tr><td colspan="99"><sup>${esc(mark)}</sup> ${esc(text)}</td></tr>`);
+    });
     out.push('</tfoot>');
   }
   out.push('</table>');

@@ -129,7 +129,8 @@ export async function runSyntaxDetailed(syntax: string, opts: RunOptions = {}): 
         };
       }
       cur.load(result.dataset, { keepHistory: true, dirty: true, title: cur.title, fileName: cur.fileName, label: cmds.slice(0, 3).join(', ') });
-      markSynced(useData.getState().dataset);
+      // a dataset changed by an extension command (e.g. CLUSTER /SAVE) is not in the engine yet
+      if (!('engineStale' in result && result.engineStale)) markSynced(useData.getState().dataset);
     }
     useJournal.getState().add({
       time: Date.now(),
