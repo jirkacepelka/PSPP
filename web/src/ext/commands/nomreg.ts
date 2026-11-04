@@ -181,6 +181,20 @@ function fullFactorial(factors: string[], covariates: string[]): Effect[] {
   return [...out, ...subsets];
 }
 
+/** Unrounded results per split group, collected only while a test sets SINK (test hook). */
+export interface NomregRaw {
+  /** per non-reference category (output order): coefficients and standard errors */
+  B: number[][];
+  SE: number[][];
+  ll: number;
+  ll0: number;
+  logConst: number;
+  pearson: number;
+  deviance: number;
+  warnings: string[];
+}
+export const inspect: { sink: NomregRaw[] | null } = { sink: null };
+
 function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
   const ds = ctx.dataset;
   const t = (k: string, a?: Record<string, unknown>) => ctx.t(`${P}.${k}`, a);
@@ -249,6 +263,11 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     if (doubtful) warnings.push(t('continues'));
     for (const w of warnings) items.push(messageItem('warning', w, ctx.line));
 
+    if (inspect.sink) {
+      const se = fit.params.map((_, i) => (cov ? Math.sqrt(cov[i][i]) : NaN));
+      const blocks = (v: number[]) => m.others.map((_, e) => v.slice(e * m.q, (e + 1) * m.q));
+      inspect.sink.push({ B: blocks(fit.params), SE: blocks(se), ll: fit.ll, ll0: 0, logConst: md.logConst, pearson: g.pearson, deviance: g.deviance, warnings });
+    }
     if (print.cps) {
       const single = md.patterns.filter((p) => p.y.filter((y) => y > 0).length === 1).length;
       const s = md.patterns.length;
@@ -258,6 +277,8 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     }
     // null model: intercept only, or all logits 0 without an intercept
     const ll0 = intercept ? md.catCount.reduce((s, n) => s + (n > 0 ? n * Math.log(n / md.nValid) : 0), 0) : md.nValid * Math.log(1 / K);
+    const last = inspect.sink?.[inspect.sink.length - 1];
+    if (last) last.ll0 = ll0;
     const nonRed = m.q - (intercept ? 1 : 0);
     const dfModel = (K - 1) * nonRed;
     const labels = paramLabels(m, ctx);

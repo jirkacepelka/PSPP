@@ -343,7 +343,7 @@ describe('CLUSTER command', () => {
     expect(errorsOf(items)).toEqual([]);
     const ts = tables(items);
     expect(ts.map((t) => t.caption)).toEqual(['Case Processing Summary', 'Agglomeration Schedule', 'Cluster Membership']);
-    const cps = ts[0].rows.at(-1)!.map((c) => c.text);
+    const cps = ts[0].rows.at(-1)!.slice(1).map((c) => c.text);
     expect(cps).toEqual(['10', '100.0%', '0', '.0%', '10', '100.0%']);
     expect(ts[0].footnotes.join(' ')).toContain('Squared Euclidean Distance used');
     const rows = scheduleRows(items);
@@ -404,14 +404,14 @@ describe('CLUSTER command', () => {
     ds.columns[1][5] = 99;
     ds.variables[1] = { ...ds.variables[1], missing: { values: [99] } };
     let items = runExt('CLUSTER x y z.', ds);
-    expect(tables(items)[0].rows.at(-1)!.map((c) => c.text)).toEqual(['8', '80.0%', '2', '20.0%', '10', '100.0%']);
+    expect(tables(items)[0].rows.at(-1)!.slice(1).map((c) => c.text)).toEqual(['8', '80.0%', '2', '20.0%', '10', '100.0%']);
     // reference: the 8 remaining cases clustered alone
     const keep = [0, 1, 2, 4, 6, 7, 8, 9];
     const ref = compute(keep.map((r) => HAND_X[r]), 'SEUCLID BAVERAGE');
     const rows = scheduleRows(items);
     ref.forEach((s, i) => expect([rows[i][1], rows[i][2], rows[i][3]]).toEqual([s.c1, s.c2, Number(s.coef.toFixed(3))]));
     items = runExt('CLUSTER x y z /MISSING=INCLUDE.', ds);
-    expect(tables(items)[0].rows.at(-1)![0].text).toBe('9');
+    expect(tables(items)[0].rows.at(-1)![1].text).toBe('9');
   });
 
   it('n = 2 gives one stage; n = 1 warns', () => {
@@ -429,7 +429,7 @@ describe('CLUSTER command', () => {
     ds.columns.push([1, 1, 1, 1, 1, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 2, 2, 2, 2, 2]);
     // filter drops case 6
     let items = runExt('CLUSTER x y z /METHOD=SINGLE.', { ...ds, filter: 'f' });
-    expect(tables(items)[0].rows.at(-1)![4].text).toBe('9');
+    expect(tables(items)[0].rows.at(-1)![5].text).toBe('9');
     const ref = compute([0, 1, 2, 3, 4, 6, 7, 8, 9].map((r) => HAND_X[r]), 'SEUCLID SINGLE');
     expect(scheduleRows(items).map((r) => [r[1], r[2]])).toEqual(ref.map((s) => [s.c1, s.c2]));
     // split by g: two schedules of 4 stages each
@@ -448,7 +448,7 @@ describe('CLUSTER command', () => {
     const items = runExt('CLUSTER x y z /PLOT=VICICLE.', { ...ds, weight: 'w' });
     expect(messages(items, 'warning').join(' ')).toMatch(/ignores case weights/);
     expect(messages(items, 'warning').join(' ')).toMatch(/Icicle/);
-    expect(tables(items)[0].rows.at(-1)![0].text).toBe('10');
+    expect(tables(items)[0].rows.at(-1)![1].text).toBe('10');
   });
 
   it('SAVE=CLUSTER adds CLUk_m variables (system-missing for unused cases)', () => {

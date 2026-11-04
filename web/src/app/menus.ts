@@ -142,7 +142,7 @@ export const MENUS: TopMenu[] = [
       '-',
       'dialog:factor|tpl:FACTOR',
       'dialog:reliability|tpl:RELIABILITY',
-      'dialog:quickCluster|dialog:cluster|tpl:QUICK CLUSTER',
+      { sub: 'menu.classify', icon: 'bubble_chart', items: ['dialog:quickCluster|dialog:cluster|tpl:QUICK CLUSTER', 'dialog:hierCluster'] },
       {
         sub: 'menu.nonparametric',
         icon: 'ssid_chart',

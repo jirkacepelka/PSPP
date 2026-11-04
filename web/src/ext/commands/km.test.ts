@@ -49,7 +49,8 @@ import { describe, expect, it } from 'vitest';
 import type { Dataset, OutputItem, Variable } from '../../engine/types';
 import { makeVariable } from '../../lib/variables';
 import { dataRows, type PivotTable } from '../../lib/pivot';
-import { errorsOf, flatItems, runExt, tables } from '../testing';
+import { errorsOf, flatItems, haveEngine, runExt, runMixed, tables } from '../testing';
+import students from '../../samples/students.json';
 import { kmFit, kmPercentile, kmTest, type Obs } from './km';
 import cs from '../../i18n/fragments/ext-km.cs.json';
 import en from '../../i18n/fragments/ext-km.en.json';
@@ -310,7 +311,7 @@ describe('KM command', () => {
     expect(pl.points.at(-1)).toEqual([23, 0]);
     // cumulative hazard stops before S = 0
     expect(charts[1].chart.curves[1].points.at(-1)![1]).toBeCloseTo(-Math.log(0.047619), 5);
-    expect(charts[1].chart.curves[1].end).toBeNull();
+    expect(charts[1].chart.curves[1].end).toBe(23); // last finite step runs to the time S = 0
     expect(flatItems(out).some((i) => i.kind === 'message' && i.severity === 'warning' && /SAVE/.test(i.text))).toBe(true);
   });
 
@@ -322,6 +323,18 @@ describe('KM command', () => {
     const mm = byCaption(out, 'Průměry a mediány doby přežití');
     expect(dataRows(mm)[0].filter((c) => !c.header)[0].text).toBe('23,287');
   });
+
+  // statsmodels survdiff on students.json: time = hours, event = stress > 20, groups = gender
+  //   logrank 2.776418 (p .249522), gb 1.759243, tw 2.295786; 120 cases, 70 events
+  it.skipIf(!haveEngine)('runs after PSPP transformations (real engine)', async () => {
+    const r = await runMixed('COMPUTE stime = hours.\nCOMPUTE died = stress > 20.\nKM stime BY gender /STATUS=died(1) /PRINT=NONE /TEST=LOGRANK BRESLOW TARONE.', students as unknown as Dataset);
+    expect(errorsOf(r.items)).toEqual([]);
+    expect(row(byCaption(r.items, 'Case Processing Summary'), 'Overall').slice(0, 2)).toEqual([120, 70]);
+    const oc = byCaption(r.items, 'Overall Comparisons');
+    expect(row(oc, 'Log Rank (Mantel-Cox)')).toEqual([2.776, 2, 0.25]);
+    expect(row(oc, 'Breslow (Generalized Wilcoxon)')[0]).toBeCloseTo(1.759, 3);
+    expect(row(oc, 'Tarone-Ware')[0]).toBeCloseTo(2.296, 3);
+  }, 60000);
 
   it('fragments have identical keys', () => {
     const keys = (o: object, p = ''): string[] => Object.entries(o).flatMap(([k, v]) => (typeof v === 'object' ? keys(v, `${p}${k}.`) : [`${p}${k}`])).sort();

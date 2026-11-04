@@ -711,17 +711,21 @@ function survivalCurve(c: Cellset, kind: string, name: string) {
   const points: [number, number][] = [];
   const y0 = yOf(1, kind)!;
   points.push([0, y0]);
+  let stop: number | null = null; // time where −ln S / ln S become infinite (S = 0)
   for (const st of c.fit.steps) {
     const y = yOf(st.s, kind);
-    if (y === null) break;
+    if (y === null) {
+      stop = st.t;
+      break;
+    }
     points.push([st.t, y]);
   }
   const censored = c.fit.censor.flatMap((x) => {
     const y = yOf(x.s, kind);
     return y === null ? [] : [[x.t, y] as [number, number]];
   });
-  const lastS = c.fit.steps.length ? c.fit.steps[c.fit.steps.length - 1].s : 1;
-  return { name, points, censored, end: yOf(lastS, kind) === null ? null : c.fit.tmax };
+  // the last step runs to the largest observed time, or to the time S reaches 0 on log scales
+  return { name, points, censored, end: stop ?? c.fit.tmax };
 }
 
 export const commands: ExtCommand[] = [{ name: NAME, run }];

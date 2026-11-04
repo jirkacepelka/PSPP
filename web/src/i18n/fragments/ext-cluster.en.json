@@ -61,5 +61,54 @@
       "pearsonVars": "MEASURE=PEARSON correlates cases across variables and needs at least two variables.",
       "varExists": "Variable {{name}} already exists."
     }
+  },
+  "dlg": {
+    "hierCluster": {
+      "title": "Hierarchical Cluster Analysis",
+      "labelBy": "Label cases by",
+      "statisticsBtn": "Statistics…",
+      "plotsBtn": "Plots…",
+      "methodBtn": "Method…",
+      "saveBtn": "Save…",
+      "schedule": "Agglomeration schedule",
+      "proximity": "Proximity matrix",
+      "membership": "Cluster membership",
+      "saveMembership": "Save cluster membership as new variables",
+      "solNone": "None",
+      "solSingle": "Single solution",
+      "solRange": "Range of solutions",
+      "nClusters": "Number of clusters",
+      "minClusters": "Minimum number of clusters",
+      "maxClusters": "Maximum number of clusters",
+      "dendrogram": "Dendrogram",
+      "icicleInfo": "Icicle plots are not available; the dendrogram shows the same merges.",
+      "method": "Cluster method",
+      "measure": "Measure (interval data)",
+      "m_BAVERAGE": "Between-groups linkage",
+      "m_WAVERAGE": "Within-groups linkage",
+      "m_SINGLE": "Nearest neighbor",
+      "m_COMPLETE": "Furthest neighbor",
+      "m_CENTROID": "Centroid clustering",
+      "m_MEDIAN": "Median clustering",
+      "m_WARD": "Ward's method",
+      "d_SEUCLID": "Squared Euclidean distance",
+      "d_EUCLID": "Euclidean distance",
+      "d_COSINE": "Cosine",
+      "d_PEARSON": "Pearson correlation",
+      "d_CHEBYCHEV": "Chebychev",
+      "d_BLOCK": "Block (city block)",
+      "d_MINKOWSKI": "Minkowski",
+      "d_POWER": "Customized (power)",
+      "power": "Power (p)",
+      "root": "Root (r)",
+      "standardizeInfo": "Values are used as they are. If the variables use very different scales, standardise them first (Descriptives → Save standardized values) and cluster the Z-scores.",
+      "errRange": "The minimum number of clusters must not exceed the maximum.",
+      "errPearson": "Pearson correlation between cases needs at least two variables.",
+      "hintSeuclid": "Centroid, median and Ward's method are meant for squared Euclidean distances.",
+      "useSeuclid": "Use squared Euclidean"
+    }
+  },
+  "menu": {
+    "classify": "Classify"
   }
 }

@@ -61,5 +61,54 @@
       "pearsonVars": "MEASURE=PEARSON koreluje případy přes proměnné a potřebuje alespoň dvě proměnné.",
       "varExists": "Proměnná {{name}} už existuje."
     }
+  },
+  "dlg": {
+    "hierCluster": {
+      "title": "Hierarchická shluková analýza",
+      "labelBy": "Popisky případů podle",
+      "statisticsBtn": "Statistiky…",
+      "plotsBtn": "Grafy…",
+      "methodBtn": "Metoda…",
+      "saveBtn": "Uložit…",
+      "schedule": "Průběh shlukování",
+      "proximity": "Matice blízkostí",
+      "membership": "Příslušnost ke shlukům",
+      "saveMembership": "Uložit příslušnost ke shlukům jako nové proměnné",
+      "solNone": "Žádná",
+      "solSingle": "Jedno řešení",
+      "solRange": "Rozsah řešení",
+      "nClusters": "Počet shluků",
+      "minClusters": "Nejmenší počet shluků",
+      "maxClusters": "Největší počet shluků",
+      "dendrogram": "Dendrogram",
+      "icicleInfo": "Rampouchové grafy nejsou k dispozici; stejná spojení ukazuje dendrogram.",
+      "method": "Metoda shlukování",
+      "measure": "Míra (intervalová data)",
+      "m_BAVERAGE": "Průměrná vazba (mezi skupinami)",
+      "m_WAVERAGE": "Průměrná vazba (uvnitř skupin)",
+      "m_SINGLE": "Nejbližší soused",
+      "m_COMPLETE": "Nejvzdálenější soused",
+      "m_CENTROID": "Centroidní metoda",
+      "m_MEDIAN": "Mediánová metoda",
+      "m_WARD": "Wardova metoda",
+      "d_SEUCLID": "Čtvercová euklidovská vzdálenost",
+      "d_EUCLID": "Euklidovská vzdálenost",
+      "d_COSINE": "Kosinus",
+      "d_PEARSON": "Pearsonova korelace",
+      "d_CHEBYCHEV": "Čebyševova vzdálenost",
+      "d_BLOCK": "Manhattanská vzdálenost",
+      "d_MINKOWSKI": "Minkowského vzdálenost",
+      "d_POWER": "Vlastní (mocninná)",
+      "power": "Mocnina (p)",
+      "root": "Odmocnina (r)",
+      "standardizeInfo": "Hodnoty se použijí tak, jak jsou. Mají-li proměnné velmi odlišná měřítka, nejprve je standardizujte (Popisné statistiky → Uložit standardizované hodnoty) a shlukujte z-skóry.",
+      "errRange": "Nejmenší počet shluků nesmí být větší než největší.",
+      "errPearson": "Pearsonova korelace mezi případy potřebuje alespoň dvě proměnné.",
+      "hintSeuclid": "Centroidní, mediánová a Wardova metoda jsou určeny pro čtvercovou euklidovskou vzdálenost.",
+      "useSeuclid": "Použít čtvercovou euklidovskou"
+    }
+  },
+  "menu": {
+    "classify": "Klasifikace"
   }
 }

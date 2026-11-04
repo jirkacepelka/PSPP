@@ -150,6 +150,20 @@ function parsePrint(tokens: ReturnType<typeof sub>) {
   return out;
 }
 
+/** Unrounded results per split group, collected only while a test sets SINK (test hook). */
+export interface PlumRaw {
+  params: number[];
+  se: number[];
+  ll: number;
+  ll0: number;
+  logConst: number;
+  pearson: number;
+  deviance: number;
+  llGeneral?: number;
+  warnings: string[];
+}
+export const inspect: { sink: PlumRaw[] | null } = { sink: null };
+
 function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
   const ds = ctx.dataset;
   const t = (k: string, a?: Record<string, unknown>) => ctx.t(`${P}.${k}`, a);
@@ -237,6 +251,8 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     if (print.fit) items.push(gofTable(ctx, P, NAME, g, md.patterns.length * (J - 1) - (J - 1 + q), [linkNote]));
     if (print.summary) items.push(pseudoTable(ctx, P, NAME, pseudoR2(ll0, fit.ll, md.nValid), [linkNote]));
     if (print.parameter) items.push(paramTable(md, fit.params, cov, tlabels, crit.cin, ctx, linkNote));
+    const raw: PlumRaw = { params: fit.params, se: fit.params.map((_, i) => (cov ? Math.sqrt(cov[i][i]) : NaN)), ll: fit.ll, ll0, logConst: md.logConst, pearson: g.pearson, deviance: g.deviance, warnings };
+    inspect.sink?.push(raw);
     if (print.tparallel) {
       if (q === 0 || J < 3) items.push(messageItem('warning', t('tparallelNone'), ctx.line));
       else {
@@ -254,6 +270,7 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
         if (gen && (!gen.converged || gen.stepFailed || gen.singular)) notes.push(t('tparallelConv'));
         const a = m2ll(md, fit.ll, print.kernel);
         const b = gen ? m2ll(md, gen.ll, print.kernel) : NaN;
+        if (gen) raw.llGeneral = gen.ll;
         const chi = a - b;
         const sup = mark(0);
         items.push(

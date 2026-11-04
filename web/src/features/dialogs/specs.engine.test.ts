@@ -40,6 +40,7 @@ const FILLED: Record<string, Values> = {
   factor: { variables: ['hours', 'sleep', 'stress', 'gpa'] },
   reliability: { items: ['hours', 'sleep', 'stress'] },
   quickCluster: { variables: ['hours', 'gpa'], saveCluster: true },
+  hierCluster: { variables: ['hours', 'sleep', 'gpa'], id: ['id'], method: 'WARD', memMode: 'range', saveMode: 'single', saveN: 3, proximity: true },
   chiSquare: { variables: ['faculty'] },
   binomial: { variables: ['job'] },
   ksNormal: { variables: ['gpa'] },
@@ -53,6 +54,7 @@ const FILLED: Record<string, Values> = {
   medianTest: { variables: ['stress'], group: ['faculty'], lo: 1, hi: 5 },
   jonckheere: { variables: ['stress'], group: ['year'], lo: 1, hi: 5 },
   roc: { variables: ['gpa'], state: ['job'], positive: '1', coordinates: true },
+  km: { time: ['stime'], status: ['died'], factor: ['gender'], logrank: true, breslow: true, tarone: true, quartiles: true, plotHazard: true },
   histogram: { variable: ['gpa'] },
   barChart: { category: ['faculty'], cluster: ['gender'], func: 'MEAN', variable: ['gpa'] },
   scatter: { y: ['gpa'], x: ['hours'], by: ['gender'] },
@@ -76,6 +78,7 @@ const FILLED: Record<string, Values> = {
 const PRELUDE: Record<string, string> = {
   mcnemar: 'COMPUTE good = gpa >= 3.\n',
   cochran: 'COMPUTE good = gpa >= 3.\n',
+  km: 'COMPUTE stime = hours.\nCOMPUTE died = stress > 20.\n',
 };
 
 const flat = (items: OutputItem[]): OutputItem[] => items.flatMap((i) => (i.kind === 'group' ? flat(i.children) : [i]));

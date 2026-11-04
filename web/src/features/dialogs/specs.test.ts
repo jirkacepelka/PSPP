@@ -28,12 +28,14 @@ const NEW_FILLED: Record<string, Values> = {
   medianTest: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
   jonckheere: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
   roc: { variables: ['score'], state: ['gender'], positive: '1' },
+  km: { time: ['age'], status: ['gender'], eventValue: '1', factor: ['group'], logrank: true },
   chiSquare: { variables: ['group'] },
   binomial: { variables: ['gender'] },
   ksNormal: { variables: ['age'] },
   reliability: { items: ['age', 'score', 'income'] },
   factor: { variables: ['age', 'score', 'income'] },
   quickCluster: { variables: ['age', 'score'] },
+  hierCluster: { variables: ['age', 'score'] },
   logistic: { dependent: ['gender'], covariates: ['age'] },
   glm: { dependent: ['score'], factors: ['gender'] },
   ctables: { rows: ['gender'], cols: ['group'] },
@@ -299,6 +301,15 @@ describe('New dialogs (WP3)', () => {
     expect(gen('factor', { ...NEW_FILLED.factor, nfactors: 'fixed', factors: 2, blank: 0.3, rotation: 'NOROTATE' })).toContain('/CRITERIA=FACTORS(2)');
     expect(gen('quickCluster', { ...NEW_FILLED.quickCluster, saveCluster: true })).toBe('QUICK CLUSTER age score\n  /CRITERIA=CLUSTERS(3) MXITER(10)\n  /SAVE=CLUSTER.');
   });
+  it('CLUSTER (hierarchical)', () => {
+    expect(gen('hierCluster', NEW_FILLED.hierCluster)).toBe('CLUSTER age score\n  /MEASURE=SEUCLID\n  /METHOD=BAVERAGE\n  /PRINT=SCHEDULE\n  /PLOT=DENDROGRAM.');
+    expect(
+      gen('hierCluster', { ...NEW_FILLED.hierCluster, id: ['city'], method: 'WARD', measure: 'MINKOWSKI', p: 3, proximity: true, memMode: 'range', saveMode: 'single', saveN: 3, dendrogram: false }),
+    ).toBe('CLUSTER age score\n  /MEASURE=MINKOWSKI(3)\n  /METHOD=WARD\n  /ID=city\n  /PRINT=SCHEDULE CLUSTER(2,4) DISTANCE\n  /PLOT=NONE\n  /SAVE=CLUSTER(3).');
+    expect(gen('hierCluster', { ...NEW_FILLED.hierCluster, schedule: false, measure: 'POWER', p: 2, r: 1 })).toContain('/MEASURE=POWER(2,1)\n  /METHOD=BAVERAGE\n  /PRINT=NONE');
+    expect(errors('hierCluster', { ...NEW_FILLED.hierCluster, memMode: 'range', memMin: 5, memMax: 3 })).toBe('dlg.hierCluster.errRange');
+    expect(errors('hierCluster', { variables: ['age'], measure: 'PEARSON' })).toBe('dlg.hierCluster.errPearson');
+  });
   it('models', () => {
     expect(gen('logistic', { dependent: ['gender'], covariates: ['age'], categorical: ['group'] })).toBe(
       'LOGISTIC REGRESSION gender WITH age group\n  /CATEGORICAL=group\n  /PRINT=CI(95)\n  /CRITERIA=CUT(0.5) ITERATE(20).',
@@ -328,5 +339,22 @@ describe('New dialogs (WP3)', () => {
     expect(gen('partialCorr', { variables: ['age', 'score'], controls: ['income'] })).toBe('PARTIAL CORR\n  /VARIABLES=age score BY income\n  /SIGNIFICANCE=TWOTAIL\n  /MISSING=LISTWISE.');
     expect(gen('partialCorr', { variables: ['age', 'score'], controls: ['income', 'gender'], tails: 'ONETAIL', showSig: false, descriptives: true, zeroOrder: true, missing: 'ANALYSIS' })).toBe('PARTIAL CORR\n  /VARIABLES=age score BY income gender\n  /SIGNIFICANCE=ONETAIL\n  /STATISTICS=DESCRIPTIVES CORR\n  /FORMAT=CONDENSED\n  /MISSING=ANALYSIS.');
     expect(errors('partialCorr', { variables: ['age', 'score'] })).toBe('dlg.errors.needVariables');
+  });
+});
+
+describe('Kaplan–Meier', () => {
+  it('KM syntax with event list, strata, tests and plots', () => {
+    expect(gen('km', { time: ['age'], status: ['gender'], eventValue: '1' })).toBe('KM age\n  /STATUS=gender(1)\n  /PRINT=TABLE MEAN\n  /PLOT=SURVIVAL.');
+    expect(
+      gen('km', {
+        time: ['age'], status: ['group'], eventType: 'list', eventList: '1, 3', factor: ['gender'], strata: ['city'],
+        logrank: true, tarone: true, compare: 'PAIRWISE', pool: 'STRATA', table: false, quartiles: true, plotHazard: true,
+      }),
+    ).toBe('KM age BY gender\n  /STRATA=city\n  /STATUS=group(1 3)\n  /PRINT=MEAN\n  /PERCENTILES\n  /PLOT=SURVIVAL HAZARD\n  /TEST=LOGRANK TARONE\n  /COMPARE=PAIRWISE STRATA.');
+    expect(gen('km', { time: ['age'], status: ['group'], eventType: 'range', lo: 2, hi: 4, table: false, mean: false, plotSurvival: false })).toBe('KM age\n  /STATUS=group(2 THRU 4)\n  /PRINT=NONE.');
+    // tests need a factor
+    expect(gen('km', { time: ['age'], status: ['gender'], logrank: true })).not.toContain('TEST');
+    expect(errors('km', { time: ['age'], status: ['gender'], eventValue: 'x' })).toBe('dlg.errors.kmEvent');
+    expect(errors('km', { time: ['age'], status: ['gender'], eventType: 'range', lo: 3, hi: 1 })).toBe('dlg.errors.kmEvent');
   });
 });

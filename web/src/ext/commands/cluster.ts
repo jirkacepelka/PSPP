@@ -497,6 +497,7 @@ function run(cmd: ParsedCommand, ctx: ExtContext): ExtResult {
           ],
           body: [
             [
+              th(''),
               td(String(n)),
               td(pct(total ? (100 * n) / total : 0, ctx)),
               td(String(total - n)),
