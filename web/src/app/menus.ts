@@ -163,6 +163,7 @@ export const MENUS: TopMenu[] = [
           'dialog:cochran',
         ],
       },
+      { sub: 'menu.survival', icon: 'monitor_heart', items: ['dialog:km'] },
       'dialog:roc|tpl:ROC',
       '-',
       'tpl:MATRIX',

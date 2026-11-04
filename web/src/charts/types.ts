@@ -2,6 +2,9 @@
    parsing from `unknown`.  The serializer maps system-missing and
    non-finite numbers to null. */
 
+import { parseSurvival, type SurvivalSpec } from './survivalSpec';
+import { parseDendrogram, type DendrogramSpec } from './dendrogram';
+
 export type Pt = [number, number];
 
 export interface HistogramSpec {
@@ -108,6 +111,8 @@ export type ChartSpec =
   | ScatterSpec
   | ScreeSpec
   | SpreadLevelSpec
+  | SurvivalSpec
+  | DendrogramSpec
   | UnknownSpec;
 
 type Obj = Record<string, unknown>;
@@ -251,6 +256,10 @@ export function parseChart(input: unknown): ChartSpec {
       };
     case 'spreadlevel':
       return { type, title, power: num(c.power), points: pts(c.points) };
+    case 'survival':
+      return parseSurvival(c, title);
+    case 'dendrogram':
+      return parseDendrogram(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }

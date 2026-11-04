@@ -504,6 +504,8 @@ export interface NewtonResult {
   converged: boolean;
   iterations: number;
   stepFailed: boolean;
+  /** stopped because no ascent direction could be computed */
+  singular: boolean;
   history: { iter: number; ll: number; halvings: number; params: number[] }[];
   H: Matrix;
 }
@@ -516,22 +518,30 @@ export function newton(f: (b: number[], deriv: boolean) => Eval, start: number[]
   const history: NewtonResult['history'] = [{ iter: 0, ll: e.ll, halvings: 0, params: [...b] }];
   let converged = false;
   let stepFailed = false;
+  let singular = false;
   let it = 0;
   while (it < crit.mxiter) {
     const g = e.g!;
     let delta: number[] | null = null;
     const negH = e.H!.map((r) => r.map((x) => -x));
     delta = solve(negH, g);
-    if (!delta || delta.some((x) => !Number.isFinite(x)) || dotv(delta, g) <= 0) delta = e.info ? solve(e.info(), g) : null;
-    if (!delta || delta.some((x) => !Number.isFinite(x))) {
-      stepFailed = true;
+    const bad = (d: number[] | null) => !d || d.some((x) => !Number.isFinite(x)) || dotv(d, g) <= 0;
+    if (bad(delta) && e.info) delta = solve(e.info(), g);
+    if (bad(delta)) {
+      // singular (e.g. separation): a slightly ridged step keeps moving along the free direction
+      const scale = Math.max(1e-300, ...negH.map((r, i) => Math.abs(r[i])));
+      delta = solve(negH.map((r, i) => r.map((x, j) => (i === j ? x + 1e-8 * scale : x))), g);
+    }
+    if (!delta || bad(delta)) {
+      singular = true;
       break;
     }
+    const step = delta;
     let lambda = 1;
     let accepted: { b: number[]; e: Eval } | null = null;
     let halvings = 0;
     for (; halvings <= crit.mxstep; halvings++) {
-      const nb = b.map((x, i) => x + lambda * delta[i]);
+      const nb = b.map((x, i) => x + lambda * step[i]);
       const ne = f(nb, false);
       if (ne.ok && ne.ll >= e.ll - 1e-10 * Math.abs(e.ll)) {
         accepted = { b: nb, e: ne };
@@ -555,7 +565,7 @@ export function newton(f: (b: number[], deriv: boolean) => Eval, start: number[]
       break;
     }
   }
-  return { params: b, ll: e.ll, converged, iterations: it, stepFailed, history, H: e.H! };
+  return { params: b, ll: e.ll, converged, iterations: it, stepFailed, singular, history, H: e.H! };
 }
 
 const dotv = (a: number[], b: number[]) => a.reduce((s, x, i) => s + x * b[i], 0);

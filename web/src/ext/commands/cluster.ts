@@ -603,9 +603,8 @@ function run(cmd: ParsedCommand, ctx: ExtContext): ExtResult {
               type: 'dendrogram',
               title: ctx.t('ext.cluster.dendrogramTitle', { method: methodName(m.method, ctx) }),
               xlabel: ctx.t('ext.cluster.rescaled'),
-              labels: Array.from({ length: n }, (_, i) => (idv ? label(i).slice(String(i + 1).length + 1) : '')),
-              numbers: Array.from({ length: n }, (_, i) => i + 1),
-              merges: stages.map((s, i) => [s.c1, s.c2, Math.round(h[i] * 1000) / 1000, s.coef]),
+              leaves: Array.from({ length: n }, (_, i) => ({ label: idv ? label(i).slice(String(i + 1).length + 1) : '', number: i + 1 })),
+              merges: stages.map((s, i) => ({ a: s.c1, b: s.c2, h: Math.round(h[i] * 1000) / 1000, coef: s.coef })),
               strings: {
                 stage: ctx.t('ext.cluster.stage'),
                 cluster1: ctx.t('ext.cluster.cluster1'),

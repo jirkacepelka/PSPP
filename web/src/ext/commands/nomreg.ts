@@ -90,6 +90,7 @@ interface FitOut {
   params: number[];
   converged: boolean;
   stepFailed: boolean;
+  singular: boolean;
   H: Matrix;
   history: ReturnType<typeof newton>['history'];
 }
@@ -106,10 +107,10 @@ function fitPrepared(md: ModelData, intercept: boolean, base: Base, crit: Criter
   const model: MnModel = { md, K, ref, others: md.cats.map((_, i) => i).filter((i) => i !== ref), intercept, q };
   if (model.others.length * q === 0) {
     const e = evaluate(model, [], false);
-    return { model, ll: e.ll, params: [], converged: true, stepFailed: false, H: [], history: [{ iter: 0, ll: e.ll, halvings: 0, params: [] }] };
+    return { model, ll: e.ll, params: [], converged: true, stepFailed: false, singular: false, H: [], history: [{ iter: 0, ll: e.ll, halvings: 0, params: [] }] };
   }
   const r = newton((b, d) => evaluate(model, b, d), startValues(model), crit);
-  return { model, ll: r.ll, params: r.params, converged: r.converged, stepFailed: r.stepFailed, H: r.H, history: r.history };
+  return { model, ll: r.ll, params: r.params, converged: r.converged, stepFailed: r.stepFailed, singular: r.singular, H: r.H, history: r.history };
 }
 
 type Base = { kind: 'FIRST' | 'LAST' } | { kind: 'VALUE'; value: Value };
@@ -228,8 +229,10 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     if (md.covariates.length && g.zeroCells > 0) warnings.push(t('zeroCells', { n: g.zeroCells, pct: fmt((100 * g.zeroCells) / g.cells, 1, ctx) }));
     let sep = 0;
     let obs = 0;
+    let tiny = 0;
     md.patterns.forEach((p, i) =>
       p.y.forEach((y, j) => {
+        if (pr[i][j] < 1e-8) tiny++;
         if (y <= 0) return;
         obs++;
         const comp = pr[i].reduce((s, v, k) => (k === j ? s : s + v), 0);
@@ -239,8 +242,8 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     const cov = covariance(fit.H, crit.singular);
     let doubtful = false;
     if (sep > 0 && sep === obs) warnings.push(t('completeSep')), (doubtful = true);
-    else if (sep > 0) warnings.push(t('quasiSep')), (doubtful = true);
-    if (!cov && fit.params.length) warnings.push(t('singular')), (doubtful = true);
+    else if (sep > 0 || tiny > 0) warnings.push(t('quasiSep')), (doubtful = true);
+    if ((!cov || fit.singular) && fit.params.length) warnings.push(t('singular')), (doubtful = true);
     if (fit.stepFailed) warnings.push(t('stepFailed')), (doubtful = true);
     else if (!fit.converged) warnings.push(t('maxIter', { n: crit.mxiter })), (doubtful = true);
     if (doubtful) warnings.push(t('continues'));

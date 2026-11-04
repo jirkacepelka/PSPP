@@ -208,9 +208,11 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     // separation: observed cells predicted with probability ≈ 1
     let sepCells = 0;
     let obsCells = 0;
+    let tinyCells = 0;
     md.patterns.forEach((p) => {
       const u = thresholdsU(model, fit.params, p.x);
       p.y.forEach((y, j) => {
+        if (catProb(link, u, j) < 1e-8) tinyCells++;
         if (y <= 0) return;
         obsCells++;
         if (catComplement(link, u, j) < 1e-8) sepCells++;
@@ -219,8 +221,8 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     const cov = covariance(fit.H, crit.singular);
     let doubtful = false;
     if (sepCells > 0 && sepCells === obsCells) warnings.push(t('completeSep')), (doubtful = true);
-    else if (sepCells > 0) warnings.push(t('quasiSep')), (doubtful = true);
-    if (!cov) warnings.push(t('singular')), (doubtful = true);
+    else if (sepCells > 0 || tinyCells > 0) warnings.push(t('quasiSep')), (doubtful = true);
+    if (!cov || fit.singular) warnings.push(t('singular')), (doubtful = true);
     if (fit.stepFailed) warnings.push(t('stepFailed')), (doubtful = true);
     else if (!fit.converged) warnings.push(t('maxIter', { n: crit.mxiter })), (doubtful = true);
     if (doubtful) warnings.push(t('continues'));
@@ -249,7 +251,7 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
         }
         const df = (J - 2) * q;
         const notes = [t('tparallelNote'), linkNote];
-        if (gen && (!gen.converged || gen.stepFailed)) notes.push(t('tparallelConv'));
+        if (gen && (!gen.converged || gen.stepFailed || gen.singular)) notes.push(t('tparallelConv'));
         const a = m2ll(md, fit.ll, print.kernel);
         const b = gen ? m2ll(md, gen.ll, print.kernel) : NaN;
         const chi = a - b;
