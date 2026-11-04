@@ -94,7 +94,6 @@
 }
 .pal-item.on {
   background: var(--accent-tint-strong);
-  box-shadow: inset 2px 0 0 var(--accent-line);
 }
 .pal-item.disabled {
   opacity: 0.5;

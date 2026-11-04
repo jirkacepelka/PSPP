@@ -6,8 +6,8 @@
  */
 
 .sh-app {
-  --sh-gutter: var(--s-3);
-  --sh-row: 28px; /* title row and menu-bar row */
+  --sh-gutter: var(--s-4);
+  --sh-row: 32px; /* title row and menu-bar row */
   --sh-item-pad: var(--s-2); /* inner padding shared by the title field and menu items */
   display: flex;
   flex-direction: column;
@@ -23,8 +23,9 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: 'logo doc tools';
   align-items: center;
-  column-gap: var(--s-2);
-  padding: var(--s-2) var(--sh-gutter) var(--s-1);
+  column-gap: var(--s-3);
+  min-height: var(--appbar-h);
+  padding: var(--s-2) var(--sh-gutter);
   flex: none;
   min-width: 0;
 }
@@ -36,13 +37,17 @@
   grid-area: logo;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 0;
   border-radius: var(--radius-panel);
   background: transparent;
   cursor: pointer;
+  transition: transform var(--dur-medium) var(--ease-emphasized);
+}
+.sh-logo:hover {
+  transform: scale(1.04);
 }
 .sh-logo:hover .logo-tile {
   fill: var(--ink-2);
@@ -107,7 +112,7 @@
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-tight);
   line-height: var(--sh-row);
@@ -149,6 +154,14 @@ input.sh-title:focus {
 }
 .sh-save.warn {
   color: var(--warning);
+}
+
+.sh-header.is-home .sh-wordmark {
+  font-size: var(--fs-xl);
+  letter-spacing: var(--ls-tight);
+}
+.sh-bottom.on-start {
+  display: none !important;
 }
 
 /* menu bar */
@@ -224,7 +237,7 @@ input.sh-title:focus {
   grid-area: tools;
   display: flex;
   align-items: center;
-  gap: var(--s-2);
+  gap: var(--s-3);
   min-width: 0;
 }
 .sh-engine {
@@ -272,27 +285,29 @@ input.sh-title:focus {
   height: var(--control-h);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-round);
   background: transparent;
   cursor: pointer;
+  transition: box-shadow var(--dur-short) var(--ease-standard);
 }
 .sh-avatar-btn:hover {
-  background: var(--surface-hover);
+  box-shadow: 0 0 0 4px var(--surface-hover);
 }
 .sh-avatar-btn .avatar {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
+  font-size: var(--fs-md);
 }
 .sh-search {
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  width: 320px;
-  height: var(--control-h);
-  padding: 0 var(--s-1) 0 var(--s-2);
-  border: var(--hairline) solid var(--line-strong);
-  border-radius: var(--radius-control);
-  background: var(--surface);
+  width: 360px;
+  height: var(--control-h-lg);
+  padding: 0 var(--s-1) 0 var(--s-3);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface-sunken);
   color: var(--ink-3);
   font: inherit;
   font-size: var(--fs-md);
@@ -302,7 +317,8 @@ input.sh-title:focus {
   transition: border-color var(--dur-short) var(--ease-standard);
 }
 .sh-search:hover {
-  border-color: var(--line-control);
+  border-color: var(--line-strong);
+  background: var(--surface);
 }
 .sh-search > .icon {
   flex: none;
@@ -1246,4 +1262,49 @@ body.sh-resizing canvas {
   .sh-drawer-scrim {
     animation: none;
   }
+}
+
+/* ------------------------------------------------ Home ⇄ workspace transition */
+.sh-header {
+  view-transition-name: sh-header;
+}
+::view-transition-group(sh-header) {
+  animation-duration: var(--dur-long);
+}
+@keyframes vt-out-zoom {
+  to {
+    opacity: 0;
+    transform: scale(1.03);
+    filter: blur(2px);
+  }
+}
+@keyframes vt-in-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+}
+@keyframes vt-out-settle {
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+}
+@keyframes vt-in-settle {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+}
+:root[data-vt='enter']::view-transition-old(root) {
+  animation: vt-out-zoom 220ms var(--ease-standard) both;
+}
+:root[data-vt='enter']::view-transition-new(root) {
+  animation: vt-in-zoom 360ms var(--ease-out) 60ms both;
+}
+:root[data-vt='home']::view-transition-old(root) {
+  animation: vt-out-settle 220ms var(--ease-standard) both;
+}
+:root[data-vt='home']::view-transition-new(root) {
+  animation: vt-in-settle 360ms var(--ease-out) 40ms both;
 }

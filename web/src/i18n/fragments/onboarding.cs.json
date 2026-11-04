@@ -1,0 +1,102 @@
+{
+  "onboarding": {
+    "dialogLabel": "Úvodní průvodce",
+    "skip": "Přeskočit",
+    "skipHint": "Přeskočit průvodce (Esc)",
+    "back": "Zpět",
+    "next": "Pokračovat",
+    "start": "Začít",
+    "stepOf": "Krok {{n}} z {{total}}",
+    "steps": {
+      "welcome": "Vítejte",
+      "profile": "Profil",
+      "look": "Vzhled",
+      "style": "Styl práce",
+      "done": "Hotovo"
+    },
+    "welcome": {
+      "eyebrow": "PSPP Studio",
+      "title": "Statistika v klidu.",
+      "lead": "Moderní pracovní plocha nad statistickým jádrem PSPP. Za minutu ji nastavíme podle vás.",
+      "point1Title": "Běží přímo v prohlížeči",
+      "point1": "Bez instalace. Popisné statistiky, testy, regrese i grafy.",
+      "point2Title": "Data neopustí váš počítač",
+      "point2": "Nic se nikam neodesílá. Soubory se zpracují lokálně.",
+      "point3Title": "Výsledkům porozumíte",
+      "point3": "U tabulek najdete vysvětlení srozumitelnou češtinou.",
+      "language": "Jazyk"
+    },
+    "profile": {
+      "title": "Jak vám máme říkat?",
+      "lead": "Nepovinné. Jméno a barva se zobrazí v horní liště a v exportovaných zprávách.",
+      "name": "Jméno",
+      "namePlaceholder": "např. Jana Nováková",
+      "nameHelp": "Iniciály doplníme automaticky.",
+      "color": "Barva avataru",
+      "colorN": "Barva {{n}}",
+      "preview": "Náhled",
+      "anonymous": "Anonym",
+      "local": "Uloženo jen v tomto prohlížeči."
+    },
+    "look": {
+      "title": "Ať se vám v tom dobře pracuje",
+      "lead": "Změny se projeví hned – sledujte pracovní plochu za tímto oknem.",
+      "theme": "Motiv",
+      "light": "Světlý",
+      "dark": "Tmavý",
+      "system": "Podle systému",
+      "accent": "Barva zvýraznění",
+      "layout": "Rozvržení pracovní plochy"
+    },
+    "presets": {
+      "label": "Rozvržení pracovní plochy",
+      "custom": "Máte vlastní nastavení. Výběrem rozvržení začnete znovu od něj.",
+      "calm": {
+        "name": "Klidný",
+        "desc": "Méně lišt, větší písmo, vysvětlení vždy zapnutá.",
+        "who": "Pro začátek"
+      },
+      "balanced": {
+        "name": "Vyvážený",
+        "desc": "Výchozí – všechny nástroje po ruce, pohodlné rozestupy.",
+        "who": "Doporučeno"
+      },
+      "full": {
+        "name": "Plný",
+        "desc": "Hustší rozvržení, všechny sloupce a panely, náhled syntaxe.",
+        "who": "Pro zkušené"
+      }
+    },
+    "style": {
+      "title": "Jak pracujete?",
+      "lead": "Pár zvyklostí, kterým se přizpůsobíme. Vše jde později změnit v Nastavení.",
+      "decimal": "Desetinný oddělovač",
+      "decimalDesc": "Při psaní čísel i v jejich zobrazení.",
+      "comma": "Čárka",
+      "dot": "Tečka",
+      "explain": "Vysvětlovat výsledky",
+      "explainDesc": "Krátké poznámky srozumitelnou řečí pod klíčovými výsledky.",
+      "explainAlways": "Vždy",
+      "explainOnDemand": "Na požádání",
+      "explainNever": "Nikdy",
+      "syntax": "Náhled syntaxe v dialozích",
+      "syntaxDesc": "Uvidíte příkaz PSPP, který dialog spustí – dobré pro učení."
+    },
+    "done": {
+      "title": "Hotovo{{name}}",
+      "lead": "Tohle jsme nastavili. Cokoli z toho změníte v Nastavení.",
+      "theme": "Motiv",
+      "layout": "Rozvržení",
+      "decimal": "Čísla",
+      "explain": "Vysvětlení",
+      "custom": "Vlastní"
+    },
+    "settings": {
+      "group": "Pracovní plocha a průvodce",
+      "rerun": "Spustit úvodního průvodce znovu",
+      "rerunDesc": "Projde jazyk, profil, vzhled a styl práce.",
+      "rerunButton": "Otevřít průvodce",
+      "layoutDesc": "Kolik lišt a podrobností pracovní plocha ukazuje."
+    }
+  }
+}

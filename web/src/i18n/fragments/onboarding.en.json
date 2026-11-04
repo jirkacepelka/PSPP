@@ -1,0 +1,102 @@
+{
+  "onboarding": {
+    "dialogLabel": "Setup guide",
+    "skip": "Skip",
+    "skipHint": "Skip the guide (Esc)",
+    "back": "Back",
+    "next": "Continue",
+    "start": "Start working",
+    "stepOf": "Step {{n}} of {{total}}",
+    "steps": {
+      "welcome": "Welcome",
+      "profile": "Profile",
+      "look": "Look",
+      "style": "Working style",
+      "done": "Done"
+    },
+    "welcome": {
+      "eyebrow": "PSPP Studio",
+      "title": "Statistics, calmly.",
+      "lead": "A modern workspace for the PSPP statistics engine. Let’s set it up for you in about a minute.",
+      "point1Title": "Runs right in your browser",
+      "point1": "No installation. Descriptives, tests, regression and charts.",
+      "point2Title": "Your data stay on your computer",
+      "point2": "Nothing is uploaded. Files are processed locally.",
+      "point3Title": "Results you can understand",
+      "point3": "Plain-language explanations next to the tables.",
+      "language": "Language"
+    },
+    "profile": {
+      "title": "How should we call you?",
+      "lead": "Optional. Your name and colour appear in the app bar and in exported reports.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Jana Nováková",
+      "nameHelp": "Initials are filled in automatically.",
+      "color": "Avatar colour",
+      "colorN": "Colour {{n}}",
+      "preview": "Preview",
+      "anonymous": "Anonymous",
+      "local": "Stored only in this browser."
+    },
+    "look": {
+      "title": "Make it feel right",
+      "lead": "Changes apply right away – watch the workspace behind this window.",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "accent": "Accent colour",
+      "layout": "Workspace layout"
+    },
+    "presets": {
+      "label": "Workspace layout",
+      "custom": "You have custom settings. Pick a layout to start again from it.",
+      "calm": {
+        "name": "Calm",
+        "desc": "Fewer bars, larger text, explanations always on.",
+        "who": "First steps"
+      },
+      "balanced": {
+        "name": "Balanced",
+        "desc": "The default – all tools at hand, comfortable spacing.",
+        "who": "Recommended"
+      },
+      "full": {
+        "name": "Full",
+        "desc": "Dense layout, every column and panel, syntax preview.",
+        "who": "Experienced users"
+      }
+    },
+    "style": {
+      "title": "How do you work?",
+      "lead": "A few habits we can adapt to. All of it can be changed later in Settings.",
+      "decimal": "Decimal separator",
+      "decimalDesc": "Used when you type and when numbers are shown.",
+      "comma": "Comma",
+      "dot": "Dot",
+      "explain": "Explain results",
+      "explainDesc": "Short plain-language notes under key results.",
+      "explainAlways": "Always",
+      "explainOnDemand": "On demand",
+      "explainNever": "Never",
+      "syntax": "Syntax preview in dialogs",
+      "syntaxDesc": "See the PSPP command each dialog will run – handy for learning."
+    },
+    "done": {
+      "title": "All set{{name}}",
+      "lead": "Here’s what we set up. You can change any of it in Settings.",
+      "theme": "Theme",
+      "layout": "Layout",
+      "decimal": "Numbers",
+      "explain": "Explanations",
+      "custom": "Custom"
+    },
+    "settings": {
+      "group": "Workspace and guide",
+      "rerun": "Run setup guide again",
+      "rerunDesc": "Walk through language, profile, look and working style.",
+      "rerunButton": "Open guide",
+      "layoutDesc": "How much chrome and detail the workspace shows."
+    }
+  }
+}

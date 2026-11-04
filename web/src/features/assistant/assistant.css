@@ -96,7 +96,6 @@
 }
 .as-vars li.on {
   background: var(--accent-tint-strong);
-  box-shadow: inset 2px 0 0 var(--accent-line);
 }
 .as-vars li.unsuited:not(.on),
 .as-vars li.elsewhere {
@@ -177,7 +176,8 @@
   background: var(--surface);
 }
 .as-test.primary {
-  box-shadow: inset 2px 0 0 var(--accent-line);
+  border-color: color-mix(in srgb, var(--accent-line) 45%, var(--line));
+  background: var(--accent-tint);
 }
 .as-test > .icon {
   color: var(--accent-text);

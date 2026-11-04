@@ -130,24 +130,31 @@ export function AppBar() {
   const { t } = useTranslation();
   const setMobileMenu = useUi((s) => s.setMobileMenu);
   const setShowStart = useUi((s) => s.setShowStart);
+  const home = useUi((s) => s.showStart);
   return (
-    <header className="sh-header">
+    <header className={`sh-header ${home ? 'is-home' : ''}`}>
       <IconButton icon="menu" className="sh-hamburger" label={t('appbar.openMenu')} onClick={() => setMobileMenu(true)} tip={false} />
       <button type="button" className="sh-logo" onClick={() => setShowStart(true)} aria-label={t('appbar.home')} data-tip={t('appbar.home')}>
-        <LogoMark size={32} />
+        <LogoMark size={40} />
       </button>
-      <div className="sh-doc">
-        <div className="sh-title-row">
-          <TitleInput />
-          <SaveStatus />
+      {home ? (
+        <div className="sh-doc">
+          <span className="sh-title static sh-wordmark">PSPP Studio</span>
         </div>
-        <MenuBar />
-      </div>
+      ) : (
+        <div className="sh-doc">
+          <div className="sh-title-row">
+            <TitleInput />
+            <SaveStatus />
+          </div>
+          <MenuBar />
+        </div>
+      )}
       <div className="sh-tools">
         <EngineStatus />
-        <ProfileButton />
         <SearchField />
         <IconButton icon="search" className="sh-search-icon" label={t('appbar.search')} onClick={() => openPalette()} tip={false} />
+        <ProfileButton />
       </div>
     </header>
   );

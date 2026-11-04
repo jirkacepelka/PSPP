@@ -65,11 +65,8 @@
   color: var(--ink);
 }
 .set-nav-item[aria-current='page'] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow:
-    inset 2px 0 0 var(--accent-line),
-    0 0 0 var(--hairline) var(--line);
+  background: var(--accent-tint-strong);
+  color: var(--on-primary-container);
   font-weight: var(--fw-medium);
 }
 .set-nav-item[aria-current='page'] .icon {

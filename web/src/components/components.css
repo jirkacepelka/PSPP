@@ -1056,9 +1056,7 @@ button.chip[aria-pressed='true']:hover {
   background: var(--surface-hover);
   outline: none;
 }
-.menu-item:focus-visible {
-  box-shadow: inset 2px 0 0 var(--accent-line);
-}
+
 .menu-item:disabled {
   opacity: 0.45;
   cursor: default;

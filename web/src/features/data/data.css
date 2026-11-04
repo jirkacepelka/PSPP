@@ -81,7 +81,8 @@
   background: var(--surface-hover);
 }
 .data-picker-option.current {
-  box-shadow: inset 2px 0 0 var(--accent-line);
+  background: var(--accent-tint);
+  color: var(--on-primary-container);
 }
 .data-picker-code {
   flex: none;

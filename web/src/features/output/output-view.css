@@ -83,7 +83,6 @@
 }
 .outline-row.on {
   background: var(--accent-tint-strong);
-  box-shadow: inset 2px 0 0 var(--accent-line);
   color: var(--ink);
 }
 .outline-row.entry .outline-label {
@@ -171,8 +170,8 @@ button.outline-toggle:hover {
   scroll-margin-top: var(--s-4);
 }
 .paper.selected {
-  border-color: var(--line-control);
-  box-shadow: inset 2px 0 0 var(--accent-line);
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 3px var(--accent-tint);
 }
 .paper.has-error {
   border-left: 2px solid var(--danger);
@@ -364,8 +363,8 @@ button.outline-toggle:hover {
   margin: var(--s-2) 0 var(--s-4);
   padding: var(--s-3) var(--s-4);
   border: var(--hairline, 1px) solid var(--line);
-  border-left: 2px solid var(--accent-line);
-  border-radius: 0 var(--radius-panel) var(--radius-panel) 0;
+  border-color: transparent;
+  border-radius: var(--radius-panel);
   background: var(--accent-tint);
   color: var(--ink);
   font-size: var(--fs-sm);

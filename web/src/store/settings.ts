@@ -63,6 +63,10 @@ export interface Settings {
   inspectorOpen: boolean;
   /** Split view layout, or off. */
   splitView: 'off' | 'syntax-output' | 'data-output';
+  /** First-run setup guide finished or skipped. */
+  onboarded: boolean;
+  /** Last visual preset chosen (app/presets.ts); 'custom' after manual tweaks. */
+  uiPreset: 'calm' | 'balanced' | 'full' | 'custom';
 }
 
 /** Accent preset colours (light-theme values) from the design system; see lib/color.ts. */
@@ -123,6 +127,8 @@ export const defaultSettings = (): Settings => {
     variableViewAllColumns: false,
     inspectorOpen: true,
     splitView: 'off',
+    onboarded: false,
+    uiPreset: 'balanced',
   };
 };
 
@@ -149,12 +155,16 @@ export const useSettings = create<SettingsState>((set, get) => ({
   },
   reset: () => {
     const d = defaultSettings();
-    set({ ...d, profile: get().profile });
+    set({ ...d, profile: get().profile, onboarded: get().onboarded });
     persist(get());
   },
   load: async () => {
     const saved = await kvGet<Partial<Settings>>(KEY);
-    if (saved && typeof saved === 'object') set({ ...defaultSettings(), ...saved, profile: { ...defaultSettings().profile, ...(saved.profile ?? {}) } });
+    if (saved && typeof saved === 'object') {
+      // Settings saved before the setup guide existed: a named profile means a returning user.
+      const onboarded = saved.onboarded ?? !!saved.profile?.name?.trim();
+      set({ ...defaultSettings(), ...saved, onboarded, profile: { ...defaultSettings().profile, ...(saved.profile ?? {}) } });
+    }
     set({ loaded: true });
   },
 }));

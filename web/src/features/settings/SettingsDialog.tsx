@@ -20,6 +20,7 @@ import { clearAutosave, clearRecent, getRecent } from '../../app/files';
 import { ShortcutsList } from '../misc/ShortcutsDialog';
 import { AboutContent } from '../misc/AboutDialog';
 import { norm } from '../palette/fuzzy';
+import { PresetCards, openOnboarding } from '../onboarding/Onboarding';
 import './settings.css';
 
 const SECTIONS = [
@@ -119,12 +120,47 @@ function GeneralSection() {
           />
         </Row>
       </Group>
+      <WorkspaceGroup />
       <Group title={t('shell.settings.helpGroup')}>
         <Toggle k="showValueLabels" label={t('shell.settings.valueLabels')} desc={t('shell.settings.valueLabelsDesc')} />
         <ExplainRow />
         <Toggle k="showSyntaxPreview" label={t('shell.settings.syntaxPreview')} desc={t('shell.settings.syntaxPreviewDesc')} />
       </Group>
     </>
+  );
+}
+
+/** Visual presets (shared with the onboarding guide) and a way to run the guide again. */
+function WorkspaceGroup() {
+  const { t } = useTranslation();
+  const close = useUi((s) => s.closeModal);
+  const showPresets = useMatch(t('onboarding.presets.label'), t('onboarding.settings.layoutDesc'), 'preset rozvrzeni layout klidny vyvazeny plny calm balanced full');
+  const showRerun = useMatch(t('onboarding.settings.rerun'), t('onboarding.settings.rerunDesc'), 'onboarding pruvodce guide wizard');
+  if (!showPresets && !showRerun) return null;
+  return (
+    <Group title={t('onboarding.settings.group')}>
+      {showPresets && (
+        <div className="onb-set-presets">
+          <span className="set-row-title">{t('onboarding.presets.label')}</span>
+          <span className="onb-row-desc">{t('onboarding.settings.layoutDesc')}</span>
+          <PresetCards compact />
+        </div>
+      )}
+      {showRerun && (
+        <Row title={t('onboarding.settings.rerun')} desc={t('onboarding.settings.rerunDesc')}>
+          <Button
+            size="sm"
+            iconStart="replay"
+            onClick={() => {
+              close();
+              openOnboarding();
+            }}
+          >
+            {t('onboarding.settings.rerunButton')}
+          </Button>
+        </Row>
+      )}
+    </Group>
   );
 }
 

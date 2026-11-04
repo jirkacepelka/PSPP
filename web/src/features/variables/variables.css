@@ -31,7 +31,6 @@
 }
 .vd-kind[aria-checked='true'] {
   background: var(--accent-tint-strong);
-  box-shadow: inset 2px 0 0 var(--accent-line);
 }
 .vd-kind .icon {
   color: var(--ink-3);

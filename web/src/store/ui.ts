@@ -3,6 +3,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { create } from 'zustand';
+import { flushSync } from 'react-dom';
+
+type VTDocument = Document & { startViewTransition?: (cb: () => Promise<void> | void) => { finished: Promise<void> } };
+
+/**
+ * Moving between Home and the workspace is a change of place, so it gets a view transition:
+ * entering a document zooms in, going home settles back. Without support it is instant.
+ */
+function placeTransition(toHome: boolean, apply: () => void) {
+  const doc = document as VTDocument;
+  const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!doc.startViewTransition || reduce) return apply();
+  const root = document.documentElement;
+  root.dataset.vt = toHome ? 'home' : 'enter';
+  const vt = doc.startViewTransition(() => flushSync(apply));
+  void vt.finished.finally(() => delete root.dataset.vt);
+}
 
 export type View = 'data' | 'variables' | 'output' | 'syntax';
 export type EngineStatus = 'loading' | 'ready' | 'running' | 'error';
@@ -74,8 +91,8 @@ export const useUi = create<UiState>((set, get) => ({
   engineVersion: '',
   toasts: [],
   mobileMenuOpen: false,
-  setView: (view) => set({ view, showStart: false }),
-  setShowStart: (showStart) => set({ showStart }),
+  setView: (view) => (get().showStart ? placeTransition(false, () => set({ view, showStart: false })) : set({ view })),
+  setShowStart: (showStart) => (showStart !== get().showStart ? placeTransition(showStart, () => set({ showStart })) : undefined),
   openModal: (modal) => set({ modal, paletteOpen: false, mobileMenuOpen: false }),
   closeModal: () => set({ modal: null }),
   setPalette: (paletteOpen) => set({ paletteOpen }),

@@ -135,7 +135,6 @@
 }
 .var-list li.on {
   background: var(--accent-tint-strong);
-  box-shadow: inset 2px 0 0 var(--accent-line);
 }
 .var-list li.unsuited {
   color: var(--ink-3);

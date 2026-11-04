@@ -79,19 +79,19 @@
   --dur-long: 260ms;
 
   /* density-dependent sizes (comfortable) */
-  --control-h: 34px;
-  --control-h-sm: 28px;
-  --control-h-lg: 40px;
-  --control-pad-x: 12px;
-  --icon-btn: 34px;
-  --icon-btn-sm: 28px;
-  --appbar-h: 56px;
-  --toolbar-h: 44px;
-  --grid-row-h: 30px;
-  --grid-header-h: 34px;
-  --menu-item-h: 32px;
-  --panel-pad: 16px;
-  --dialog-pad: 24px;
+  --control-h: 36px;
+  --control-h-sm: 30px;
+  --control-h-lg: 44px;
+  --control-pad-x: 14px;
+  --icon-btn: 36px;
+  --icon-btn-sm: 30px;
+  --appbar-h: 72px;
+  --toolbar-h: 50px;
+  --grid-row-h: 32px;
+  --grid-header-h: 38px;
+  --menu-item-h: 34px;
+  --panel-pad: 20px;
+  --dialog-pad: 28px;
 
   /* z-index scale */
   --z-sticky: 10;

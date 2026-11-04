@@ -219,7 +219,7 @@ export function ConfirmDialog({ modal }: { modal: Extract<Modal, { kind: 'confir
   const close = useUi((s) => s.closeModal);
   return (
     <Dialog
-      title={t(modal.titleKey)}
+      title={t(modal.titleKey, modal.messageArgs)}
       size="small"
       icon={modal.danger ? 'warning' : 'help'}
       onClose={close}
