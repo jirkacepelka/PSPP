@@ -37,6 +37,8 @@ const NEW_FILLED: Record<string, Values> = {
   quickCluster: { variables: ['age', 'score'] },
   hierCluster: { variables: ['age', 'score'] },
   logistic: { dependent: ['gender'], covariates: ['age'] },
+  plum: { dependent: ['group'], factors: ['gender'], covariates: ['age'] },
+  nomreg: { dependent: ['city'], factors: ['gender'], covariates: ['age'] },
   glm: { dependent: ['score'], factors: ['gender'] },
   ctables: { rows: ['gender'], cols: ['group'] },
   histogram: { variable: ['age'] },
@@ -316,6 +318,16 @@ describe('New dialogs (WP3)', () => {
     );
     expect(errors('logistic', { dependent: ['gender'] })).toBe('dlg.errors.predictors');
     expect(gen('glm', { dependent: ['score'], factors: ['gender', 'group'], design: 'main' })).toBe('GLM score BY gender group\n  /METHOD=SSTYPE(3)\n  /INTERCEPT=INCLUDE\n  /DESIGN=gender group.');
+  });
+  it('ordinal and multinomial regression (PLUM, NOMREG)', () => {
+    expect(gen('plum', NEW_FILLED.plum)).toBe('PLUM group BY gender WITH age\n  /LINK=LOGIT\n  /CRITERIA=CIN(95) MXITER(100)\n  /PRINT=FIT PARAMETER SUMMARY.');
+    expect(gen('plum', { dependent: ['group'], link: 'PROBIT', fit: false, summary: false, parameter: false, tparallel: true, ciLevel: 90, iterate: 50 })).toBe(
+      'PLUM group\n  /LINK=PROBIT\n  /CRITERIA=CIN(90) MXITER(50)\n  /PRINT=TPARALLEL.',
+    );
+    expect(gen('nomreg', NEW_FILLED.nomreg)).toBe('NOMREG city (BASE=LAST ORDER=ASCENDING) BY gender WITH age\n  /CRITERIA=CIN(95) MXITER(100)\n  /PRINT=CPS MFI SUMMARY LRT PARAMETER.');
+    expect(gen('nomreg', { ...NEW_FILLED.nomreg, base: 'custom', baseValue: 'Brno', classtable: true })).toContain("NOMREG city (BASE='Brno' ORDER=ASCENDING)");
+    expect(gen('nomreg', { dependent: ['group'], base: 'custom', baseValue: '2' })).toContain('NOMREG group (BASE=2 ORDER=ASCENDING)');
+    expect(errors('nomreg', { dependent: ['group'], base: 'custom', baseValue: '' })).toBe('dlg.nomreg.needBase');
   });
   it('tables and graphs', () => {
     expect(gen('ctables', { rows: ['gender', 'age'], cols: ['group'], colpct: true })).toBe(

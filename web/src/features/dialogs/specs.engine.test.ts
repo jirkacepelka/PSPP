@@ -37,6 +37,8 @@ const FILLED: Record<string, Values> = {
   partialCorr: { variables: ['hours', 'stress', 'gpa'], controls: ['sleep'], descriptives: true, zeroOrder: true },
   regressionLinear: { dependent: ['gpa'], independents: ['hours', 'sleep'] },
   logistic: { dependent: ['job'], covariates: ['gpa'], categorical: ['gender'] },
+  plum: { dependent: ['satisf'], factors: ['faculty'], covariates: ['hours', 'gpa'], tparallel: true, link: 'PROBIT' },
+  nomreg: { dependent: ['commute'], factors: ['job'], covariates: ['gpa'], fit: true, classtable: true },
   factor: { variables: ['hours', 'sleep', 'stress', 'gpa'] },
   reliability: { items: ['hours', 'sleep', 'stress'] },
   quickCluster: { variables: ['hours', 'gpa'], saveCluster: true },

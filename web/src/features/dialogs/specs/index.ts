@@ -33,13 +33,15 @@ import { km } from './km';
 import { factor, quickCluster, reliability } from './scale';
 import { hierCluster } from './cluster';
 import { glm, logistic } from './models';
+import { plum } from './plum';
+import { nomreg } from './nomreg';
 import { ctables, variableProperties } from './tables';
 import { barChart, boxplot, histogram, scatter } from './graphs';
 
 export const DIALOG_SPECS: DialogSpec[] = [
   frequencies, descriptives, explore, crosstabs, ctables,
   means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm,
-  correlations, partialCorr, regressionLinear, logistic,
+  correlations, partialCorr, regressionLinear, logistic, plum, nomreg,
   factor, reliability, quickCluster, hierCluster,
   chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc, km,
   histogram, barChart, scatter, boxplot,

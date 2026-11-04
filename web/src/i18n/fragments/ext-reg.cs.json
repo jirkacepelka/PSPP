@@ -150,7 +150,6 @@
       "tparallel": "Test paralelních přímek",
       "history": "Historie iterací",
       "iterate": "Maximální počet iterací",
-      "notOrdinal": "{{name}} není pořadová – ordinální regrese předpokládá uspořádané kategorie.",
       "manyCats": "{{name}} má {{count}} různých hodnot; ordinální regrese je určena pro několik uspořádaných kategorií.",
       "binary": "{{name}} má jen dvě hodnoty – stejný model s jednodušším výstupem dá binární logistická regrese."
     },
@@ -175,7 +174,6 @@
       "iterate": "Maximální počet iterací",
       "manyCats": "{{name}} má {{count}} různých hodnot; každá z nich tvoří samostatnou rovnici.",
       "ordinal": "{{name}} je pořadová – ordinální regrese (PLUM) využije uspořádání a potřebuje méně parametrů.",
-      "useOrdinal": "Otevřít ordinální regresi",
       "needBase": "Zadejte hodnotu referenční kategorie."
     }
   }

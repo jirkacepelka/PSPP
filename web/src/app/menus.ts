@@ -138,7 +138,7 @@ export const MENUS: TopMenu[] = [
       { sub: 'menu.compareMeans', icon: 'compare_arrows', items: ['dialog:means', '-', 'dialog:ttestOneSample', 'dialog:ttestIndependent', 'dialog:ttestPaired', '-', 'dialog:oneway'] },
       'dialog:glm|tpl:GLM',
       { sub: 'menu.correlate', icon: 'scatter_plot', items: ['dialog:correlations', 'dialog:partialCorr'] },
-      { sub: 'menu.regression', icon: 'trending_up', items: ['dialog:regressionLinear', 'dialog:logistic|dialog:logisticRegression|tpl:LOGISTIC REGRESSION'] },
+      { sub: 'menu.regression', icon: 'trending_up', items: ['dialog:regressionLinear', 'dialog:logistic|dialog:logisticRegression|tpl:LOGISTIC REGRESSION', 'dialog:plum', 'dialog:nomreg'] },
       '-',
       'dialog:factor|tpl:FACTOR',
       'dialog:reliability|tpl:RELIABILITY',

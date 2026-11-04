@@ -150,7 +150,6 @@
       "tparallel": "Test of parallel lines",
       "history": "Iteration history",
       "iterate": "Maximum iterations",
-      "notOrdinal": "{{name}} is not ordinal – ordinal regression assumes ordered categories.",
       "manyCats": "{{name}} has {{count}} distinct values; ordinal regression is meant for a few ordered categories.",
       "binary": "{{name}} has only two values – binary logistic regression gives the same model with simpler output."
     },
@@ -175,7 +174,6 @@
       "iterate": "Maximum iterations",
       "manyCats": "{{name}} has {{count}} distinct values; each one becomes a separate equation.",
       "ordinal": "{{name}} is ordinal – ordinal regression (PLUM) uses the order and needs fewer parameters.",
-      "useOrdinal": "Open ordinal regression",
       "needBase": "Enter the value of the reference category."
     }
   }

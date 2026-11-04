@@ -225,6 +225,9 @@ describe('NOMREG commute BY job WITH gpa hours', () => {
     checkRaw(sink[1], REF.car);
     checkTables(out, REF.car, COMMUTE);
     expect(table(out, 'Parameter Estimates').footnotes[0]).toBe('The reference category is: Car.');
+    const num = run('NOMREG satisf (BASE=3 ORDER=DESCENDING) WITH gpa /PRINT=PARAMETER.');
+    expect(table(num, 'Parameter Estimates').footnotes[0]).toBe('The reference category is: Neutral.');
+    expect(table(num, 'Parameter Estimates').rows.filter((r) => r[0].text === 'Very satisfied')).toHaveLength(2);
   });
   it('default PRINT: case processing, model fitting, pseudo R², LR tests and parameters', () => {
     const out = run('NOMREG commute BY job WITH gpa hours.');
