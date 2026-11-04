@@ -52,6 +52,10 @@
 .sh-header:not(.is-home) .sh-doc {
   row-gap: 2px;
 }
+.sh-logo {
+  /* logo → text: 12px column gap + 8px item padding, halved to 10px */
+  margin-right: -10px;
+}
 .sh-header.is-fitted:not(.is-home) .sh-logo {
   align-self: start;
   margin-top: var(--logo-top);

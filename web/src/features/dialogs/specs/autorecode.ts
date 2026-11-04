@@ -7,7 +7,7 @@ export const autorecode: DialogSpec = {
   id: 'autorecode',
   kind: 'transform',
   title: 'dlg.autorecode.title',
-  icon: 'auto_fix_high',
+  icon: 'auto_fix',
   command: 'AUTORECODE',
   size: 'wide',
   fields: [
