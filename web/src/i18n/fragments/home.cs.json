@@ -68,7 +68,20 @@
     "colContent": "Obsah",
     "colEdited": "Upraveno",
     "hideQuestions": "Skrýt otázky",
-    "showQuestions": "Zkuste si otázku"
+    "showQuestions": "Zkuste si otázku",
+    "hi": "Ahoj, {{name}}",
+    "hiAnon": "Vítejte v PSPP Studiu",
+    "summaryDocs_one": "Máte {{count}} rozpracovaný dokument.",
+    "summaryDocs_few": "Máte {{count}} rozpracované dokumenty.",
+    "summaryDocs_many": "Máte {{count}} rozpracovaných dokumentů.",
+    "summaryDocs_other": "Máte {{count}} rozpracovaných dokumentů.",
+    "summaryLast": "Naposledy jste pracovali na",
+    "summaryEmpty": "Otevřete svůj soubor, začněte s prázdnými daty, nebo si vyzkoušejte některou z ukázek.",
+    "createTitle": "Vytvořit nebo otevřít",
+    "createDesc": "Vyberte, čím začít – práce se pak průběžně ukládá sama.",
+    "openDescShort": "SPSS, PSPP, CSV, tabulka nebo syntaxe",
+    "dropHint": "Soubor můžete také přetáhnout kamkoli do okna.",
+    "tipSearch": "Tip: příkazy, proměnné i analýzy najdete přes"
   },
   "docs": {
     "missing": "Dokument se nepodařilo najít.",

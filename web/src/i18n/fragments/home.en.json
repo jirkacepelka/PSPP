@@ -68,7 +68,20 @@
     "colContent": "Contents",
     "colEdited": "Edited",
     "hideQuestions": "Hide questions",
-    "showQuestions": "Try a question"
+    "showQuestions": "Try a question",
+    "hi": "Hi, {{name}}",
+    "hiAnon": "Welcome to PSPP Studio",
+    "summaryDocs_one": "You have {{count}} document in progress.",
+    "summaryDocs_few": "You have {{count}} documents in progress.",
+    "summaryDocs_many": "You have {{count}} documents in progress.",
+    "summaryDocs_other": "You have {{count}} documents in progress.",
+    "summaryLast": "Last time you worked on",
+    "summaryEmpty": "Open your own file, start with blank data, or try one of the samples.",
+    "createTitle": "Create or open",
+    "createDesc": "Pick how to start – your work then saves itself as you go.",
+    "openDescShort": "SPSS, PSPP, CSV, spreadsheet or syntax",
+    "dropHint": "You can also drop a file anywhere in the window.",
+    "tipSearch": "Tip: find commands, variables and analyses with"
   },
   "docs": {
     "missing": "The document could not be found.",

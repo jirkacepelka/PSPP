@@ -13,6 +13,8 @@ import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
 import { IconButton } from '../../components/IconButton';
 import { MenuButton } from '../../components/MenuButton';
+import { Kbd } from '../../components/Kbd';
+import { CreateDialog } from './CreateDialog';
 import { Segmented } from '../../components/Segmented';
 import { formatShortcut } from '../../app/actions';
 import {
@@ -20,10 +22,7 @@ import {
   duplicateDocument,
   getCurrentDocId,
   listDocuments,
-  newDataset,
-  newSyntax,
   openDocument,
-  openFileDialog,
   openSample,
   renameDocument,
   type DocMeta,
@@ -95,7 +94,7 @@ function SheetThumb({ tone }: { tone?: string }) {
     <span className="hm-sheet" data-tone={tone} aria-hidden="true">
       <span className="hm-sheet-head" />
       {Array.from({ length: 6 }, (_, r) => (
-        <span key={r} className="hm-sheet-row">
+        <span key={r} className="hm-sheet-row" style={{ '--r': r } as CSSProperties}>
           <span />
           <span />
           <span />
@@ -289,28 +288,44 @@ export function StartScreen() {
   const DOC_LIMIT = view === 'grid' ? 8 : 12;
   const shown = matches && !allDocs && !query ? matches.slice(0, DOC_LIMIT) : matches;
   const first = name.trim().split(/\s+/)[0];
+  const [creating, setCreating] = useState(false);
+  const rel = useRelTime();
+  const { i18n } = useTranslation();
+  const today = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+  const last = docs?.[0];
 
   return (
     <div className="hm">
       <section className="hm-band" aria-labelledby="hm-greet">
         <div className="hm-band-inner">
           <header className="hm-hero hm-in" style={{ '--i': 0 } as CSSProperties}>
+            <p className="hm-eyebrow">
+              {t(greetingKey(false))} · <span className="hm-date">{today}</span>
+            </p>
             <h2 id="hm-greet" className="hm-title">
-              {t(greetingKey(!!first), { name: first })}
+              {first ? t('home.hi', { name: first }) : t('home.hiAnon')}
             </h2>
-            <MenuButton
-              variant="primary"
-              icon="add"
-              label={t('home.create')}
-              menuLabel={t('home.createMenu')}
-              className="hm-create"
-              alignEnd
-              items={[
-                { type: 'item', id: 'open', label: t('home.openItem'), icon: 'upload_file', shortcut: formatShortcut('Mod+O'), onSelect: () => void openFileDialog() },
-                { type: 'item', id: 'blank', label: t('home.blankItem'), icon: 'table', onSelect: newDataset },
-                { type: 'item', id: 'syntax', label: t('home.syntaxItem'), icon: 'code', onSelect: () => void newSyntax() },
-              ]}
-            />
+            <p className="hm-summary">
+              {last ? (
+                <>
+                  {t('home.summaryDocs', { count: docs?.length ?? 0 })} {t('home.summaryLast')}{' '}
+                  <button type="button" className="hm-link" onClick={() => void openDocument(last.id)}>
+                    {last.title}
+                  </button>{' '}
+                  <span className="hm-summary-time">({rel(last.time)})</span>.
+                </>
+              ) : (
+                t('home.summaryEmpty')
+              )}
+            </p>
+            <div className="hm-hero-actions">
+              <Button variant="primary" iconStart="add" className="hm-create" onClick={() => setCreating(true)}>
+                {t('home.create')}
+              </Button>
+              <span className="hm-tip">
+                {t('home.tipSearch')} <Kbd keys={formatShortcut('Mod+K').split('+')} />
+              </span>
+            </div>
           </header>
 
           <div className="hm-samples hm-in" style={{ '--i': 1 } as CSSProperties}>
@@ -442,6 +457,7 @@ export function StartScreen() {
           </aside>
         )}
       </div>
+      {creating && <CreateDialog onClose={() => setCreating(false)} />}
     </div>
   );
 }
