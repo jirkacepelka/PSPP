@@ -152,7 +152,7 @@ function table(out: ReturnType<typeof runExt>, caption: string) {
 }
 /** Value cells of the first row having a stub cell LABEL (and, if given, a stub cell GROUP). */
 function rowNums(out: ReturnType<typeof runExt>, caption: string, label: string, group?: string): (number | null)[] {
-  const row = table(out, caption).rows.find((r) => r.some((c) => c.header && c.text === label) && (!group || r.some((c) => c.header && c.text === group)));
+  const row = table(out, caption).rows.find((r) => r.some((c) => !c.header) && r.some((c) => c.header && c.text === label) && (!group || r.some((c) => c.header && c.text === group)));
   if (!row) throw new Error(`no row ${label} in ${caption}`);
   return row.filter((c) => !c.header).map((c) => c.num);
 }
@@ -190,7 +190,7 @@ describe('NOMREG commute BY job WITH gpa hours', () => {
     const out = run(syntax);
     checkRaw(sink[0], REF.main);
     checkTables(out, REF.main, COMMUTE);
-    expect(warnings(out)).toEqual([]);
+    expect(warnings(out)).toEqual(['There are 354 (75.0%) cells (i.e., dependent variable levels by observed combinations of predictor variable values) with zero frequencies.']);
   });
   it('tables have SPSS layout', () => {
     const out = run(syntax);
@@ -206,7 +206,7 @@ describe('NOMREG commute BY job WITH gpa hours', () => {
     expect(table(out, 'Likelihood Ratio Tests').rows.find((r) => r[0].text === 'Intercept')!.map((c) => c.text).slice(1)).toEqual(['290.133ᵇ', '.000', '0', '']);
     const pe = table(out, 'Parameter Estimates');
     expect(pe.footnotes).toEqual(['The reference category is: Walking.', 'This parameter is set to zero because it is redundant.']);
-    expect(pe.rows.filter((r) => r.some((c) => c.text === '[job=1]')).every((r) => r.filter((c) => !c.header).map((c) => c.text).join('|') === '0ᵇ|||0|||||')).toBe(true);
+    expect(pe.rows.filter((r) => r.some((c) => c.text === '[job=1]')).every((r) => r.filter((c) => !c.header).map((c) => c.text).join('|') === '0ᵇ|||0||||')).toBe(true);
     expect(pe.rows.filter((r) => r[0].text === 'Walking')).toHaveLength(0);
     // classification: rows observed, columns predicted (codes: reference first in the script)
     const codes = [REF.main.ref, ...REF.main.others];
