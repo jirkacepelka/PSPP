@@ -24,6 +24,10 @@
   -webkit-backdrop-filter: blur(3px) saturate(0.92);
   animation: onb-fade calc(var(--dur-long) * 1.5) var(--ease-out) both;
 }
+/* dark: a plain neutral scrim, no coloured glow */
+:root[data-theme='dark'] .onb-backdrop {
+  background: color-mix(in srgb, var(--canvas) 80%, transparent);
+}
 
 .onb-card {
   position: relative;
@@ -822,4 +826,20 @@
     margin-top: var(--s-4);
     padding-top: var(--s-4);
   }
+}
+
+.onb-hero-logo {
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--s-4);
+}
+.onb-hero-logo .logo-tile {
+  fill: var(--accent);
+}
+.onb-hero-logo .logo-glyph,
+.onb-hero-logo .logo-slice {
+  fill: var(--accent-ink);
+}
+.onb-hero-logo .logo-slice {
+  opacity: 0.72;
 }

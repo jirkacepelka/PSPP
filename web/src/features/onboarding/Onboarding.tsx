@@ -7,6 +7,7 @@
  *   openOnboarding()     opens it again (Settings → General)
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import { LogoMark } from '../shell/Logo';
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { create } from 'zustand';
@@ -244,8 +245,8 @@ function WelcomeStep({ titleId }: { titleId: string }) {
   ];
   return (
     <>
-      <div className="onb-hero-mark" aria-hidden="true">
-        <Icon name="bar_chart" size={28} />
+      <div className="onb-hero-logo" aria-hidden="true">
+        <LogoMark size={56} />
       </div>
       <StepHead titleId={titleId} eyebrow={t('onboarding.welcome.eyebrow')} title={t('onboarding.welcome.title')} lead={t('onboarding.welcome.lead')} />
       <ul className="onb-points">

@@ -1,16 +1,15 @@
 /*
- * PSPP Studio mark: a calm graphite tile with a single distribution curve drawn in the
- * user's accent colour over a quiet baseline — "a quiet desk for careful numbers".
+ * PSPP Studio mark: a "P" whose bowl is a pie chart with one slice pulled out – the letter
+ * and the statistics in one shape. Drawn in the user's accent colour.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 export function LogoMark({ size = 28, className = '' }: { size?: number; className?: string }) {
   return (
     <svg className={`logo-mark ${className}`} width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect className="logo-tile" x="0" y="0" width="32" height="32" rx="7" />
-      <path className="logo-base" d="M6.5 24.5h19" />
-      <path className="logo-mean" d="M16 10.5v14" />
-      <path className="logo-curve" d="M5 23.5C9.6 23.5 11 10.5 16 10.5S22.4 23.5 27 23.5" />
-      <circle className="logo-dot" cx="22.5" cy="9" r="1.9" />
+      <rect className="logo-tile" x="0" y="0" width="32" height="32" rx="8" />
+      <rect className="logo-glyph" x="9.3" y="7.2" width="4.4" height="17.6" rx="2.2" />
+      <path className="logo-glyph" d="M15.3 13.2H21.3A6 6 0 1 1 15.3 7.2Z" />
+      <path className="logo-slice" d="M16.6 11.9V5.9A6 6 0 0 1 22.6 11.9Z" />
     </svg>
   );
 }

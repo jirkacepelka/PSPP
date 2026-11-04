@@ -4,7 +4,7 @@
  * the search field's right edge is the workspace gutter.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../../components/Icon';
 import { IconButton } from '../../components/IconButton';
@@ -126,16 +126,68 @@ export function SearchField() {
   );
 }
 
+/**
+ * Sizes and places the logo so its top edge sits on the cap height of the document title and
+ * its bottom edge on the baseline of the menu bar, whatever the font, font size or density.
+ */
+function useLogoFit(header: RefObject<HTMLElement>, active: boolean) {
+  const fontSize = useSettings((s) => s.fontSize);
+  const density = useSettings((s) => s.density);
+  const lang = useSettings((s) => s.language);
+  useLayoutEffect(() => {
+    const h = header.current;
+    if (!h) return;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const fit = () => {
+      const title = h.querySelector<HTMLElement>('.sh-title-measure') ?? h.querySelector<HTMLElement>('.sh-title');
+      const menu = h.querySelector<HTMLElement>('.sh-menubar-item');
+      if (!active || !ctx || !title || !menu || !title.offsetParent) {
+        h.classList.remove('is-fitted');
+        return;
+      }
+      // the exact baseline: a zero-size inline-block sits on it
+      const metrics = (el: HTMLElement) => {
+        const probe = document.createElement('span');
+        probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+        el.appendChild(probe);
+        const baseline = probe.getBoundingClientRect().bottom;
+        probe.remove();
+        const cs = getComputedStyle(el);
+        // canvas rounds glyph bounds to whole pixels: measure big, then scale down
+        ctx.font = `${cs.fontWeight} 1000px ${cs.fontFamily}`;
+        const cap = (ctx.measureText('H').actualBoundingBoxAscent / 1000) * parseFloat(cs.fontSize);
+        return { baseline, cap };
+      };
+      const tm = metrics(title);
+      const mm = metrics(menu);
+      const capTop = tm.baseline - tm.cap;
+      const size = Math.round(mm.baseline) - Math.round(capTop);
+      const hr = h.getBoundingClientRect();
+      const padTop = parseFloat(getComputedStyle(h).paddingTop) || 0;
+      h.style.setProperty('--logo-size', `${size}px`);
+      h.style.setProperty('--logo-top', `${Math.round(capTop) - Math.round(hr.top + padTop)}px`);
+      h.classList.add('is-fitted');
+    };
+    fit();
+    void document.fonts?.ready.then(fit);
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [header, active, fontSize, density, lang]);
+}
+
 export function AppBar() {
   const { t } = useTranslation();
   const setMobileMenu = useUi((s) => s.setMobileMenu);
   const setShowStart = useUi((s) => s.setShowStart);
   const home = useUi((s) => s.showStart);
+  const ref = useRef<HTMLElement>(null);
+  useLogoFit(ref, !home);
   return (
-    <header className={`sh-header ${home ? 'is-home' : ''}`}>
+    <header ref={ref} className={`sh-header ${home ? 'is-home' : ''}`}>
       <IconButton icon="menu" className="sh-hamburger" label={t('appbar.openMenu')} onClick={() => setMobileMenu(true)} tip={false} />
-      <button type="button" className="sh-logo" onClick={() => setShowStart(true)} aria-label={t('appbar.home')} data-tip={t('appbar.home')}>
-        <LogoMark size={40} />
+      <button type="button" className="sh-logo" onClick={() => setShowStart(true)} aria-label={t('appbar.home')}>
+        <LogoMark />
       </button>
       {home ? (
         <div className="sh-doc">

@@ -47,7 +47,6 @@ export function ProfileButton() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={t('profile.open', { name })}
-        data-tip={name}
         onClick={() => setOpen(!open)}
       >
         <Avatar profile={profile} />

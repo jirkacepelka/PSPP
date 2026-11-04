@@ -31,12 +31,32 @@ export function reducedMotion(): boolean {
   }
 }
 
+let lastFavicon = '';
+/** The tab icon follows the chosen accent colour (same mark as the logo). */
+function updateFavicon(root: HTMLElement) {
+  const cs = getComputedStyle(root);
+  const bg = cs.getPropertyValue('--accent').trim() || '#0f7b5f';
+  const fg = cs.getPropertyValue('--accent-ink').trim() || '#ffffff';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${bg}"/><rect x="9.3" y="7.2" width="4.4" height="17.6" rx="2.2" fill="${fg}"/><path d="M15.3 13.2H21.3A6 6 0 1 1 15.3 7.2Z" fill="${fg}"/><path d="M16.6 11.9V5.9A6 6 0 0 1 22.6 11.9Z" fill="${fg}" fill-opacity=".72"/></svg>`;
+  if (svg === lastFavicon) return;
+  lastFavicon = svg;
+  const href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  // replace the element: some browsers ignore an href change on an existing icon link
+  document.querySelectorAll('link[rel~="icon"]').forEach((l) => l.remove());
+  const link = document.createElement('link');
+  link.rel = 'icon';
+  link.type = 'image/svg+xml';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
 export function applyAppearance(s: Settings) {
   const root = document.documentElement;
   const dark = resolvedDark(s);
   root.dataset.theme = dark ? 'dark' : 'light';
   root.dataset.density = s.density;
   applyAccent(s.accent, dark, root);
+  updateFavicon(root);
   root.style.setProperty('--fs-base', `${s.fontSize}px`);
   root.style.setProperty('--font-grid', GRID_FONTS[s.gridFont] ?? GRID_FONTS.system);
   root.lang = s.language;

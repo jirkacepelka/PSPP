@@ -3,9 +3,7 @@
 .hm {
   min-height: 100%;
   padding: var(--s-7) var(--sh-gutter, var(--s-4)) var(--s-8);
-  background:
-    radial-gradient(1200px 380px at 12% -120px, var(--accent-tint), transparent 70%),
-    var(--canvas);
+  background: var(--canvas);
 }
 .hm-inner {
   display: flex;

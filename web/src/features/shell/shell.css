@@ -37,50 +37,42 @@
   grid-area: logo;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: var(--logo-size, 40px);
+  height: var(--logo-size, 40px);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-panel);
+  border-radius: calc(var(--logo-size, 40px) / 4);
   background: transparent;
   cursor: pointer;
   transition: transform var(--dur-medium) var(--ease-emphasized);
 }
-.sh-logo:hover {
-  transform: scale(1.04);
+.sh-header.is-fitted:not(.is-home) .sh-logo {
+  align-self: start;
+  margin-top: var(--logo-top);
 }
-.sh-logo:hover .logo-tile {
-  fill: var(--ink-2);
+.sh-logo:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .logo-mark {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 .logo-tile {
-  fill: var(--ink);
-  transition: fill var(--dur-short) var(--ease-standard);
+  fill: var(--accent);
 }
-.logo-base,
-.logo-mean {
-  stroke: var(--canvas);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  fill: none;
-  opacity: 0.35;
+.logo-glyph {
+  fill: var(--accent-ink);
 }
-.logo-mean {
-  opacity: 0.22;
+.logo-slice {
+  fill: var(--accent-ink);
+  opacity: 0.72;
+  transform-origin: 16.6px 11.9px;
+  transition: transform var(--dur-medium) var(--ease-out);
 }
-.logo-curve {
-  stroke: var(--accent);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  fill: none;
-}
-:root[data-theme='dark'] .logo-curve {
-  stroke: var(--accent);
-}
-.logo-dot {
-  fill: var(--canvas);
+.sh-logo:hover .logo-slice {
+  transform: translate(1px, -1px);
 }
 
 .sh-doc {
