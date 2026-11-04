@@ -130,6 +130,9 @@ export function SearchField() {
  * Sizes and places the logo so its top edge sits on the cap height of the document title and
  * its bottom edge on the baseline of the menu bar, whatever the font, font size or density.
  */
+/** Corner radius of the mark as a share of its size (5 / 32 in Logo.tsx). */
+const LOGO_RADIUS = 5 / 32;
+
 function useLogoFit(header: RefObject<HTMLElement>, active: boolean) {
   const fontSize = useSettings((s) => s.fontSize);
   const density = useSettings((s) => s.density);
@@ -162,14 +165,18 @@ function useLogoFit(header: RefObject<HTMLElement>, active: boolean) {
       const tm = metrics(title);
       const mm = metrics(menu);
       const capTop = tm.baseline - tm.cap;
-      const size = Math.round(mm.baseline) - Math.round(capTop);
+      // the mark overhangs the text block by half its corner radius, top and bottom
+      const span = Math.round(mm.baseline) - Math.round(capTop);
+      const size = Math.round(span / (1 - LOGO_RADIUS));
+      const overhang = Math.round((size - span) / 2);
       const hr = h.getBoundingClientRect();
       const padTop = parseFloat(getComputedStyle(h).paddingTop) || 0;
       h.style.setProperty('--logo-size', `${size}px`);
-      h.style.setProperty('--logo-top', `${Math.round(capTop) - Math.round(hr.top + padTop)}px`);
+      h.style.setProperty('--logo-top', `${Math.round(capTop) - overhang - Math.round(hr.top + padTop)}px`);
       h.classList.add('is-fitted');
     };
     fit();
+    requestAnimationFrame(fit);
     void document.fonts?.ready.then(fit);
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);

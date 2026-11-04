@@ -9,6 +9,7 @@
  */
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
+import { useMenuAim } from '../../components/menuAim';
 import { Icon } from '../../components/Icon';
 import type { Anchor } from '../../components/Menu';
 
@@ -32,7 +33,7 @@ export function AppMenu({ items, anchor, onClose, label, autoFocus = true, level
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number }>({ left: anchor.x, top: anchor.y });
   const [sub, setSub] = useState<{ index: number; anchor: Anchor; focus: boolean } | null>(null);
-  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { aimed, cancel } = useMenuAim(ref, level);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -132,7 +133,7 @@ export function AppMenu({ items, anchor, onClose, label, autoFocus = true, level
 
   return createPortal(
     <>
-      <div ref={ref} className="menu app-menu" role="menu" aria-label={label} style={{ left: pos.left, top: pos.top, zIndex: 900 + level }} onKeyDown={onKeyDown}>
+      <div ref={ref} className="menu app-menu" role="menu" data-level={level} aria-label={label} style={{ left: pos.left, top: pos.top, zIndex: 900 + level }} onKeyDown={onKeyDown}>
         {items.map((it, i) => {
           if (it.type === 'sep') return <div key={`sep${i}`} className="menu-sep" role="separator" />;
           if (it.type === 'header') return <div key={`h${i}`} className="menu-header">{it.label}</div>;
@@ -151,10 +152,9 @@ export function AppMenu({ items, anchor, onClose, label, autoFocus = true, level
                 onClick={(e) => openSub(i, e.currentTarget, true)}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget;
-                  if (hoverTimer.current) clearTimeout(hoverTimer.current);
-                  hoverTimer.current = setTimeout(() => openSub(i, el, false), 120);
+                  if (sub?.index === i) return cancel();
+                  aimed(() => openSub(i, el, false), sub ? 0 : 90);
                 }}
-                onMouseLeave={() => hoverTimer.current && clearTimeout(hoverTimer.current)}
               >
                 <Icon name={it.icon ?? ''} />
                 <span className="menu-label">{it.label}</span>
@@ -174,8 +174,8 @@ export function AppMenu({ items, anchor, onClose, label, autoFocus = true, level
               data-index={i}
               disabled={it.disabled}
               onMouseEnter={() => {
-                if (hoverTimer.current) clearTimeout(hoverTimer.current);
-                if (sub) hoverTimer.current = setTimeout(() => setSub(null), 150);
+                if (sub) aimed(() => setSub(null));
+                else cancel();
               }}
               onClick={() => {
                 onClose('select');
