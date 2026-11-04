@@ -155,7 +155,9 @@
       "moreVariables": "Přesuňte do seznamu ještě další proměnné.",
       "predictors": "Přidejte alespoň jeden prediktor.",
       "expected": "Zadejte očekávané četnosti, např. 10 20 30.",
-      "nothingToDo": "Vyberte alespoň jednu vlastnost, kterou chcete nastavit."
+      "nothingToDo": "Vyberte alespoň jednu vlastnost, kterou chcete nastavit.",
+      "runsValue": "Zadejte hodnotu dělicího bodu.",
+      "rocPositive": "Vyberte hodnotu pozitivního stavu."
     },
     "hints": {
       "measure": {
@@ -351,6 +353,53 @@
       "compare": "Porovnat",
       "byGroups": "Skupiny vedle sebe",
       "byVariables": "Proměnné vedle sebe"
+    },
+    "runs": {
+      "title": "Test sérií (runs)",
+      "cutPoint": "Dělicí bod",
+      "median": "Medián",
+      "mean": "Průměr",
+      "mode": "Modus",
+      "custom": "Vlastní hodnota",
+      "value": "Hodnota"
+    },
+    "mcnemar": {
+      "title": "McNemarův test"
+    },
+    "cochran": {
+      "title": "Cochranův Q test",
+      "variables": "Související dvouhodnotové proměnné",
+      "hint": "Každá proměnná je jedno opakované měření ano/ne u stejných případů."
+    },
+    "medianTest": {
+      "title": "Mediánový test (k nezávislých výběrů)",
+      "value": "Medián",
+      "valueHint": "Prázdné = medián všech případů."
+    },
+    "jonckheere": {
+      "title": "Jonckheereův–Terpstrův test"
+    },
+    "roc": {
+      "title": "ROC křivka",
+      "testVariables": "Testové proměnné",
+      "stateVariable": "Proměnná stavu",
+      "positive": "Hodnota pozitivního stavu",
+      "display": "Zobrazit",
+      "curve": "ROC křivku",
+      "reference": "Diagonální referenční čáru",
+      "se": "Směrodatnou chybu a interval spolehlivosti plochy",
+      "coordinates": "Souřadnice křivky",
+      "testpos": "Vyšší výsledek testu znamená",
+      "large": "Spíše pozitivní stav",
+      "small": "Spíše negativní stav (pozitivní jsou nižší hodnoty)",
+      "cutoff": "Dělicí hodnota klasifikace",
+      "include": "Dělicí hodnota patří do pozitivní třídy",
+      "exclude": "Dělicí hodnota nepatří do pozitivní třídy",
+      "distribution": "Odhad plochy",
+      "free": "Neparametrický",
+      "negexpo": "Bi-negativně exponenciální",
+      "missingExclude": "Vyloučit uživatelem chybějící hodnoty",
+      "missingInclude": "Uživatelem chybějící hodnoty brát jako platné"
     }
   },
   "assistant": {

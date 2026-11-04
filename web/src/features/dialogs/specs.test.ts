@@ -22,6 +22,12 @@ const NEW_FILLED: Record<string, Values> = {
   kruskalWallis: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
   wilcoxon: { pairs: [{ a: 'age', b: 'score' }] },
   friedman: { variables: ['age', 'score', 'income'] },
+  runs: { variables: ['age'] },
+  mcnemar: { pairs: [{ a: 'gender', b: 'group' }] },
+  cochran: { variables: ['gender', 'group'] },
+  medianTest: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
+  jonckheere: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
+  roc: { variables: ['score'], state: ['gender'], positive: '1' },
   chiSquare: { variables: ['group'] },
   binomial: { variables: ['gender'] },
   ksNormal: { variables: ['age'] },
@@ -274,6 +280,10 @@ describe('New dialogs (WP3)', () => {
     expect(gen('kruskalWallis', NEW_FILLED.kruskalWallis)).toBe('NPAR TESTS\n  /K-W=score BY group(1, 3).');
     expect(errors('kruskalWallis', { ...NEW_FILLED.kruskalWallis, hi: 1 })).toBe('dlg.errors.range');
     expect(gen('wilcoxon', { ...NEW_FILLED.wilcoxon, sign: true })).toBe('NPAR TESTS\n  /WILCOXON=age WITH score (PAIRED)\n  /SIGN=age WITH score (PAIRED).');
+    expect(gen('runs', { variables: ['age'], cut: 'custom', value: 30 })).toBe('NPAR TESTS\n  /RUNS(30)=age.');
+    expect(gen('medianTest', { ...NEW_FILLED.medianTest })).toBe('NPAR TESTS\n  /MEDIAN=score BY group(1, 3).');
+    expect(gen('roc', NEW_FILLED.roc)).toContain('ROC score BY gender(1)');
+    expect(errors('roc', { variables: ['score'], state: ['gender'] })).toBe('dlg.errors.rocPositive');
     expect(gen('friedman', { ...NEW_FILLED.friedman, kendall: true })).toBe('NPAR TESTS\n  /FRIEDMAN=age score income\n  /KENDALL=age score income.');
     expect(gen('chiSquare', NEW_FILLED.chiSquare)).toBe('NPAR TESTS\n  /CHISQUARE=group\n  /EXPECTED=EQUAL.');
     expect(gen('chiSquare', { variables: ['group'], expected: 'values', freqs: '10 20 30' })).toContain('/EXPECTED=10, 20, 30');

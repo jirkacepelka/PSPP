@@ -145,7 +145,9 @@
       "moreVariables": "Move more variables into the list.",
       "predictors": "Add at least one predictor.",
       "expected": "Enter the expected frequencies, e.g. 10 20 30.",
-      "nothingToDo": "Choose at least one property to set."
+      "nothingToDo": "Choose at least one property to set.",
+      "runsValue": "Enter the cut-point value.",
+      "rocPositive": "Choose the value of the positive state."
     },
     "hints": {
       "measure": {
@@ -341,6 +343,53 @@
       "compare": "Compare",
       "byGroups": "Groups side by side",
       "byVariables": "Variables side by side"
+    },
+    "runs": {
+      "title": "Runs test",
+      "cutPoint": "Cut point",
+      "median": "Median",
+      "mean": "Mean",
+      "mode": "Mode",
+      "custom": "Custom value",
+      "value": "Value"
+    },
+    "mcnemar": {
+      "title": "McNemar test"
+    },
+    "cochran": {
+      "title": "Cochran's Q test",
+      "variables": "Related dichotomous variables",
+      "hint": "Each variable is one repeated yes/no measurement of the same cases."
+    },
+    "medianTest": {
+      "title": "Median test (k independent samples)",
+      "value": "Median",
+      "valueHint": "Leave empty to use the median of all cases."
+    },
+    "jonckheere": {
+      "title": "Jonckheere-Terpstra test"
+    },
+    "roc": {
+      "title": "ROC curve",
+      "testVariables": "Test variables",
+      "stateVariable": "State variable",
+      "positive": "Value of the positive state",
+      "display": "Display",
+      "curve": "ROC curve",
+      "reference": "Diagonal reference line",
+      "se": "Standard error and confidence interval of the area",
+      "coordinates": "Coordinates of the curve",
+      "testpos": "Larger test result indicates",
+      "large": "More positive state",
+      "small": "Less positive state (smaller values are positive)",
+      "cutoff": "Classification cut-off",
+      "include": "Include the cut-off value in the positive class",
+      "exclude": "Exclude the cut-off value from the positive class",
+      "distribution": "Area estimate",
+      "free": "Nonparametric",
+      "negexpo": "Bi-negative exponential",
+      "missingExclude": "Exclude user-missing values",
+      "missingInclude": "Treat user-missing values as valid"
     }
   },
   "assistant": {

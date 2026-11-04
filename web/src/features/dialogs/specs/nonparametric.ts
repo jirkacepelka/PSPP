@@ -216,3 +216,109 @@ export const ksNormal: DialogSpec = {
   ],
   toSyntax: (v) => command('NPAR TESTS', '', [wrap([`KOLMOGOROV-SMIRNOV(${str(v, 'dist') || 'NORMAL'})=${vars(v, 'variables').join(' ')}`]), ...tail(v)]),
 };
+
+export const runs: DialogSpec = {
+  id: 'runs',
+  kind: 'analysis',
+  title: 'dlg.runs.title',
+  icon: 'swap_horiz',
+  command: 'NPAR TESTS',
+  source: 'numeric',
+  fields: [
+    { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1 },
+    {
+      kind: 'radio',
+      id: 'cut',
+      label: 'dlg.runs.cutPoint',
+      default: 'MEDIAN',
+      options: [
+        { value: 'MEDIAN', label: 'dlg.runs.median' },
+        { value: 'MEAN', label: 'dlg.runs.mean' },
+        { value: 'MODE', label: 'dlg.runs.mode' },
+        { value: 'custom', label: 'dlg.runs.custom' },
+      ],
+    },
+    { kind: 'number', id: 'value', label: 'dlg.runs.value', default: null, when: (v) => v.cut === 'custom' },
+    options,
+  ],
+  validate: (v) => (v.cut === 'custom' && num(v, 'value') === null ? 'dlg.errors.runsValue' : null),
+  errorFields: { 'dlg.errors.runsValue': 'value' },
+  toSyntax: (v) => {
+    const cut = v.cut === 'custom' ? String(num(v, 'value')) : str(v, 'cut') || 'MEDIAN';
+    return command('NPAR TESTS', '', [wrap([`RUNS(${cut})=${vars(v, 'variables').join(' ')}`]), ...tail(v)]);
+  },
+};
+
+export const mcnemar: DialogSpec = {
+  id: 'mcnemar',
+  kind: 'analysis',
+  title: 'dlg.mcnemar.title',
+  icon: 'compare_arrows',
+  command: 'NPAR TESTS',
+  source: 'numeric',
+  size: 'normal',
+  fields: [pairsField, options],
+  validate: (v) => {
+    const p = rows(v, 'pairs');
+    if (!p.length || p.some((r) => !r.a || !r.b)) return 'dlg.errors.pairs';
+    if (p.some((r) => r.a === r.b)) return 'dlg.errors.pairSame';
+    return null;
+  },
+  toSyntax: (v) => {
+    const p = rows(v, 'pairs');
+    return command('NPAR TESTS', '', [wrap([`MCNEMAR=${p.map((r) => r.a).join(' ')} WITH ${p.map((r) => r.b).join(' ')} (PAIRED)`]), ...tail(v)]);
+  },
+};
+
+export const cochran: DialogSpec = {
+  id: 'cochran',
+  kind: 'analysis',
+  title: 'dlg.cochran.title',
+  icon: 'checklist',
+  command: 'NPAR TESTS',
+  source: 'numeric',
+  fields: [{ kind: 'varlist', id: 'variables', label: 'dlg.cochran.variables', hint: 'dlg.cochran.hint', filter: 'numeric', min: 2, prefer: ['nominal'] }, options],
+  toSyntax: (v) => command('NPAR TESTS', '', [wrap([`COCHRAN=${vars(v, 'variables').join(' ')}`]), ...tail(v)]),
+};
+
+const kGroupFields: Field[] = [
+  { kind: 'varlist', id: 'variables', label: 'dlg.common.testVariables', filter: 'numeric', min: 1, prefer: ['scale', 'ordinal'] },
+  { kind: 'varlist', id: 'group', label: 'dlg.ttestIndependent.groupingVariable', filter: 'numeric', max: 1, min: 1, prefer: ['nominal', 'ordinal'], groups: true },
+  { kind: 'groupvalues', source: 'group', ids: ['lo', 'hi'], labels: ['dlg.kruskalWallis.min', 'dlg.kruskalWallis.max'], mode: 'range' },
+];
+const rangeValid = (v: Values) => {
+  const lo = num(v, 'lo');
+  const hi = num(v, 'hi');
+  return lo === null || hi === null || lo >= hi ? 'dlg.errors.range' : null;
+};
+
+export const medianTest: DialogSpec = {
+  id: 'medianTest',
+  kind: 'analysis',
+  title: 'dlg.medianTest.title',
+  icon: 'align_vertical_center',
+  command: 'NPAR TESTS',
+  fields: [
+    ...kGroupFields,
+    { kind: 'number', id: 'median', label: 'dlg.medianTest.value', hint: 'dlg.medianTest.valueHint', default: null },
+    options,
+  ],
+  errorFields: { 'dlg.errors.range': 'lo' },
+  validate: rangeValid,
+  toSyntax: (v) => {
+    const m = num(v, 'median');
+    return command('NPAR TESTS', '', [wrap([`MEDIAN${m === null ? '' : `(${m})`}=${vars(v, 'variables').join(' ')}`, 'BY', `${vars(v, 'group')[0]}(${num(v, 'lo')}, ${num(v, 'hi')})`]), ...tail(v)]);
+  },
+};
+
+export const jonckheere: DialogSpec = {
+  id: 'jonckheere',
+  kind: 'analysis',
+  title: 'dlg.jonckheere.title',
+  icon: 'stairs',
+  command: 'NPAR TESTS',
+  fields: [...kGroupFields, options],
+  errorFields: { 'dlg.errors.range': 'lo' },
+  validate: rangeValid,
+  toSyntax: (v) => command('NPAR TESTS', '', [wrap([`J-T=${vars(v, 'variables').join(' ')}`, 'BY', `${vars(v, 'group')[0]}(${num(v, 'lo')}, ${num(v, 'hi')})`]), ...tail(v)]),
+};

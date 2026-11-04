@@ -45,6 +45,12 @@ const FILLED: Record<string, Values> = {
   kruskalWallis: { variables: ['stress'], group: ['faculty'], lo: 1, hi: 5 },
   wilcoxon: { pairs: [{ a: 'hours', b: 'sleep' }], sign: true },
   friedman: { variables: ['hours', 'sleep', 'stress'], kendall: true },
+  runs: { variables: ['gpa'], cut: 'MEDIAN' },
+  mcnemar: { pairs: [{ a: 'job', b: 'good' }] },
+  cochran: { variables: ['job', 'good'] },
+  medianTest: { variables: ['stress'], group: ['faculty'], lo: 1, hi: 5 },
+  jonckheere: { variables: ['stress'], group: ['year'], lo: 1, hi: 5 },
+  roc: { variables: ['gpa'], state: ['job'], positive: '1', coordinates: true },
   histogram: { variable: ['gpa'] },
   barChart: { category: ['faculty'], cluster: ['gender'], func: 'MEAN', variable: ['gpa'] },
   scatter: { y: ['gpa'], x: ['hours'], by: ['gender'] },
@@ -64,6 +70,12 @@ const FILLED: Record<string, Values> = {
   variableProperties: { variables: ['gender'], measure: 'NOMINAL', role: 'INPUT', labels: [{ value: '9', label: 'N/A' }], missing: '9' },
 };
 
+/** Syntax run before a spec's own, e.g. to derive a second dichotomous variable. */
+const PRELUDE: Record<string, string> = {
+  mcnemar: 'COMPUTE good = gpa >= 3.\n',
+  cochran: 'COMPUTE good = gpa >= 3.\n',
+};
+
 const flat = (items: OutputItem[]): OutputItem[] => items.flatMap((i) => (i.kind === 'group' ? flat(i.children) : [i]));
 
 describe.skipIf(!have)('dialog syntax runs in PSPP', () => {
@@ -77,7 +89,7 @@ describe.skipIf(!have)('dialog syntax runs in PSPP', () => {
       const patch = FILLED[spec.id];
       expect(patch, `engine test data for ${spec.id}`).toBeDefined();
       const syntax = spec.toSyntax({ ...defaultValues(spec), ...patch }, ctx);
-      const r = await engine.run(syntax, structuredClone(ds));
+      const r = await engine.run((PRELUDE[spec.id] ?? '') + syntax, structuredClone(ds));
       const errs = flat(r.items).filter((i) => i.kind === 'message' && i.severity === 'error');
       if (process.env.SHOW) console.log(spec.id, flat(r.items).map((i) => i.kind === "message" ? "MSG:" + (i as { text: string }).text : i.kind).join(","));
       if (errs.length) failures.push(`${spec.id}: ${syntax}\n  → ${errs.map((e) => (e as { text: string }).text).join(' | ')}`);
