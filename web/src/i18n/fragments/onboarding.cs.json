@@ -167,6 +167,7 @@
     "outTitle": "T-test: průměr podle pohlaví",
     "explain": "Ženy mají v průměru vyšší skóre; rozdíl je statisticky významný.",
     "explainBtn": "Co to znamená?",
-    "status": "Připraveno"
+    "status": "Připraveno",
+    "gpaLabel": "Průměr známek"
   }
 }

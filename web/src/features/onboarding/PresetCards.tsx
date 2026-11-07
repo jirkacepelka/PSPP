@@ -52,7 +52,7 @@ export function PresetPreview({ patch }: { patch: PresetPatch }) {
   );
 }
 
-export function PresetCards({ compact, onPick }: { compact?: boolean; onPick?: (p: UiPreset) => void }) {
+export function PresetCards({ compact, onPick, onHover }: { compact?: boolean; onPick?: (p: UiPreset) => void; onHover?: (patch: PresetPatch | null) => void }) {
   const { t } = useTranslation();
   const active = useActivePreset();
   const ref = useRef<HTMLDivElement>(null);
@@ -76,7 +76,7 @@ export function PresetCards({ compact, onPick }: { compact?: boolean; onPick?: (
           const on = active === p.id;
           const tabbable = on || (active === 'custom' && p.id === 'balanced');
           return (
-            <button key={p.id} type="button" role="radio" aria-checked={on} tabIndex={tabbable ? 0 : -1} data-preset={p.id} className="onb-preset" onClick={() => pick(p)}>
+            <button key={p.id} type="button" role="radio" aria-checked={on} tabIndex={tabbable ? 0 : -1} data-preset={p.id} className="onb-preset" onClick={() => pick(p)} onPointerEnter={() => onHover?.(p.patch)} onPointerLeave={() => onHover?.(null)}>
               <PresetPreview patch={p.patch} />
               <span className="onb-preset-text">
                 <span className="onb-preset-head">

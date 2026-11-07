@@ -1,6 +1,9 @@
 {
   "settings": {
-    "section": { "general": "General", "analysis": "Analysis and output" },
+    "section": {
+      "general": "General",
+      "analysis": "Analysis and output"
+    },
     "sectionDesc": {
       "general": "Language, theme, numbers and the help PSPP Studio offers you.",
       "analysis": "How results are computed, formatted and explained."
@@ -60,7 +63,9 @@
       "weightTip": "Weighting: each case counts with the weight of a variable. Click to change.",
       "splitTip": "Split file: analyses run separately for each group. Click to change."
     },
-    "split": { "resize": "Resize the split view" },
+    "split": {
+      "resize": "Resize the split view"
+    },
     "journal": {
       "title": "Journal",
       "tab": "Journal",
@@ -179,7 +184,11 @@
       "allColumnsDesc": "Width, decimals, columns, alignment and role (as in SPSS)",
       "accentOk": "Contrast {{light}} : 1 in light and {{dark}} : 1 in dark theme – passes WCAG AA.",
       "accentWarn": "Contrast {{light}} : 1 / {{dark}} : 1 – choose a darker colour for readable text.",
-      "accentAdjusted": "Your custom colour was adjusted so text on it stays readable."
+      "accentAdjusted": "Your custom colour was adjusted so text on it stays readable.",
+      "previewCaption": "Live preview",
+      "previewNote": "Hover a setting and the preview shows what it changes.",
+      "inspector": "Variable detail panel",
+      "inspectorDesc": "Beside the data: type, value labels and distribution of the selected variable."
     },
     "shortcuts": {
       "desc": "Keys for the current view come first. Press ? any time to open this overview.",
@@ -218,15 +227,42 @@
     },
     "tasks": {
       "started": "Task: {{question}} The dialog is pre-filled – check it and click Run.",
-      "stSatisf": { "q": "How satisfied are the students?", "method": "Frequencies" },
-      "stGpa": { "q": "Do women and men differ in GPA?", "method": "T-test" },
-      "stStress": { "q": "Is stress related to sleep and study time?", "method": "Correlation" },
-      "emSalary": { "q": "How high are the salaries?", "method": "Descriptives" },
-      "emJobcat": { "q": "Do salaries differ by job category?", "method": "ANOVA" },
-      "emPredict": { "q": "Can education predict salary?", "method": "Regression" },
-      "trDrop": { "q": "Did blood pressure drop after 8 weeks?", "method": "Paired t-test" },
-      "trDrug": { "q": "Which drug lowers blood pressure most?", "method": "ANOVA" },
-      "trSmoke": { "q": "Are smokers spread evenly across groups?", "method": "Crosstab" }
+      "stSatisf": {
+        "q": "How satisfied are the students?",
+        "method": "Frequencies"
+      },
+      "stGpa": {
+        "q": "Do women and men differ in GPA?",
+        "method": "T-test"
+      },
+      "stStress": {
+        "q": "Is stress related to sleep and study time?",
+        "method": "Correlation"
+      },
+      "emSalary": {
+        "q": "How high are the salaries?",
+        "method": "Descriptives"
+      },
+      "emJobcat": {
+        "q": "Do salaries differ by job category?",
+        "method": "ANOVA"
+      },
+      "emPredict": {
+        "q": "Can education predict salary?",
+        "method": "Regression"
+      },
+      "trDrop": {
+        "q": "Did blood pressure drop after 8 weeks?",
+        "method": "Paired t-test"
+      },
+      "trDrug": {
+        "q": "Which drug lowers blood pressure most?",
+        "method": "ANOVA"
+      },
+      "trSmoke": {
+        "q": "Are smokers spread evenly across groups?",
+        "method": "Crosstab"
+      }
     }
   }
 }

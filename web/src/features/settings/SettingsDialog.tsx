@@ -21,6 +21,8 @@ import { ShortcutsList } from '../misc/ShortcutsDialog';
 import { AboutContent } from '../misc/AboutDialog';
 import { norm } from '../palette/fuzzy';
 import { PresetCards, openOnboarding } from '../onboarding/Onboarding';
+import { WorkspacePreview, type PreviewPart } from '../onboarding/WorkspacePreview';
+import { DensityArt, ExplainArt, ThemeCards, VisualChoice } from '../onboarding/VisualChoice';
 import './settings.css';
 
 const SECTIONS = [
@@ -36,6 +38,25 @@ const SECTIONS = [
 ] as const;
 type SectionId = (typeof SECTIONS)[number]['id'];
 
+/** What the live preview beside a section shows: a part to point at and values to try out. */
+interface PreviewState {
+  highlight?: PreviewPart | null;
+  patch?: Parameters<typeof WorkspacePreview>[0]['patch'];
+}
+const PreviewCtx = createContext<(p: PreviewState) => void>(() => undefined);
+/** Hover / focus handlers that point the preview at PART while the pointer or focus is inside. */
+function usePoint(part?: PreviewPart) {
+  const setPv = useContext(PreviewCtx);
+  if (!part) return {};
+  return {
+    onPointerEnter: () => setPv({ highlight: part }),
+    onPointerLeave: () => setPv({}),
+    onFocus: () => setPv({ highlight: part }),
+    onBlur: () => setPv({}),
+  };
+}
+const PREVIEW_VIEW: Partial<Record<SectionId, 'data' | 'output'>> = { general: 'data', appearance: 'data', analysis: 'output', data: 'data' };
+
 /** Current search query; rows that do not match hide themselves. */
 const QueryCtx = createContext('');
 
@@ -49,10 +70,11 @@ function useMatch(...texts: (string | undefined)[]): boolean {
     .every((w) => hay.includes(w));
 }
 
-function Row({ title, desc, children, htmlFor, keywords }: { title: string; desc?: string; children: ReactNode; htmlFor?: string; keywords?: string }) {
+function Row({ title, desc, children, htmlFor, keywords, part, stack }: { title: string; desc?: string; children: ReactNode; htmlFor?: string; keywords?: string; part?: PreviewPart; stack?: boolean }) {
+  const point = usePoint(part);
   if (!useMatch(title, desc, keywords)) return null;
   return (
-    <div className="set-row">
+    <div className={`set-row ${stack ? 'is-stack' : ''}`} {...point}>
       <div className="set-row-text">
         {htmlFor ? (
           <label htmlFor={htmlFor} className="set-row-title">
@@ -68,12 +90,13 @@ function Row({ title, desc, children, htmlFor, keywords }: { title: string; desc
   );
 }
 
-function Toggle({ k, label, desc }: { k: keyof Settings; label: string; desc?: string }) {
+function Toggle({ k, label, desc, part }: { k: keyof Settings; label: string; desc?: string; part?: PreviewPart }) {
   const v = useSettings((s) => s[k]) as boolean;
   const set = useSettings((s) => s.set);
+  const point = usePoint(part);
   if (!useMatch(label, desc)) return null;
   return (
-    <div className="set-row set-row-switch">
+    <div className="set-row set-row-switch" {...point}>
       <Switch label={label} description={desc} checked={v} onChange={(e) => set({ [k]: e.target.checked } as Partial<Settings>)} />
     </div>
   );
@@ -105,10 +128,10 @@ function GeneralSection() {
             ]}
           />
         </Row>
-        <Row title={t('settings.theme')} keywords="motiv tema dark light">
-          <ThemeSwitch />
+        <Row title={t('settings.theme')} keywords="motiv tema dark light" stack>
+          <ThemeCards />
         </Row>
-        <Row title={t('settings.decimalSeparator')} desc={t('settings.decimalSeparatorDesc')}>
+        <Row title={t('settings.decimalSeparator')} desc={t('settings.decimalSeparatorDesc')} part="numbers">
           <Segmented
             aria-label={t('settings.decimalSeparator')}
             value={s.decimalSeparator}
@@ -122,7 +145,7 @@ function GeneralSection() {
       </Group>
       <WorkspaceGroup />
       <Group title={t('shell.settings.helpGroup')}>
-        <Toggle k="showValueLabels" label={t('shell.settings.valueLabels')} desc={t('shell.settings.valueLabelsDesc')} />
+        <Toggle k="showValueLabels" label={t('shell.settings.valueLabels')} desc={t('shell.settings.valueLabelsDesc')} part="valueLabels" />
         <ExplainRow />
         <Toggle k="showSyntaxPreview" label={t('shell.settings.syntaxPreview')} desc={t('shell.settings.syntaxPreviewDesc')} />
       </Group>
@@ -133,6 +156,7 @@ function GeneralSection() {
 /** Visual presets (shared with the onboarding guide) and a way to run the guide again. */
 function WorkspaceGroup() {
   const { t } = useTranslation();
+  const setPv = useContext(PreviewCtx);
   const close = useUi((s) => s.closeModal);
   const showPresets = useMatch(t('onboarding.presets.label'), t('onboarding.settings.layoutDesc'), 'preset rozvrzeni layout klidny vyvazeny plny calm balanced full');
   const showRerun = useMatch(t('onboarding.settings.rerun'), t('onboarding.settings.rerunDesc'), 'onboarding pruvodce guide wizard');
@@ -143,7 +167,7 @@ function WorkspaceGroup() {
         <div className="onb-set-presets">
           <span className="set-row-title">{t('onboarding.presets.label')}</span>
           <span className="onb-row-desc">{t('onboarding.settings.layoutDesc')}</span>
-          <PresetCards compact />
+          <PresetCards compact onHover={(patch) => setPv(patch ? { patch } : {})} />
         </div>
       )}
       {showRerun && (
@@ -164,41 +188,73 @@ function WorkspaceGroup() {
   );
 }
 
-function ThemeSwitch() {
-  const { t } = useTranslation();
-  const theme = useSettings((s) => s.theme);
-  const set = useSettings((s) => s.set);
-  return (
-    <Segmented
-      aria-label={t('settings.theme')}
-      value={theme}
-      onChange={(v) => set({ theme: v })}
-      options={[
-        { value: 'light', label: t('settings.themeLight'), icon: 'light_mode' },
-        { value: 'dark', label: t('settings.themeDark'), icon: 'dark_mode' },
-        { value: 'system', label: t('settings.themeSystem'), icon: 'brightness_auto' },
-      ]}
-    />
-  );
-}
-
 function ExplainRow() {
   const { t } = useTranslation();
   const v = useSettings((s) => s.explainResults);
   const set = useSettings((s) => s.set);
+  const setPv = useContext(PreviewCtx);
   return (
-    <Row title={t('shell.settings.explain')} desc={t('shell.settings.explainDesc')} keywords="interpretace vysvetleni interpretation">
-      <Segmented
-        aria-label={t('shell.settings.explain')}
+    <Row title={t('shell.settings.explain')} desc={t('shell.settings.explainDesc')} keywords="interpretace vysvetleni interpretation" stack>
+      <VisualChoice
+        label={t('shell.settings.explain')}
         value={v}
         onChange={(x) => set({ explainResults: x })}
+        onHover={(x) => setPv(x ? { patch: { explainResults: x }, highlight: 'explain' } : {})}
         options={[
-          { value: 'always', label: t('shell.settings.explainAlways') },
-          { value: 'onDemand', label: t('shell.settings.explainOnDemand') },
-          { value: 'never', label: t('shell.settings.explainNever') },
+          { value: 'always', label: t('shell.settings.explainAlways'), desc: t('onboarding.style.explainAlwaysDesc'), art: <ExplainArt mode="always" /> },
+          { value: 'onDemand', label: t('shell.settings.explainOnDemand'), desc: t('onboarding.style.explainOnDemandDesc'), art: <ExplainArt mode="onDemand" /> },
+          { value: 'never', label: t('shell.settings.explainNever'), desc: t('onboarding.style.explainNeverDesc'), art: <ExplainArt mode="never" /> },
         ]}
       />
     </Row>
+  );
+}
+
+/** Example digits in each grid font. */
+function GridFontChoice() {
+  const { t } = useTranslation();
+  const v = useSettings((s) => s.gridFont);
+  const set = useSettings((s) => s.set);
+  const setPv = useContext(PreviewCtx);
+  const fam: Record<Settings['gridFont'], string> = { system: 'system-ui, sans-serif', inter: "'Inter', sans-serif", roboto: "'Roboto', sans-serif", mono: "'Roboto Mono', monospace" };
+  const opts = (['system', 'inter', 'roboto', 'mono'] as const).map((f) => ({
+    value: f,
+    label: f === 'system' ? t('settings.fontSystem') : f === 'mono' ? 'Roboto Mono' : f === 'inter' ? 'Inter' : 'Roboto',
+    art: (
+      <span className="set-font-art" style={{ fontFamily: fam[f] }}>
+        1 234,56
+        <small>Aa 0O 1l</small>
+      </span>
+    ),
+  }));
+  return <VisualChoice label={t('settings.gridFont')} value={v} onChange={(x) => set({ gridFont: x })} onHover={(x) => setPv(x ? { highlight: 'grid' } : {})} options={opts} className="set-vc-4" />;
+}
+
+/** How variables are listed in dialogs: name, label or both. */
+function ListShowsChoice() {
+  const { t } = useTranslation();
+  const v = useSettings((s) => s.listShows);
+  const set = useSettings((s) => s.set);
+  const chip = (name: boolean, label: boolean) => (
+    <span className="set-chip-art">
+      <span className="set-chip-ic">
+        <Icon name="straighten" size={12} />
+      </span>
+      {label && <span>{t('preview.gpaLabel')}</span>}
+      {name && <span className={label ? 'set-chip-name' : ''}>{label ? '(gpa)' : 'gpa'}</span>}
+    </span>
+  );
+  return (
+    <VisualChoice
+      label={t('shell.settings.listShows')}
+      value={v}
+      onChange={(x) => set({ listShows: x })}
+      options={[
+        { value: 'name', label: t('shell.settings.listName'), art: chip(true, false) },
+        { value: 'label', label: t('shell.settings.listLabel'), art: chip(false, true) },
+        { value: 'both', label: t('shell.settings.listBoth'), art: chip(true, true) },
+      ]}
+    />
   );
 }
 
@@ -252,50 +308,45 @@ function AccentPicker() {
 function AppearanceSection() {
   const { t } = useTranslation();
   const s = useSettings();
+  const setPv = useContext(PreviewCtx);
   return (
     <>
       <Group>
-        <Row title={t('settings.theme')}>
-          <ThemeSwitch />
+        <Row title={t('settings.theme')} stack>
+          <ThemeCards />
         </Row>
-        <Row title={t('settings.accent')} desc={t('settings.accentDesc')} keywords="barva color akcent">
+        <Row title={t('settings.accent')} desc={t('settings.accentDesc')} keywords="barva color akcent" part="appbar">
           <AccentPicker />
         </Row>
-        <Toggle k="toolbarLabels" label={t('shell.settings.toolbarLabels')} desc={t('shell.settings.toolbarLabelsDesc')} />
-        <Row title={t('settings.density')}>
-          <Segmented
-            aria-label={t('settings.density')}
+        <Row title={t('settings.density')} stack part="grid">
+          <VisualChoice
+            label={t('settings.density')}
             value={s.density}
             onChange={(v) => s.set({ density: v })}
+            onHover={(v) => setPv(v ? { patch: { density: v }, highlight: 'grid' } : {})}
             options={[
-              { value: 'comfortable', label: t('settings.comfortable'), icon: 'density_medium' },
-              { value: 'compact', label: t('settings.compact'), icon: 'density_small' },
+              { value: 'comfortable', label: t('settings.comfortable'), art: <DensityArt dense={false} /> },
+              { value: 'compact', label: t('settings.compact'), art: <DensityArt dense /> },
             ]}
           />
         </Row>
-        <Row title={t('settings.fontSize')} desc={`${s.fontSize} px`} htmlFor="set-fsize">
+        <Row title={t('settings.fontSize')} desc={`${s.fontSize} px`} htmlFor="set-fsize" part="grid">
+          <span className="set-fs-sample" style={{ fontSize: s.fontSize }} aria-hidden="true">
+            Aa 21,4
+          </span>
           <input id="set-fsize" type="range" min={12} max={18} step={1} value={s.fontSize} onChange={(e) => s.set({ fontSize: Number(e.target.value) })} className="set-range" />
         </Row>
-        <Row title={t('settings.gridFont')} htmlFor="set-gfont">
-          <Select
-            id="set-gfont"
-            size="sm"
-            value={s.gridFont}
-            onChange={(e) => s.set({ gridFont: e.target.value as Settings['gridFont'] })}
-            options={[
-              { value: 'system', label: t('settings.fontSystem') },
-              { value: 'inter', label: 'Inter' },
-              { value: 'roboto', label: 'Roboto' },
-              { value: 'mono', label: 'Roboto Mono' },
-            ]}
-          />
+        <Row title={t('settings.gridFont')} stack keywords="font pismo">
+          <GridFontChoice />
         </Row>
       </Group>
       <TableStyles />
       <Group title={t('shell.settings.chrome')}>
-        <Toggle k="showToolbar" label={t('shell.settings.commandBar')} desc={t('shell.settings.commandBarDesc')} />
-        <Toggle k="showFormulaBar" label={t('actions.showFormulaBar')} />
-        <Toggle k="showStatusBar" label={t('shell.settings.statusFacts')} />
+        <Toggle k="showToolbar" label={t('shell.settings.commandBar')} desc={t('shell.settings.commandBarDesc')} part="toolbar" />
+        <Toggle k="toolbarLabels" label={t('shell.settings.toolbarLabels')} desc={t('shell.settings.toolbarLabelsDesc')} part="labels" />
+        <Toggle k="showFormulaBar" label={t('actions.showFormulaBar')} part="formula" />
+        <Toggle k="inspectorOpen" label={t('shell.settings.inspector')} desc={t('shell.settings.inspectorDesc')} part="inspector" />
+        <Toggle k="showStatusBar" label={t('shell.settings.statusFacts')} part="status" />
       </Group>
     </>
   );
@@ -305,12 +356,22 @@ function TableStyles() {
   const { t } = useTranslation();
   const tableStyle = useSettings((s) => s.tableStyle);
   const set = useSettings((s) => s.set);
+  const setPv = useContext(PreviewCtx);
   if (!useMatch(t('settings.tableStyle'), 'apa tabulky tables styl')) return null;
   return (
     <Group title={t('settings.tableStyle')}>
       <div className="set-styles" role="radiogroup" aria-label={t('settings.tableStyle')}>
         {(['modern', 'classic', 'apa', 'compact'] as const).map((st) => (
-          <button key={st} type="button" role="radio" aria-checked={tableStyle === st} className="set-style" onClick={() => set({ tableStyle: st })}>
+          <button
+            key={st}
+            type="button"
+            role="radio"
+            aria-checked={tableStyle === st}
+            className="set-style"
+            onClick={() => set({ tableStyle: st })}
+            onPointerEnter={() => setPv({ patch: { tableStyle: st }, highlight: 'table' })}
+            onPointerLeave={() => setPv({})}
+          >
             <div className={`output-doc ts-${st} set-style-preview`} aria-hidden="true">
               <table>
                 <tbody>
@@ -347,18 +408,18 @@ function AnalysisSection() {
     <>
       <Group title={t('shell.settings.resultsGroup')}>
         <ExplainRow />
-        <Row title={t('shell.settings.pFormat')} desc={t('shell.settings.pFormatDesc')} keywords="p hodnota signifikance significance">
+        <Row title={t('shell.settings.pFormat')} desc={t('shell.settings.pFormatDesc')} keywords="p hodnota signifikance significance" part="table">
           <Segmented
             aria-label={t('shell.settings.pFormat')}
             value={s.pFormat}
             onChange={(v) => s.set({ pFormat: v })}
             options={[
-              { value: 'exact', label: t('shell.settings.pExact') },
-              { value: 'threshold', label: t('shell.settings.pThreshold') },
+              { value: 'exact', label: `${t('shell.settings.pExact')}  ,004` },
+              { value: 'threshold', label: `${t('shell.settings.pThreshold')}  < ,01` },
             ]}
           />
         </Row>
-        <Row title={t('shell.settings.leadingZero')} desc={t('shell.settings.leadingZeroDesc')}>
+        <Row title={t('shell.settings.leadingZero')} desc={t('shell.settings.leadingZeroDesc')} part="table">
           <Segmented
             aria-label={t('shell.settings.leadingZero')}
             value={s.leadingZero}
@@ -386,23 +447,24 @@ function AnalysisSection() {
         </Row>
       </Group>
       <Group title={t('shell.settings.dialogsGroup')}>
-        <Row title={t('shell.settings.listShows')} desc={t('shell.settings.listShowsDesc')}>
-          <Segmented
-            aria-label={t('shell.settings.listShows')}
-            value={s.listShows}
-            onChange={(v) => s.set({ listShows: v })}
-            options={[
-              { value: 'name', label: t('shell.settings.listName') },
-              { value: 'label', label: t('shell.settings.listLabel') },
-              { value: 'both', label: t('shell.settings.listBoth') },
-            ]}
-          />
+        <Row title={t('shell.settings.listShows')} desc={t('shell.settings.listShowsDesc')} stack>
+          <ListShowsChoice />
         </Row>
         <Toggle k="showSyntaxPreview" label={t('shell.settings.syntaxPreview')} desc={t('shell.settings.syntaxPreviewDesc')} />
         <Toggle k="rerunReplaces" label={t('shell.settings.rerunReplaces')} desc={t('shell.settings.rerunReplacesDesc')} />
       </Group>
     </>
   );
+}
+
+/** Today in a PSPP date format, e.g. 07.11.2026 for EDATE. */
+function dateExample(f: Settings['dateFormat']): string {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const y = d.getFullYear();
+  const mon = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][d.getMonth()];
+  return f === 'EDATE' ? `${dd}.${mm}.${y}` : f === 'DATE' ? `${dd}-${mon}-${y}` : f === 'ADATE' ? `${mm}/${dd}/${y}` : `${y}/${mm}/${dd}`;
 }
 
 function DataSection() {
@@ -422,7 +484,7 @@ function DataSection() {
             ]}
           />
         </Row>
-        <Row title={t('settings.defaultDecimals')} desc={t('settings.defaultDecimalsDesc')} htmlFor="set-ddec">
+        <Row title={t('settings.defaultDecimals')} desc={t('settings.defaultDecimalsDesc')} htmlFor="set-ddec" part="numbers">
           <NumberField id="set-ddec" size="sm" className="set-narrow" value={s.defaultDecimals} min={0} max={16} step={1} onValueChange={(v) => v != null && s.set({ defaultDecimals: Math.round(v) })} steppers />
         </Row>
         <Row title={t('settings.dateFormat')} desc={t('settings.dateFormatDesc')} htmlFor="set-dfmt">
@@ -432,17 +494,17 @@ function DataSection() {
             value={s.dateFormat}
             onChange={(e) => s.set({ dateFormat: e.target.value as Settings['dateFormat'] })}
             options={[
-              { value: 'EDATE', label: 'dd.mm.rrrr (EDATE)' },
-              { value: 'DATE', label: 'dd-mmm-rrrr (DATE)' },
-              { value: 'ADATE', label: 'mm/dd/rrrr (ADATE)' },
-              { value: 'SDATE', label: 'rrrr/mm/dd (SDATE)' },
+              { value: 'EDATE', label: `${dateExample('EDATE')}  (EDATE)` },
+              { value: 'DATE', label: `${dateExample('DATE')}  (DATE)` },
+              { value: 'ADATE', label: `${dateExample('ADATE')}  (ADATE)` },
+              { value: 'SDATE', label: `${dateExample('SDATE')}  (SDATE)` },
             ]}
           />
         </Row>
       </Group>
       <Group>
-        <Toggle k="showValueLabels" label={t('shell.settings.valueLabels')} desc={t('shell.settings.valueLabelsDesc')} />
-        <Toggle k="variableViewAllColumns" label={t('shell.settings.allColumns')} desc={t('shell.settings.allColumnsDesc')} />
+        <Toggle k="showValueLabels" label={t('shell.settings.valueLabels')} desc={t('shell.settings.valueLabelsDesc')} part="valueLabels" />
+        <Toggle k="variableViewAllColumns" label={t('shell.settings.allColumns')} desc={t('shell.settings.allColumnsDesc')} part="grid" />
       </Group>
     </>
   );
@@ -452,6 +514,22 @@ function EditorSection() {
   const { t } = useTranslation();
   const s = useSettings();
   return (
+    <>
+    <div className={`set-code-sample ${s.wordWrap ? 'is-wrap' : ''}`} aria-hidden="true" style={{ fontSize: s.editorFontSize }}>
+      {[
+        ['FREQUENCIES', ' /VARIABLES=gender faculty year /STATISTICS=MEAN MEDIAN STDDEV.'],
+        ['T-TEST', ' GROUPS=gender(1 2) /VARIABLES=gpa.'],
+        ['GRAPH', ' /LINE(MULTIPLE)=MEAN(gpa) BY year BY gender.'],
+      ].map(([k, rest], i) => (
+        <div key={i} className="set-code-line">
+          {s.lineNumbers && <span className="set-code-ln">{i + 1}</span>}
+          <span className="set-code-txt">
+            <b>{k}</b>
+            {rest}
+          </span>
+        </div>
+      ))}
+    </div>
     <Group>
       <Row title={t('settings.editorFontSize')} desc={`${s.editorFontSize} px`} htmlFor="set-efs">
         <input id="set-efs" type="range" min={11} max={22} value={s.editorFontSize} onChange={(e) => s.set({ editorFontSize: Number(e.target.value) })} className="set-range" />
@@ -460,6 +538,7 @@ function EditorSection() {
       <Toggle k="wordWrap" label={t('settings.wordWrap')} />
       <Toggle k="autoRunSelection" label={t('settings.autoRunSelection')} desc={t('settings.autoRunSelectionDesc')} />
     </Group>
+    </>
   );
 }
 
@@ -615,7 +694,9 @@ export function SettingsDialog({ section }: { section?: string }) {
   }, [section]);
   const [active, setActive] = useState<SectionId>(initial);
   const [q, setQ] = useState('');
+  const [pv, setPv] = useState<PreviewState>({});
   const searching = q.trim().length > 0;
+  const view = searching ? undefined : PREVIEW_VIEW[active];
   return (
     <Dialog title={t('settings.title')} icon="settings" onClose={close} size="xwide" className="set-dialog" bodyClassName="set-body" initialFocus=".set-search input">
       <div className="set-layout">
@@ -633,6 +714,7 @@ export function SettingsDialog({ section }: { section?: string }) {
               onClick={() => {
                 setQ('');
                 setActive(s.id);
+                setPv({});
               }}
             >
               <Icon name={s.icon} size={18} />
@@ -640,7 +722,8 @@ export function SettingsDialog({ section }: { section?: string }) {
             </button>
           ))}
         </nav>
-        <div className="set-content">
+        <div className={`set-content ${view ? 'has-preview' : ''}`}>
+          <PreviewCtx.Provider value={setPv}>
           <QueryCtx.Provider value={q.trim()}>
             {searching ? (
               <>
@@ -653,13 +736,26 @@ export function SettingsDialog({ section }: { section?: string }) {
                 <p className="set-search-empty">{t('shell.settings.noMatch', { q: q.trim() })}</p>
               </>
             ) : (
-              <>
-                <h3 className="set-h">{label(t, active, 'section')}</h3>
-                <p className="set-sub">{label(t, active, 'sectionDesc')}</p>
-                <SectionBody id={active} />
-              </>
+              <div className="set-split">
+                <div className="set-main">
+                  <h3 className="set-h">{label(t, active, 'section')}</h3>
+                  <p className="set-sub">{label(t, active, 'sectionDesc')}</p>
+                  <SectionBody id={active} />
+                </div>
+                {view && (
+                  <aside className="set-preview" aria-label={t('onboarding.previewLabel')}>
+                    <span className="onb-aside-cap">
+                      <Icon name="visibility" size={16} />
+                      {t('shell.settings.previewCaption')}
+                    </span>
+                    <WorkspacePreview view={pv.highlight === 'table' || pv.highlight === 'explain' ? 'output' : view} highlight={pv.highlight ?? null} patch={pv.patch} />
+                    <span className="set-preview-note">{t('shell.settings.previewNote')}</span>
+                  </aside>
+                )}
+              </div>
             )}
           </QueryCtx.Provider>
+          </PreviewCtx.Provider>
         </div>
       </div>
     </Dialog>

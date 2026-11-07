@@ -1272,6 +1272,7 @@ function analyse(spec: Spec, ds: Dataset, groupRows: number[], wAll: number[], c
           plotItems.push(
             chartItem(title, {
               type: 'line',
+              title,
               xlabel: xf,
               ylabel: t('emmShort'),
               legendTitle: lf ?? '',

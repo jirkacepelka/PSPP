@@ -186,6 +186,7 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
     out.push(
       chartItem(grp.label ? `${base} (${grp.label})` : base, {
         type: 'line',
+        title: grp.label ? `${base} (${grp.label})` : base,
         xlabel: varTitle(X.v),
         ylabel,
         legendTitle: G ? varTitle(G.v) : '',

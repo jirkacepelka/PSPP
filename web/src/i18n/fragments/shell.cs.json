@@ -1,6 +1,9 @@
 {
   "settings": {
-    "section": { "general": "Obecné", "analysis": "Analýza a výstup" },
+    "section": {
+      "general": "Obecné",
+      "analysis": "Analýza a výstup"
+    },
     "sectionDesc": {
       "general": "Jazyk, motiv, čísla a nápověda, kterou vám PSPP Studio nabízí.",
       "analysis": "Jak se počítají, formátují a vysvětlují výsledky analýz."
@@ -60,7 +63,9 @@
       "weightTip": "Vážení: každý případ se počítá s vahou podle proměnné. Klikněte pro nastavení.",
       "splitTip": "Rozdělení souboru: analýzy se počítají zvlášť pro každou skupinu. Klikněte pro nastavení."
     },
-    "split": { "resize": "Změnit poměr rozděleného zobrazení" },
+    "split": {
+      "resize": "Změnit poměr rozděleného zobrazení"
+    },
     "journal": {
       "title": "Deník",
       "tab": "Deník",
@@ -179,7 +184,11 @@
       "allColumnsDesc": "Šířka, desetinná místa, sloupce, zarovnání a role (jako v SPSS)",
       "accentOk": "Kontrast {{light}} : 1 ve světlém a {{dark}} : 1 v tmavém motivu – splňuje WCAG AA.",
       "accentWarn": "Kontrast {{light}} : 1 / {{dark}} : 1 – pro čitelný text zvolte tmavší barvu.",
-      "accentAdjusted": "Vlastní barvu jsme upravili, aby text na ní zůstal čitelný."
+      "accentAdjusted": "Vlastní barvu jsme upravili, aby text na ní zůstal čitelný.",
+      "previewCaption": "Živý náhled",
+      "previewNote": "Najeďte na nastavení a náhled ukáže, co se změní.",
+      "inspector": "Panel s detailem proměnné",
+      "inspectorDesc": "Vpravo u dat: typ, popisky hodnot a rozložení vybrané proměnné."
     },
     "shortcuts": {
       "desc": "Klávesy pro aktuální zobrazení jsou nahoře. Tento přehled otevřete kdykoli klávesou ?.",
@@ -218,15 +227,42 @@
     },
     "tasks": {
       "started": "Úkol: {{question}} Dialog je předvyplněný – zkontrolujte ho a klikněte na Spustit.",
-      "stSatisf": { "q": "Jak spokojení jsou studenti?", "method": "Četnosti" },
-      "stGpa": { "q": "Liší se studijní průměr žen a mužů?", "method": "T-test" },
-      "stStress": { "q": "Souvisí stres se spánkem a učením?", "method": "Korelace" },
-      "emSalary": { "q": "Jak vysoké jsou mzdy?", "method": "Popisné statistiky" },
-      "emJobcat": { "q": "Liší se mzdy podle pracovního zařazení?", "method": "ANOVA" },
-      "emPredict": { "q": "Dá se mzda předpovědět ze vzdělání?", "method": "Regrese" },
-      "trDrop": { "q": "Klesl krevní tlak po 8 týdnech léčby?", "method": "Párový t-test" },
-      "trDrug": { "q": "Který lék snižuje tlak nejvíc?", "method": "ANOVA" },
-      "trSmoke": { "q": "Jsou kuřáci rovnoměrně ve všech skupinách?", "method": "Kontingenční tabulka" }
+      "stSatisf": {
+        "q": "Jak spokojení jsou studenti?",
+        "method": "Četnosti"
+      },
+      "stGpa": {
+        "q": "Liší se studijní průměr žen a mužů?",
+        "method": "T-test"
+      },
+      "stStress": {
+        "q": "Souvisí stres se spánkem a učením?",
+        "method": "Korelace"
+      },
+      "emSalary": {
+        "q": "Jak vysoké jsou mzdy?",
+        "method": "Popisné statistiky"
+      },
+      "emJobcat": {
+        "q": "Liší se mzdy podle pracovního zařazení?",
+        "method": "ANOVA"
+      },
+      "emPredict": {
+        "q": "Dá se mzda předpovědět ze vzdělání?",
+        "method": "Regrese"
+      },
+      "trDrop": {
+        "q": "Klesl krevní tlak po 8 týdnech léčby?",
+        "method": "Párový t-test"
+      },
+      "trDrug": {
+        "q": "Který lék snižuje tlak nejvíc?",
+        "method": "ANOVA"
+      },
+      "trSmoke": {
+        "q": "Jsou kuřáci rovnoměrně ve všech skupinách?",
+        "method": "Kontingenční tabulka"
+      }
     }
   }
 }

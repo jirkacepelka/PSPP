@@ -167,6 +167,7 @@
     "outTitle": "T-test: mean by gender",
     "explain": "Women score higher on average; the difference is statistically significant.",
     "explainBtn": "What does it mean?",
-    "status": "Ready"
+    "status": "Ready",
+    "gpaLabel": "Grade average"
   }
 }
