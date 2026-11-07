@@ -608,7 +608,6 @@ export function ChartShell(props: ChartShellProps) {
             height={totalH}
             viewBox={`0 0 ${width} ${totalH}`}
           >
-            <title>{ariaLabel}</title>
             <rect className="pspp-chart__bg" x="0" y="0" width={width} height={totalH} />
             <g transform={`translate(${px} 0)`}>
               {titleLines.map((l, i) => (

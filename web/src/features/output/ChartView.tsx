@@ -4,7 +4,32 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { PsppChart } from '../../charts';
+import { useData } from '../../store/data';
+import type { Dataset } from '../../engine/types';
+
+const norm = (x: string) => x.replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * Histograms arrive from the engine as bins only. When the charted variable (matched by its label
+ * or name, which the engine uses as the chart title) holds whole numbers only, mark the chart so
+ * bins are labelled by their values ("20") instead of their bounds ("20 – 21").
+ */
+function withIntegerHint(chart: unknown, ds: Dataset | null, itemTitle: string): unknown {
+  if (!ds || typeof chart !== 'object' || chart === null) return chart;
+  const outer = chart as Record<string, unknown>;
+  const inner = (typeof outer.chart === 'object' && outer.chart ? outer.chart : outer) as Record<string, unknown>;
+  if (inner.type !== 'histogram') return chart;
+  const title = norm(String(inner.title || outer.title || itemTitle || ''));
+  if (!title) return chart;
+  const idx = ds.variables.findIndex((v) => v.type !== 'string' && (norm(v.label ?? '') === title || norm(v.name) === title));
+  if (idx < 0) return chart;
+  const col = ds.columns[idx] ?? [];
+  const integer = col.some((x) => typeof x === 'number') && col.every((x) => x === null || typeof x !== 'number' || !Number.isFinite(x) || Number.isInteger(x));
+  if (!integer) return chart;
+  return inner === outer ? { ...outer, integer: true } : { ...outer, chart: { ...inner, integer: true } };
+}
 
 interface SimpleChart {
   type: 'bar' | 'histogram' | 'pie';
@@ -34,10 +59,12 @@ function niceMax(v: number) {
 
 export function ChartView({ chart, title }: { chart: unknown; title: string }) {
   const { t, i18n } = useTranslation();
+  const ds = useData((s) => s.dataset);
+  const hinted = useMemo(() => withIntegerHint(chart, ds, title), [chart, ds, title]);
   if (!isSimple(chart)) {
     return (
       <PsppChart
-        chart={chart}
+        chart={hinted}
         t={(key, fallback) => t(key, { ns: 'charts', defaultValue: fallback })}
         locale={i18n.language}
       />

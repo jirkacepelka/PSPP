@@ -27,6 +27,15 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
   if (spec.stddev !== null) stats.push(`${tr(t, 'stdDev')} ${formatValue(spec.stddev, locale, 2)}`);
   if (spec.n !== null) stats.push(`${tr(t, 'n')} = ${formatValue(spec.n, locale)}`);
   const bins = spec.bins;
+  // whole-number data: a bin [20, 21) holds only the value 20, so say "20", not "20 – 21"
+  const ints = (b: [number, number, number]): [number, number] => [Math.ceil(b[0] - 1e-9), Math.ceil(b[1] - 1e-9) - 1];
+  const discrete = spec.integer && bins.length > 0 && bins.every((b) => ints(b)[1] >= ints(b)[0] || b[2] === 0);
+  const single = discrete && bins.every((b) => ints(b)[1] <= ints(b)[0]);
+  const binLabel = (b: [number, number, number]) => {
+    if (!discrete) return `${formatValue(b[0], locale)} – ${formatValue(b[1], locale)}`;
+    const [a, z] = ints(b);
+    return z <= a ? formatValue(a, locale) : `${formatValue(a, locale)} – ${formatValue(z, locale)}`;
+  };
   const total = bins.reduce((s, b) => s + b[2], 0);
   const canNormal = spec.showNormal && spec.mean !== null && spec.stddev !== null && spec.stddev > 0 && bins.length > 0;
   const legend: LegendItem[] | undefined = canNormal
@@ -44,9 +53,9 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
       legend={legend}
       ariaLabel={`${title}. ${tr(t, 'ariaBins', { count: bins.length })}. ${stats.join(', ')}.`}
       table={{
-        columns: [tr(t, 'lowerBound'), tr(t, 'upperBound'), freq],
-        rows: bins.map((b) => [formatValue(b[0], locale), formatValue(b[1], locale), formatValue(b[2], locale)]),
-        numeric: [true, true, true],
+        columns: discrete ? [name, freq] : [tr(t, 'lowerBound'), tr(t, 'upperBound'), freq],
+        rows: bins.map((b) => (discrete ? [binLabel(b), formatValue(b[2], locale)] : [formatValue(b[0], locale), formatValue(b[1], locale), formatValue(b[2], locale)])),
+        numeric: discrete ? [true, true] : [true, true, true],
       }}
     >
       {(area) => {
@@ -71,8 +80,18 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
         const plotH = area.height - m.top - m.bottom;
         const sx = linearScale([x0, x1], [m.left, m.left + plotW]);
         const sy = linearScale(yt.domain, [m.top + plotH, m.top]);
-        const xt = ticksWithin(x0, x1, clamp(Math.floor(plotW / 80), 3, 10));
-        const fx = tickFormatter(xt.step, xt.ticks, locale);
+        let xt = ticksWithin(x0, x1, clamp(Math.floor(plotW / 80), 3, 10));
+        let fx = tickFormatter(xt.step, xt.ticks, locale);
+        let xScale = sx;
+        if (single) {
+          // one value per bin: a tick under the middle of each bar, labelled with its value
+          const vals = bins.map((b) => ints(b)[0]);
+          const every = Math.max(1, Math.ceil(vals.length / clamp(Math.floor(plotW / 36), 2, 40)));
+          const centre = new Map(bins.map((b, i) => [vals[i], (b[0] + b[1]) / 2]));
+          xt = { ...xt, ticks: vals.filter((_, i) => i % every === 0) };
+          fx = (v: number) => formatValue(v, locale);
+          xScale = Object.assign((v: number) => sx(centre.get(v) ?? v), sx);
+        }
         const base = sy(0);
         let curve = '';
         if (canNormal) {
@@ -91,11 +110,11 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
               </clipPath>
             </defs>
             <YAxis axis={{ scale: sy, ticks: yt.ticks, format: fy }} left={m.left} width={plotW} />
-            <XAxis axis={{ scale: sx, ticks: xt.ticks, format: fx }} top={m.top} height={plotH} left={m.left} width={plotW} />
+            <XAxis axis={{ scale: xScale, ticks: xt.ticks, format: fx }} top={m.top} height={plotH} left={m.left} width={plotW} />
             {bins.map((b, i) => {
               const xa = sx(b[0]);
               const xb = sx(b[1]);
-              const range = `${formatValue(b[0], locale)} – ${formatValue(b[1], locale)}`;
+              const range = binLabel(b);
               const tip = { title: range, rows: [{ label: freq, value: formatValue(b[2], locale), color: seriesColor(0), key: 'rect' as const }] };
               const w = Math.max(1, xb - xa - 2);
               return (

@@ -15,6 +15,8 @@ export interface HistogramSpec {
   mean: number | null;
   stddev: number | null;
   showNormal: boolean;
+  /** the variable holds whole numbers only (set by the app from the dataset): bins are labelled by the values they hold */
+  integer: boolean;
   /** [lower, upper, count] per bin. */
   bins: [number, number, number][];
 }
@@ -158,7 +160,7 @@ export function parseChart(input: unknown): ChartSpec {
         const hi = num(a[1]);
         if (lo !== null && hi !== null) bins.push([lo, hi, num(a[2]) ?? 0]);
       }
-      return { type, title, n: num(c.n), mean: num(c.mean), stddev: num(c.stddev), showNormal: c.showNormal === true, bins };
+      return { type, title, n: num(c.n), mean: num(c.mean), stddev: num(c.stddev), showNormal: c.showNormal === true, integer: c.integer === true, bins };
     }
     case 'bar':
       return {
