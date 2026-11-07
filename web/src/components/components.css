@@ -1129,7 +1129,7 @@ button.chip[aria-pressed='true']:hover {
   gap: var(--s-3);
   min-height: 60px;
   padding: var(--s-3) var(--s-3) var(--s-3) var(--dialog-pad);
-  border-bottom: var(--hairline) solid var(--line);
+  /* no divider under the title: the header and the body read as one sheet */
 }
 .dialog-heading {
   flex: 1;
