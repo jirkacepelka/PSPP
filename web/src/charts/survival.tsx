@@ -52,6 +52,7 @@ function SurvivalPlot({ spec, area, locale, colors, t }: { spec: SurvivalSpec; a
   let y: Ticks;
   const yc = clamp(Math.floor(area.height / 48), 3, 9);
   if (spec.kind === 'survival' || spec.kind === 'oms') y = { ...ticksWithin(0, 1, area.height < 220 ? 5 : 10), domain: [0, 1] };
+  else if (spec.kind === 'lml' && ys.length) y = niceTicks(Math.min(...ys), Math.max(...ys, Math.min(...ys) + 0.1), yc);
   else y = niceTicks(Math.min(0, ...ys), Math.max(0, ...ys, spec.kind === 'hazard' ? 0.1 : 0), yc);
   const x = niceTicks(0, xMax || 1, clamp(Math.floor(area.width / 90), 3, 10));
   x.domain = [0, x.domain[1]];

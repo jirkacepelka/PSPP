@@ -1,10 +1,11 @@
 /* Chart spec of the Kaplan–Meier plots (type 'survival', written by the KM
-   extension analysis in src/ext/commands/km.ts) and its defensive parser.
+   extension analysis in src/ext/commands/km.ts and by COXREG, coxreg.ts) and its defensive parser.
    Rendered by survival.tsx. */
 
 import type { Pt } from './types';
 
-export type SurvivalKind = 'survival' | 'hazard' | 'logsurv' | 'oms';
+/** 'lml': ln(−ln S) (Cox regression log-minus-log plot) */
+export type SurvivalKind = 'survival' | 'hazard' | 'logsurv' | 'oms' | 'lml';
 
 export interface SurvivalCurve {
   name: string;
@@ -41,7 +42,7 @@ const pts = (v: unknown): Pt[] =>
     const y = num(a[1]);
     return x !== null && y !== null ? [[x, y] as Pt] : [];
   });
-const KINDS: SurvivalKind[] = ['survival', 'hazard', 'logsurv', 'oms'];
+const KINDS: SurvivalKind[] = ['survival', 'hazard', 'logsurv', 'oms', 'lml'];
 
 export function parseSurvival(c: Obj, title: string): SurvivalSpec {
   const kind = KINDS.includes(c.kind as SurvivalKind) ? (c.kind as SurvivalKind) : 'survival';

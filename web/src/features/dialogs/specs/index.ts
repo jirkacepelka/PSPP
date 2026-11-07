@@ -30,8 +30,10 @@ import { transpose } from './transpose';
 import { binomial, chiSquare, cochran, friedman, jonckheere, kruskalWallis, ksNormal, mannWhitney, mcnemar, medianTest, runs, wilcoxon } from './nonparametric';
 import { roc } from './roc';
 import { km } from './km';
+import { coxreg } from './coxreg';
 import { factor, quickCluster, reliability } from './scale';
 import { hierCluster } from './cluster';
+import { discriminant } from './discriminant';
 import { glm, logistic } from './models';
 import { plum } from './plum';
 import { nomreg } from './nomreg';
@@ -42,8 +44,8 @@ export const DIALOG_SPECS: DialogSpec[] = [
   frequencies, descriptives, explore, crosstabs, ctables,
   means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm,
   correlations, partialCorr, regressionLinear, logistic, plum, nomreg,
-  factor, reliability, quickCluster, hierCluster,
-  chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc, km,
+  factor, reliability, quickCluster, hierCluster, discriminant,
+  chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc, km, coxreg,
   histogram, barChart, scatter, boxplot,
   compute, recodeSame, recodeDifferent, count, rank, autorecode,
   sortCases, selectCases, weightCases, splitFile, aggregate, transpose, variableProperties,
