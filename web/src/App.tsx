@@ -118,6 +118,8 @@ export function App() {
   const { t } = useTranslation();
   const showToolbar = useSettings((s) => s.showToolbar);
   const showFormula = useSettings((s) => s.showFormulaBar);
+  // the formula bar earns its row only while a cell is selected
+  const hasCell = useUi((s) => !!s.selected);
   const view = useUi((s) => s.view);
   const showStart = useUi((s) => s.showStart);
   const title = useData((s) => s.title);
@@ -262,7 +264,7 @@ export function App() {
       <h1 className="sr-only">{h1}</h1>
       <AppBar />
       {showToolbar && !showStart && <CommandBar />}
-      {showFormula && view === 'data' && !showStart && (
+      {showFormula && hasCell && view === 'data' && !showStart && (
         <div className="sh-formula">
           <FormulaBar />
         </div>

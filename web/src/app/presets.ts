@@ -13,7 +13,7 @@ export type PresetState = PresetId | 'custom';
 /** The settings a preset controls. */
 export type PresetPatch = Pick<
   Settings,
-  'density' | 'fontSize' | 'showToolbar' | 'showFormulaBar' | 'showStatusBar' | 'inspectorOpen' | 'explainResults' | 'showSyntaxPreview' | 'variableViewAllColumns' | 'listShows'
+  'density' | 'fontSize' | 'showToolbar' | 'showFormulaBar' | 'showStatusBar' | 'inspectorOpen' | 'explainResults' | 'showSyntaxPreview' | 'variableViewAllColumns' | 'listShows' | 'toolbarLabels'
 >;
 
 export interface UiPreset {
@@ -40,6 +40,7 @@ export const UI_PRESETS: readonly UiPreset[] = [
       showSyntaxPreview: false,
       variableViewAllColumns: false,
       listShows: 'label',
+      toolbarLabels: true,
     },
   },
   {
@@ -57,6 +58,7 @@ export const UI_PRESETS: readonly UiPreset[] = [
       showSyntaxPreview: true,
       variableViewAllColumns: false,
       listShows: 'both',
+      toolbarLabels: false,
     },
   },
   {
@@ -74,6 +76,7 @@ export const UI_PRESETS: readonly UiPreset[] = [
       showSyntaxPreview: true,
       variableViewAllColumns: true,
       listShows: 'both',
+      toolbarLabels: false,
     },
   },
 ];

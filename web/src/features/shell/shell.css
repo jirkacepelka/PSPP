@@ -286,11 +286,12 @@ input.sh-title:focus {
 .sh-avatar-btn {
   display: grid;
   place-items: center;
-  width: var(--control-h);
-  height: var(--control-h);
+  /* same height and corner radius as the search field beside it */
+  width: var(--control-h-lg);
+  height: var(--control-h-lg);
   padding: 0;
   border: 0;
-  border-radius: var(--radius-round);
+  border-radius: var(--radius-panel);
   background: transparent;
   cursor: pointer;
   transition: box-shadow var(--dur-short) var(--ease-standard);
@@ -299,9 +300,13 @@ input.sh-title:focus {
   box-shadow: 0 0 0 4px var(--surface-hover);
 }
 .sh-avatar-btn .avatar {
-  width: 36px;
-  height: 36px;
+  width: var(--control-h-lg);
+  height: var(--control-h-lg);
+  border-radius: var(--radius-panel);
   font-size: var(--fs-md);
+}
+.sh-avatar-btn .avatar img {
+  border-radius: inherit;
 }
 .sh-search {
   display: flex;
@@ -1312,4 +1317,10 @@ body.sh-resizing canvas {
 }
 :root[data-vt='home']::view-transition-new(root) {
   animation: vt-in-settle 360ms var(--ease-out) 40ms both;
+}
+
+/* labelled toolbar actions (calm preset) */
+.sh-labeled.is-pressed {
+  background: var(--accent-tint-strong);
+  color: var(--on-primary-container);
 }

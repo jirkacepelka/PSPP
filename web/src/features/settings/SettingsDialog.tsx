@@ -261,6 +261,7 @@ function AppearanceSection() {
         <Row title={t('settings.accent')} desc={t('settings.accentDesc')} keywords="barva color akcent">
           <AccentPicker />
         </Row>
+        <Toggle k="toolbarLabels" label={t('shell.settings.toolbarLabels')} desc={t('shell.settings.toolbarLabelsDesc')} />
         <Row title={t('settings.density')}>
           <Segmented
             aria-label={t('settings.density')}

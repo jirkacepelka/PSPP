@@ -86,5 +86,11 @@
   "docs": {
     "missing": "Dokument se nepodařilo najít.",
     "copyOf": "{{name}} (kopie)"
+  },
+  "shell": {
+    "settings": {
+      "toolbarLabels": "Popisky u hlavních nástrojů",
+      "toolbarLabelsDesc": "U nejčastějších ikon v liště nástrojů zobrazit i text."
+    }
   }
 }

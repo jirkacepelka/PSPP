@@ -26,10 +26,30 @@ import { useUi, type View } from '../../store/ui';
 import { useLayout } from './layout';
 
 /** Icon button bound to an action (label, shortcut, enabled and checked state). */
-export function ActionButton({ id, icon, labelKey }: { id: string; icon?: string; labelKey?: string }) {
+/** A toolbar action; MAIN actions also show their text when "toolbar labels" is on (calm preset). */
+export function ActionButton({ id, icon, labelKey, main }: { id: string; icon?: string; labelKey?: string; main?: boolean }) {
   const { t } = useTranslation();
+  const labels = useSettings((s) => s.toolbarLabels);
   const a = ACTIONS_BY_ID[id];
   if (!a) return null;
+  if (main && labels) {
+    const pressed = a.checked ? a.checked() : undefined;
+    const sc = formatShortcut(a.shortcut);
+    return (
+      <Button
+        size="sm"
+        variant="ghost"
+        iconStart={icon ?? a.icon ?? 'help'}
+        className={`sh-labeled ${pressed ? 'is-pressed' : ''}`}
+        aria-pressed={pressed}
+        title={sc ? `${t(labelKey ?? a.label)} (${sc})` : undefined}
+        disabled={a.enabled ? !a.enabled() : false}
+        onClick={() => runAction(id)}
+      >
+        {t(labelKey ?? a.label).replace(/…$/, '')}
+      </Button>
+    );
+  }
   return (
     <IconButton
       icon={icon ?? a.icon ?? 'help'}
@@ -110,16 +130,16 @@ function DataTools({ view }: { view: View }) {
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        {view === 'data' && <ActionButton id="view.valueLabels" />}
-        <ActionButton id="edit.find" />
+        {view === 'data' && <ActionButton id="view.valueLabels" main />}
+        <ActionButton id="edit.find" main />
         <ActionButton id="edit.goto" />
         <ActionButton id="edit.gotoVariable" />
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        {view === 'data' && <ActionButton id="edit.insertCase" />}
-        <ActionButton id="edit.insertVariable" />
-        {view === 'data' && <ActionButton id="dialog:sortCases" icon="sort" />}
+        {view === 'data' && <ActionButton id="edit.insertCase" main />}
+        <ActionButton id="edit.insertVariable" main />
+        {view === 'data' && <ActionButton id="dialog:sortCases" icon="sort" main />}
       </ToolbarGroup>
     </>
   );
@@ -131,8 +151,8 @@ function OutputTools() {
     <>
       <ToolbarGroup className="sh-keep-mobile">
         <ActionButton id="output.edit" />
-        <ActionButton id="output.rerun" />
-        <ActionButton id="output.pin" />
+        <ActionButton id="output.rerun" main />
+        <ActionButton id="output.pin" main />
       </ToolbarGroup>
       <ToolbarSeparator />
       {/* export, print and clear live labelled in the output's own bar */}
@@ -164,7 +184,7 @@ function SyntaxTools() {
       </ToolbarGroup>
       <ToolbarSeparator />
       <ToolbarGroup>
-        <ActionButton id="syntax.save" />
+        <ActionButton id="syntax.save" main />
         <ActionButton id="view.journal" />
         <ActionButton id="view.split" />
       </ToolbarGroup>
@@ -180,7 +200,7 @@ export function CommandBar() {
   // re-render on state that changes enabled/checked
   useData((s) => s.revision);
   useOutput((s) => `${s.entries.length}${s.selectedId}`);
-  useSettings((s) => `${s.showValueLabels}${s.inspectorOpen}${s.splitView}`);
+  useSettings((s) => `${s.showValueLabels}${s.inspectorOpen}${s.splitView}${s.toolbarLabels}`);
   useLayout((s) => s.journalOpen);
   useUi((s) => s.engineStatus);
   const assistant = ACTIONS_BY_ID['analysis.assistant'];

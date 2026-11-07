@@ -61,6 +61,8 @@ export interface Settings {
   variableViewAllColumns: boolean;
   /** Variable inspector side panel open. */
   inspectorOpen: boolean;
+  /** Text labels next to the main toolbar icons (on in the calm preset). */
+  toolbarLabels: boolean;
   /** Split view layout, or off. */
   splitView: 'off' | 'syntax-output' | 'data-output';
   /** First-run setup guide finished or skipped. */
@@ -127,6 +129,7 @@ export const defaultSettings = (): Settings => {
     variableViewAllColumns: false,
     inspectorOpen: true,
     splitView: 'off',
+    toolbarLabels: false,
     onboarded: false,
     uiPreset: 'balanced',
   };

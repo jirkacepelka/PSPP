@@ -394,11 +394,27 @@ export function DataView() {
   const gotoVariableRef = useRef(gotoVariable);
   gotoVariableRef.current = gotoVariable;
 
-  // keep the inspector in sync when the Data View opens
+  // keep the inspector in sync when the Data View opens; with nothing selected yet, start on the
+  // first cell of the first variable that is not a case identifier (all values distinct), so the
+  // formula bar and inspector show something useful instead of "select a cell"
   useEffect(() => {
     const c = selection.current?.cell[0];
     if (c !== undefined && c < nVars) useActiveVariable.getState().setActive(c, selectedCols(selection));
-    else if (useActiveVariable.getState().index === null && nVars) useActiveVariable.getState().setActive(0);
+    else if (nVars && ds) {
+      const n = Math.min(200, Math.max(0, ...ds.columns.map((x) => x?.length ?? 0)));
+      const isId = (i: number) => {
+        const col = (ds.columns[i] ?? []).slice(0, n).filter((x) => x !== null && x !== '');
+        return col.length > 1 && new Set(col).size === col.length;
+      };
+      let first = 0;
+      while (first < nVars - 1 && isId(first)) first++;
+      if (n > 0) {
+        const sel: GridSelection = { columns: CompactSelection.empty(), rows: CompactSelection.empty(), current: { cell: [first, 0], range: { x: first, y: 0, width: 1, height: 1 }, rangeStack: [] } };
+        setSelection(sel);
+        select({ row: 0, col: first });
+      }
+      useActiveVariable.getState().setActive(first);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nVars]);
 
