@@ -7,7 +7,7 @@
 import type { Dataset, EngineApi, OutputItem, RunResult } from '../engine/types';
 import { splitCommands } from '../lib/syntax';
 import { commandName } from '../lib/commands';
-import { EXT_COMMAND_NAMES } from './names';
+import { EXT_COMMAND_NAMES, EXT_CONDITIONAL } from './names';
 import { parseCommand } from './parse';
 import { messageItem } from './table';
 import { ExtError, type ExtCommand, type ExtContext } from './types';
@@ -19,11 +19,14 @@ export const EXT_COMMANDS: Record<string, ExtCommand> = Object.fromEntries(
     .map((c) => [c.name, c]),
 );
 
+/** True when the command NAME (text TEXT) runs as an extension: always, or when a conditional extension claims it. */
+export function isExtCommand(name: string | null, text: string): name is string {
+  if (!name) return false;
+  return EXT_COMMAND_NAMES.includes(name) || EXT_CONDITIONAL.some((c) => c.name === name && c.claims(text));
+}
+
 export function hasExtCommand(syntax: string): boolean {
-  return splitCommands(syntax).some((c) => {
-    const n = commandName(c.text);
-    return !!n && EXT_COMMAND_NAMES.includes(n);
-  });
+  return splitCommands(syntax).some((c) => isExtCommand(commandName(c.text), c.text));
 }
 
 /** Runs one extension command; errors become messages, never exceptions. */
@@ -75,7 +78,7 @@ export async function runWithExtensions(
   };
   for (let i = 0; i < spans.length; i++) {
     const name = commandName(spans[i].text);
-    if (name && EXT_COMMAND_NAMES.includes(name)) {
+    if (isExtCommand(name, spans[i].text)) {
       await flush(i);
       if (!ds) {
         items.push(messageItem('error', `${name}: no active dataset.`, spans[i].startLine));

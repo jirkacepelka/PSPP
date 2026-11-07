@@ -222,7 +222,7 @@ export function kmTest(strata: Obs[][][], type: TestType): { chi: number; df: nu
 
 /* ---------------------------------------------------------------- parsing */
 
-interface EventSpec {
+export interface EventSpec {
   values: number[];
   ranges: [number, number][];
 }
@@ -245,7 +245,8 @@ interface Options {
 
 const T = (ctx: ExtContext, key: string, args?: Record<string, unknown>) => ctx.t(`ext.km.${key}`, args);
 
-function parseStatus(tokens: Token[], vars: Variable[], ctx: ExtContext): { status: string; event: EventSpec } {
+/** STATUS=var[(EVENT)](values | lo THRU hi) – shared with COXREG. */
+export function parseStatus(tokens: Token[], vars: Variable[], ctx: ExtContext): { status: string; event: EventSpec } {
   const { names, next } = varList(tokens, 0, vars, ['EVENT', 'LOST']);
   if (names.length !== 1) throw new ExtError(T(ctx, 'errStatus'));
   let i = next;

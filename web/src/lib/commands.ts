@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { PSPP_COMMANDS as ENGINE_COMMANDS, PSPP_UNIMPLEMENTED as ENGINE_UNIMPLEMENTED } from './commandList';
-import { EXT_COMMAND_NAMES } from '../ext/names';
+import { EXT_COMMAND_NAMES, EXT_CONDITIONAL } from '../ext/names';
 
 /** Commands that run: the engine's plus the extension analyses computed in the browser (src/ext). */
-export const PSPP_COMMANDS: readonly string[] = [...ENGINE_COMMANDS, ...EXT_COMMAND_NAMES];
+export const PSPP_COMMANDS: readonly string[] = [...new Set([...ENGINE_COMMANDS, ...EXT_COMMAND_NAMES, ...EXT_CONDITIONAL.map((c) => c.name)])];
 export const PSPP_UNIMPLEMENTED: readonly string[] = ENGINE_UNIMPLEMENTED.filter((c) => !EXT_COMMAND_NAMES.includes(c));
 
 const SORTED = [...PSPP_COMMANDS].sort((a, b) => b.split(' ').length - a.split(' ').length);

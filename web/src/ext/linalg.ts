@@ -62,3 +62,87 @@ export function logDetSpd(a: Matrix): number | null {
     }
   return 2 * l.reduce((s, r, i) => s + Math.log(r[i]), 0);
 }
+
+/** Cholesky factor L (lower triangular, A = L Lᵀ) of a symmetric positive definite matrix; null if not PD. */
+export function cholesky(a: Matrix): Matrix | null {
+  const n = a.length;
+  const l = zeros(n, n);
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j <= i; j++) {
+      let s = a[i][j];
+      for (let k = 0; k < j; k++) s -= l[i][k] * l[j][k];
+      if (i === j) {
+        if (!(s > 0)) return null;
+        l[i][i] = Math.sqrt(s);
+      } else l[i][j] = s / l[j][j];
+    }
+  return l;
+}
+
+/** Eigenvalues (descending) and eigenvectors (columns of VECTORS) of a symmetric matrix, cyclic Jacobi. */
+export function symEigen(a: Matrix): { values: number[]; vectors: Matrix } {
+  const n = a.length;
+  const m = a.map((r) => [...r]);
+  const v = identity(n);
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    let diag = 0;
+    for (let i = 0; i < n; i++) {
+      diag += m[i][i] * m[i][i];
+      for (let j = i + 1; j < n; j++) off += m[i][j] * m[i][j];
+    }
+    if (off <= 1e-30 * Math.max(diag, 1e-300)) break;
+    for (let p = 0; p < n; p++)
+      for (let q = p + 1; q < n; q++) {
+        if (Math.abs(m[p][q]) < 1e-300) continue;
+        const theta = (m[q][q] - m[p][p]) / (2 * m[p][q]);
+        const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+        const c = 1 / Math.sqrt(t * t + 1);
+        const s = t * c;
+        for (let k = 0; k < n; k++) {
+          const mkp = m[k][p];
+          const mkq = m[k][q];
+          m[k][p] = c * mkp - s * mkq;
+          m[k][q] = s * mkp + c * mkq;
+        }
+        for (let k = 0; k < n; k++) {
+          const mpk = m[p][k];
+          const mqk = m[q][k];
+          m[p][k] = c * mpk - s * mqk;
+          m[q][k] = s * mpk + c * mqk;
+        }
+        for (let k = 0; k < n; k++) {
+          const vkp = v[k][p];
+          const vkq = v[k][q];
+          v[k][p] = c * vkp - s * vkq;
+          v[k][q] = s * vkp + c * vkq;
+        }
+      }
+  }
+  const order = m.map((_, i) => i).sort((i, j) => m[j][j] - m[i][i]);
+  return { values: order.map((i) => m[i][i]), vectors: v.map((r) => order.map((i) => r[i])) };
+}
+
+/**
+ * Eigenvalues (descending) of E⁻¹H for symmetric H and symmetric positive definite E (the
+ * generalized problem H x = λ E x, reduced to L⁻¹ H L⁻ᵀ with E = L Lᵀ); null if E is not PD.
+ */
+export function genEigenvalues(h: Matrix, e: Matrix): number[] | null {
+  const l = cholesky(e);
+  if (!l) return null;
+  const n = l.length;
+  // solve L Y = H, then L Z = Yᵀ  →  Z = L⁻¹ H L⁻ᵀ
+  const fwd = (b: Matrix): Matrix => {
+    const y = zeros(n, b[0]?.length ?? 0);
+    for (let c = 0; c < (b[0]?.length ?? 0); c++)
+      for (let i = 0; i < n; i++) {
+        let s = b[i][c];
+        for (let k = 0; k < i; k++) s -= l[i][k] * y[k][c];
+        y[i][c] = s / l[i][i];
+      }
+    return y;
+  };
+  const z = fwd(transpose(fwd(h)));
+  const sym = z.map((r, i) => r.map((x, j) => (x + z[j][i]) / 2));
+  return symEigen(sym).values;
+}
