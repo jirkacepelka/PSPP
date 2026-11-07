@@ -35,6 +35,8 @@ import { factor, quickCluster, reliability } from './scale';
 import { hierCluster } from './cluster';
 import { discriminant } from './discriminant';
 import { glm, logistic } from './models';
+import { glmMultivariate } from './glmMultivariate';
+import { glmRepeated } from './glmRepeated';
 import { plum } from './plum';
 import { nomreg } from './nomreg';
 import { ctables, variableProperties } from './tables';
@@ -42,7 +44,7 @@ import { barChart, boxplot, histogram, scatter } from './graphs';
 
 export const DIALOG_SPECS: DialogSpec[] = [
   frequencies, descriptives, explore, crosstabs, ctables,
-  means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm,
+  means, ttestOneSample, ttestIndependent, ttestPaired, oneway, glm, glmMultivariate, glmRepeated,
   correlations, partialCorr, regressionLinear, logistic, plum, nomreg,
   factor, reliability, quickCluster, hierCluster, discriminant,
   chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc, km, coxreg,

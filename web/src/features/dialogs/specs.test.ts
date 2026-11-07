@@ -37,10 +37,13 @@ const NEW_FILLED: Record<string, Values> = {
   factor: { variables: ['age', 'score', 'income'] },
   quickCluster: { variables: ['age', 'score'] },
   hierCluster: { variables: ['age', 'score'] },
+  discriminant: { group: ['group'], lo: 1, hi: 3, independents: ['age', 'score'] },
   logistic: { dependent: ['gender'], covariates: ['age'] },
   plum: { dependent: ['group'], factors: ['gender'], covariates: ['age'] },
   nomreg: { dependent: ['city'], factors: ['gender'], covariates: ['age'] },
   glm: { dependent: ['score'], factors: ['gender'] },
+  glmMultivariate: { dependents: ['age', 'score'], factors: ['gender'] },
+  glmRepeated: { measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }], between: ['gender'] },
   ctables: { rows: ['gender'], cols: ['group'] },
   histogram: { variable: ['age'] },
   barChart: { category: ['group'] },
@@ -313,6 +316,20 @@ describe('New dialogs (WP3)', () => {
     expect(errors('hierCluster', { ...NEW_FILLED.hierCluster, memMode: 'range', memMin: 5, memMax: 3 })).toBe('dlg.hierCluster.errRange');
     expect(errors('hierCluster', { variables: ['age'], measure: 'PEARSON' })).toBe('dlg.hierCluster.errPearson');
   });
+  it('DISCRIMINANT', () => {
+    expect(gen('discriminant', NEW_FILLED.discriminant)).toBe(
+      'DISCRIMINANT\n  /GROUPS=group(1 3)\n  /VARIABLES=age score\n  /METHOD=DIRECT\n  /PRIORS=EQUAL\n  /STATISTICS=TABLE\n  /CLASSIFY=NONMISSING POOLED.',
+    );
+    expect(
+      gen('discriminant', { ...NEW_FILLED.discriminant, method: 'WILKS', st_MEAN: true, st_BOXM: true, st_COEFF: true, crossvalid: true, priors: 'SIZE', combined: true, casewise: true, saveClass: true, saveProbs: true, meansub: true }),
+    ).toBe(
+      'DISCRIMINANT\n  /GROUPS=group(1 3)\n  /VARIABLES=age score\n  /METHOD=WILKS\n  /FIN=3.84\n  /FOUT=2.71\n  /PRIORS=SIZE\n  /STATISTICS=MEAN STDDEV BOXM COEFF TABLE CROSSVALID\n  /PLOT=COMBINED CASES\n  /SAVE=CLASS PROBS\n  /CLASSIFY=NONMISSING POOLED MEANSUB.',
+    );
+    expect(gen('discriminant', { ...NEW_FILLED.discriminant, method: 'WILKS', criterion: 'P', pin: 0.1, pout: 0.2 })).toContain('/PIN=0.1\n  /POUT=0.2');
+    expect(errors('discriminant', { ...NEW_FILLED.discriminant, lo: 3, hi: 1 })).toBe('dlg.errors.range');
+    expect(errors('discriminant', { ...NEW_FILLED.discriminant, method: 'WILKS', fin: 2, fout: 3 })).toBe('dlg.discriminant.errFin');
+    expect(errors('discriminant', { ...NEW_FILLED.discriminant, independents: [] })).toBe('dlg.errors.needVariables');
+  });
   it('models', () => {
     expect(gen('logistic', { dependent: ['gender'], covariates: ['age'], categorical: ['group'] })).toBe(
       'LOGISTIC REGRESSION gender WITH age group\n  /CATEGORICAL=group\n  /PRINT=CI(95)\n  /CRITERIA=CUT(0.5) ITERATE(20).',
@@ -383,5 +400,29 @@ describe('Cox regression', () => {
     ).toBe('COXREG age\n  /STATUS=group(1 3)\n  /STRATA=city\n  /CATEGORICAL=gender\n  /CONTRAST(gender)=INDICATOR(1)\n  /METHOD=ENTER score income gender\n  /PLOT=SURVIVAL LML\n  /PRINT=SUMMARY BASELINE CORR\n  /CRITERIA=ITERATE(50).');
     expect(errors('coxreg', { time: ['age'], status: ['gender'] })).toBe('dlg.errors.predictors');
     expect(errors('coxreg', { time: ['age'], status: ['gender'], covariates: ['score'], eventValue: 'x' })).toBe('dlg.errors.kmEvent');
+  });
+});
+
+describe('GLM multivariate and repeated measures dialogs', () => {
+  it('repeated measures syntax, validation and row-count hint', () => {
+    expect(gen('glmRepeated', { measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }], between: ['gender'], compare: true })).toBe(
+      'GLM age score income BY gender\n  /WSFACTOR=time 3 POLYNOMIAL\n  /METHOD=SSTYPE(3)\n  /PRINT=DESCRIPTIVE ETASQ\n  /EMMEANS=TABLES(time) COMPARE ADJ(BONFERRONI)\n  /EMMEANS=TABLES(gender) COMPARE ADJ(BONFERRONI)\n  /CRITERIA=ALPHA(0.05)\n  /WSDESIGN=time.',
+    );
+    const two = gen('glmRepeated', { factor2: 'side', levels1: 2, levels2: 2, contrast2: 'SIMPLE', measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }, { v: 'group' }] });
+    expect(two).toContain('/WSFACTOR=time 2 POLYNOMIAL side 2 SIMPLE');
+    expect(two).toContain('/WSDESIGN=time side time*side.');
+    expect(errors('glmRepeated', { measures: [{ v: 'age' }, { v: 'score' }] })).toBe('dlg.glmRepeated.rowCount');
+    expect(errors('glmRepeated', { measures: [{ v: 'age' }, { v: 'age' }, { v: 'score' }] })).toBe('dlg.glmRepeated.fillAll');
+    expect(errors('glmRepeated', { factor1: 'age', measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }] })).toBe('dlg.glmRepeated.badName');
+    expect(errors('glmRepeated', { factor1: '', measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }] })).toBe('dlg.glmRepeated.needName');
+    const spec = SPECS_BY_ID.glmRepeated;
+    const h = spec.hints!({ ...defaultValues(spec), levels1: 4 }, ctx);
+    expect(h[0].action?.patch).toEqual({ measures: [{ v: '' }, { v: '' }, { v: '' }, { v: '' }] });
+  });
+  it('multivariate syntax needs two dependents', () => {
+    expect(gen('glmMultivariate', { dependents: ['age', 'score'], factors: ['gender', 'group'], design: 'main', descriptive: false, etasq: false })).toBe(
+      'GLM age score BY gender group\n  /METHOD=SSTYPE(3)\n  /INTERCEPT=INCLUDE\n  /CRITERIA=ALPHA(0.05)\n  /DESIGN=gender group.',
+    );
+    expect(errors('glmMultivariate', { dependents: ['age'] })).toBe('dlg.errors.moreVariables');
   });
 });

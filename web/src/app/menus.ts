@@ -136,7 +136,7 @@ export const MENUS: TopMenu[] = [
       { sub: 'menu.descriptive', icon: 'bar_chart', items: ['dialog:frequencies', 'dialog:descriptives', 'dialog:explore', 'dialog:crosstabs'] },
       'dialog:ctables|tpl:CTABLES',
       { sub: 'menu.compareMeans', icon: 'compare_arrows', items: ['dialog:means', '-', 'dialog:ttestOneSample', 'dialog:ttestIndependent', 'dialog:ttestPaired', '-', 'dialog:oneway'] },
-      'dialog:glm|tpl:GLM',
+      { sub: 'menu.glm', icon: 'account_tree', items: ['dialog:glm|tpl:GLM', 'dialog:glmMultivariate', 'dialog:glmRepeated'] },
       { sub: 'menu.correlate', icon: 'scatter_plot', items: ['dialog:correlations', 'dialog:partialCorr'] },
       { sub: 'menu.regression', icon: 'trending_up', items: ['dialog:regressionLinear', 'dialog:logistic|dialog:logisticRegression|tpl:LOGISTIC REGRESSION', 'dialog:plum', 'dialog:nomreg'] },
       '-',

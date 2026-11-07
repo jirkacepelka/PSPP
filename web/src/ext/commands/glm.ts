@@ -25,7 +25,7 @@
 import type { Dataset, OutputItem, Variable } from '../../engine/types';
 import { isMissing, requireNumeric, splitGroups, valueText, variable, weights, type Cell as DCell } from '../data';
 import { chi2Sf, fSf, tInv, tTwoTail } from '../dist';
-import { genEigenvalues, transpose, zeros, type Matrix } from '../linalg';
+import { genEigenvalues, symEigen, transpose, zeros, type Matrix } from '../linalg';
 import { isKw, keywords, kwArg, sub, varList, type ParsedCommand, type Token } from '../parse';
 import { fmt, fmtN, groupItem, messageItem, tableItem, td, textItem, th, type Cell } from '../table';
 import { ExtError, type ExtCommand, type ExtContext } from '../types';
@@ -244,6 +244,8 @@ function parseSpec(cmd: ParsedCommand, ds: Dataset, warn: (k: string, a?: Record
   if (sst?.length && sst[0].value !== 3) throw new ExtError('Only Type III sums of squares (SSTYPE(3)) are supported for multivariate and repeated measures GLM.');
   if (isKw(sub(cmd, 'INTERCEPT')?.[0], 'EXCLUDE')) throw new ExtError('INTERCEPT=EXCLUDE is not supported for multivariate and repeated measures GLM.');
 
+  const meas = sub(cmd, 'MEASURE');
+  if (meas && meas.filter((t) => t.kind === 'id').length > 1) throw new ExtError('Doubly multivariate designs (several names on MEASURE) are not supported.');
   const wsTok = sub(cmd, 'WSFACTORS', 'WSFACTOR');
   const ws = wsTok ? parseWsFactors(wsTok, vars) : [];
   if (ws.length) {
@@ -257,8 +259,6 @@ function parseSpec(cmd: ParsedCommand, ds: Dataset, warn: (k: string, a?: Record
     const key = (e: Effect) => [...e].sort().join('*');
     if (eff.length !== full.length || !full.every((e) => eff.some((x) => key(x) === key(e)))) throw new ExtError('Only the full factorial within-subjects design is supported on WSDESIGN.');
   }
-  const meas = sub(cmd, 'MEASURE');
-  if (meas && meas.filter((t) => t.kind === 'id').length > 1) throw new ExtError('Doubly multivariate designs (several names on MEASURE) are not supported.');
   const measure = meas?.find((t) => t.kind === 'id')?.text ?? 'MEASURE_1';
 
   const resolveBetween = (n: string) => [...factors, ...covariates].find((x) => x.toUpperCase() === n.toUpperCase()) ?? null;
@@ -420,8 +420,14 @@ interface MvRow {
 export function multivariateTests(H: Matrix, E: Matrix, q: number, v: number): MvRow[] | null {
   const p = H.length;
   if (p === 0 || q <= 0 || v <= 0) return null;
+  if (v < p) return null;
+  // singular (or numerically singular) error SSCP: relative eigenvalues of the correlation form
+  const dg = E.map((r, i) => Math.sqrt(Math.max(r[i], 0)));
+  if (dg.some((x) => !(x > 0))) return null;
+  const ce = symEigen(E.map((r, i) => r.map((x, j) => x / (dg[i] * dg[j])))).values;
+  if (!(ce[ce.length - 1] > 1e-10 * ce[0])) return null;
   const ev = genEigenvalues(H, E);
-  if (!ev || v < p) return null;
+  if (!ev) return null;
   const lam = ev.map((x) => Math.max(0, x));
   const s = Math.min(p, q);
   const m = (Math.abs(p - q) - 1) / 2;

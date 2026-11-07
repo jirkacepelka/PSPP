@@ -21,6 +21,10 @@ the engine left behind.
    A command that changes the active dataset (e.g. `/SAVE` variables) returns `{ items, dataset }`
    with a NEW dataset object (never mutate `ctx.dataset`); it replaces the active dataset for the
    following commands and in the app (`runWithExtensions` returns it, flagged `engineStale`).
+4. A command PSPP implements only partly (e.g. `GLM`: univariate only) goes into `EXT_CONDITIONAL`
+   in `names.ts` instead: `{ name, claims(commandText) }`. Only commands `claims` accepts run as the
+   extension (`isExtCommand` in `runner.ts`); the others still go to the engine, and the name stays
+   an engine command for matching and highlighting.
 
 ## Rules
 - **Data** (`data.ts`): always go through `splitGroups(ds)` (FILTER, positive WEIGHT, SPLIT FILE

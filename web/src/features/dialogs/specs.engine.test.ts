@@ -33,6 +33,8 @@ const FILLED: Record<string, Values> = {
   ttestPaired: { pairs: [{ a: 'hours', b: 'sleep' }] },
   oneway: { dependents: ['stress'], factor: ['faculty'], ph_TUKEY: true },
   glm: { dependent: ['stress'], factors: ['faculty', 'gender'] },
+  glmMultivariate: { dependents: ['sleep', 'stress', 'gpa'], factors: ['gender'], covariates: ['hours'], homogeneity: true, parameter: true, compare: true },
+  glmRepeated: { measures: [{ v: 't1' }, { v: 't2' }, { v: 't3' }], between: ['gender'], homogeneity: true, compare: true },
   correlations: { variables: ['hours', 'gpa'] },
   partialCorr: { variables: ['hours', 'stress', 'gpa'], controls: ['sleep'], descriptives: true, zeroOrder: true },
   regressionLinear: { dependent: ['gpa'], independents: ['hours', 'sleep'] },
@@ -43,6 +45,7 @@ const FILLED: Record<string, Values> = {
   reliability: { items: ['hours', 'sleep', 'stress'] },
   quickCluster: { variables: ['hours', 'gpa'], saveCluster: true },
   hierCluster: { variables: ['hours', 'sleep', 'gpa'], id: ['id'], method: 'WARD', memMode: 'range', saveMode: 'single', saveN: 3, proximity: true },
+  discriminant: { group: ['faculty'], lo: 1, hi: 5, independents: ['hours', 'sleep', 'stress', 'gpa'], method: 'WILKS', st_MEAN: true, st_UNIVF: true, st_BOXM: true, st_COEFF: true, st_RAW: true, st_CORR: true, crossvalid: true, combined: true, saveClass: true, saveScores: true, saveProbs: true },
   chiSquare: { variables: ['faculty'] },
   binomial: { variables: ['job'] },
   ksNormal: { variables: ['gpa'] },
@@ -79,6 +82,7 @@ const FILLED: Record<string, Values> = {
 
 /** Syntax run before a spec's own, e.g. to derive a second dichotomous variable. */
 const PRELUDE: Record<string, string> = {
+  glmRepeated: 'COMPUTE t1 = stress / 4.\nCOMPUTE t2 = hours / 3.\nCOMPUTE t3 = sleep.\n',
   mcnemar: 'COMPUTE good = gpa >= 3.\n',
   cochran: 'COMPUTE good = gpa >= 3.\n',
   km: 'COMPUTE stime = hours.\nCOMPUTE died = stress > 20.\n',
