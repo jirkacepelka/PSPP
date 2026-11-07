@@ -168,12 +168,12 @@
 .icon-btn:active:not(:disabled) {
   background: var(--state-pressed);
 }
-/* pressed / toggled: neutral tile + accent glyph (calm, no tonal fill) */
+/* pressed / toggled: a soft accent wash over the whole button, like selected items */
 .icon-btn[aria-pressed='true'],
 .icon-btn.active {
-  background: var(--surface-selected);
-  border-color: var(--line-strong);
-  color: var(--accent-text);
+  background: var(--accent-tint-strong);
+  border-color: transparent;
+  color: var(--on-primary-container);
 }
 .icon-btn:disabled {
   opacity: 0.4;

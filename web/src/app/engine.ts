@@ -2,6 +2,7 @@
  * Engine orchestration: initialisation and running syntax against the active dataset.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import { SPECS_BY_ID } from '../features/dialogs/specs';
 import { hasExtCommand, runWithExtensions } from '../ext/runner';
 import i18n from '../i18n';
 import { getEngineHandle, markSynced } from '../engine/client';
@@ -141,8 +142,20 @@ export async function runSyntaxDetailed(syntax: string, opts: RunOptions = {}): 
       ok: errs === 0,
     });
     const groups = items.filter((i) => i.kind === 'group');
-    const base = groups.length === 1 && groups[0].kind === 'group' ? groups[0].title : cmds[0];
-    const title = !base ? i18n.t('output.log') : cmds.length <= 1 ? base : `${base} +${cmds.length - 1}`;
+    // human names of the procedures (engine groups are titled in the output language), not command keywords
+    const names = [...new Set(groups.map((g) => (g.kind === 'group' ? g.title : '')).filter(Boolean))];
+    const specTitle = opts.source?.specId ? SPECS_BY_ID[opts.source.specId]?.title : undefined;
+    const title = specTitle
+      ? i18n.t(specTitle).replace(/…$/, '')
+      : names.length
+        ? names.length <= 2
+          ? names.join(', ')
+          : `${names.slice(0, 2).join(', ')} +${names.length - 2}`
+        : cmds.length
+          ? cmds.length <= 1
+            ? cmds[0]
+            : `${cmds[0]} +${cmds.length - 1}`
+          : i18n.t('output.log');
     let entryId: string | null = null;
     if (items.length || !opts.quiet) {
       entryId = `e${Date.now().toString(36)}${entryCounter++}`;

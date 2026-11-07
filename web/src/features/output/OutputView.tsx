@@ -403,10 +403,6 @@ export function OutputView() {
         <span className="output-bar-title">{t('views.output')}</span>
         {entries.length > 0 && <span className="output-bar-count">{t('output.results', { count: entries.length })}</span>}
         <span className="spacer" />
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => openModal({ kind: 'assistant' })} disabled={!hasData}>
-          <Icon name="explore" />
-          <span className="hide-sm">{t('output.analyze')}</span>
-        </button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={exportOutputHtml} disabled={!entries.length}>
           <Icon name="download" />
           <span className="hide-sm">{t('output.exportHtml')}</span>

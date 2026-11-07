@@ -135,12 +135,7 @@ function OutputTools() {
         <ActionButton id="output.pin" />
       </ToolbarGroup>
       <ToolbarSeparator />
-      <ToolbarGroup>
-        <ActionButton id="file.exportOutput" icon="ios_share" />
-        <ActionButton id="file.print" />
-        <ActionButton id="util.clearOutput" />
-      </ToolbarGroup>
-      <ToolbarSeparator />
+      {/* export, print and clear live labelled in the output's own bar */}
       <ActionButton id="view.journal" labelKey="shell.actions.journal" />
       <ActionButton id="view.split" />
       <span className="sr-only">{t('views.output')}</span>
