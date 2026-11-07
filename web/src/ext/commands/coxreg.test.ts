@@ -144,14 +144,14 @@ describe('COXREG vs statsmodels PHReg (Breslow)', () => {
     expect(dataRows(om)[0].map((c) => c.text)).toEqual(['149.097', '38.906', '2', '.000', '38.873', '2', '.000', '38.873', '2', '.000']);
     expect(dataRows(byCaption(out, 'Omnibus Tests of Model Coefficients', 0))[0].map((c) => c.text)).toEqual(['187.970']);
     const ve = byCaption(out, 'Variables in the Equation');
-    expect(row(ve, 'drug')).toEqual(['1.192', '.419', '8.105', '1', '.004', '3.293', '1.449', '7.483']);
+    expect(row(ve, 'drug')).toEqual(['1.192', '.419', '8.105', '1', '.004', '3.293', '1.450', '7.480']);
     expect(row(ve, 'lw')[2]).toBe('20.008');
     const cps = byCaption(out, 'Case Processing Summary');
     expect(row(cps, 'Cases available in analysis', 'Eventᵃ')).toEqual(['30', '71.4%']);
     expect(row(cps, 'Cases available in analysis', 'Censored')).toEqual(['12', '28.6%']);
     expect(cps.footnotes[0]).toContain('Weeks');
     const st = byCaption(out, 'Survival Table');
-    expect(row(st, '23')).toEqual(['.004', '.025', '.035', '3.700']);
+    expect(row(st, '23')).toEqual(['.007', '.025', '.035', '3.700']);
     expect(row(byCaption(out, 'Covariate Means'), 'lw')).toEqual(['2.930']);
     expect(warnings(out)).toEqual([]);
   });

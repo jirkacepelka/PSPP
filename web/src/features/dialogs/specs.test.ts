@@ -29,6 +29,7 @@ const NEW_FILLED: Record<string, Values> = {
   jonckheere: { variables: ['score'], group: ['group'], lo: 1, hi: 3 },
   roc: { variables: ['score'], state: ['gender'], positive: '1' },
   km: { time: ['age'], status: ['gender'], eventValue: '1', factor: ['group'], logrank: true },
+  coxreg: { time: ['age'], status: ['gender'], eventValue: '1', covariates: ['score'], categorical: ['group'] },
   chiSquare: { variables: ['group'] },
   binomial: { variables: ['gender'] },
   ksNormal: { variables: ['age'] },
@@ -368,5 +369,19 @@ describe('Kaplan–Meier', () => {
     expect(gen('km', { time: ['age'], status: ['gender'], logrank: true })).not.toContain('TEST');
     expect(errors('km', { time: ['age'], status: ['gender'], eventValue: 'x' })).toBe('dlg.errors.kmEvent');
     expect(errors('km', { time: ['age'], status: ['gender'], eventType: 'range', lo: 3, hi: 1 })).toBe('dlg.errors.kmEvent');
+  });
+});
+
+describe('Cox regression', () => {
+  it('COXREG syntax with categorical covariates, strata, plots and options', () => {
+    expect(gen('coxreg', { time: ['age'], status: ['gender'], covariates: ['score'] })).toBe('COXREG age\n  /STATUS=gender(1)\n  /METHOD=ENTER score\n  /PRINT=DEFAULT CI(95)\n  /CRITERIA=ITERATE(20).');
+    expect(
+      gen('coxreg', {
+        time: ['age'], status: ['group'], eventType: 'list', eventList: '1 3', covariates: ['score', 'income'], categorical: ['gender'], refCat: 'FIRST', strata: ['city'],
+        plotSurvival: true, plotLml: true, ci: false, baseline: true, corr: true, display: 'LAST', iterate: 50,
+      }),
+    ).toBe('COXREG age\n  /STATUS=group(1 3)\n  /STRATA=city\n  /CATEGORICAL=gender\n  /CONTRAST(gender)=INDICATOR(1)\n  /METHOD=ENTER score income gender\n  /PLOT=SURVIVAL LML\n  /PRINT=SUMMARY BASELINE CORR\n  /CRITERIA=ITERATE(50).');
+    expect(errors('coxreg', { time: ['age'], status: ['gender'] })).toBe('dlg.errors.predictors');
+    expect(errors('coxreg', { time: ['age'], status: ['gender'], covariates: ['score'], eventValue: 'x' })).toBe('dlg.errors.kmEvent');
   });
 });

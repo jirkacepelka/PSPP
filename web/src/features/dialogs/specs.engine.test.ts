@@ -57,6 +57,7 @@ const FILLED: Record<string, Values> = {
   jonckheere: { variables: ['stress'], group: ['year'], lo: 1, hi: 5 },
   roc: { variables: ['gpa'], state: ['job'], positive: '1', coordinates: true },
   km: { time: ['stime'], status: ['died'], factor: ['gender'], logrank: true, breslow: true, tarone: true, quartiles: true, plotHazard: true },
+  coxreg: { time: ['stime'], status: ['died'], covariates: ['gpa'], categorical: ['gender'], strata: ['job'], plotSurvival: true, plotLml: true, baseline: true, corr: true },
   histogram: { variable: ['gpa'] },
   barChart: { category: ['faculty'], cluster: ['gender'], func: 'MEAN', variable: ['gpa'] },
   scatter: { y: ['gpa'], x: ['hours'], by: ['gender'] },
@@ -81,6 +82,7 @@ const PRELUDE: Record<string, string> = {
   mcnemar: 'COMPUTE good = gpa >= 3.\n',
   cochran: 'COMPUTE good = gpa >= 3.\n',
   km: 'COMPUTE stime = hours.\nCOMPUTE died = stress > 20.\n',
+  coxreg: 'COMPUTE stime = hours.\nCOMPUTE died = stress > 20.\n',
 };
 
 const flat = (items: OutputItem[]): OutputItem[] => items.flatMap((i) => (i.kind === 'group' ? flat(i.children) : [i]));
