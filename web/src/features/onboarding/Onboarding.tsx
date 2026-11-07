@@ -1,14 +1,15 @@
 /*
- * First-run setup guide: welcome + language, profile, look (theme, accent, visual preset),
- * working style, done. A full-screen overlay over a soft accent wash; every choice applies
- * live so the workspace behind it changes as you go. Esc or "Skip" finishes it.
+ * First-run setup guide: welcome + language, profile, experience (visual preset), look (theme,
+ * accent, density, toolbar labels), working style, done (with first actions). Every choice applies
+ * live, and a miniature of the workspace beside the steps (WorkspacePreview) shows what it changes;
+ * hovering an option previews it before it is picked. Esc or "Skip" finishes it.
  *
  *   <OnboardingGate />   mount once (App.tsx); shows itself on first run
  *   openOnboarding()     opens it again (Settings → General)
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import { LogoMark } from '../shell/Logo';
-import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { create } from 'zustand';
 import { useTranslation } from 'react-i18next';
@@ -20,15 +21,26 @@ import { Switch } from '../../components/Choice';
 import { trapTab } from '../../components/focus';
 import { ACCENT_PRESETS, findPreset } from '../../lib/color';
 import { AVATAR_COLORS, initialsOf, useSettings } from '../../store/settings';
-import { activePreset, getPreset } from '../../app/presets';
+import { UI_PRESETS, activePreset, applyPreset, getPreset, useActivePreset, type PresetId } from '../../app/presets';
+import { newDataset, openFileDialog, openSample } from '../../app/files';
 import { Avatar } from '../shell/ProfileMenu';
-import { PresetCards } from './PresetCards';
+import { WorkspacePreview, type PreviewPart } from './WorkspacePreview';
+import { DensityArt, ExplainArt, ThemeCards, ToolbarArt, VisualChoice } from './VisualChoice';
 import './onboarding.css';
+import './preview.css';
 
 export { PresetCards, PresetPreview } from './PresetCards';
 
-const STEPS = ['welcome', 'profile', 'look', 'style', 'done'] as const;
+const STEPS = ['welcome', 'profile', 'level', 'look', 'style', 'done'] as const;
 type StepId = (typeof STEPS)[number];
+
+/** What the preview beside the steps shows: a view, a part to point at, values to try out. */
+interface PreviewState {
+  highlight?: PreviewPart | null;
+  patch?: Parameters<typeof WorkspacePreview>[0]['patch'];
+}
+type SetPreview = (p: PreviewState) => void;
+const STEP_VIEW: Record<StepId, 'data' | 'output'> = { welcome: 'data', profile: 'data', level: 'data', look: 'data', style: 'output', done: 'data' };
 
 /** Close animation length; matches --dur-long. */
 const CLOSE_MS = 260;
@@ -68,6 +80,7 @@ function Onboarding({ onDone }: { onDone: () => void }) {
   const stepRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
   const [height, setHeight] = useState<number | undefined>(undefined);
+  const [preview, setPreview] = useState<PreviewState>({});
   const id = STEPS[step];
   const titleId = `${uid}-title`;
   const last = step === STEPS.length - 1;
@@ -111,6 +124,7 @@ function Onboarding({ onDone }: { onDone: () => void }) {
   const go = (to: number) => {
     if (to < 0 || to >= STEPS.length) return;
     setDir(to > step ? 'fwd' : 'back');
+    setPreview({});
     setStep(to);
   };
   const next = () => (last ? finish() : go(step + 1));
@@ -127,7 +141,8 @@ function Onboarding({ onDone }: { onDone: () => void }) {
   return createPortal(
     <div className={`onb-root ${closing ? 'is-closing' : ''}`} onKeyDown={onKeyDown}>
       <div className="onb-backdrop" aria-hidden="true" />
-      <div ref={cardRef} className="onb-card" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={cardRef} className="onb-card has-aside" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+        <div className="onb-main">
         <header className="onb-head">
           <div className="onb-progress">
             <span className="onb-progress-text">
@@ -152,7 +167,7 @@ function Onboarding({ onDone }: { onDone: () => void }) {
 
         <div className="onb-viewport" style={height ? { height } : undefined}>
           <div key={id} ref={stepRef} className={`onb-step is-${dir}`} data-step={id}>
-            <StepBody id={id} titleId={titleId} onEnter={next} />
+            <StepBody id={id} titleId={titleId} onEnter={next} setPreview={setPreview} onFinish={finish} />
           </div>
         </div>
 
@@ -167,24 +182,37 @@ function Onboarding({ onDone }: { onDone: () => void }) {
             {last ? t('onboarding.start') : t('onboarding.next')}
           </Button>
         </footer>
+        </div>
+        <aside className="onb-aside" aria-label={t('onboarding.previewLabel')}>
+          <div className="onb-aside-inner">
+            <span className="onb-aside-cap">
+              <Icon name="visibility" size={16} />
+              {t('onboarding.previewCaption')}
+            </span>
+            <WorkspacePreview view={STEP_VIEW[id]} highlight={preview.highlight ?? (id === 'profile' ? 'avatar' : null)} patch={preview.patch} />
+            <span className="onb-aside-note">{t(`onboarding.previewNote.${id}`)}</span>
+          </div>
+        </aside>
       </div>
     </div>,
     document.body,
   );
 }
 
-function StepBody({ id, titleId, onEnter }: { id: StepId; titleId: string; onEnter: () => void }) {
+function StepBody({ id, titleId, onEnter, setPreview, onFinish }: { id: StepId; titleId: string; onEnter: () => void; setPreview: SetPreview; onFinish: () => void }) {
   switch (id) {
     case 'welcome':
       return <WelcomeStep titleId={titleId} />;
     case 'profile':
       return <ProfileStep titleId={titleId} onEnter={onEnter} />;
+    case 'level':
+      return <LevelStep titleId={titleId} setPreview={setPreview} />;
     case 'look':
-      return <LookStep titleId={titleId} />;
+      return <LookStep titleId={titleId} setPreview={setPreview} />;
     case 'style':
-      return <StyleStep titleId={titleId} />;
+      return <StyleStep titleId={titleId} setPreview={setPreview} />;
     case 'done':
-      return <DoneStep titleId={titleId} />;
+      return <DoneStep titleId={titleId} onFinish={onFinish} />;
   }
 }
 
@@ -196,18 +224,6 @@ function StepHead({ titleId, title, lead, eyebrow }: { titleId: string; title: s
         {title}
       </h2>
       {lead && <p className="onb-lead">{lead}</p>}
-    </div>
-  );
-}
-
-function OptionRow({ label, desc, children, stack }: { label: string; desc?: string; children: ReactNode; stack?: boolean }) {
-  return (
-    <div className={`onb-row ${stack ? 'is-stack' : ''}`}>
-      <div className="onb-row-text">
-        <span className="onb-row-label">{label}</span>
-        {desc && <span className="onb-row-desc">{desc}</span>}
-      </div>
-      <div className="onb-row-control">{children}</div>
     </div>
   );
 }
@@ -375,84 +391,175 @@ function SwatchGroup({ items, value, onChange, labelledBy, kind }: { items: Swat
   );
 }
 
-function LookStep({ titleId }: { titleId: string }) {
+const LEVEL_ICON: Record<PresetId, string> = { calm: 'school', balanced: 'trending_up', full: 'terminal' };
+
+/** Experience level: picks a visual preset; hovering a card previews it beside the steps. */
+function LevelStep({ titleId, setPreview }: { titleId: string; setPreview: SetPreview }) {
+  const { t } = useTranslation();
+  const active = useActivePreset();
+  const ref = useRef<HTMLDivElement>(null);
+  const idx = UI_PRESETS.findIndex((p) => p.id === active);
+  const pick = (id: PresetId) => applyPreset(id);
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+    if (!(e.key in step)) return;
+    e.preventDefault();
+    const n = UI_PRESETS[(Math.max(0, idx) + step[e.key] + UI_PRESETS.length) % UI_PRESETS.length];
+    pick(n.id);
+    ref.current?.querySelector<HTMLElement>(`[data-preset="${n.id}"]`)?.focus();
+  };
+  return (
+    <>
+      <StepHead titleId={titleId} title={t('onboarding.level.title')} lead={t('onboarding.level.lead')} />
+      <div ref={ref} className="onb-levels" role="radiogroup" aria-label={t('onboarding.level.title')} onKeyDown={onKeyDown} onPointerLeave={() => setPreview({})}>
+        {UI_PRESETS.map((p, i) => {
+          const on = active === p.id;
+          const try_ = () => setPreview({ patch: p.patch });
+          return (
+            <button
+              key={p.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              data-preset={p.id}
+              tabIndex={on || (idx < 0 && i === 1) ? 0 : -1}
+              className="onb-level"
+              onClick={() => pick(p.id)}
+              onPointerEnter={try_}
+              onFocus={try_}
+              onBlur={() => setPreview({})}
+            >
+              <span className="onb-level-icon" aria-hidden="true">
+                <Icon name={LEVEL_ICON[p.id]} size={22} />
+              </span>
+              <span className="onb-level-text">
+                <span className="onb-level-name">
+                  {t(`onboarding.level.${p.id}.name`)}
+                  <span className="onb-level-tag">{t(`${p.key}.name`)}</span>
+                </span>
+                <span className="onb-level-desc">{t(`onboarding.level.${p.id}.desc`)}</span>
+                <span className="onb-level-gets">
+                  {(t(`onboarding.level.${p.id}.gets`, { returnObjects: true }) as string[]).map((g) => (
+                    <span key={g}>
+                      <Icon name="check" size={14} />
+                      {g}
+                    </span>
+                  ))}
+                </span>
+              </span>
+              <span className="onb-preset-check" aria-hidden="true">
+                <Icon name="check" size={16} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {active === 'custom' && (
+        <p className="onb-presets-note">
+          <Icon name="tune" size={16} />
+          {t('onboarding.presets.custom')}
+        </p>
+      )}
+    </>
+  );
+}
+
+function LookStep({ titleId, setPreview }: { titleId: string; setPreview: SetPreview }) {
   const { t, i18n } = useTranslation();
-  const theme = useSettings((s) => s.theme);
   const accent = useSettings((s) => s.accent);
+  const density = useSettings((s) => s.density);
+  const toolbarLabels = useSettings((s) => s.toolbarLabels);
   const set = useSettings((s) => s.set);
   const lang = i18n.language === 'cs' ? 'cs' : 'en';
   const current = findPreset(accent);
   return (
     <>
       <StepHead titleId={titleId} title={t('onboarding.look.title')} lead={t('onboarding.look.lead')} />
-      <div className="onb-look-top">
+      <div className="onb-field">
+        <span className="field-label">{t('onboarding.look.theme')}</span>
+        <ThemeCards />
+      </div>
+      <div className="onb-field">
+        <span className="field-label" id={`${titleId}-accent`}>
+          {t('onboarding.look.accent')}
+        </span>
+        <SwatchGroup
+          labelledBy={`${titleId}-accent`}
+          kind="accent"
+          value={current?.id}
+          onChange={(pid) => {
+            const p = ACCENT_PRESETS.find((x) => x.id === pid);
+            if (p) set({ accent: p.light });
+          }}
+          items={ACCENT_PRESETS.map((p) => ({ id: p.id, light: p.light, dark: p.dark, label: p.name[lang] }))}
+        />
+      </div>
+      <div className="onb-look-pair">
         <div className="onb-field">
-          <span className="field-label">{t('onboarding.look.theme')}</span>
-          <Segmented
-            aria-label={t('onboarding.look.theme')}
-            value={theme}
-            onChange={(v) => set({ theme: v })}
+          <span className="field-label">{t('settings.density')}</span>
+          <VisualChoice
+            label={t('settings.density')}
+            value={density}
+            onChange={(v) => set({ density: v })}
+            onHover={(v) => setPreview(v ? { patch: { density: v }, highlight: 'grid' } : {})}
             options={[
-              { value: 'light', label: t('onboarding.look.light'), icon: 'light_mode' },
-              { value: 'dark', label: t('onboarding.look.dark'), icon: 'dark_mode' },
-              { value: 'system', label: t('onboarding.look.system'), icon: 'brightness_auto' },
+              { value: 'comfortable', label: t('settings.comfortable'), art: <DensityArt dense={false} /> },
+              { value: 'compact', label: t('settings.compact'), art: <DensityArt dense /> },
             ]}
           />
         </div>
         <div className="onb-field">
-          <span className="field-label" id={`${titleId}-accent`}>
-            {t('onboarding.look.accent')}
-          </span>
-          <SwatchGroup
-            labelledBy={`${titleId}-accent`}
-            kind="accent"
-            value={current?.id}
-            onChange={(pid) => {
-              const p = ACCENT_PRESETS.find((x) => x.id === pid);
-              if (p) set({ accent: p.light });
-            }}
-            items={ACCENT_PRESETS.map((p) => ({ id: p.id, light: p.light, dark: p.dark, label: p.name[lang] }))}
+          <span className="field-label">{t('onboarding.look.toolbar')}</span>
+          <VisualChoice
+            label={t('onboarding.look.toolbar')}
+            value={toolbarLabels ? 'labels' : 'icons'}
+            onChange={(v) => set({ toolbarLabels: v === 'labels', ...(v === 'labels' ? { showToolbar: true } : {}) })}
+            onHover={(v) => setPreview(v ? { patch: { toolbarLabels: v === 'labels', showToolbar: true }, highlight: 'toolbar' } : {})}
+            options={[
+              { value: 'icons', label: t('onboarding.look.iconsOnly'), art: <ToolbarArt labels={false} /> },
+              { value: 'labels', label: t('onboarding.look.withLabels'), art: <ToolbarArt labels /> },
+            ]}
           />
         </div>
-      </div>
-      <div className="onb-field">
-        <span className="field-label">{t('onboarding.look.layout')}</span>
-        <PresetCards />
       </div>
     </>
   );
 }
 
-function StyleStep({ titleId }: { titleId: string }) {
+function StyleStep({ titleId, setPreview }: { titleId: string; setPreview: SetPreview }) {
   const { t } = useTranslation();
   const s = useSettings();
   return (
     <>
       <StepHead titleId={titleId} title={t('onboarding.style.title')} lead={t('onboarding.style.lead')} />
+      <div className="onb-field" onPointerEnter={() => setPreview({ highlight: 'numbers' })} onPointerLeave={() => setPreview({})}>
+        <span className="field-label">{t('onboarding.style.decimal')}</span>
+        <VisualChoice
+          label={t('onboarding.style.decimal')}
+          value={s.decimalSeparator}
+          onChange={(v) => s.set({ decimalSeparator: v })}
+          onHover={(v) => setPreview(v ? { patch: { decimalSeparator: v }, highlight: 'numbers' } : {})}
+          options={[
+            { value: ',', label: t('onboarding.style.comma'), art: <span className="onb-art-num">1 234,56</span> },
+            { value: '.', label: t('onboarding.style.dot'), art: <span className="onb-art-num">1,234.56</span> },
+          ]}
+        />
+      </div>
+      <div className="onb-field">
+        <span className="field-label">{t('onboarding.style.explain')}</span>
+        <VisualChoice
+          label={t('onboarding.style.explain')}
+          value={s.explainResults}
+          onChange={(v) => s.set({ explainResults: v })}
+          onHover={(v) => setPreview(v ? { patch: { explainResults: v }, highlight: 'explain' } : {})}
+          options={[
+            { value: 'always', label: t('onboarding.style.explainAlways'), desc: t('onboarding.style.explainAlwaysDesc'), art: <ExplainArt mode="always" /> },
+            { value: 'onDemand', label: t('onboarding.style.explainOnDemand'), desc: t('onboarding.style.explainOnDemandDesc'), art: <ExplainArt mode="onDemand" /> },
+            { value: 'never', label: t('onboarding.style.explainNever'), desc: t('onboarding.style.explainNeverDesc'), art: <ExplainArt mode="never" /> },
+          ]}
+        />
+      </div>
       <div className="onb-rows">
-        <OptionRow label={t('onboarding.style.decimal')} desc={t('onboarding.style.decimalDesc')}>
-          <Segmented
-            aria-label={t('onboarding.style.decimal')}
-            value={s.decimalSeparator}
-            onChange={(v) => s.set({ decimalSeparator: v })}
-            options={[
-              { value: ',', label: `${t('onboarding.style.comma')}  3,14` },
-              { value: '.', label: `${t('onboarding.style.dot')}  3.14` },
-            ]}
-          />
-        </OptionRow>
-        <OptionRow label={t('onboarding.style.explain')} desc={t('onboarding.style.explainDesc')}>
-          <Segmented
-            aria-label={t('onboarding.style.explain')}
-            value={s.explainResults}
-            onChange={(v) => s.set({ explainResults: v })}
-            options={[
-              { value: 'always', label: t('onboarding.style.explainAlways') },
-              { value: 'onDemand', label: t('onboarding.style.explainOnDemand') },
-              { value: 'never', label: t('onboarding.style.explainNever') },
-            ]}
-          />
-        </OptionRow>
         <div className="onb-row onb-row-switch">
           <Switch label={t('onboarding.style.syntax')} description={t('onboarding.style.syntaxDesc')} checked={s.showSyntaxPreview} onChange={(e) => s.set({ showSyntaxPreview: e.target.checked })} />
         </div>
@@ -461,7 +568,7 @@ function StyleStep({ titleId }: { titleId: string }) {
   );
 }
 
-function DoneStep({ titleId }: { titleId: string }) {
+function DoneStep({ titleId, onFinish }: { titleId: string; onFinish: () => void }) {
   const { t } = useTranslation();
   const s = useSettings();
   const first = s.profile.name.trim().split(/\s+/)[0] ?? '';
@@ -474,6 +581,15 @@ function DoneStep({ titleId }: { titleId: string }) {
     { icon: 'pin', label: t('onboarding.done.decimal'), value: s.decimalSeparator === ',' ? '1 234,56' : '1,234.56' },
     { icon: 'lightbulb', label: t('onboarding.done.explain'), value: t(`onboarding.style.${explainKey}`) },
   ];
+  const go = (fn: () => void) => () => {
+    onFinish();
+    window.setTimeout(fn, CLOSE_MS + 20);
+  };
+  const actions = [
+    { icon: 'school', title: t('onboarding.done.sample'), desc: t('onboarding.done.sampleDesc'), run: () => void openSample('students') },
+    { icon: 'upload_file', title: t('onboarding.done.open'), desc: t('onboarding.done.openDesc'), run: () => void openFileDialog() },
+    { icon: 'table_view', title: t('onboarding.done.blank'), desc: t('onboarding.done.blankDesc'), run: () => newDataset() },
+  ];
   return (
     <>
       <div className="onb-done-mark" aria-hidden="true">
@@ -483,22 +599,33 @@ function DoneStep({ titleId }: { titleId: string }) {
         </svg>
       </div>
       <StepHead titleId={titleId} title={t('onboarding.done.title', { name: first ? `, ${first}` : '' })} lead={t('onboarding.done.lead')} />
-      <div className="onb-summary">
-        <div className="onb-summary-profile">
-          <Avatar profile={s.profile} />
-          <span>{s.profile.name.trim() || t('onboarding.profile.anonymous')}</span>
-        </div>
-        <dl className="onb-summary-list">
-          {items.map((it) => (
-            <div key={it.label} className="onb-summary-item">
-              <dt>
-                <Icon name={it.icon} size={18} />
-                {it.label}
-              </dt>
-              <dd>{it.value}</dd>
-            </div>
+      <dl className="onb-summary-list onb-summary-inline">
+        {items.map((it) => (
+          <div key={it.label} className="onb-summary-item">
+            <dt>
+              <Icon name={it.icon} size={16} />
+              {it.label}
+            </dt>
+            <dd>{it.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="onb-field">
+        <span className="field-label">{t('onboarding.done.firstStep')}</span>
+        <div className="onb-actions">
+          {actions.map((a) => (
+            <button key={a.icon} type="button" className="onb-action" onClick={go(a.run)}>
+              <span className="onb-action-icon" aria-hidden="true">
+                <Icon name={a.icon} size={20} />
+              </span>
+              <span className="onb-action-text">
+                <strong>{a.title}</strong>
+                <span>{a.desc}</span>
+              </span>
+              <Icon name="arrow_forward" size={16} className="onb-action-go" />
+            </button>
           ))}
-        </dl>
+        </div>
       </div>
     </>
   );

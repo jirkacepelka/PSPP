@@ -12,7 +12,8 @@
       "profile": "Profile",
       "look": "Look",
       "style": "Working style",
-      "done": "Done"
+      "done": "Done",
+      "level": "Experience"
     },
     "welcome": {
       "eyebrow": "PSPP Studio",
@@ -40,13 +41,16 @@
     },
     "look": {
       "title": "Make it feel right",
-      "lead": "Changes apply right away – watch the workspace behind this window.",
+      "lead": "Changes apply right away – watch the preview on the right.",
       "theme": "Theme",
       "light": "Light",
       "dark": "Dark",
       "system": "System",
       "accent": "Accent colour",
-      "layout": "Workspace layout"
+      "layout": "Workspace layout",
+      "toolbar": "Tool buttons",
+      "iconsOnly": "Icons only",
+      "withLabels": "Icons with labels"
     },
     "presets": {
       "label": "Workspace layout",
@@ -80,7 +84,10 @@
       "explainOnDemand": "On demand",
       "explainNever": "Never",
       "syntax": "Syntax preview in dialogs",
-      "syntaxDesc": "See the PSPP command each dialog will run – handy for learning."
+      "syntaxDesc": "See the PSPP command each dialog will run – handy for learning.",
+      "explainAlwaysDesc": "A note under every test",
+      "explainOnDemandDesc": "After clicking the bulb",
+      "explainNeverDesc": "Tables only"
     },
     "done": {
       "title": "All set{{name}}",
@@ -89,7 +96,14 @@
       "layout": "Layout",
       "decimal": "Numbers",
       "explain": "Explanations",
-      "custom": "Custom"
+      "custom": "Custom",
+      "firstStep": "How do you want to start?",
+      "sample": "Try it on sample data",
+      "sampleDesc": "Student survey – 120 respondents",
+      "open": "Open your own file",
+      "openDesc": ".sav, .csv, .ods, .por…",
+      "blank": "Start with an empty sheet",
+      "blankDesc": "Type the data in yourself"
     },
     "settings": {
       "group": "Workspace and guide",
@@ -97,6 +111,62 @@
       "rerunDesc": "Walk through language, profile, look and working style.",
       "rerunButton": "Open guide",
       "layoutDesc": "How much chrome and detail the workspace shows."
+    },
+    "previewLabel": "Workspace preview",
+    "previewCaption": "Preview – follows your choices",
+    "previewNote": {
+      "welcome": "This is the workspace. Every choice in this guide shows up here right away.",
+      "profile": "Your name and colour appear in the top right.",
+      "level": "Hover an option to see how the workspace changes.",
+      "look": "Theme, colour, density and button labels – all live.",
+      "style": "This is how analysis results will look.",
+      "done": "You can change all of this any time in Settings (Ctrl+,)."
+    },
+    "level": {
+      "title": "How much statistics experience do you have?",
+      "lead": "We will set how many tools and how much guidance you see.",
+      "calm": {
+        "name": "I'm starting out",
+        "desc": "I'm learning, or I need statistics only now and then.",
+        "gets": [
+          "Buttons with labels",
+          "Larger text, fewer bars",
+          "Explanations next to results"
+        ]
+      },
+      "balanced": {
+        "name": "I know the basics",
+        "desc": "I know tests and regression and want everything at hand.",
+        "gets": [
+          "Variable detail panel",
+          "Formula bar",
+          "Syntax preview in dialogs"
+        ]
+      },
+      "full": {
+        "name": "I work with it professionally",
+        "desc": "I know SPSS or syntax and want as much data on screen as possible.",
+        "gets": [
+          "Denser grid",
+          "All variable columns",
+          "Explanations on demand"
+        ]
+      }
     }
+  },
+  "preview": {
+    "aria": "Miniature of the workspace with the current settings",
+    "docTitle": "Student survey",
+    "male": "Male",
+    "female": "Female",
+    "tLabels": "Labels",
+    "tFind": "Find",
+    "tCase": "Case",
+    "tSort": "Sort",
+    "scale": "Scale · 18–25",
+    "outTitle": "T-test: mean by gender",
+    "explain": "Women score higher on average; the difference is statistically significant.",
+    "explainBtn": "What does it mean?",
+    "status": "Ready"
   }
 }

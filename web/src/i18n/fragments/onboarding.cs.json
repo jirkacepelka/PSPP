@@ -12,7 +12,8 @@
       "profile": "Profil",
       "look": "Vzhled",
       "style": "Styl práce",
-      "done": "Hotovo"
+      "done": "Hotovo",
+      "level": "Zkušenosti"
     },
     "welcome": {
       "eyebrow": "PSPP Studio",
@@ -40,13 +41,16 @@
     },
     "look": {
       "title": "Ať se vám v tom dobře pracuje",
-      "lead": "Změny se projeví hned – sledujte pracovní plochu za tímto oknem.",
+      "lead": "Změny se projeví hned – sledujte náhled vpravo.",
       "theme": "Motiv",
       "light": "Světlý",
       "dark": "Tmavý",
       "system": "Podle systému",
       "accent": "Barva zvýraznění",
-      "layout": "Rozvržení pracovní plochy"
+      "layout": "Rozvržení pracovní plochy",
+      "toolbar": "Tlačítka nástrojů",
+      "iconsOnly": "Jen ikony",
+      "withLabels": "Ikony s popisky"
     },
     "presets": {
       "label": "Rozvržení pracovní plochy",
@@ -80,7 +84,10 @@
       "explainOnDemand": "Na požádání",
       "explainNever": "Nikdy",
       "syntax": "Náhled syntaxe v dialozích",
-      "syntaxDesc": "Uvidíte příkaz PSPP, který dialog spustí – dobré pro učení."
+      "syntaxDesc": "Uvidíte příkaz PSPP, který dialog spustí – dobré pro učení.",
+      "explainAlwaysDesc": "Poznámka pod každým testem",
+      "explainOnDemandDesc": "Po kliknutí na žárovku",
+      "explainNeverDesc": "Jen tabulky"
     },
     "done": {
       "title": "Hotovo{{name}}",
@@ -89,7 +96,14 @@
       "layout": "Rozvržení",
       "decimal": "Čísla",
       "explain": "Vysvětlení",
-      "custom": "Vlastní"
+      "custom": "Vlastní",
+      "firstStep": "Čím začnete?",
+      "sample": "Vyzkoušet na ukázkových datech",
+      "sampleDesc": "Studentský průzkum – 120 respondentů",
+      "open": "Otevřít vlastní soubor",
+      "openDesc": ".sav, .csv, .ods, .por…",
+      "blank": "Začít s prázdnou tabulkou",
+      "blankDesc": "Data zadáte ručně"
     },
     "settings": {
       "group": "Pracovní plocha a průvodce",
@@ -97,6 +111,62 @@
       "rerunDesc": "Projde jazyk, profil, vzhled a styl práce.",
       "rerunButton": "Otevřít průvodce",
       "layoutDesc": "Kolik lišt a podrobností pracovní plocha ukazuje."
+    },
+    "previewLabel": "Náhled pracovní plochy",
+    "previewCaption": "Náhled – mění se podle vašich voleb",
+    "previewNote": {
+      "welcome": "Takhle vypadá pracovní plocha. Každá volba v průvodci se tu hned projeví.",
+      "profile": "Jméno a barva se objeví vpravo nahoře.",
+      "level": "Najeďte na možnost a uvidíte, jak se plocha změní.",
+      "look": "Motiv, barva, hustota i popisky tlačítek – vše naživo.",
+      "style": "Takhle budou vypadat výsledky analýz.",
+      "done": "Vše jde kdykoli změnit v Nastavení (Ctrl+,)."
+    },
+    "level": {
+      "title": "Jaké máte se statistikou zkušenosti?",
+      "lead": "Podle toho připravíme, kolik nástrojů a nápovědy uvidíte.",
+      "calm": {
+        "name": "Začínám",
+        "desc": "Učím se, nebo statistiku potřebuji jen občas.",
+        "gets": [
+          "Tlačítka s popisky",
+          "Větší písmo, méně lišt",
+          "Vysvětlení u výsledků"
+        ]
+      },
+      "balanced": {
+        "name": "Znám základy",
+        "desc": "Testy a regresi znám, chci mít vše po ruce.",
+        "gets": [
+          "Panel s detailem proměnné",
+          "Řádek vzorců",
+          "Náhled syntaxe v dialozích"
+        ]
+      },
+      "full": {
+        "name": "Pracuji profesionálně",
+        "desc": "Znám SPSS nebo syntaxi, chci co nejvíc dat na obrazovce.",
+        "gets": [
+          "Hustší tabulka",
+          "Všechny sloupce proměnných",
+          "Vysvětlení jen na požádání"
+        ]
+      }
     }
+  },
+  "preview": {
+    "aria": "Miniatura pracovní plochy podle aktuálního nastavení",
+    "docTitle": "Průzkum studentů",
+    "male": "Muž",
+    "female": "Žena",
+    "tLabels": "Popisky",
+    "tFind": "Najít",
+    "tCase": "Případ",
+    "tSort": "Seřadit",
+    "scale": "Škála · 18–25",
+    "outTitle": "T-test: průměr podle pohlaví",
+    "explain": "Ženy mají v průměru vyšší skóre; rozdíl je statisticky významný.",
+    "explainBtn": "Co to znamená?",
+    "status": "Připraveno"
   }
 }
