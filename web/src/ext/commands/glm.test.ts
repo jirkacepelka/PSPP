@@ -447,6 +447,33 @@ describe('GLM repeated measures', () => {
     near(row(pw, '1', '1', '2')[2], REF.mixed.paramT1[5]);
   });
 
+  it('profile plots: line chart of the EMMs (time on the x axis, a line per group), CI bars, panels', () => {
+    const flat = (items: OutputItem[]): OutputItem[] => items.flatMap((x) => [x, ...('children' in x && Array.isArray(x.children) ? flat(x.children as OutputItem[]) : [])]);
+    const out = runExt('GLM t1 t2 t3 t4 BY g /WSFACTOR=time 4 /PLOT=PROFILE(time*g g) ERRORBAR=CI /EMMEANS=TABLES(g*time).', mixed());
+    expect(errorsOf(out)).toEqual([]);
+    const charts = flat(out).filter((x) => x.kind === 'chart') as Extract<OutputItem, { kind: 'chart' }>[];
+    expect(charts).toHaveLength(2);
+    const c = charts[0].chart as { type: string; xlabel: string; legendTitle: string; categories: string[]; series: { name: string; values: number[]; lo: number[]; hi: number[] }[] };
+    expect(c.type).toBe('line');
+    expect(c.xlabel).toBe('time');
+    expect(c.legendTitle).toBe('g');
+    expect(c.categories).toEqual(['1', '2', '3', '4']);
+    expect(c.series.map((s) => s.name)).toEqual(['1', '2']);
+    // saturated model: EMMs are the cell means, and the bars are the EMM table's CI
+    near(c.series[1].values[3], MIX.slice(5).reduce((s, r) => s + r[3], 0) / 6);
+    const est = byCaption(out, 'g * time');
+    near(c.series[1].lo[3], row(est, '2', '4')[2]);
+    near(c.series[1].hi[3], row(est, '2', '4')[3]);
+    const c2 = charts[1].chart as { categories: string[]; series: { values: number[] }[] };
+    expect(c2.categories).toEqual(['1', '2']);
+    expect(c2.series).toHaveLength(1);
+    // three factors: one panel per level of the third
+    const out3 = runExt('GLM y1 y2 BY a b /PLOT=PROFILE(a*b) PROFILE(b*a*a).', manova());
+    expect(errorsOf(out3).length).toBe(1);
+    const m = runExt('GLM y1 y2 y3 BY a b /PLOT=PROFILE(a*b).', manova());
+    expect(flat(m).filter((x) => x.kind === 'chart')).toHaveLength(3); // one per dependent
+  });
+
   it('students: three groups, listwise, Mauchly/epsilons and within SS', () => {
     const out = runExt('GLM hours stress age BY gender /WSFACTOR=x 3.', studentsDs);
     expect(errorsOf(out)).toEqual([]);

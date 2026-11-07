@@ -97,9 +97,14 @@
       "notEstimable": "Tato kombinace úrovní faktorů není pozorována, proto odpovídající populační marginální průměr nelze odhadnout.",
       "noValid": "Pro tuto analýzu nejsou žádné platné případy.",
       "dfE0": "Nezbývají žádné reziduální stupně volnosti; testy nelze spočítat.",
-      "plotSkipped": "Profilové grafy (PLOT) se nekreslí; použijte odhadnuté marginální průměry.",
       "keywordIgnored": "PRINT={{keyword}} není podporováno a bylo ignorováno.",
-      "subIgnored": "Podpříkaz {{sub}} není u vícerozměrného GLM a opakovaných měření podporován a byl ignorován."
+      "subIgnored": "Podpříkaz {{sub}} není u vícerozměrného GLM a opakovaných měření podporován a byl ignorován.",
+      "plotY": "Odhadnuté marginální průměry: {{name}}",
+      "emmShort": "Odhadnuté marginální průměry",
+      "profilePlots": "Profilové grafy",
+      "seBar": "±{{mult}} SE",
+      "plotNonEstimable": "Některé průměry nelze odhadnout (prázdné buňky); čáry jsou v těchto místech přerušené.",
+      "plotKeywordIgnored": "PLOT {{keyword}} není podporováno a bylo vynecháno."
     }
   },
   "menu": {

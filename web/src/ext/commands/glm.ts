@@ -27,7 +27,7 @@ import { isMissing, requireNumeric, splitGroups, valueText, variable, weights, t
 import { chi2Sf, fSf, tInv, tTwoTail } from '../dist';
 import { genEigenvalues, symEigen, transpose, zeros, type Matrix } from '../linalg';
 import { isKw, keywords, kwArg, sub, varList, type ParsedCommand, type Token } from '../parse';
-import { fmt, fmtN, groupItem, messageItem, tableItem, td, textItem, th, type Cell } from '../table';
+import { chartItem, fmt, fmtN, groupItem, messageItem, tableItem, td, textItem, th, type Cell } from '../table';
 import { ExtError, type ExtCommand, type ExtContext } from '../types';
 
 const NAME = 'GLM';
@@ -51,6 +51,12 @@ interface EmmRequest {
   compare: string | null;
   adj: Adjust;
 }
+interface PlotSpec {
+  /** PROFILE terms: [x axis factor, separate lines, separate plots] */
+  profiles: string[][];
+  errorBar: 'NONE' | 'CI' | 'SE';
+  seMult: number;
+}
 interface Spec {
   dvs: string[];
   factors: string[];
@@ -60,6 +66,7 @@ interface Spec {
   effects: Effect[];
   print: { descriptive: boolean; etasq: boolean; homogeneity: boolean; parameter: boolean };
   emmeans: EmmRequest[];
+  plot: PlotSpec;
   alpha: number;
   includeUser: boolean;
 }
@@ -210,6 +217,62 @@ function parseEmmeans(tokens: Token[], resolve: (n: string) => string | null): E
   return { term, compare, adj };
 }
 
+/** /PLOT=PROFILE(a a*b a*b*c) [ERRORBAR=NO|CI|SE(m)] [TYPE=LINE] [MEANREFERENCE=NO] [YAXIS=AUTO] */
+function parsePlot(tokens: Token[], resolve: (n: string) => string | null, warn: (k: string, a?: Record<string, unknown>) => void): PlotSpec {
+  const plot: PlotSpec = { profiles: [], errorBar: 'NONE', seMult: 2 };
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (kwIs(t, 'PROFILE') && tokens[i + 1]?.text === '(') {
+      let j = i + 2;
+      let term: string[] = [];
+      const flush = () => {
+        if (!term.length) return;
+        if (term.length > 3) throw new ExtError('A profile plot takes at most three factors (horizontal axis * separate lines * separate plots).');
+        plot.profiles.push(term);
+        term = [];
+      };
+      for (; j < tokens.length && tokens[j].text !== ')'; j++) {
+        const x = tokens[j];
+        if (x.text === '*' || isKw(x, 'BY')) continue;
+        if (x.text === ',') {
+          flush();
+          continue;
+        }
+        const n = x.kind === 'id' ? resolve(x.text) : null;
+        if (!n) throw new ExtError(`${x.text} on PLOT=PROFILE is not a factor of the model.`);
+        if (term.length && tokens[j - 1]?.text !== '*' && !isKw(tokens[j - 1], 'BY')) flush();
+        if (term.includes(n)) throw new ExtError(`${n} appears twice in a PROFILE term.`);
+        term.push(n);
+      }
+      flush();
+      if (tokens[j]?.text !== ')') throw new ExtError('PROFILE( is missing its closing parenthesis.');
+      i = j;
+    } else if (kwIs(t, 'ERRORBAR')) {
+      let j = i + 1;
+      if (tokens[j]?.text === '=') j++;
+      const k = tokens[j];
+      if (kwIs(k, 'NO')) plot.errorBar = 'NONE';
+      else if (kwIs(k, 'CI')) plot.errorBar = 'CI';
+      else if (kwIs(k, 'SE')) {
+        plot.errorBar = 'SE';
+        if (tokens[j + 1]?.text === '(' && typeof tokens[j + 2]?.value === 'number') {
+          plot.seMult = tokens[j + 2].value!;
+          j += 3;
+        }
+      } else throw new ExtError('ERRORBAR must be NO, CI or SE(multiplier).');
+      i = j;
+    } else if (kwIs(t, 'TYPE')) {
+      const k = tokens[i + 1]?.text === '=' ? tokens[i + 2] : tokens[i + 1];
+      if (k && !kwIs(k, 'LINE')) warn('plotKeywordIgnored', { keyword: `TYPE=${k.text}` });
+      i += tokens[i + 1]?.text === '=' ? 2 : 1;
+    } else if (kwIs(t, 'MEANREFERENCE') || kwIs(t, 'YAXIS')) {
+      i += tokens[i + 1]?.text === '=' ? 2 : 1;
+    } else if (t.kind === 'id' && ['SPREADLEVEL', 'RESIDUALS'].some((n) => subIs(t.text.toUpperCase(), n))) warn('plotKeywordIgnored', { keyword: t.text.toUpperCase() });
+    else if (t.text !== '=' && t.text !== ',') throw new ExtError(`Unexpected '${t.text}' on PLOT.`);
+  }
+  return plot;
+}
+
 function parseSpec(cmd: ParsedCommand, ds: Dataset, warn: (k: string, a?: Record<string, unknown>) => void): Spec {
   const vars = ds.variables;
   for (const s of cmd.subs) if (!SUBS.some((n) => subIs(s.name, n))) throw new ExtError(`Unknown subcommand ${s.name}.`);
@@ -289,9 +352,9 @@ function parseSpec(cmd: ParsedCommand, ds: Dataset, warn: (k: string, a?: Record
   const alpha = alphaTok?.[0]?.value ?? 0.05;
   if (!(alpha > 0 && alpha < 1)) throw new ExtError('ALPHA must be between 0 and 1.');
   const includeUser = keywords(sub(cmd, 'MISSING')).has('INCLUDE');
-  if (sub(cmd, 'PLOT')) warn('plotSkipped');
+  const plot = parsePlot(sub(cmd, 'PLOT') ?? [], resolveFactor, warn);
   for (const s of ['POSTHOC', 'CONTRAST', 'SAVE', 'OUTFILE']) if (cmd.subs.some((x) => subIs(x.name, s))) warn('subIgnored', { sub: s });
-  return { dvs: d.names, factors, covariates, ws, measure, effects, print, emmeans, alpha, includeUser };
+  return { dvs: d.names, factors, covariates, ws, measure, effects, print, emmeans, plot, alpha, includeUser };
 }
 
 /* -------------------------------------------------------------- linear algebra */
@@ -561,7 +624,7 @@ function run(cmd: ParsedCommand, ctx: ExtContext): OutputItem[] {
   const ds = ctx.dataset;
   const t = (k: string, a?: Record<string, unknown>) => ctx.t(`${P}.${k}`, a);
   const pre: OutputItem[] = [];
-  const spec = parseSpec(cmd, ds, (k, a) => pre.push(messageItem(k === 'plotSkipped' ? 'note' : 'warning', t(k, a), ctx.line)));
+  const spec = parseSpec(cmd, ds, (k, a) => pre.push(messageItem('warning', t(k, a), ctx.line)));
   const children: OutputItem[] = [...pre];
   const w = weights(ds);
   for (const group of splitGroups(ds)) {
@@ -1123,7 +1186,7 @@ function analyse(spec: Spec, ds: Dataset, groupRows: number[], wAll: number[], c
   }
 
   // ---------- Estimated Marginal Means
-  if (spec.emmeans.length) {
+  if (spec.emmeans.length || spec.plot.profiles.length) {
     const emmItems: OutputItem[] = [];
     // X'WX of the indicator model (for estimability)
     const XtX = Array.from({ length: ind.q }, (_, i) => ind.C[i].slice(0, ind.q));
@@ -1168,6 +1231,60 @@ function analyse(spec: Spec, ds: Dataset, groupRows: number[], wAll: number[], c
     const levelLabel = (n: string, li: number) => (isWithin(n) ? String(li + 1) : levelName(fIdx(n), li));
     // per dependent variable (MANOVA) or one measure (RM)
     const targets = isRM ? [{ label: '', m: null as number[] | null }] : dvs.map((d, j) => ({ label: d.v.label || d.v.name, m: Array.from({ length: k }, (_, z) => (z === j ? 1 : 0)) }));
+    // ---------- Profile plots (estimated marginal means; covariates at their means)
+    const plotItems: OutputItem[] = [];
+    const yTitle = (tg: { label: string }) => t('plotY', { name: tg.label || spec.measure });
+    for (const term of spec.plot.profiles) {
+      const [xf, lf, pf] = term;
+      const panels = pf ? Array.from({ length: levelsOf(pf) }, (_, li) => li) : [null];
+      for (const tg of targets) {
+        for (const pl of panels) {
+          const lines = lf ? Array.from({ length: levelsOf(lf) }, (_, li) => li) : [null];
+          let anyNonEst = false;
+          const series = lines.map((ll) => {
+            const values: (number | null)[] = [];
+            const lo: (number | null)[] = [];
+            const hi: (number | null)[] = [];
+            for (let xi = 0; xi < levelsOf(xf); xi++) {
+              const assign = new Map<string, number>([[xf, xi]]);
+              if (lf && ll !== null) assign.set(lf, ll);
+              if (pf && pl !== null) assign.set(pf, pl);
+              const l = lvec(new Map([...assign].filter(([n]) => !isWithin(n))));
+              const m = tg.m ?? mvec(new Map([...assign].filter(([n]) => isWithin(n))));
+              if (!estimable(l)) {
+                anyNonEst = true;
+                values.push(null);
+                lo.push(null);
+                hi.push(null);
+                continue;
+              }
+              const r = est(l, m);
+              const half = spec.plot.errorBar === 'CI' ? tq * r.se : spec.plot.seMult * r.se;
+              values.push(r.value);
+              lo.push(r.value - half);
+              hi.push(r.value + half);
+            }
+            return { name: lf && ll !== null ? levelLabel(lf, ll) : yTitle(tg), values, ...(spec.plot.errorBar !== 'NONE' ? { lo, hi } : {}) };
+          });
+          const titleBase = yTitle(tg);
+          const title = pl !== null && pf ? `${titleBase}: ${pf} = ${levelLabel(pf, pl)}` : titleBase;
+          const errorLabel = spec.plot.errorBar === 'CI' ? t('ci', { level: conf }) : spec.plot.errorBar === 'SE' ? t('seBar', { mult: fmt(spec.plot.seMult, 0, ctx) }) : '';
+          plotItems.push(
+            chartItem(title, {
+              type: 'line',
+              xlabel: xf,
+              ylabel: t('emmShort'),
+              legendTitle: lf ?? '',
+              errorLabel,
+              categories: Array.from({ length: levelsOf(xf) }, (_, li) => levelLabel(xf, li)),
+              series,
+            }),
+          );
+          if (anyNonEst) plotItems.push(messageItem('note', t('plotNonEstimable'), ctx.line));
+        }
+      }
+    }
+
     for (const req of spec.emmeans) {
       const notes = new Notes();
       const term = req.term;
@@ -1212,7 +1329,9 @@ function analyse(spec: Spec, ds: Dataset, groupRows: number[], wAll: number[], c
       if (req.compare) items.push(pairwise(req, term, targets));
       emmItems.push(term.length ? groupItem(term.join(' * '), NAME, items) : groupItem(t('grandMean'), NAME, items));
     }
-    out.push(groupItem(t('emm'), NAME, emmItems));
+    if (emmItems.length) out.push(groupItem(t('emm'), NAME, emmItems));
+    if (plotItems.length && covNote) plotItems.push(messageItem('note', covNote, ctx.line));
+    if (plotItems.length) out.push(groupItem(t('profilePlots'), NAME, plotItems));
 
     // pairwise comparisons of REQ.compare within each combination of the other factors
     function pairwise(req: EmmRequest, term: string[], targets: { label: string; m: number[] | null }[]): OutputItem {

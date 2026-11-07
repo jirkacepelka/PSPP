@@ -1,0 +1,25 @@
+{
+  "ext": {
+    "graphLine": {
+      "group": "Line chart",
+      "title": "{{y}} by {{x}}",
+      "titleBy": "{{y}} by {{x}} and {{g}}",
+      "noCases": "No valid cases for the line chart.",
+      "ciLabel": "{{level}}% CI",
+      "seLabel": "±{{mult}} SE",
+      "sdLabel": "±{{mult}} SD",
+      "f": {
+        "COUNT": "Count",
+        "PCT": "Percent",
+        "CUFREQ": "Cumulative count",
+        "CUPCT": "Cumulative percent",
+        "MEAN": "Mean",
+        "MEDIAN": "Median",
+        "SUM": "Sum",
+        "MINIMUM": "Minimum",
+        "MAXIMUM": "Maximum",
+        "STDDEV": "Std. deviation"
+      }
+    }
+  }
+}

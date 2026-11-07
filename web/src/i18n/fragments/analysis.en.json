@@ -390,6 +390,23 @@
       "negexpo": "Bi-negative exponential",
       "missingExclude": "Exclude user-missing values",
       "missingInclude": "Treat user-missing values as valid"
+    },
+    "lineChart": {
+      "title": "Line chart",
+      "category": "Categories (X axis)",
+      "lines": "Separate lines for",
+      "points": "Points show",
+      "median": "Median of variable",
+      "variable": "Variable for the points",
+      "interval": "Error bars"
+    },
+    "glmPlot": {
+      "profile": "Profile plot of the means",
+      "profileHint": "Lines of the estimated marginal means: the first factor on the X axis, a line per level of the next.",
+      "errorBar": "Error bars",
+      "none": "None",
+      "ci": "95% confidence interval",
+      "se": "±2 standard errors"
     }
   },
   "assistant": {

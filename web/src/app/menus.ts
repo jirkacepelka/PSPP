@@ -173,7 +173,7 @@ export const MENUS: TopMenu[] = [
     id: 'graphs',
     label: 'menu.graphs',
     mnemonic: 'shell.mnemonic.graphs',
-    items: ['dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT', 'dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:barChartMean|tpl:GRAPH BAR MEAN', 'dialog:boxplot'],
+    items: ['dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT', 'dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:barChartMean|tpl:GRAPH BAR MEAN', 'dialog:lineChart', 'dialog:boxplot'],
   },
   {
     id: 'utilities',

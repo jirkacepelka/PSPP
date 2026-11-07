@@ -17,6 +17,7 @@ import { parseChart, type ChartSpec } from './types';
 import { NpChart, RocChart, ScatterChart, ScreeChart, SpreadLevelChart } from './xy';
 import { SurvivalChart } from './survival';
 import { DendrogramChart } from './dendrogram';
+import { LineChart } from './line';
 
 export interface PsppChartProps {
   /** The `chart` member of an output item (or the whole item). */
@@ -57,6 +58,8 @@ export function PsppChart({ chart, width, height, t = defaultT, locale }: PsppCh
       return <SurvivalChart spec={spec} {...common} />;
     case 'dendrogram':
       return <DendrogramChart spec={spec} {...common} />;
+    case 'line':
+      return <LineChart spec={spec} {...common} />;
     default:
       return (
         <figure className="pspp-chart pspp-chart--fallback" style={width ? { width } : undefined} role="img" aria-label={spec.title || tr(t, 'untitled')}>

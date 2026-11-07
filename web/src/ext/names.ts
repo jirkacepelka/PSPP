@@ -12,6 +12,8 @@ export const EXT_COMMAND_NAMES: readonly string[] = ['NONPAR CORR', 'PARTIAL COR
  */
 export const EXT_CONDITIONAL: readonly { name: string; claims: (commandText: string) => boolean }[] = [
   { name: 'GLM', claims: (text) => glmClaims(text) },
+  // PSPP's GRAPH draws histograms, scatterplots and bar charts; line charts are an extension
+  { name: 'GRAPH', claims: (text) => /\/\s*LINE\b/i.test(text) },
 ];
 
 /** GLM is multivariate / repeated measures: /WSFACTOR, or more than one dependent (TO counts as several). */

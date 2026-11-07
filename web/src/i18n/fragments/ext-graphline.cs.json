@@ -1,0 +1,25 @@
+{
+  "ext": {
+    "graphLine": {
+      "group": "Čárový graf",
+      "title": "{{y}} podle {{x}}",
+      "titleBy": "{{y}} podle {{x}} a {{g}}",
+      "noCases": "Pro čárový graf nejsou žádné platné případy.",
+      "ciLabel": "{{level}}% IS",
+      "seLabel": "±{{mult}} SE",
+      "sdLabel": "±{{mult}} SD",
+      "f": {
+        "COUNT": "Počet",
+        "PCT": "Procento",
+        "CUFREQ": "Kumulativní počet",
+        "CUPCT": "Kumulativní procento",
+        "MEAN": "Průměr",
+        "MEDIAN": "Medián",
+        "SUM": "Součet",
+        "MINIMUM": "Minimum",
+        "MAXIMUM": "Maximum",
+        "STDDEV": "Směr. odchylka"
+      }
+    }
+  }
+}

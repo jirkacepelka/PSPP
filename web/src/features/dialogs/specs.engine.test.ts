@@ -63,6 +63,7 @@ const FILLED: Record<string, Values> = {
   coxreg: { time: ['stime'], status: ['died'], covariates: ['gpa'], categorical: ['gender'], strata: ['job'], plotSurvival: true, plotLml: true, baseline: true, corr: true },
   histogram: { variable: ['gpa'] },
   barChart: { category: ['faculty'], cluster: ['gender'], func: 'MEAN', variable: ['gpa'] },
+  lineChart: { category: ['faculty'], lines: ['gender'], variable: ['gpa'], interval: 'CI' },
   scatter: { y: ['gpa'], x: ['hours'], by: ['gender'] },
   boxplot: { variables: ['gpa'], factor: ['faculty'] },
   compute: { target: 'x', expression: 'hours * 2' },

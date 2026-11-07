@@ -40,7 +40,7 @@ import { glmRepeated } from './glmRepeated';
 import { plum } from './plum';
 import { nomreg } from './nomreg';
 import { ctables, variableProperties } from './tables';
-import { barChart, boxplot, histogram, scatter } from './graphs';
+import { barChart, boxplot, histogram, lineChart, scatter } from './graphs';
 
 export const DIALOG_SPECS: DialogSpec[] = [
   frequencies, descriptives, explore, crosstabs, ctables,
@@ -48,7 +48,7 @@ export const DIALOG_SPECS: DialogSpec[] = [
   correlations, partialCorr, regressionLinear, logistic, plum, nomreg,
   factor, reliability, quickCluster, hierCluster, discriminant,
   chiSquare, binomial, runs, ksNormal, mannWhitney, medianTest, kruskalWallis, jonckheere, wilcoxon, mcnemar, friedman, cochran, roc, km, coxreg,
-  histogram, barChart, scatter, boxplot,
+  histogram, barChart, lineChart, scatter, boxplot,
   compute, recodeSame, recodeDifferent, count, rank, autorecode,
   sortCases, selectCases, weightCases, splitFile, aggregate, transpose, variableProperties,
 ];

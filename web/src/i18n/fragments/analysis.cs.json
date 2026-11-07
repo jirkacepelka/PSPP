@@ -400,6 +400,23 @@
       "negexpo": "Bi-negativně exponenciální",
       "missingExclude": "Vyloučit uživatelem chybějící hodnoty",
       "missingInclude": "Uživatelem chybějící hodnoty brát jako platné"
+    },
+    "lineChart": {
+      "title": "Čárový graf",
+      "category": "Kategorie (osa X)",
+      "lines": "Samostatné čáry pro",
+      "points": "Body ukazují",
+      "median": "Medián proměnné",
+      "variable": "Proměnná pro body",
+      "interval": "Chybové úsečky"
+    },
+    "glmPlot": {
+      "profile": "Profilový graf průměrů",
+      "profileHint": "Čáry odhadnutých marginálních průměrů: první faktor na ose X, čára pro každou úroveň dalšího.",
+      "errorBar": "Chybové úsečky",
+      "none": "Žádné",
+      "ci": "95% interval spolehlivosti",
+      "se": "±2 směrodatné chyby"
     }
   },
   "assistant": {

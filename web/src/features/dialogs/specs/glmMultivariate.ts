@@ -5,7 +5,7 @@
  */
 import type { DialogSpec } from '../types';
 import { command, vars, wrap } from '../syntaxUtil';
-import { glmOptions, glmOptionSubs } from './glmRepeated';
+import { glmOptions, glmOptionSubs, glmPlot, glmPlotSub } from './glmRepeated';
 
 export const glmMultivariate: DialogSpec = {
   id: 'glmMultivariate',
@@ -28,6 +28,7 @@ export const glmMultivariate: DialogSpec = {
         { value: 'main', label: 'dlg.glm.main' },
       ],
     },
+    glmPlot,
     glmOptions,
   ],
   toSyntax: (v) => {
@@ -37,6 +38,7 @@ export const glmMultivariate: DialogSpec = {
       'METHOD=SSTYPE(3)',
       'INTERCEPT=INCLUDE',
       ...glmOptionSubs(v, f),
+      glmPlotSub(v, f[0], f[1]),
       v.design === 'main' && f.length > 1 && wrap([`DESIGN=${[...c, ...f].join(' ')}`]),
     ]);
   },

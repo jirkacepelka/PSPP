@@ -1,5 +1,6 @@
 /*
- * Charts: histogram, bar chart and scatterplot (GRAPH) and boxplot (EXAMINE).
+ * Charts: histogram, bar chart and scatterplot (GRAPH), line chart (GRAPH /LINE, an extension
+ * analysis: src/ext/commands/graphLine.ts) and boxplot (EXAMINE).
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import type { DialogSpec } from '../types';
@@ -51,6 +52,52 @@ export const barChart: DialogSpec = {
     const summary = ['MEAN', 'SUM', 'MINIMUM', 'MAXIMUM'].includes(f) ? `${f}(${vars(v, 'variable')[0]})` : f;
     const cl = vars(v, 'cluster')[0];
     return command('GRAPH', '', [`BAR=${summary} BY ${vars(v, 'category')[0]}${cl ? ` BY ${cl}` : ''}`]);
+  },
+};
+
+export const lineChart: DialogSpec = {
+  id: 'lineChart',
+  kind: 'graph',
+  title: 'dlg.lineChart.title',
+  icon: 'show_chart',
+  command: 'GRAPH',
+  fields: [
+    { kind: 'varlist', id: 'category', label: 'dlg.lineChart.category', min: 1, max: 1, prefer: ['ordinal', 'nominal'], groups: true },
+    { kind: 'varlist', id: 'lines', label: 'dlg.lineChart.lines', max: 1, prefer: ['nominal', 'ordinal'], groups: true },
+    {
+      kind: 'select',
+      id: 'func',
+      label: 'dlg.lineChart.points',
+      default: 'MEAN',
+      options: [
+        { value: 'MEAN', label: 'dlg.barChart.mean' },
+        { value: 'MEDIAN', label: 'dlg.lineChart.median' },
+        { value: 'SUM', label: 'dlg.barChart.sum' },
+        { value: 'COUNT', label: 'dlg.barChart.count' },
+        { value: 'PCT', label: 'dlg.barChart.pct' },
+        { value: 'CUPCT', label: 'dlg.barChart.cupct' },
+      ],
+    },
+    { kind: 'varlist', id: 'variable', label: 'dlg.lineChart.variable', filter: 'numeric', max: 1, min: 1, prefer: ['scale'], when: (v) => ['MEAN', 'MEDIAN', 'SUM'].includes(String(v.func ?? 'MEAN')) },
+    {
+      kind: 'select',
+      id: 'interval',
+      label: 'dlg.lineChart.interval',
+      default: 'NONE',
+      when: (v) => String(v.func ?? 'MEAN') === 'MEAN',
+      options: [
+        { value: 'NONE', label: 'dlg.glmPlot.none' },
+        { value: 'CI', label: 'dlg.glmPlot.ci' },
+        { value: 'SE', label: 'dlg.glmPlot.se' },
+      ],
+    },
+  ],
+  toSyntax: (v) => {
+    const f = str(v, 'func') || 'MEAN';
+    const summary = ['MEAN', 'MEDIAN', 'SUM'].includes(f) ? `${f}(${vars(v, 'variable')[0]})` : f;
+    const g = vars(v, 'lines')[0];
+    const iv = f === 'MEAN' ? str(v, 'interval') : '';
+    return command('GRAPH', '', [`LINE(${g ? 'MULTIPLE' : 'SIMPLE'})=${summary} BY ${vars(v, 'category')[0]}${g ? ` BY ${g}` : ''}`, iv === 'CI' && 'INTERVAL CI(95)', iv === 'SE' && 'INTERVAL SE(2)']);
   },
 };
 

@@ -46,6 +46,34 @@ export function glmOptionSubs(v: Values, factors: string[]): string[] {
   ].filter((s): s is string => Boolean(s));
 }
 
+/** Profile plot of the estimated marginal means (shared by both dialogs). */
+export const glmPlot: Field = {
+  kind: 'group',
+  columns: 2,
+  fields: [
+    { kind: 'checkbox', id: 'profile', label: 'dlg.glmPlot.profile', hint: 'dlg.glmPlot.profileHint' },
+    {
+      kind: 'select',
+      id: 'errorBar',
+      label: 'dlg.glmPlot.errorBar',
+      default: 'CI',
+      when: (v) => Boolean(v.profile),
+      options: [
+        { value: 'NO', label: 'dlg.glmPlot.none' },
+        { value: 'CI', label: 'dlg.glmPlot.ci' },
+        { value: 'SE', label: 'dlg.glmPlot.se' },
+      ],
+    },
+  ],
+};
+
+/** /PLOT=PROFILE(x*lines) with the error bars chosen, or nothing. */
+export function glmPlotSub(v: Values, x: string | undefined, lines: string | undefined): string | false {
+  if (!bool(v, 'profile') || !x) return false;
+  const eb = str(v, 'errorBar') || 'CI';
+  return `PLOT=PROFILE(${lines ? `${x}*${lines}` : x})${eb === 'NO' ? '' : eb === 'SE' ? ' ERRORBAR=SE(2)' : ' ERRORBAR=CI'}`;
+}
+
 const CONTRASTS = [
   { value: 'POLYNOMIAL', label: 'dlg.glmOptions.polynomial' },
   { value: 'SIMPLE', label: 'dlg.glmOptions.simple' },
@@ -100,6 +128,7 @@ export const glmRepeated: DialogSpec = {
     },
     { kind: 'varlist', id: 'between', label: 'dlg.glmRepeated.between', prefer: ['nominal', 'ordinal'], groups: true },
     { kind: 'varlist', id: 'covariates', label: 'dlg.glmRepeated.covariates', filter: 'numeric', prefer: ['scale'] },
+    glmPlot,
     glmOptions,
   ],
   errorFields: {
@@ -138,6 +167,7 @@ export const glmRepeated: DialogSpec = {
       str(v, 'measure') && `MEASURE=${str(v, 'measure')}`,
       'METHOD=SSTYPE(3)',
       ...glmOptionSubs(v, [...(f2 ? [f1, f2] : [f1]), ...b]),
+      glmPlotSub(v, f1, f2 || b[0]),
       `WSDESIGN=${within.join(' ')}`,
     ]);
   },

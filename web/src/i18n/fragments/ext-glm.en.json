@@ -97,9 +97,14 @@
       "notEstimable": "This level combination of factors is not observed, thus the corresponding population marginal mean is not estimable.",
       "noValid": "There are no valid cases for this analysis.",
       "dfE0": "There are no residual degrees of freedom; the tests cannot be computed.",
-      "plotSkipped": "Profile plots (PLOT) are not drawn; use the estimated marginal means instead.",
       "keywordIgnored": "PRINT={{keyword}} is not supported and was ignored.",
-      "subIgnored": "The {{sub}} subcommand is not supported for multivariate and repeated measures GLM and was ignored."
+      "subIgnored": "The {{sub}} subcommand is not supported for multivariate and repeated measures GLM and was ignored.",
+      "plotY": "Estimated marginal means of {{name}}",
+      "emmShort": "Estimated marginal means",
+      "profilePlots": "Profile Plots",
+      "seBar": "±{{mult}} SE",
+      "plotNonEstimable": "Some means are not estimable (empty cells); the lines break there.",
+      "plotKeywordIgnored": "PLOT {{keyword}} is not supported and was ignored."
     }
   },
   "menu": {

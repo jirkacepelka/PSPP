@@ -47,6 +47,7 @@ const NEW_FILLED: Record<string, Values> = {
   ctables: { rows: ['gender'], cols: ['group'] },
   histogram: { variable: ['age'] },
   barChart: { category: ['group'] },
+  lineChart: { category: ['group'], variable: ['score'] },
   scatter: { y: ['score'], x: ['age'] },
   boxplot: { variables: ['score'], factor: ['group'] },
   variableProperties: { variables: ['gender'], measure: 'NOMINAL' },
@@ -353,6 +354,10 @@ describe('New dialogs (WP3)', () => {
     );
     expect(gen('histogram', NEW_FILLED.histogram)).toBe('GRAPH\n  /HISTOGRAM(NORMAL)=age.');
     expect(gen('barChart', { category: ['group'], cluster: ['gender'], func: 'MEAN', variable: ['score'] })).toBe('GRAPH\n  /BAR=MEAN(score) BY group BY gender.');
+    expect(gen('lineChart', { category: ['group'], lines: ['gender'], variable: ['score'], interval: 'CI' })).toBe('GRAPH\n  /LINE(MULTIPLE)=MEAN(score) BY group BY gender\n  /INTERVAL CI(95).');
+    expect(gen('lineChart', { category: ['group'], func: 'COUNT' })).toBe('GRAPH\n  /LINE(SIMPLE)=COUNT BY group.');
+    expect(gen('glmRepeated', { measures: [{ v: 'age' }, { v: 'score' }, { v: 'income' }], between: ['gender'], profile: true })).toContain('/PLOT=PROFILE(time*gender) ERRORBAR=CI');
+    expect(gen('glmMultivariate', { dependents: ['age', 'score'], factors: ['gender', 'group'], profile: true, errorBar: 'NO' })).toContain('/PLOT=PROFILE(gender*group).');
     expect(gen('scatter', { ...NEW_FILLED.scatter, by: ['gender'] })).toBe('GRAPH\n  /SCATTERPLOT(BIVARIATE)=age WITH score BY gender.');
     expect(gen('boxplot', NEW_FILLED.boxplot)).toBe('EXAMINE VARIABLES=score BY group\n  /PLOT=BOXPLOT\n  /STATISTICS=NONE\n  /COMPARE=GROUPS.');
   });

@@ -75,6 +75,9 @@ const en = {
   ariaBoxes: '{count} boxes',
   ariaPoints: '{count} points',
   ariaCurves: '{count} curves',
+  ariaLines: '{count} lines',
+  errorBars: 'Error bars: {label}',
+  lineChart: 'Line chart',
   ariaValues: '{count} values',
   ariaGroups: '{count} groups',
 } as const;
@@ -150,6 +153,9 @@ const cs: Record<ChartStringKey, string> = {
   ariaBoxes: 'krabic: {count}',
   ariaPoints: 'bodů: {count}',
   ariaCurves: 'křivek: {count}',
+  ariaLines: 'čar: {count}',
+  errorBars: 'Chybové úsečky: {label}',
+  lineChart: 'Čárový graf',
   ariaValues: 'hodnot: {count}',
   ariaGroups: 'skupin: {count}',
 };

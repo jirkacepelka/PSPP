@@ -4,6 +4,7 @@
 
 import { parseSurvival, type SurvivalSpec } from './survivalSpec';
 import { parseDendrogram, type DendrogramSpec } from './dendrogram';
+import { parseLine, type LineSpec } from './lineSpec';
 
 export type Pt = [number, number];
 
@@ -113,6 +114,7 @@ export type ChartSpec =
   | SpreadLevelSpec
   | SurvivalSpec
   | DendrogramSpec
+  | LineSpec
   | UnknownSpec;
 
 type Obj = Record<string, unknown>;
@@ -260,6 +262,8 @@ export function parseChart(input: unknown): ChartSpec {
       return parseSurvival(c, title);
     case 'dendrogram':
       return parseDendrogram(c, title);
+    case 'line':
+      return parseLine(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }
