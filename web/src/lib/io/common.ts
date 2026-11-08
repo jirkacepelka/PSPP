@@ -6,6 +6,7 @@
  */
 import type { Cell, Dataset, Variable } from '../../engine/types';
 import { PSPP_EPOCH_MS } from '../format';
+import { maxOf } from '../csv';
 import { makeVariable, uniqueName } from '../variables';
 
 /** Seconds from the PSPP epoch to the spreadsheet epoch (1899-12-30). */
@@ -81,7 +82,7 @@ export function gridToDataset(grid: SheetCell[][], name: string, opts: { header?
   const header = opts.header ?? (firstAllText && new Set(rows[0].map(cellText)).size === rows[0].length);
   const head = header ? rows[0] : [];
   const body = header ? rows.slice(1) : rows;
-  const ncol = Math.max(head.length, ...body.map((r) => r.length), 0);
+  const ncol = maxOf(body, head.length, (r) => r.length);
   const variables: Variable[] = [];
   const columns: Cell[][] = [];
   const names: string[] = [];
@@ -104,8 +105,8 @@ export function gridToDataset(grid: SheetCell[][], name: string, opts: { header?
         const f = { type: 'TIME', w: 8, d: 0 };
         variables.push(makeVariable(vn, { label, type: 'numeric', print: f, write: f, measure: 'scale' }));
       } else {
-        const d = Math.max(0, ...nums.map((x) => (x === null ? 0 : decimalsOf(x))));
-        const maxInt = Math.max(1, ...nums.map((x) => (x === null ? 1 : String(Math.trunc(Math.abs(x))).length + (x < 0 ? 1 : 0))));
+        const d = maxOf(nums, 0, (x) => (x === null ? 0 : decimalsOf(x)));
+        const maxInt = maxOf(nums, 1, (x) => (x === null ? 1 : String(Math.trunc(Math.abs(x))).length + (x < 0 ? 1 : 0)));
         const w = Math.min(40, Math.max(8, maxInt + (d ? d + 1 : 0)));
         const distinct = new Set(nums.filter((x) => x !== null)).size;
         variables.push(makeVariable(vn, { label, type: 'numeric', print: { type: 'F', w, d }, write: { type: 'F', w, d }, measure: d === 0 && distinct <= 10 ? 'nominal' : 'scale' }));
@@ -113,7 +114,7 @@ export function gridToDataset(grid: SheetCell[][], name: string, opts: { header?
       columns.push(nums);
     } else {
       const strs = vals.map((v) => (v === null ? '' : 's' in v ? v.s : formatPlain(v.n, v.kind)));
-      const width = Math.max(1, Math.min(32767, ...strs.map((v) => new TextEncoder().encode(v).length)));
+      const width = Math.min(32767, maxOf(strs, 1, (v) => new TextEncoder().encode(v).length));
       variables.push(
         makeVariable(vn, { label, type: 'string', width, print: { type: 'A', w: width, d: 0 }, write: { type: 'A', w: width, d: 0 }, measure: 'nominal', align: 'left', columns: Math.min(Math.max(width, 8), 32) }),
       );

@@ -72,6 +72,19 @@ export function guessDecimalComma(rows: string[][], delimiter: string): boolean 
   return comma > dot || (comma === 0 && dot === 0 && delimiter === ';');
 }
 
+/** Largest f(item), at least `floor`; a loop, because spreading a million values into Math.max overflows the call stack. */
+export function maxOf<T>(items: readonly T[], floor: number, f: (x: T) => number): number {
+  let m = floor;
+  for (const it of items) {
+    const v = f(it);
+    if (v > m) m = v;
+  }
+  return m;
+}
+
+const encoder = new TextEncoder();
+const byteLength = (v: string) => (/^[\x00-\x7f]*$/.test(v) ? v.length : encoder.encode(v).length);
+
 export function guessColumn(values: string[], decimalComma: boolean): { variable: Partial<Variable>; column: Cell[] } {
   const nonEmpty = values.filter((v) => v.trim() !== '');
   const numRe = decimalComma ? NUM_COMMA : NUM_DOT;
@@ -83,7 +96,7 @@ export function guessColumn(values: string[], decimalComma: boolean): { variable
       if (m) d = Math.max(d, m[1].length);
     }
     d = Math.min(d, 6);
-    const maxInt = Math.max(1, ...nums.map((n) => (n === null ? 1 : String(Math.trunc(Math.abs(n))).length + (n < 0 ? 1 : 0))));
+    const maxInt = maxOf(nums, 1, (n) => (n === null ? 1 : String(Math.trunc(Math.abs(n))).length + (n < 0 ? 1 : 0)));
     const w = Math.min(40, Math.max(8, maxInt + (d ? d + 1 : 0)));
     return { variable: { type: 'numeric', print: { type: 'F', w, d }, write: { type: 'F', w, d }, measure: d === 0 && new Set(nums).size <= 10 ? 'nominal' : 'scale' }, column: nums };
   }
@@ -101,7 +114,7 @@ export function guessColumn(values: string[], decimalComma: boolean): { variable
       };
     }
   }
-  const width = Math.max(1, Math.min(32767, ...values.map((v) => new TextEncoder().encode(v).length)));
+  const width = Math.min(32767, maxOf(values, 1, byteLength));
   return {
     variable: { type: 'string', width, print: { type: 'A', w: width, d: 0 }, write: { type: 'A', w: width, d: 0 }, measure: 'nominal', align: 'left', columns: Math.min(Math.max(width, 8), 32) },
     column: values,
@@ -122,7 +135,7 @@ export function delimitedToDataset(text: string, name: string, opts: DelimitedOp
   const header = opts.header ?? (rows.length > 1 && rows[0].every((c) => c.trim() !== '' && !/^[-+]?[\d.,]+$/.test(c.trim())));
   const head = header ? rows[0] : [];
   const body = header ? rows.slice(1) : rows;
-  const ncol = Math.max(head.length, ...body.map((r) => r.length), 0);
+  const ncol = maxOf(body, head.length, (r) => r.length);
   const variables: Variable[] = [];
   const columns: Cell[][] = [];
   const names: string[] = [];
