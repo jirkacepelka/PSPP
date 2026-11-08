@@ -881,10 +881,8 @@
   align-items: center;
   gap: var(--s-1);
   color: var(--ink-3);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 .onb-aside-note {
   min-height: 3em;
