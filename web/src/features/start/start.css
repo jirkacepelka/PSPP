@@ -1079,3 +1079,22 @@
     transition: none;
   }
 }
+
+/* Sample thumbnails stay light "paper" in the dark theme: the schematic sheet needs contrast to be readable. */
+:root[data-theme='dark'] .hm-samples .hm-thumb {
+  --measure-nominal: #8a4f87;
+  --measure-nominal-tint: #f5ecf4;
+  --measure-ordinal: #8c6510;
+  --measure-ordinal-tint: #f7f0e1;
+  --measure-scale: #2f6a9a;
+  --measure-scale-tint: #e8f0f7;
+  border-color: #3a3833;
+  background: #f4f2ec;
+}
+:root[data-theme='dark'] .hm-samples .hm-sheet-row span {
+  background: #d8d5cc;
+}
+:root[data-theme='dark'] .hm-samples .hm-card:hover .hm-thumb,
+:root[data-theme='dark'] .hm-samples .hm-card:focus-visible .hm-thumb {
+  border-color: #6b6862;
+}
