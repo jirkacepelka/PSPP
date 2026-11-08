@@ -99,9 +99,6 @@ export const ACCENT_PRESETS: AccentPreset[] = [
 
 export const DEFAULT_ACCENT = ACCENT_PRESETS[0].light;
 
-/** Hex values the store may hold that the presets list stores as their light variant. */
-export const ACCENT_PRESET_HEXES = ACCENT_PRESETS.map((p) => p.light);
-
 /**
  * Old Material-era defaults → new default. The settings store still ships '#1a73e8'
  * as its default accent; until it imports ACCENT_PRESETS from here, untouched installs

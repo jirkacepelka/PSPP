@@ -249,13 +249,6 @@ export async function openSample(id: SampleId, then?: () => void) {
   });
 }
 
-/** Removes one entry from the recent-files list. */
-export async function removeRecent(id: string) {
-  const list = await getRecent();
-  await kvDel(`recent-file:${id}`);
-  await kvSet(RECENT_KEY, list.filter((r) => r.id !== id));
-  window.dispatchEvent(new Event('pspp-recent-changed'));
-}
 
 // ------------------------------------------------------------------ save
 
@@ -445,14 +438,6 @@ async function addRecent(name: string, bytes: Uint8Array, kind: RecentFile['kind
   window.dispatchEvent(new Event('pspp-recent-changed'));
 }
 
-export async function openRecent(r: RecentFile) {
-  const bytes = await kvGet<Uint8Array>(`recent-file:${r.id}`);
-  if (!bytes) {
-    toast(t('files.recentMissing', { name: r.name }), { kind: 'error' });
-    return;
-  }
-  await openBytes(r.name, bytes);
-}
 
 export async function clearRecent() {
   const list = await getRecent();
@@ -627,11 +612,6 @@ export async function renameDocument(id: string, title: string) {
   docsChanged();
 }
 
-/** Kept for compatibility: the most recent document as an autosave snapshot. */
-export async function getAutosave(): Promise<AutosaveState | undefined> {
-  const [m] = await listDocuments();
-  return m ? kvGet<AutosaveState>(docKey(m.id)) : undefined;
-}
 
 export function restoreAutosave(a: AutosaveState) {
   if (a.dataset) useData.getState().load(a.dataset, { title: a.title, fileName: a.fileName, dirty: true });

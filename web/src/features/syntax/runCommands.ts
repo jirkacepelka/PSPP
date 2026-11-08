@@ -18,9 +18,6 @@ export function registerEditor(view: EditorView, tabId: string): () => void {
   };
 }
 
-export function getEditor() {
-  return editor;
-}
 
 export type RunMode = 'all' | 'selection' | 'current' | 'toEnd';
 

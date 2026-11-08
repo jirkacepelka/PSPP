@@ -91,6 +91,3 @@ export async function kvDel(key: string): Promise<void> {
   }
 }
 
-export function storageAvailable(): Promise<boolean> {
-  return openDb().then((d) => d !== null);
-}

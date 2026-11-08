@@ -1,7 +1,7 @@
 # Návrh e-mailu: PSPP Studio pro vývojáře GNU PSPP
 
 Před odesláním doplň věci v `[hranatých závorkách]` a ověř adresy na pspp.org / gnu.org.
-Repozitář musí být veřejný (stav jsem neověřil).
+Repozitář je veřejný (ověřeno přes GitHub API).
 
 **Komu:** pspp-dev@gnu.org
 **Kopie (volitelně):** maintainers@gnu.org (obecná otázka, jak se projekt může stát součástí GNU) nebo licensing@gnu.org (název, AI)
@@ -17,7 +17,7 @@ My name is [Jiří Čepelka]. First of all, thank you for PSPP.
 
 **What came out of it: PSPP Studio.** It is the PSPP 2.1.3 engine compiled to WebAssembly, with a new interface that runs entirely in the browser (nothing to install, and no data ever leaves the user's computer). It is available in Czech and English, and PSPP's own messages are translated into Czech too.
 
-- Live demo: https://pspp-studio-jiris-projects-be291b70.vercel.app
+- Live demo: https://pspp-studio.vercel.app
 - Source code (GPL-3.0-or-later): https://github.com/jirkacepelka/PSPP
 - Screenshots: attached (see the list at the end)
 
@@ -51,26 +51,26 @@ Best regards,
 [university / affiliation, if you want to mention it]
 [e-mail] · https://github.com/jirkacepelka
 
-Attachments (screenshots, also in the repository under `web/docs/screenshots/email/`):
-1. `01-welcome-setup.png` – first-run guide with a live preview of the workspace
-2. `02-start.png` – start screen
-3. `03-data.png` – data grid with value labels and variable inspector
-4. `04-menu.png` – the Analyze menu
-5. `05-output.png` – results with a plain-language explanation under the table
-6. `06-settings.png` – settings with a live preview
-7. `07-output-dark.png` – dark theme
+Attachments (screenshots, also in the repository under `web/docs/screenshots/`):
+1. `welcome-setup.png` – first-run guide with a live preview of the workspace
+2. `start.png` – start screen
+3. `data.png` – data grid with value labels and variable inspector
+4. `menu.png` – the Analyze menu
+5. `output.png` – results with a plain-language explanation under the table
+6. `settings.png` – settings with a live preview
+7. `output-dark.png` – dark theme
 
 ---
 
 ## Poznámky pro tebe
 
-- **Přílohy:** snímky jsou v `web/docs/screenshots/email/` (1600 px, anglicky). Do `pspp-dev` se přílohy posílají nejlépe jako několik menších souborů nebo jako odkaz do repozitáře (https://github.com/jirkacepelka/PSPP/tree/claude/exciting-wright-ah3znw/web/docs/screenshots/email, po sloučení změn do hlavní větve upravit na `main`). Konference mívají limit velikosti zprávy, takže odkaz je bezpečnější. Doplnit do textu vidět stačí jednu z variant.
+- **Přílohy:** snímky jsou v `web/docs/screenshots/` (1600 px, anglicky). Do `pspp-dev` se přílohy posílají nejlépe jako několik menších souborů nebo jako odkaz do repozitáře (https://github.com/jirkacepelka/PSPP/tree/main/web/docs/screenshots – odkaz funguje až po sloučení do `main`; zatím je jedinou větví `claude/exciting-wright-ah3znw`, a ta je i výchozí). Konference mívají limit velikosti zprávy, takže odkaz je bezpečnější. Doplnit do textu vidět stačí jednu z variant.
 - **Nativní aplikace:** nabídka přepsání do nativní aplikace je zmíněna jako možnost, ne slib. Ověř, že to tak opravdu myslíš. Rozšiřující analýzy mají v repozitáři jednotkové testy (`web/src/ext/commands/*.test.ts`), proto je e-mail zmiňuje.
 - **Realistické očekávání:** GNU projekty obvykle přijímá FSF až po přihlášení balíčku přes maintainers@gnu.org a podpisu převodu autorských práv; bývá to pomalé. Přirozenější první krok je často pspp-dev: oni sami rozhodnou, jestli to chtějí jako součást PSPP, jako samostatný balíček, nebo odkazem. Z paměti: ověř si postup na gnu.org/help/evaluation.html a gnu.org/software/devel.html.
 - **Potenciální překážky, na které se připrav:** (1) JavaScript/TypeScript a React se v GNU často řeší jinak než C (FSF je citlivé na svobodný JavaScript – GPL licence a zdroj jsou ale v pořádku); (2) část kódu vznikla s pomocí AI, což může zpomalit nebo zablokovat převod autorských práv; (3) nasazení na Vercelu je komerční služba, FSF by pravděpodobně chtělo hostování mimo ni.
 - **Převod autorských práv:** pokud na projektu pracovala univerzita (zadání, stipendium, pracovní poměr), může mít na kód práva ona. Před přislíbením převodu to ověř u školy.
-- **Veřejný repozitář:** v GitHubu Settings → General → Danger Zone → Change visibility. Bez zdrojového kódu by distribuce aplikace s GPL jádrem nebyla v souladu s licencí.
-- **Živá ukázka:** pokud je za Vercel Deployment Protection, vývojáři se do ní nedostanou. Ověř v anonymním okně.
+- **Veřejný repozitář:** ověřeno, licence GPL-3.0 je v GitHubu rozpoznaná. Jediná větev je `claude/exciting-wright-ah3znw` a je výchozí; pro e-mail je lepší mít `main` – po schválení ji slouč nebo přejmenuj.
+- **Živá ukázka:** veřejná adresa https://pspp-studio.vercel.app odpovídá bez přihlášení (ověřeno). Adresa s `-jiris-projects-` je chráněná přihlášením, proto ji v e-mailu nepoužívej.
 - **Úpravy upstreamu:** výčet odpovídá `engine/README.md`; projdi si před odesláním `git log -- engine/pspp`.
 - **Konference:** do `pspp-dev` se vyplatí přihlásit předem, aby ti došly odpovědi.
 - **Tvrzení v e-mailu, která jsem nemohl ověřit:** „guided first-run setup", „accessible design" a seznam analýz odpovídají tomu, co jsme v projektu stavěli, ale zkontroluj, že ti sedí.

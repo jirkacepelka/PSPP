@@ -1,6 +1,5 @@
 # PSPP Studio – engine
 
-GNU PSPP 2.1.3 (`pspp/`) zkompilované do WebAssembly, bez GUI a bez Cairo.
 GNU PSPP 2.1.3 (`pspp/`) compiled to WebAssembly, headless and without Cairo.
 
 | Path | What |

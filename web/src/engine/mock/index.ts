@@ -5,7 +5,7 @@
  */
 import type { Cell, Dataset, EngineApi, OutputItem, RunResult, Variable } from '../types';
 import { splitCommands, tokenize, isCommentCommand, type Token } from '../../lib/syntax';
-import { matchCommand, PSPP_COMMANDS, PSPP_UNIMPLEMENTED } from '../../lib/commands';
+import { matchCommand, PSPP_UNIMPLEMENTED } from '../../lib/commands';
 import { datasetToDelimited, delimitedToDataset } from '../../lib/csv';
 import { formatCell, isMissingValue, valueLabelFor } from '../../lib/format';
 import { makeVariable } from '../../lib/variables';
@@ -789,5 +789,3 @@ export function createMockEngine(): EngineApi {
     },
   };
 }
-
-export const KNOWN_COMMANDS = PSPP_COMMANDS;

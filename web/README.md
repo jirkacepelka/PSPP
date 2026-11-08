@@ -1,38 +1,9 @@
 # PSPP Studio – web
 
-Moderní webové rozhraní pro [GNU PSPP](https://www.gnu.org/software/pspp/), které běží celé v prohlížeči.
-A modern browser front-end for GNU PSPP that runs entirely in the browser.
+The React/TypeScript front end of PSPP Studio: a modern interface for GNU PSPP that runs entirely
+in the browser. See the [project README](../README.md) for an overview.
 
-Licence / License: GPL-3.0-or-later. Zdrojový kód / source: <https://github.com/jirkacepelka/PSPP>
-
-## Česky
-
-Požadavky: Node.js 22.
-
-```bash
-npm install
-npm run dev        # vývojový server (http://localhost:5173)
-npm run build      # kontrola typů + produkční build do dist/
-npm run preview    # náhled buildu
-npm run test       # jednotkové testy (Vitest)
-```
-
-- Statistické jádro je GNU PSPP zkompilované do WebAssembly (`public/engine/pspp.js` + `.wasm`),
-  načítá se ve Web Workeru (`src/engine/worker.ts`). Pokud jádro chybí, aplikace automaticky použije
-  ukázkové jádro v JavaScriptu (`src/engine/mock/`). Vynutit ho lze parametrem `?engine=mock`.
-- Nastavení, profil, nedávné soubory a automatické ukládání jsou v IndexedDB tohoto prohlížeče.
-- Překlady: `src/i18n/cs.json`, `src/i18n/en.json` (kontrola: `npm run i18n:check`).
-- Nové analytické dialogy: přidejte soubor do `src/features/dialogs/specs/` a zaregistrujte ho
-  v `specs/index.ts`; test syntaxe patří do `specs.test.ts`.
-- Ikony (Material Symbols) jsou podmnožina fontu; po přidání nové ikony spusťte `npm run icons`
-  (vyžaduje `pip install fonttools brotli`).
-- Snímky obrazovky: `npm run build && npx vite preview --port 4173` a pak
-  `node scripts/screenshots.cjs` (Playwright) → `docs/screenshots/`.
-- Nasazení: statický hosting (Vercel), viz `vercel.json`.
-
-## English
-
-Requirements: Node.js 22.
+Requires Node.js 22.
 
 ```bash
 npm install
@@ -42,29 +13,40 @@ npm run preview    # preview the build
 npm run test       # unit tests (Vitest)
 ```
 
-- The statistics engine is GNU PSPP compiled to WebAssembly (`public/engine/pspp.js` + `.wasm`),
-  loaded in a Web Worker (`src/engine/worker.ts`). When it is missing the app falls back to a JavaScript
-  demo engine (`src/engine/mock/`); force it with `?engine=mock`.
-- Settings, profile, recent files and autosave live in this browser's IndexedDB.
-- Translations: `src/i18n/cs.json`, `src/i18n/en.json` (check with `npm run i18n:check`).
-- New analysis dialogs: add a spec file under `src/features/dialogs/specs/`, register it in
-  `specs/index.ts` and add a syntax test to `specs.test.ts`.
-- Icons are a subset of Material Symbols; run `npm run icons` after using a new icon name
-  (needs `pip install fonttools brotli`).
-- Screenshots: `npm run build && npx vite preview --port 4173`, then `node scripts/screenshots.cjs`
-  (Playwright) → `docs/screenshots/`.
-- Deployment: static hosting (Vercel), see `vercel.json`.
+## Notes
 
-### Layout
+- **Engine.** GNU PSPP compiled to WebAssembly (`public/engine/pspp.js` + `.wasm`), loaded in a
+  Web Worker (`src/engine/worker.ts`). When it is missing, the app falls back to a small JavaScript
+  demo engine (`src/engine/mock/`); force it with `?engine=mock`.
+- **Extra analyses.** `src/ext/commands/*.ts` implement analyses PSPP lacks as SPSS syntax commands
+  computed in the browser; they are discovered automatically.
+- **Storage.** Settings, profile, recent files and autosave live in the browser's IndexedDB.
+- **Translations.** `src/i18n/cs.json`, `src/i18n/en.json` and `src/i18n/fragments/*.{cs,en}.json`.
+  Check that the keys match with `npm run i18n:check`.
+- **New analysis dialogs.** Add a spec file under `src/features/dialogs/specs/`, register it in
+  `specs/index.ts` and add a syntax test to `specs.test.ts`.
+- **Icons.** A subset of Material Symbols; run `npm run icons` after using a new icon name
+  (needs `pip install fonttools brotli`).
+- **Screenshots.** `npm run build && npx vite preview --port 4173`, then `node scripts/screenshots.cjs`
+  (Playwright).
+- **Design system.** Tokens and component rules: [`docs/design-system.md`](docs/design-system.md);
+  open the app with `?styleguide` for the living style guide.
+- **Deployment.** Static hosting (Vercel), see `../vercel.json`.
+
+## Layout
 
 ```
 src/
-  engine/       types.ts (engine contract), client.ts, worker.ts (WASM stub), mock/ (demo engine)
-  app/          actions, menus, engine orchestration, files/autosave, theme
+  engine/       engine contract (types.ts), client, worker, mock engine
+  app/          actions, menus, engine orchestration, files and autosave, theme
   store/        Zustand stores: data (undo/redo), ui, output, syntax, settings
-  features/     shell (app bar, menus, toolbar, tabs), data, variables, syntax, output,
-                dialogs (declarative specs + renderer), settings, start, palette, misc
-  lib/          formats/dates, CSV, syntax splitting, colors, storage, PSPP command list
-  i18n/         cs.json, en.json
+  features/     shell, data, variables, syntax, output, dialogs (declarative specs),
+                settings, onboarding, start, palette
+  ext/          extra analyses (commands/) and their numerical helpers
+  charts/       chart renderer for the engine's chart data
+  lib/          formats and dates, CSV/Excel/ODS import and export, colours, storage
+  i18n/         translations
   samples/      bundled sample datasets (generated by scripts/make-samples.mjs)
 ```
+
+License: GPL-3.0-or-later.

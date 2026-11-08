@@ -6,7 +6,7 @@ The PSPP Studio design system. It keeps the clarity of the old Sheets/Docs-like 
 - Base layer (reset, type, focus, utilities): `src/styles/base.css`
 - Components: `src/components/` (exported from `src/components/index.ts`, styles in `components.css`)
 - Accent generation: `src/lib/color.ts`
-- Living style guide: open the app with `?styleguide` (add `&theme=dark`, `&accent=teal`, `&density=compact`). Screenshots are in `docs/design-system/`.
+- Living style guide: open the app with `?styleguide` (add `&theme=dark`, `&accent=teal`, `&density=compact`).
 
 ## 1. Principles
 

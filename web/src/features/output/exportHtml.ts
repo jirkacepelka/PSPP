@@ -305,12 +305,6 @@ ${body}
 </main><script>${FIT_SCRIPT(opts.mode === 'pdf')}</script></body></html>`;
 }
 
-/** Backwards-compatible: the whole output as an HTML document. */
-export function outputToHtml(entries: OutputEntry[]): string {
-  const o = useSettings.getState().outputExport;
-  return buildOutputDocument(entries, { ...o, mode: 'html' });
-}
-
 /** Prints the document in a hidden frame (the browser offers "Save as PDF"). */
 export function printDocument(html: string, title: string) {
   const frame = document.createElement('iframe');

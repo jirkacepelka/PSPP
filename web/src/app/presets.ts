@@ -100,16 +100,3 @@ export function activePreset(s: Partial<Settings>): PresetState {
 export function useActivePreset(): PresetState {
   return useSettings((s) => activePreset(s));
 }
-
-/**
- * Optional: keeps the stored `uiPreset` field in sync with the values (flips to 'custom'
- * after a manual change, back to a preset when the values match one again).
- * Returns an unsubscribe function.
- */
-export function startPresetTracking(): () => void {
-  return useSettings.subscribe((s) => {
-    if (!s.loaded) return;
-    const now = activePreset(s);
-    if (now !== s.uiPreset) s.set({ uiPreset: now });
-  });
-}

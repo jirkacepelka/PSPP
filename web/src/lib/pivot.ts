@@ -138,9 +138,3 @@ export function values(row: PivotCell[]): (number | null)[] {
   return row.filter((c) => !c.header).map((c) => c.num);
 }
 
-/** Number of leading header (stub) columns in the table. */
-export function stubWidth(t: PivotTable): number {
-  const rows = dataRows(t);
-  if (!rows.length) return 0;
-  return Math.min(...rows.map((row) => row.findIndex((c) => !c.header)).filter((i) => i >= 0));
-}
