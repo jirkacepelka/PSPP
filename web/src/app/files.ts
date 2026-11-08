@@ -206,8 +206,8 @@ export async function openBytes(name: string, bytes: Uint8Array, opts: { handle?
 export function loadImportedDataset(name: string, ds: Dataset, handle?: FsFileHandle) {
   const title = name.replace(/\.[^.]+$/, '');
   confirmDiscard(() => {
+    // not markSynced: the engine has not seen this dataset, so the next run must send it
     useData.getState().load({ ...ds, name: title }, { title, fileName: name });
-    markSynced(useData.getState().dataset);
     currentHandle = handle ?? null;
     useUi.getState().setView('data');
     toast(t('io.imported', { name, cases: t('io.n.cases', { count: Math.max(0, ...ds.columns.map((c) => c.length)) }), vars: t('io.n.vars', { count: ds.variables.length }) }));
