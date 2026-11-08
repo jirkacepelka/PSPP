@@ -27,7 +27,9 @@ What it adds on top of PSPP:
 - output export to PDF, Word (.docx) and HTML, with charts and tables
 - a few extra analyses implemented in the browser on top of the engine (for example GLM profile plots and line charts)
 
-About the engine: the changes to the upstream sources are small and published in the repository under `engine/pspp` (see `git log -- engine/pspp`): an optional `--without-cairo` build, an `html_table_to_string()` helper, and Emscripten portability fixes. A small C bridge (`engine/bridge`) exposes the library to JavaScript, and the build scripts are in `engine/scripts`. I would be glad to submit any of these changes upstream if you think they are worth having, for example the Cairo-optional build.
+About the engine: the changes to the upstream sources are small and published in the repository under `engine/pspp` (see `git log -- engine/pspp`): an optional `--without-cairo` build, an `html_table_to_string()` helper, and Emscripten portability fixes. A small C bridge (`engine/bridge`) exposes the library to JavaScript, and the build scripts are in `engine/scripts`. I would be glad to submit the changes to the upstream sources if you think they are worth having, for example the Cairo-optional build (subject to what I say below about AI assistance).
+
+One more thing, in the interest of being open about it: most of the code of the front end, and the bridge and build scripts around the engine, were written with the help of an AI model (Anthropic's Claude Opus 5.5), under my direction and review. I understand that some free software projects have reservations about AI-assisted code, for licensing, provenance or other reasons, and I fully respect that. If that is a concern for you, I will gladly keep the project fully separate, and I would not submit any of that code upstream unless you explicitly say you want it.
 
 I should also say that this is an independent project and is not endorsed by the GNU Project or the FSF. The name "PSPP Studio" contains the PSPP name, so please tell me if you would prefer that I use a different one. SPSS is a trademark of IBM, and the application states this.
 
@@ -45,4 +47,5 @@ Best regards,
 - **Živá ukázka:** Vercel adresa je z konfigurace projektu. Pokud nasazení chrání přihlášení (Vercel Deployment Protection), vývojáři se na ukázku nedostanou. Zkontroluj to v anonymním okně, případně nastav vlastní doménu.
 - **Úpravy upstreamu:** tvrzení o změnách v e-mailu odpovídá `engine/README.md`. Před odesláním si ještě pro jistotu projdi `git log -- engine/pspp`, aby seznam seděl.
 - **Konference:** pro zaslání do `pspp-dev` se může vyplatit přihlásit se předem na gnu.org/software/pspp, aby ti došly odpovědi (zprávy od nečlenů mohou čekat na schválení).
+- **Použití AI:** věta o Opusu 5.5 je v e-mailu záměrně opatrná a bere v úvahu možný odpor. Pokud jsi ty sám část kódu psal ručně, můžeš to doplnit; zpráva by měla odpovídat skutečnosti. Úpravy zdrojů PSPP v `engine/pspp` vznikly také s pomocí AI, proto jsem nabídku jejich zaslání upstreamu podmínil.
 - **Tón:** e-mail záměrně nic nežádá; je to informace a nabídka. FSF ani GNU projekt neschvalují odvozené projekty.
