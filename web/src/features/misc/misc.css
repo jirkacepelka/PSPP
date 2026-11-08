@@ -174,3 +174,17 @@
     grid-template-columns: 1fr;
   }
 }
+.format-cards {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.sa-opts {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+}
+.sa-opts .check {
+  align-items: flex-start;
+}
+.sa-opts .set-row-desc {
+  display: block;
+}

@@ -1,0 +1,138 @@
+{
+  "actions": {
+    "exportXlsx": "Excel workbook (.xlsx)",
+    "exportOds": "OpenDocument spreadsheet (.ods)",
+    "exportTsv": "Tab-separated values (.tsv)",
+    "exportJson": "PSPP Studio dataset (.json)",
+    "exportPdf": "Output as PDF"
+  },
+  "files": {
+    "needsEngine": "{{name}} needs the PSPP engine, which is not available in demo mode. CSV, Excel, ODS, JSON and SPS files work."
+  },
+  "saveAs": {
+    "mockWarning": "SPSS formats need the PSPP WebAssembly engine, which is not running. Excel, ODS, CSV, TSV and JSON work without it.",
+    "fmt": {
+      "xlsx": "Excel",
+      "ods": "OpenDocument",
+      "csv": "CSV",
+      "tsv": "TSV",
+      "json": "JSON"
+    },
+    "fmtDesc": {
+      "xlsx": ".xlsx – data plus a sheet describing the variables",
+      "ods": ".ods – for LibreOffice, data plus variable descriptions",
+      "csv": ".csv – values only, for any program",
+      "tsv": ".tsv – tab-separated values",
+      "json": ".json – the whole dataset, for PSPP Studio and scripts"
+    }
+  },
+  "io": {
+    "xlsOld": "The old Excel .xls format cannot be read. Save {{name}} in Excel as .xlsx or .csv and open it again.",
+    "imported": "Imported {{name}} – {{cases}}, {{vars}}",
+    "group": {
+      "spss": "SPSS and PSPP – keeps everything",
+      "sheets": "Spreadsheets and text – for other programs"
+    },
+    "options": "Options",
+    "labels": "Write value labels instead of codes",
+    "labelsDesc": "E.g. “female” instead of 2. Good for reading, not for further analysis.",
+    "csvStyle": "Delimiter and decimal separator",
+    "csvComma": "Comma, decimal point (1.5)",
+    "csvSemicolon": "Semicolon, decimal comma (1,5) – European Excel",
+    "sheetNote": "The second sheet describes the variables: labels, measure, value labels and missing values.",
+    "dict": {
+      "sheetData": "Data",
+      "sheetVars": "Variables",
+      "name": "Name",
+      "label": "Label",
+      "type": "Type",
+      "format": "Format",
+      "measure": "Measure",
+      "valueLabels": "Value labels",
+      "missing": "Missing values",
+      "numeric": "Numeric",
+      "string": "String"
+    },
+    "import": {
+      "title": "Import data",
+      "import": "Import",
+      "encoding": "Character encoding",
+      "auto": "Detect",
+      "delimiter": "Delimiter",
+      "decimal": "Decimal separator",
+      "detected": "Detected: {{value}}",
+      "delim": {
+        "auto": "Detect",
+        "comma": "Comma",
+        "semicolon": "Semicolon",
+        "tab": "Tab",
+        "pipe": "Pipe |"
+      },
+      "dec": {
+        "auto": "Detect",
+        "dot": "Point 1.5",
+        "comma": "Comma 1,5"
+      },
+      "sheet": "Sheet",
+      "header": "First row contains variable names",
+      "preview": "Data preview",
+      "summary": "{{cases}} · {{vars}}",
+      "numeric_one": "{{count}} numeric",
+      "numeric_few": "{{count}} numeric",
+      "numeric_other": "{{count}} numeric",
+      "typeText": "text",
+      "typeNumber": "number",
+      "typeDate": "date",
+      "more": "… and {{rows}} more rows, {{cols}} more columns",
+      "empty": "The file contains no data.",
+      "error": "The file cannot be read: {{message}}"
+    },
+    "out": {
+      "title": "Export output",
+      "export": "Export",
+      "asPdf": "PDF…",
+      "asHtml": "Web page (HTML)…",
+      "printNow": "Print",
+      "fmt": {
+        "pdf": "PDF",
+        "html": "Web page"
+      },
+      "fmtDesc": {
+        "pdf": "For printing and handing in, A4 with page numbers",
+        "html": "A single .html file that opens in a browser or Word"
+      },
+      "include": "Include",
+      "opt": {
+        "toc": "Table of contents",
+        "interpret": "Plain-language explanations",
+        "syntax": "Command syntax"
+      },
+      "optDesc": {
+        "toc": "A linked list of results at the start of the document",
+        "interpret": "What t-tests, correlations and other tests mean, under their tables",
+        "syntax": "The PSPP commands that produced each result – to repeat the analysis"
+      },
+      "pdfHint": "The browser's print dialog opens. Choose “Save as PDF” as the printer.",
+      "makePdf": "Create PDF",
+      "makeHtml": "Download HTML",
+      "savedHtml": "Output downloaded as HTML",
+      "fileSuffix": "output",
+      "toc": "Contents",
+      "report": "Analysis results",
+      "data": "Data",
+      "size": "Size",
+      "sizeValue": "{{cases}}, {{vars}}",
+      "results": "Results",
+      "created": "Created",
+      "footer": "Created with PSPP Studio – free software built on GNU PSPP."
+    },
+    "n": {
+      "cases_one": "{{count}} case",
+      "cases_few": "{{count}} cases",
+      "cases_other": "{{count}} cases",
+      "vars_one": "{{count}} variable",
+      "vars_few": "{{count}} variables",
+      "vars_other": "{{count}} variables"
+    }
+  }
+}

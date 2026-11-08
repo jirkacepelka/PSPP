@@ -148,27 +148,43 @@ export function FindDialog() {
   );
 }
 
+const FORMAT_ICON: Record<SaveFormat, string> = {
+  sav: 'description',
+  zsav: 'folder_zip',
+  por: 'swap_horizontal_circle',
+  xlsx: 'table_view',
+  ods: 'grid_on',
+  csv: 'csv',
+  tsv: 'view_column',
+  json: 'data_object',
+};
+const FORMAT_GROUPS: { key: string; formats: SaveFormat[] }[] = [
+  { key: 'spss', formats: ['sav', 'zsav', 'por'] },
+  { key: 'sheets', formats: ['xlsx', 'ods', 'csv', 'tsv', 'json'] },
+];
+
 export function SaveAsDialog() {
   const { t } = useTranslation();
   const close = useUi((s) => s.closeModal);
   const title = useData((s) => s.title);
   const kind = useUi((s) => s.engineKind);
+  const exportOptions = useSettings((s) => s.exportOptions);
+  const setSettings = useSettings((s) => s.set);
   const [name, setName] = useState(title || 'data');
-  const [format, setFormat] = useState<SaveFormat>(kind === 'mock' ? 'csv' : 'sav');
-  const formats: { f: SaveFormat; icon: string }[] = [
-    { f: 'sav', icon: 'description' },
-    { f: 'zsav', icon: 'folder_zip' },
-    { f: 'por', icon: 'swap_horizontal_circle' },
-    { f: 'csv', icon: 'csv' },
-  ];
+  const [format, setFormat] = useState<SaveFormat>(kind === 'mock' ? 'xlsx' : 'sav');
+  const [opts, setOpts] = useState(exportOptions);
+  const needsEngine = (f: SaveFormat) => f === 'sav' || f === 'zsav' || f === 'por';
+  const lossy = !needsEngine(format) && format !== 'json';
   const save = () => {
     close();
-    void saveDataset({ format, name, saveAs: true });
+    if (lossy) setSettings({ exportOptions: opts });
+    void saveDataset({ format, name, saveAs: true, options: opts });
   };
   return (
     <Dialog
       title={t('saveAs.title')}
       icon="save_as"
+      size="wide"
       onClose={close}
       footer={
         <>
@@ -188,20 +204,44 @@ export function SaveAsDialog() {
             <span className="ext">.{format}</span>
           </div>
         </div>
-        <fieldset className="dlg-fieldset">
-          <legend className="field-label">{t('saveAs.format')}</legend>
-          <div className="format-cards">
-            {formats.map(({ f, icon }) => (
-              <label key={f} className={`format-card ${format === f ? 'on' : ''}`}>
-                <input type="radio" name="fmt" checked={format === f} onChange={() => setFormat(f)} />
-                <Icon name={icon} />
-                <span className="format-name">{t(`saveAs.fmt.${f}`)}</span>
-                <span className="set-row-desc">{t(`saveAs.fmtDesc.${f}`)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        {kind === 'mock' && format !== 'csv' && (
+        {FORMAT_GROUPS.map((g) => (
+          <fieldset key={g.key} className="dlg-fieldset">
+            <legend className="field-label">{t(`io.group.${g.key}`)}</legend>
+            <div className="format-cards">
+              {g.formats.map((f) => (
+                <label key={f} className={`format-card ${format === f ? 'on' : ''}`}>
+                  <input type="radio" name="fmt" checked={format === f} onChange={() => setFormat(f)} />
+                  <Icon name={FORMAT_ICON[f]} />
+                  <span className="format-name">{t(`saveAs.fmt.${f}`)}</span>
+                  <span className="set-row-desc">{t(`saveAs.fmtDesc.${f}`)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+        {lossy && (
+          <fieldset className="dlg-fieldset sa-opts">
+            <legend className="field-label">{t('io.options')}</legend>
+            <label className="check">
+              <input type="checkbox" checked={opts.labels} onChange={(e) => setOpts({ ...opts, labels: e.target.checked })} />
+              <span>
+                {t('io.labels')}
+                <span className="set-row-desc">{t('io.labelsDesc')}</span>
+              </span>
+            </label>
+            {format === 'csv' && (
+              <div className="segmented" role="radiogroup" aria-label={t('io.csvStyle')}>
+                {[false, true].map((semi) => (
+                  <button key={String(semi)} type="button" role="radio" aria-checked={opts.semicolon === semi} onClick={() => setOpts({ ...opts, semicolon: semi })}>
+                    {t(semi ? 'io.csvSemicolon' : 'io.csvComma')}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(format === 'xlsx' || format === 'ods') && <p className="field-hint">{t('io.sheetNote')}</p>}
+          </fieldset>
+        )}
+        {kind === 'mock' && needsEngine(format) && (
           <p className="dlg-info warn">
             <Icon name="warning" />
             {t('saveAs.mockWarning')}

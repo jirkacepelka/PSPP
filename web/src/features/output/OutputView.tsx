@@ -14,7 +14,7 @@ import { useOutput, type OutputEntry } from '../../store/output';
 import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
 import { useData } from '../../store/data';
-import { exportOutputHtml, printOutput } from '../../app/files';
+import { printOutput } from '../../app/files';
 import { pasteSyntax, runSyntaxDetailed } from '../../app/engine';
 import { openDialog } from '../../app/actions';
 import { formatShortcut } from '../../app/actions';
@@ -403,14 +403,20 @@ export function OutputView() {
         <span className="output-bar-title">{t('views.output')}</span>
         {entries.length > 0 && <span className="output-bar-count">{t('output.results', { count: entries.length })}</span>}
         <span className="spacer" />
-        <button type="button" className="btn btn-ghost btn-sm" onClick={exportOutputHtml} disabled={!entries.length}>
-          <Icon name="download" />
-          <span className="hide-sm">{t('output.exportHtml')}</span>
-        </button>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={printOutput} disabled={!entries.length}>
-          <Icon name="print" />
-          <span className="hide-sm">{t('output.print')}</span>
-        </button>
+        <MenuButton
+          icon="ios_share"
+          label={t('io.out.export')}
+          variant="ghost"
+          size="sm"
+          alignEnd
+          disabled={!entries.length}
+          items={[
+            { type: 'item', id: 'pdf', label: t('io.out.asPdf'), icon: 'picture_as_pdf', onSelect: () => openModal({ kind: 'exportOutput', format: 'pdf' }) },
+            { type: 'item', id: 'html', label: t('io.out.asHtml'), icon: 'html', onSelect: () => openModal({ kind: 'exportOutput', format: 'html' }) },
+            { type: 'sep' },
+            { type: 'item', id: 'print', label: t('io.out.printNow'), icon: 'print', onSelect: () => printOutput() },
+          ]}
+        />
         <IconButton
           icon="delete_sweep"
           small

@@ -51,6 +51,10 @@ export interface Settings {
   ciLevel: number;
   /** Language of APA-style copied tables. */
   apaLocale: Lang;
+  /** Data export: value labels instead of codes; CSV with ';' and decimal comma. */
+  exportOptions: { labels: boolean; semicolon: boolean };
+  /** Output export (HTML / PDF): what to include. */
+  outputExport: { syntax: boolean; interpret: boolean; toc: boolean };
   /** Re-running an output result replaces it instead of appending. */
   rerunReplaces: boolean;
   /** How variables are listed in dialogs and pickers. */
@@ -123,6 +127,8 @@ export const defaultSettings = (): Settings => {
     pFormat: 'exact',
     ciLevel: 95,
     apaLocale: lang,
+    exportOptions: { labels: false, semicolon: lang === 'cs' },
+    outputExport: { syntax: false, interpret: true, toc: true },
     rerunReplaces: true,
     listShows: 'both',
     showSyntaxPreview: true,

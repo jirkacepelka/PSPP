@@ -1,0 +1,114 @@
+/* Import dialog (CSV / TSV / XLSX / ODS) with preview. */
+.imp {
+  display: grid;
+  gap: var(--s-4);
+}
+.imp-file {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.imp-opts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--s-3) var(--s-5);
+}
+.imp-opts .field {
+  display: grid;
+  gap: var(--s-1);
+  margin: 0;
+}
+.imp-opts .select {
+  min-width: 180px;
+}
+.imp-header {
+  align-self: center;
+  margin-top: var(--s-4);
+}
+.imp-table-wrap {
+  overflow: auto;
+  max-height: 340px;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}
+.imp-table-wrap:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.imp-table {
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  min-width: 100%;
+}
+.imp-table th,
+.imp-table td {
+  padding: 5px var(--s-3);
+  border-bottom: var(--hairline) solid var(--line);
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.imp-table td.num {
+  text-align: right;
+}
+.imp-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-sunken);
+  border-bottom-color: var(--line-strong);
+  vertical-align: bottom;
+}
+.imp-var {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+.imp-var .icon {
+  color: var(--ink-3);
+}
+.imp-type {
+  display: block;
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+.imp-rn {
+  width: 1%;
+  color: var(--ink-3);
+  text-align: right !important;
+  background: var(--surface-sunken);
+}
+.imp-more,
+.imp-empty {
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+.imp-summary {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+@media (max-width: 600px) {
+  .imp-opts .select {
+    min-width: 0;
+    width: 100%;
+  }
+  .imp-opts .field {
+    width: 100%;
+  }
+  .imp-summary {
+    display: none;
+  }
+}

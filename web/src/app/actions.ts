@@ -12,7 +12,7 @@ import { useSyntax } from '../store/syntax';
 import { useUi, type View } from '../store/ui';
 import { SPECS_BY_ID } from '../features/dialogs/specs';
 import { syntaxTemplate } from '../features/syntax/templates';
-import { exportOutputHtml, newDataset, newSyntax, openFileDialog, openSample, printOutput, saveDataset, saveSyntaxFile } from './files';
+import { newDataset, newSyntax, openFileDialog, openSample, printOutput, saveDataset, saveSyntaxFile } from './files';
 import { pasteSyntax, runSyntax } from './engine';
 import { manualUrl, SOURCE_URL } from './help';
 import { gridCommands } from './gridBus';
@@ -114,9 +114,14 @@ export const ACTIONS: Action[] = [
   { id: 'file.export.sav', label: 'actions.exportSav', icon: 'description', run: () => void saveDataset({ format: 'sav', saveAs: true }), enabled: hasData },
   { id: 'file.export.zsav', label: 'actions.exportZsav', icon: 'folder_zip', run: () => void saveDataset({ format: 'zsav', saveAs: true }), enabled: hasData },
   { id: 'file.export.por', label: 'actions.exportPor', icon: 'swap_horizontal_circle', run: () => void saveDataset({ format: 'por', saveAs: true }), enabled: hasData },
+  { id: 'file.export.xlsx', label: 'actions.exportXlsx', icon: 'table_view', run: () => void saveDataset({ format: 'xlsx', saveAs: true }), enabled: hasData },
+  { id: 'file.export.ods', label: 'actions.exportOds', icon: 'grid_on', run: () => void saveDataset({ format: 'ods', saveAs: true }), enabled: hasData },
   { id: 'file.export.csv', label: 'actions.exportCsv', icon: 'csv', run: () => void saveDataset({ format: 'csv', saveAs: true }), enabled: hasData },
+  { id: 'file.export.tsv', label: 'actions.exportTsv', icon: 'view_column', run: () => void saveDataset({ format: 'tsv', saveAs: true }), enabled: hasData },
+  { id: 'file.export.json', label: 'actions.exportJson', icon: 'data_object', run: () => void saveDataset({ format: 'json', saveAs: true }), enabled: hasData },
   { id: 'file.saveSyntax', label: 'actions.saveSyntax', icon: 'download', run: saveSyntaxFile },
-  { id: 'file.exportOutput', label: 'actions.exportOutput', icon: 'html', run: exportOutputHtml },
+  { id: 'file.exportOutput', label: 'actions.exportOutput', icon: 'html', run: () => ui().openModal({ kind: 'exportOutput', format: 'html' }) },
+  { id: 'file.exportPdf', label: 'actions.exportPdf', icon: 'picture_as_pdf', run: () => ui().openModal({ kind: 'exportOutput', format: 'pdf' }) },
   { id: 'file.print', label: 'actions.print', icon: 'print', shortcut: 'Mod+P', run: printOutput },
   tpl('SYSFILE INFO', 'actions.sysfileInfo', 'info'),
   { id: 'file.start', label: 'actions.startScreen', icon: 'home', run: () => ui().setShowStart(true) },

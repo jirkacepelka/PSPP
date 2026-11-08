@@ -34,6 +34,8 @@ import { OnboardingGate } from './features/onboarding/Onboarding';
 import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
 import { ConfirmDialog, FindDialog, GotoDialog, SaveAsDialog } from './features/misc/SmallDialogs';
+import { ImportDialog } from './features/misc/ImportDialog';
+import { ExportOutputDialog } from './features/output/ExportOutputDialog';
 import { MissingDialog, TypeDialog, ValueLabelsDialog } from './features/variables/VariableDialogs';
 import './features/shell/shell.css';
 
@@ -109,6 +111,10 @@ function Modals() {
       return <FindDialog />;
     case 'saveAs':
       return <SaveAsDialog />;
+    case 'import':
+      return <ImportDialog name={modal.name} bytes={modal.bytes} />;
+    case 'exportOutput':
+      return <ExportOutputDialog format={modal.format} />;
     case 'confirm':
       return <ConfirmDialog modal={modal} />;
   }

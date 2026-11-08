@@ -27,7 +27,7 @@ export const MENUS: TopMenu[] = [
       '-',
       'file.save',
       'file.saveAs',
-      { sub: 'menu.export', icon: 'ios_share', items: ['file.export.sav', 'file.export.zsav', 'file.export.por', 'file.export.csv', '-', 'file.saveSyntax', 'file.exportOutput'] },
+      { sub: 'menu.export', icon: 'ios_share', items: ['file.export.sav', 'file.export.zsav', 'file.export.por', '-', 'file.export.xlsx', 'file.export.ods', 'file.export.csv', 'file.export.tsv', 'file.export.json', '-', 'file.saveSyntax', 'file.exportPdf', 'file.exportOutput'] },
       '-',
       'file.print',
       'tpl:SYSFILE INFO',

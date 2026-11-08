@@ -54,9 +54,27 @@ export function parseDelimited(text: string, delimiter = detectDelimiter(text)):
   return rows.filter((r) => !(r.length === 1 && r[0] === ''));
 }
 
-function guessColumn(values: string[], decimalComma: boolean): { variable: Partial<Variable>; column: Cell[] } {
+const NUM_DOT = /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
+const NUM_COMMA = /^[-+]?(\d+(,\d*)?|,\d+)([eE][-+]?\d+)?$/;
+const ISO_DT = /^\d{4}-\d{1,2}-\d{1,2}[ T]\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?$/;
+
+/** Whether numbers in these rows use a decimal comma (",5" "3,14" and no "3.14"). */
+export function guessDecimalComma(rows: string[][], delimiter: string): boolean {
+  if (delimiter === ',') return false;
+  let comma = 0;
+  let dot = 0;
+  for (const r of rows.slice(0, 200))
+    for (const c of r) {
+      const v = c.trim();
+      if (/^[-+]?\d*,\d+$/.test(v)) comma++;
+      else if (/^[-+]?\d*\.\d+$/.test(v)) dot++;
+    }
+  return comma > dot || (comma === 0 && dot === 0 && delimiter === ';');
+}
+
+export function guessColumn(values: string[], decimalComma: boolean): { variable: Partial<Variable>; column: Cell[] } {
   const nonEmpty = values.filter((v) => v.trim() !== '');
-  const numRe = decimalComma ? /^[-+]?\d+(,\d+)?([eE][-+]?\d+)?$/ : /^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/;
+  const numRe = decimalComma ? NUM_COMMA : NUM_DOT;
   if (nonEmpty.length > 0 && nonEmpty.every((v) => numRe.test(v.trim()))) {
     const nums = values.map((v) => (v.trim() === '' ? null : Number(v.trim().replace(',', '.'))));
     let d = 0;
@@ -68,6 +86,10 @@ function guessColumn(values: string[], decimalComma: boolean): { variable: Parti
     const maxInt = Math.max(1, ...nums.map((n) => (n === null ? 1 : String(Math.trunc(Math.abs(n))).length + (n < 0 ? 1 : 0))));
     const w = Math.min(40, Math.max(8, maxInt + (d ? d + 1 : 0)));
     return { variable: { type: 'numeric', print: { type: 'F', w, d }, write: { type: 'F', w, d }, measure: d === 0 && new Set(nums).size <= 10 ? 'nominal' : 'scale' }, column: nums };
+  }
+  if (nonEmpty.length > 0 && nonEmpty.every((v) => ISO_DT.test(v.trim()) && parseDate(v, 'YMDHMS') !== null)) {
+    const f = { type: 'YMDHMS', w: 19, d: 0 };
+    return { variable: { type: 'numeric', print: f, write: f, measure: 'scale' }, column: values.map((v) => (v.trim() === '' ? null : parseDate(v, 'YMDHMS'))) };
   }
   for (const fmt of ['SDATE', 'EDATE', 'ADATE', 'DATE'] as const) {
     if (nonEmpty.length > 0 && nonEmpty.every((v) => parseDate(v, fmt) !== null && (fmt !== 'SDATE' || /^\d{4}/.test(v.trim())) && (fmt !== 'EDATE' || v.includes('.')) && (fmt !== 'ADATE' || v.includes('/')))) {
@@ -86,9 +108,17 @@ function guessColumn(values: string[], decimalComma: boolean): { variable: Parti
   };
 }
 
-export function delimitedToDataset(text: string, name: string, opts: { header?: boolean; delimiter?: string } = {}): Dataset {
+export interface DelimitedOptions {
+  header?: boolean;
+  delimiter?: string;
+  /** decimal separator of numbers; guessed from the data when omitted */
+  decimalComma?: boolean;
+}
+
+export function delimitedToDataset(text: string, name: string, opts: DelimitedOptions = {}): Dataset {
   const delimiter = opts.delimiter ?? detectDelimiter(text);
   const rows = parseDelimited(text.replace(/^\ufeff/, ''), delimiter);
+  const decimalComma = opts.decimalComma ?? guessDecimalComma(rows, delimiter);
   const header = opts.header ?? (rows.length > 1 && rows[0].every((c) => c.trim() !== '' && !/^[-+]?[\d.,]+$/.test(c.trim())));
   const head = header ? rows[0] : [];
   const body = header ? rows.slice(1) : rows;
@@ -98,7 +128,7 @@ export function delimitedToDataset(text: string, name: string, opts: { header?: 
   const names: string[] = [];
   for (let c = 0; c < ncol; c++) {
     const vals = body.map((r) => r[c] ?? '');
-    const g = guessColumn(vals, delimiter === ';');
+    const g = guessColumn(vals, decimalComma);
     const raw = head[c]?.trim() || `VAR${String(c + 1).padStart(5, '0')}`;
     const vn = uniqueName(raw, names);
     names.push(vn);
@@ -112,7 +142,7 @@ function csvField(s: string, delimiter: string): string {
   return /[",\n\r;\t]/.test(s) || s.includes(delimiter) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export function datasetToDelimited(ds: Dataset, delimiter = ',', useLabels = false): string {
+export function datasetToDelimited(ds: Dataset, delimiter = ',', useLabels = false, decimalComma = false): string {
   const n = Math.max(0, ...ds.columns.map((c) => c.length));
   const lines = [ds.variables.map((v) => csvField(v.name, delimiter)).join(delimiter)];
   for (let r = 0; r < n; r++) {
@@ -125,7 +155,12 @@ export function datasetToDelimited(ds: Dataset, delimiter = ',', useLabels = fal
             const l = v.valueLabels.find((x) => x.value === c);
             if (l) return csvField(l.label, delimiter);
           }
-          if (typeof c === 'number') return /DATE|TIME|YMDHMS|QYR|MOYR|WKYR/.test(v.print.type) ? csvField(formatNumber(c, v.print), delimiter) : String(c);
+          if (typeof c === 'number') {
+            if (/DATE|TIME|YMDHMS|QYR|MOYR|WKYR/.test(v.print.type)) return csvField(formatNumber(c, v.print), delimiter);
+            // round away binary noise (0.1 + 0.2) but keep every meaningful digit
+            const txt = String(Number(c.toPrecision(15)));
+            return decimalComma ? txt.replace('.', ',') : txt;
+          }
           return csvField(c.trimEnd(), delimiter);
         })
         .join(delimiter),

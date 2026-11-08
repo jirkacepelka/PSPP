@@ -14,11 +14,15 @@ import { useOutput, type OutputEntry } from '../store/output';
 import { useSettings } from '../store/settings';
 import { useSyntax, type SyntaxTab } from '../store/syntax';
 import { useUi } from '../store/ui';
-import { outputToHtml } from '../features/output/exportHtml';
+import { buildOutputDocument, printDocument, type OutputExportOptions } from '../features/output/exportHtml';
 import { localizeSample } from '../samples/localize';
+import { CLIENT_FORMATS, MIME as CLIENT_MIME, importKind, readDataFile, writeDataFile, type ClientFormat, type DictionaryLabels, type ExportOptions } from '../lib/io';
 
-export const OPEN_ACCEPT = '.sav,.zsav,.por,.sps,.csv,.txt,.tsv,.ods,.json';
-export type SaveFormat = 'sav' | 'zsav' | 'por' | 'csv';
+export const OPEN_ACCEPT = '.sav,.zsav,.por,.sps,.pspp,.csv,.tsv,.txt,.dat,.tab,.xlsx,.xlsm,.ods,.gnumeric,.json';
+export type SaveFormat = 'sav' | 'zsav' | 'por' | ClientFormat;
+export const SAVE_FORMATS: SaveFormat[] = ['sav', 'zsav', 'por', 'xlsx', 'ods', 'csv', 'tsv', 'json'];
+/** Formats that keep everything about the variables (the others keep values and, in spreadsheets, a description sheet). */
+const isNative = (f: SaveFormat) => f === 'sav' || f === 'zsav' || f === 'por';
 
 export interface RecentFile {
   id: string;
@@ -83,8 +87,10 @@ export async function openFileDialog() {
             accept: {
               'application/x-spss-sav': ['.sav', '.zsav'],
               'application/x-spss-por': ['.por'],
-              'text/plain': ['.sps', '.csv', '.txt', '.tsv'],
+              'text/plain': ['.sps', '.pspp', '.csv', '.txt', '.tsv', '.dat', '.tab'],
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx', '.xlsm'],
               'application/vnd.oasis.opendocument.spreadsheet': ['.ods'],
+              'application/x-gnumeric': ['.gnumeric'],
               'application/json': ['.json'],
             },
           },
@@ -138,6 +144,24 @@ export async function openBytes(name: string, bytes: Uint8Array, opts: { handle?
     useUi.getState().setView('syntax');
     return;
   }
+  if (/\.xls$/i.test(name)) {
+    toast(t('io.xlsOld', { name }), { kind: 'error' });
+    return;
+  }
+  const ik = importKind(name);
+  if (ik === 'json') {
+    try {
+      loadImportedDataset(name, readDataFile(name, bytes).dataset, opts.handle);
+    } catch (e) {
+      toast(t('files.openFailed', { name, message: e instanceof Error ? e.message : String(e) }), { kind: 'error' });
+    }
+    return;
+  }
+  if (ik) {
+    // text and spreadsheets: preview with import options first
+    useUi.getState().openModal({ kind: 'import', name, bytes });
+    return;
+  }
   const ui = useUi.getState();
   ui.setEngine({ engineStatus: 'running' });
   try {
@@ -176,6 +200,18 @@ export async function openBytes(name: string, bytes: Uint8Array, opts: { handle?
   } finally {
     useUi.getState().setEngine({ engineStatus: 'ready' });
   }
+}
+
+/** Loads a dataset read in the browser (CSV, XLSX, ODS, JSON) as the current data. */
+export function loadImportedDataset(name: string, ds: Dataset, handle?: FsFileHandle) {
+  const title = name.replace(/\.[^.]+$/, '');
+  confirmDiscard(() => {
+    useData.getState().load({ ...ds, name: title }, { title, fileName: name });
+    markSynced(useData.getState().dataset);
+    currentHandle = handle ?? null;
+    useUi.getState().setView('data');
+    toast(t('io.imported', { name, cases: t('io.n.cases', { count: Math.max(0, ...ds.columns.map((c) => c.length)) }), vars: t('io.n.vars', { count: ds.variables.length }) }));
+  });
 }
 
 export function newDataset() {
@@ -227,15 +263,37 @@ const MIME: Record<SaveFormat, string> = {
   sav: 'application/x-spss-sav',
   zsav: 'application/x-spss-sav',
   por: 'application/x-spss-por',
-  csv: 'text/csv',
+  ...CLIENT_MIME,
 };
+
+/** Localized names for the variable sheet of spreadsheet exports. */
+function dictionaryLabels(): DictionaryLabels {
+  return {
+    sheetData: t('io.dict.sheetData'),
+    sheetVars: t('io.dict.sheetVars'),
+    cols: ['name', 'label', 'type', 'format', 'measure', 'valueLabels', 'missing'].map((k) => t(`io.dict.${k}`)),
+    type: { numeric: t('io.dict.numeric'), string: t('io.dict.string') },
+    measure: { nominal: t('measure.nominal'), ordinal: t('measure.ordinal'), scale: t('measure.scale'), unknown: '' },
+  };
+}
+
+/** A download name browsers accept: Chromium replaces names with accents by "download". */
+export function asciiFileName(name: string): string {
+  const out = name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w .()-]+/g, '_')
+    .replace(/_+/g, '_')
+    .trim();
+  return /^[._ -]*(\.[a-z0-9]+)?$/i.test(out) ? `data${out.match(/\.[a-z0-9]+$/i)?.[0] ?? ''}` : out;
+}
 
 export function downloadBlob(name: string, data: BlobPart, mime: string) {
   const blob = new Blob([data], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = name;
+  a.download = asciiFileName(name);
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -243,11 +301,11 @@ export function downloadBlob(name: string, data: BlobPart, mime: string) {
 }
 
 function formatOf(name: string | null): SaveFormat | null {
-  const ext = name?.toLowerCase().match(/\.(sav|zsav|por|csv)$/)?.[1];
-  return (ext as SaveFormat) ?? null;
+  const ext = name?.toLowerCase().match(/\.([a-z]+)$/)?.[1] as SaveFormat | undefined;
+  return ext && SAVE_FORMATS.includes(ext) ? ext : null;
 }
 
-export async function saveDataset(opts: { format?: SaveFormat; name?: string; saveAs?: boolean } = {}) {
+export async function saveDataset(opts: { format?: SaveFormat; name?: string; saveAs?: boolean; options?: ExportOptions } = {}) {
   const data = useData.getState();
   if (!data.dataset) return;
   const existing = formatOf(data.fileName);
@@ -260,10 +318,11 @@ export async function saveDataset(opts: { format?: SaveFormat; name?: string; sa
   const fileName = `${base}.${format}`;
   useUi.getState().setEngine({ engineStatus: 'running' });
   try {
-    const { api } = await getEngineHandle();
     let bytes: Uint8Array;
     try {
-      bytes = await api.save(data.dataset, format);
+      bytes = (CLIENT_FORMATS as string[]).includes(format)
+        ? writeDataFile(data.dataset, format as ClientFormat, dictionaryLabels(), opts.options ?? useSettings.getState().exportOptions)
+        : await (await getEngineHandle()).api.save(data.dataset, format as 'sav' | 'zsav' | 'por');
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.startsWith('MOCK_UNSUPPORTED')) {
@@ -301,8 +360,8 @@ export async function saveDataset(opts: { format?: SaveFormat; name?: string; sa
       }
     }
     if (!written) downloadBlob(fileName, bytes as BlobPart, MIME[format]);
-    useData.getState().markSaved(format === 'csv' ? data.fileName : fileName);
-    if (format !== 'csv') useData.getState().setTitle(base);
+    useData.getState().markSaved(isNative(format) ? fileName : data.fileName);
+    if (isNative(format)) useData.getState().setTitle(base);
     useData.getState().markSaved();
     toast(t('files.saved', { name: fileName }), { kind: 'success' });
   } catch (e) {
@@ -321,19 +380,33 @@ export function saveSyntaxFile() {
   downloadBlob(name, tab.text, 'text/plain');
 }
 
-export function exportOutputHtml() {
+const outputBase = () => (useData.getState().title || 'output').replace(/[^\p{L}\p{N}_-]+/gu, '-');
+
+/** Saves the output as a standalone HTML document (options: what to include). */
+export function exportOutputHtml(opts?: Partial<Omit<OutputExportOptions, 'mode'>>) {
   const entries = useOutput.getState().entries;
   if (!entries.length) {
     toast(t('output.empty'));
     return;
   }
-  const html = outputToHtml(entries, useData.getState().title || 'PSPP Studio', useSettings.getState().tableStyle);
-  downloadBlob(`${(useData.getState().title || 'output').replace(/[^\p{L}\p{N}_-]+/gu, '_')}-output.html`, html, 'text/html');
+  const html = buildOutputDocument(entries, { ...useSettings.getState().outputExport, ...opts, mode: 'html' });
+  downloadBlob(`${outputBase()}-${t('io.out.fileSuffix')}.html`, html, 'text/html');
+  toast(t('io.out.savedHtml'), { kind: 'success' });
+}
+
+/** Prints the output document; the browser's print dialog saves it as PDF. */
+export function exportOutputPdf(opts?: Partial<Omit<OutputExportOptions, 'mode'>>) {
+  const entries = useOutput.getState().entries;
+  if (!entries.length) {
+    toast(t('output.empty'));
+    return;
+  }
+  const html = buildOutputDocument(entries, { ...useSettings.getState().outputExport, ...opts, mode: 'pdf' });
+  printDocument(html, `${outputBase()}-${t('io.out.fileSuffix')}`);
 }
 
 export function printOutput() {
-  useUi.getState().setView('output');
-  setTimeout(() => window.print(), 150);
+  exportOutputPdf();
 }
 
 // ------------------------------------------------------------------ recent

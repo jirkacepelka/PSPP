@@ -5,7 +5,7 @@ const root = new URL('../src/', import.meta.url).pathname;
 const files = [];
 (function walk(d) { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (/\.(ts|tsx)$/.test(f) && !f.endsWith('.test.ts')) files.push(p); } })(root);
 const PREFIXES = ['common','menu','actions','views','appbar','profile','settings','status','engine','toolbar','formula','data','variables','varType','align','measure','role','typeDialog','valueLabels','missing','dialogs','dlg','stat','agg','output','syntax','start','samples','files','run','palette','goto','find','saveAs','about','shortcuts'];
-const IGNORE = new Set(['data.csv', 'data.sav', 'settings.v1', 'syntax.runAll', 'syntax.runCurrent', 'syntax.runSelection', 'syntax.runToEnd', 'syntax.save']);
+const IGNORE = new Set(['data.csv', 'data.sav', 'settings.v1', 'syntax.runAll', 'syntax.runCurrent', 'syntax.runSelection', 'syntax.runToEnd', 'syntax.save', 'settings.xml', 'content.xml']);
 const keys = new Set();
 const re = /['"`]((?:[a-z][A-Za-z]*)(?:\.[A-Za-z0-9_]+)+)['"`]/g;
 for (const f of files) { const s = readFileSync(f, 'utf8'); let m; while ((m = re.exec(s))) { const k = m[1]; if (PREFIXES.includes(k.split('.')[0]) && !IGNORE.has(k)) keys.add(k); } }

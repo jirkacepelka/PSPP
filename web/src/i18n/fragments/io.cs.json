@@ -1,0 +1,138 @@
+{
+  "actions": {
+    "exportXlsx": "Sešit Excel (.xlsx)",
+    "exportOds": "Tabulka OpenDocument (.ods)",
+    "exportTsv": "Hodnoty oddělené tabulátorem (.tsv)",
+    "exportJson": "Datová sada PSPP Studia (.json)",
+    "exportPdf": "Výstup jako PDF"
+  },
+  "files": {
+    "needsEngine": "Soubor {{name}} vyžaduje jádro PSPP, které v ukázkovém režimu není k dispozici. Soubory CSV, Excel, ODS, JSON a SPS fungují."
+  },
+  "saveAs": {
+    "mockWarning": "Formáty SPSS vyžadují jádro PSPP ve WebAssembly, které teď neběží. Excel, ODS, CSV, TSV a JSON fungují i bez něj.",
+    "fmt": {
+      "xlsx": "Excel",
+      "ods": "OpenDocument",
+      "csv": "CSV",
+      "tsv": "TSV",
+      "json": "JSON"
+    },
+    "fmtDesc": {
+      "xlsx": ".xlsx – data a list s popisem proměnných",
+      "ods": ".ods – pro LibreOffice, data a popis proměnných",
+      "csv": ".csv – jen hodnoty, pro jakýkoli program",
+      "tsv": ".tsv – hodnoty oddělené tabulátorem",
+      "json": ".json – celá datová sada pro PSPP Studio a skripty"
+    }
+  },
+  "io": {
+    "xlsOld": "Starý formát Excelu .xls neumím přečíst. Uložte soubor {{name}} v Excelu jako .xlsx nebo .csv a otevřete ho znovu.",
+    "imported": "Načteno: {{name}} – {{cases}}, {{vars}}",
+    "group": {
+      "spss": "SPSS a PSPP – zachová všechno",
+      "sheets": "Tabulky a text – pro jiné programy"
+    },
+    "options": "Volby",
+    "labels": "Zapsat popisky hodnot místo kódů",
+    "labelsDesc": "Např. „žena“ místo 2. Hodí se pro čtení, ne pro další výpočty.",
+    "csvStyle": "Oddělovač a desetinná čárka",
+    "csvComma": "Čárka, desetinná tečka (1.5)",
+    "csvSemicolon": "Středník, desetinná čárka (1,5) – český Excel",
+    "sheetNote": "Druhý list sešitu popisuje proměnné: popisky, míru, popisky hodnot a chybějící hodnoty.",
+    "dict": {
+      "sheetData": "Data",
+      "sheetVars": "Proměnné",
+      "name": "Název",
+      "label": "Popisek",
+      "type": "Typ",
+      "format": "Formát",
+      "measure": "Míra",
+      "valueLabels": "Popisky hodnot",
+      "missing": "Chybějící hodnoty",
+      "numeric": "Číselná",
+      "string": "Textová"
+    },
+    "import": {
+      "title": "Importovat data",
+      "import": "Importovat",
+      "encoding": "Kódování znaků",
+      "auto": "Rozpoznat",
+      "delimiter": "Oddělovač",
+      "decimal": "Desetinný oddělovač",
+      "detected": "Rozpoznáno: {{value}}",
+      "delim": {
+        "auto": "Rozpoznat",
+        "comma": "Čárka",
+        "semicolon": "Středník",
+        "tab": "Tabulátor",
+        "pipe": "Svislice |"
+      },
+      "dec": {
+        "auto": "Rozpoznat",
+        "dot": "Tečka 1.5",
+        "comma": "Čárka 1,5"
+      },
+      "sheet": "List",
+      "header": "První řádek obsahuje názvy proměnných",
+      "preview": "Náhled dat",
+      "summary": "{{cases}} · {{vars}}",
+      "numeric_one": "{{count}} číselná",
+      "numeric_few": "{{count}} číselné",
+      "numeric_other": "{{count}} číselných",
+      "typeText": "text",
+      "typeNumber": "číslo",
+      "typeDate": "datum",
+      "more": "… a dalších {{rows}} řádků, {{cols}} sloupců",
+      "empty": "V souboru nejsou žádná data.",
+      "error": "Soubor nelze přečíst: {{message}}"
+    },
+    "out": {
+      "title": "Exportovat výstup",
+      "export": "Exportovat",
+      "asPdf": "PDF…",
+      "asHtml": "Web (HTML)…",
+      "printNow": "Vytisknout",
+      "fmt": {
+        "pdf": "PDF",
+        "html": "Webová stránka"
+      },
+      "fmtDesc": {
+        "pdf": "Pro tisk a odevzdání, A4 s čísly stran",
+        "html": "Jeden soubor .html, otevře se v prohlížeči i ve Wordu"
+      },
+      "include": "Zahrnout",
+      "opt": {
+        "toc": "Obsah",
+        "interpret": "Vysvětlení výsledků",
+        "syntax": "Syntaxe příkazů"
+      },
+      "optDesc": {
+        "toc": "Seznam výsledků s odkazy na začátku dokumentu",
+        "interpret": "Srozumitelný výklad pod t-testy, korelacemi a dalšími testy",
+        "syntax": "Příkazy PSPP, které výsledek vytvořily – pro zopakování analýzy"
+      },
+      "pdfHint": "Otevře se tiskový dialog prohlížeče. Jako tiskárnu zvolte „Uložit jako PDF“.",
+      "makePdf": "Vytvořit PDF",
+      "makeHtml": "Stáhnout HTML",
+      "savedHtml": "Výstup je stažený jako HTML",
+      "fileSuffix": "vystup",
+      "toc": "Obsah",
+      "report": "Výsledky analýzy",
+      "data": "Data",
+      "size": "Rozsah",
+      "sizeValue": "{{cases}}, {{vars}}",
+      "results": "Výsledků",
+      "created": "Vytvořeno",
+      "footer": "Vytvořeno v PSPP Studiu – svobodném softwaru postaveném na GNU PSPP."
+    },
+    "n": {
+      "cases_one": "{{count}} případ",
+      "cases_few": "{{count}} případy",
+      "cases_other": "{{count}} případů",
+      "vars_one": "{{count}} proměnná",
+      "vars_few": "{{count}} proměnné",
+      "vars_other": "{{count}} proměnných"
+    }
+  }
+}
