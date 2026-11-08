@@ -1,4 +1,4 @@
-# Klidná pracovní plocha — Calm Workspace
+# Calm Workspace design system
 
 The PSPP Studio design system. It keeps the clarity of the old Sheets/Docs-like UI and drops the Google look: warm neutral surfaces, hairlines instead of elevation, sharp 4/6/8 px geometry, and one user-configurable accent that appears only where a decision happens.
 
@@ -142,7 +142,7 @@ The CSS classes are public too (for markup that cannot use React components yet)
 | Selected row: `--accent-tint-strong` + `box-shadow: inset 2px 0 0 var(--accent-line)` | `background: var(--primary-container)` blocks with accent text |
 | Separate regions with `border: 1px solid var(--line)` | `box-shadow` on panels, cards, toolbars, the app bar |
 | Radius 6 on controls, 8 on panels, 4 on chips | `border-radius: 999px` pills or 16–28px rounded cards |
-| Sentence-case group labels (`Nedávné`) | `text-transform: uppercase` + letter-spacing |
+| Sentence-case group labels (`Recent`) | `text-transform: uppercase` + letter-spacing |
 | Muted text in `--ink-3` | Opacity on text, or `--ink-disabled` for readable text |
 | `var(--danger)` with an icon and words for errors | Red alone as the only signal |
 | Hex/rgba only inside `tokens.css` | Literal colours in feature CSS (`#1a73e8`, `#fff`) |

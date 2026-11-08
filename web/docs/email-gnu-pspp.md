@@ -1,11 +1,11 @@
-# Návrh e-mailu: PSPP Studio pro vývojáře GNU PSPP
+# Draft e-mail: PSPP Studio for the GNU PSPP developers
 
-Před odesláním doplň věci v `[hranatých závorkách]` a ověř adresy na pspp.org / gnu.org.
-Repozitář je veřejný (ověřeno přes GitHub API).
+Fill in everything in `[square brackets]` and check the addresses on pspp.org / gnu.org before sending.
+The repository is public (checked via the GitHub API).
 
-**Komu:** pspp-dev@gnu.org
-**Kopie (volitelně):** maintainers@gnu.org (obecná otázka, jak se projekt může stát součástí GNU) nebo licensing@gnu.org (název, AI)
-**Předmět:** Would you consider adopting PSPP Studio, a modern web front end for PSPP?
+**To:** pspp-dev@gnu.org
+**Cc (optional):** maintainers@gnu.org (general question on how a project becomes part of GNU) or licensing@gnu.org (name, AI)
+**Subject:** Would you consider adopting PSPP Studio, a modern web front end for PSPP?
 
 ---
 
@@ -62,15 +62,15 @@ Attachments (screenshots, also in the repository under `web/docs/screenshots/`):
 
 ---
 
-## Poznámky pro tebe
+## Notes before sending
 
-- **Přílohy:** snímky jsou v `web/docs/screenshots/` (1600 px, anglicky). Do `pspp-dev` se přílohy posílají nejlépe jako několik menších souborů nebo jako odkaz do repozitáře (https://github.com/jirkacepelka/PSPP/tree/main/web/docs/screenshots – odkaz funguje až po sloučení do `main`; zatím je jedinou větví `claude/exciting-wright-ah3znw`, a ta je i výchozí). Konference mívají limit velikosti zprávy, takže odkaz je bezpečnější. Doplnit do textu vidět stačí jednu z variant.
-- **Nativní aplikace:** nabídka přepsání do nativní aplikace je zmíněna jako možnost, ne slib. Ověř, že to tak opravdu myslíš. Rozšiřující analýzy mají v repozitáři jednotkové testy (`web/src/ext/commands/*.test.ts`), proto je e-mail zmiňuje.
-- **Realistické očekávání:** GNU projekty obvykle přijímá FSF až po přihlášení balíčku přes maintainers@gnu.org a podpisu převodu autorských práv; bývá to pomalé. Přirozenější první krok je často pspp-dev: oni sami rozhodnou, jestli to chtějí jako součást PSPP, jako samostatný balíček, nebo odkazem. Z paměti: ověř si postup na gnu.org/help/evaluation.html a gnu.org/software/devel.html.
-- **Potenciální překážky, na které se připrav:** (1) JavaScript/TypeScript a React se v GNU často řeší jinak než C (FSF je citlivé na svobodný JavaScript – GPL licence a zdroj jsou ale v pořádku); (2) část kódu vznikla s pomocí AI, což může zpomalit nebo zablokovat převod autorských práv; (3) nasazení na Vercelu je komerční služba, FSF by pravděpodobně chtělo hostování mimo ni.
-- **Převod autorských práv:** pokud na projektu pracovala univerzita (zadání, stipendium, pracovní poměr), může mít na kód práva ona. Před přislíbením převodu to ověř u školy.
-- **Veřejný repozitář:** ověřeno, licence GPL-3.0 je v GitHubu rozpoznaná. Jediná větev je `claude/exciting-wright-ah3znw` a je výchozí; pro e-mail je lepší mít `main` – po schválení ji slouč nebo přejmenuj.
-- **Živá ukázka:** veřejná adresa https://pspp-studio.vercel.app odpovídá bez přihlášení (ověřeno). Adresa s `-jiris-projects-` je chráněná přihlášením, proto ji v e-mailu nepoužívej.
-- **Úpravy upstreamu:** výčet odpovídá `engine/README.md`; projdi si před odesláním `git log -- engine/pspp`.
-- **Konference:** do `pspp-dev` se vyplatí přihlásit předem, aby ti došly odpovědi.
-- **Tvrzení v e-mailu, která jsem nemohl ověřit:** „guided first-run setup", „accessible design" a seznam analýz odpovídají tomu, co jsme v projektu stavěli, ale zkontroluj, že ti sedí.
+- **Attachments:** the screenshots are in `web/docs/screenshots/` (1600 px, English). Mailing lists often limit message size, so a link to the repository folder is safer than attaching the images: https://github.com/jirkacepelka/PSPP/tree/main/web/docs/screenshots (works once `main` is the default branch).
+- **Demo:** the public address https://pspp-studio.vercel.app answers without a login (checked). The address containing `-jiris-projects-` is behind Vercel login protection, so do not use it in the e-mail.
+- **Native rewrite:** the e-mail offers it as a possibility, not a promise. Make sure you mean it. The extra analyses have unit tests (`web/src/ext/commands/*.test.ts`), which is why the e-mail mentions them.
+- **Realistic expectations:** GNU packages are normally accepted through maintainers@gnu.org, after a copyright assignment to the FSF, and this can be slow. A natural first step is `pspp-dev`: they can decide whether they want it as part of PSPP, as a separate package, or just a link. This is from memory; check gnu.org/help/evaluation.html and gnu.org/software/devel.html.
+- **Obstacles to expect:** (1) JavaScript/TypeScript and React are handled differently from C in GNU (the FSF cares about free JavaScript; a GPL licence with available source is fine); (2) part of the code was written with AI assistance, which may slow down or block the copyright assignment; (3) hosting on Vercel is a commercial service, so the FSF would probably want hosting elsewhere.
+- **Copyright:** if the university was involved (an assignment, scholarship or employment), it may hold rights to the code. Check with the university before promising an assignment.
+- **Upstream changes:** the list matches `engine/README.md`; check `git log -- engine/pspp` before sending.
+- **Mailing list:** subscribe to `pspp-dev` first so replies reach you.
+- **AI disclosure:** the paragraph about Opus 5.5 is deliberately careful. If you wrote some of the code by hand, add that; the text must match the facts. The changes to PSPP's own sources in `engine/pspp` were also made with AI help, so the offer to send them upstream is conditional.
+- **Branch:** `main` now exists and is identical to the working branch; make it the default in GitHub Settings → Branches.
