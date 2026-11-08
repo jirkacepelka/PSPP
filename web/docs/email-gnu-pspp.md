@@ -11,12 +11,17 @@ Repozitář musí být veřejný (stav jsem neověřil).
 
 Hello PSPP developers,
 
-My name is [Jiří Čepelka]. I am writing to ask a question rather than only to announce something: **would the PSPP project, or GNU more broadly, be willing to adopt and maintain a web front end I built for PSPP?** I do not have the time to maintain it on my own, and I would rather see it live on under the GNU Project than be left to rot in a personal repository.
+My name is [Jiří Čepelka]. First of all, thank you for PSPP.
 
-**Why it exists.** It started at my university, where we wanted a user-friendly free alternative to SPSS. PSPP has an excellent core, but for students it was missing some analyses and its interface looked dated and was hard to find your way around. So I built **PSPP Studio**: the PSPP 2.1.3 engine compiled to WebAssembly, with a new interface that runs entirely in the browser (no installation, and no data ever leaves the user's computer). It is available in Czech and English, and PSPP's own messages are translated into Czech too.
+**Why I built this.** It started at my university, where we wanted a user-friendly, free alternative to SPSS for students. PSPP has an excellent statistical core, but for people who are new to statistics it was missing some of the analyses they need, and its interface looked dated and was hard to find your way around. I wanted to see how far a modern, approachable interface on top of the PSPP engine could go.
+
+**What came out of it: PSPP Studio.** It is the PSPP 2.1.3 engine compiled to WebAssembly, with a new interface that runs entirely in the browser (nothing to install, and no data ever leaves the user's computer). It is available in Czech and English, and PSPP's own messages are translated into Czech too.
 
 - Live demo: https://pspp-studio-jiris-projects-be291b70.vercel.app
 - Source code (GPL-3.0-or-later): https://github.com/jirkacepelka/PSPP
+- Screenshots: attached (see the list at the end)
+
+**My question.** I do not have the time to maintain this on my own. **Would the PSPP project, or GNU more broadly, be interested in adopting and maintaining it?** It does not have to stay a web application: the engine and the design are separable, and the interface could just as well be rewritten as a native desktop application (for example to replace the current PSPPIRE GTK interface), or reused in some other form. I care more about the idea of a friendly free SPSS alternative living on than about the technology it is built with.
 
 **What it adds on top of PSPP**
 
@@ -31,7 +36,7 @@ My name is [Jiří Čepelka]. I am writing to ask a question rather than only to
 
 **What I would like to know**
 
-1. Would you be interested in taking this in, either as part of PSPP (for example as an official web interface) or as a separate GNU package? If not, I would be glad of any suggestion for where it could go, or which of its parts would be worth contributing separately (for example the Cairo-optional build).
+1. Would you be interested in taking this in, as part of PSPP (as a web interface, or as a model for a new native interface) or as a separate GNU package? If not, I would be glad of any suggestion for where it could go, or which of its parts would be worth contributing separately (for example the Cairo-optional build, or the extra analyses together with their unit tests).
 2. If yes, what would be needed from my side: copyright assignment to the FSF, following the GNU coding standards (the front end is TypeScript/React, not C), or something else? I am happy to do the handover work.
 3. Do you have any objection to the name "PSPP Studio"?
 
@@ -39,17 +44,28 @@ My name is [Jiří Čepelka]. I am writing to ask a question rather than only to
 
 For clarity: today this is an independent project, not endorsed by the GNU Project or the FSF, and SPSS is a trademark of IBM (the application says so).
 
-Thank you for PSPP, and for your time.
+Thank you for your time.
 
 Best regards,
 [Jiří Čepelka]
 [university / affiliation, if you want to mention it]
 [e-mail] · https://github.com/jirkacepelka
 
+Attachments (screenshots, also in the repository under `web/docs/screenshots/email/`):
+1. `01-welcome-setup.png` – first-run guide with a live preview of the workspace
+2. `02-start.png` – start screen
+3. `03-data.png` – data grid with value labels and variable inspector
+4. `04-menu.png` – the Analyze menu
+5. `05-output.png` – results with a plain-language explanation under the table
+6. `06-settings.png` – settings with a live preview
+7. `07-output-dark.png` – dark theme
+
 ---
 
 ## Poznámky pro tebe
 
+- **Přílohy:** snímky jsou v `web/docs/screenshots/email/` (1600 px, anglicky). Do `pspp-dev` se přílohy posílají nejlépe jako několik menších souborů nebo jako odkaz do repozitáře (https://github.com/jirkacepelka/PSPP/tree/claude/exciting-wright-ah3znw/web/docs/screenshots/email, po sloučení změn do hlavní větve upravit na `main`). Konference mívají limit velikosti zprávy, takže odkaz je bezpečnější. Doplnit do textu vidět stačí jednu z variant.
+- **Nativní aplikace:** nabídka přepsání do nativní aplikace je zmíněna jako možnost, ne slib. Ověř, že to tak opravdu myslíš. Rozšiřující analýzy mají v repozitáři jednotkové testy (`web/src/ext/commands/*.test.ts`), proto je e-mail zmiňuje.
 - **Realistické očekávání:** GNU projekty obvykle přijímá FSF až po přihlášení balíčku přes maintainers@gnu.org a podpisu převodu autorských práv; bývá to pomalé. Přirozenější první krok je často pspp-dev: oni sami rozhodnou, jestli to chtějí jako součást PSPP, jako samostatný balíček, nebo odkazem. Z paměti: ověř si postup na gnu.org/help/evaluation.html a gnu.org/software/devel.html.
 - **Potenciální překážky, na které se připrav:** (1) JavaScript/TypeScript a React se v GNU často řeší jinak než C (FSF je citlivé na svobodný JavaScript – GPL licence a zdroj jsou ale v pořádku); (2) část kódu vznikla s pomocí AI, což může zpomalit nebo zablokovat převod autorských práv; (3) nasazení na Vercelu je komerční služba, FSF by pravděpodobně chtělo hostování mimo ni.
 - **Převod autorských práv:** pokud na projektu pracovala univerzita (zadání, stipendium, pracovní poměr), může mít na kód práva ona. Před přislíbením převodu to ověř u školy.
