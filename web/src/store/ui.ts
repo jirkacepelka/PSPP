@@ -38,7 +38,7 @@ export type Modal =
   | { kind: 'find' }
   | { kind: 'saveAs' }
   | { kind: 'import'; name: string; bytes: Uint8Array }
-  | { kind: 'exportOutput'; format: 'html' | 'pdf' }
+  | { kind: 'exportOutput'; format?: 'html' | 'pdf' | 'docx' }
   | { kind: 'confirm'; titleKey: string; messageKey: string; messageArgs?: Record<string, string>; confirmKey?: string; danger?: boolean; onConfirm: () => void };
 
 export interface Toast {

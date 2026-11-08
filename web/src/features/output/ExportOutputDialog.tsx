@@ -10,14 +10,15 @@ import { Icon } from '../../components/Icon';
 import { useUi } from '../../store/ui';
 import { useSettings } from '../../store/settings';
 import { useOutput } from '../../store/output';
-import { exportOutputHtml, exportOutputPdf } from '../../app/files';
+import { exportOutputDocx, exportOutputHtml, exportOutputPdf } from '../../app/files';
 import './export-dialog.css';
 
-type Fmt = 'pdf' | 'html';
+type Fmt = 'pdf' | 'docx' | 'html';
+const FMT_ICON: Record<Fmt, string> = { pdf: 'picture_as_pdf', docx: 'article', html: 'html' };
 
 function PageArt({ toc, interpret, syntax, fmt }: { toc: boolean; interpret: boolean; syntax: boolean; fmt: Fmt }) {
   return (
-    <div className={`xd-page is-${fmt}`} aria-hidden="true">
+    <div className={`xd-page is-${fmt === 'html' ? 'html' : 'paged'}`} aria-hidden="true">
       <div className="xd-head">
         <i className="xd-logo" />
         <span>
@@ -60,26 +61,26 @@ function PageArt({ toc, interpret, syntax, fmt }: { toc: boolean; interpret: boo
           </div>
         </div>
       </div>
-      {fmt === 'pdf' && <span className="xd-pageno">1 / 3</span>}
+      {fmt !== 'html' && <span className="xd-pageno">1 / 3</span>}
     </div>
   );
 }
 
-export function ExportOutputDialog({ format }: { format: Fmt }) {
+export function ExportOutputDialog({ format }: { format?: Fmt }) {
   const { t } = useTranslation();
   const close = useUi((s) => s.closeModal);
   const saved = useSettings((s) => s.outputExport);
   const set = useSettings((s) => s.set);
   const count = useOutput((s) => s.entries.length);
-  const [fmt, setFmt] = useState<Fmt>(format);
+  const [fmt, setFmt] = useState<Fmt>(format ?? saved.format ?? 'pdf');
   const [o, setO] = useState(saved);
   const run = () => {
-    set({ outputExport: o });
+    set({ outputExport: { ...o, format: fmt } });
     close();
     // let the dialog close before the print dialog takes over
-    setTimeout(() => (fmt === 'pdf' ? exportOutputPdf(o) : exportOutputHtml(o)), 30);
+    setTimeout(() => (fmt === 'pdf' ? exportOutputPdf(o) : fmt === 'docx' ? void exportOutputDocx(o) : exportOutputHtml(o)), 30);
   };
-  const opts: { key: keyof typeof o; icon: string }[] = [
+  const opts: { key: 'toc' | 'interpret' | 'syntax'; icon: string }[] = [
     { key: 'toc', icon: 'toc' },
     { key: 'interpret', icon: 'lightbulb' },
     { key: 'syntax', icon: 'code' },
@@ -97,7 +98,7 @@ export function ExportOutputDialog({ format }: { format: Fmt }) {
           <button type="button" className="btn btn-ghost" onClick={close}>{t('common.cancel')}</button>
           <button type="button" className="btn btn-primary" onClick={run} data-autofocus>
             <Icon name={fmt === 'pdf' ? 'picture_as_pdf' : 'download'} />
-            {t(fmt === 'pdf' ? 'io.out.makePdf' : 'io.out.makeHtml')}
+            {t(fmt === 'pdf' ? 'io.out.makePdf' : fmt === 'docx' ? 'io.out.makeDocx' : 'io.out.makeHtml')}
           </button>
         </>
       }
@@ -107,10 +108,10 @@ export function ExportOutputDialog({ format }: { format: Fmt }) {
           <fieldset className="dlg-fieldset">
             <legend className="field-label">{t('saveAs.format')}</legend>
             <div className="format-cards xd-formats">
-              {(['pdf', 'html'] as const).map((f) => (
+              {(['pdf', 'docx', 'html'] as const).map((f) => (
                 <label key={f} className={`format-card ${fmt === f ? 'on' : ''}`}>
                   <input type="radio" name="xfmt" checked={fmt === f} onChange={() => setFmt(f)} />
-                  <Icon name={f === 'pdf' ? 'picture_as_pdf' : 'html'} />
+                  <Icon name={FMT_ICON[f]} />
                   <span className="format-name">{t(`io.out.fmt.${f}`)}</span>
                   <span className="set-row-desc">{t(`io.out.fmtDesc.${f}`)}</span>
                 </label>

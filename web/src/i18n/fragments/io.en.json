@@ -1,10 +1,8 @@
 {
   "actions": {
-    "exportXlsx": "Excel workbook (.xlsx)",
-    "exportOds": "OpenDocument spreadsheet (.ods)",
-    "exportTsv": "Tab-separated values (.tsv)",
-    "exportJson": "PSPP Studio dataset (.json)",
-    "exportPdf": "Output as PDF"
+    "exportOutput": "Export output (PDF, Word, HTML)…",
+    "print": "Print output",
+    "saveAs": "Save as… (SPSS, Excel, CSV)"
   },
   "files": {
     "needsEngine": "{{name}} needs the PSPP engine, which is not available in demo mode. CSV, Excel, ODS, JSON and SPS files work."
@@ -90,16 +88,16 @@
     "out": {
       "title": "Export output",
       "export": "Export",
-      "asPdf": "PDF…",
-      "asHtml": "Web page (HTML)…",
       "printNow": "Print",
       "fmt": {
         "pdf": "PDF",
-        "html": "Web page"
+        "html": "Web page",
+        "docx": "Word"
       },
       "fmtDesc": {
         "pdf": "For printing and handing in, A4 with page numbers",
-        "html": "A single .html file that opens in a browser or Word"
+        "html": "A single .html file for the browser",
+        "docx": "An editable .docx with tables and charts"
       },
       "include": "Include",
       "opt": {
@@ -124,7 +122,9 @@
       "sizeValue": "{{cases}}, {{vars}}",
       "results": "Results",
       "created": "Created",
-      "footer": "Created with PSPP Studio – free software built on GNU PSPP."
+      "footer": "Created with PSPP Studio – free software built on GNU PSPP.",
+      "makeDocx": "Download Word",
+      "savedDocx": "Output downloaded as a Word document"
     },
     "n": {
       "cases_one": "{{count}} case",

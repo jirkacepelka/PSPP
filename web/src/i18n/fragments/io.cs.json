@@ -1,10 +1,8 @@
 {
   "actions": {
-    "exportXlsx": "Sešit Excel (.xlsx)",
-    "exportOds": "Tabulka OpenDocument (.ods)",
-    "exportTsv": "Hodnoty oddělené tabulátorem (.tsv)",
-    "exportJson": "Datová sada PSPP Studia (.json)",
-    "exportPdf": "Výstup jako PDF"
+    "exportOutput": "Exportovat výstup (PDF, Word, HTML)…",
+    "print": "Tisk výstupu",
+    "saveAs": "Uložit jako… (SPSS, Excel, CSV)"
   },
   "files": {
     "needsEngine": "Soubor {{name}} vyžaduje jádro PSPP, které v ukázkovém režimu není k dispozici. Soubory CSV, Excel, ODS, JSON a SPS fungují."
@@ -90,16 +88,16 @@
     "out": {
       "title": "Exportovat výstup",
       "export": "Exportovat",
-      "asPdf": "PDF…",
-      "asHtml": "Web (HTML)…",
       "printNow": "Vytisknout",
       "fmt": {
         "pdf": "PDF",
-        "html": "Webová stránka"
+        "html": "Webová stránka",
+        "docx": "Word"
       },
       "fmtDesc": {
         "pdf": "Pro tisk a odevzdání, A4 s čísly stran",
-        "html": "Jeden soubor .html, otevře se v prohlížeči i ve Wordu"
+        "html": "Jeden soubor .html pro prohlížeč",
+        "docx": "Upravitelný dokument .docx s tabulkami a grafy"
       },
       "include": "Zahrnout",
       "opt": {
@@ -124,7 +122,9 @@
       "sizeValue": "{{cases}}, {{vars}}",
       "results": "Výsledků",
       "created": "Vytvořeno",
-      "footer": "Vytvořeno v PSPP Studiu – svobodném softwaru postaveném na GNU PSPP."
+      "footer": "Vytvořeno v PSPP Studiu – svobodném softwaru postaveném na GNU PSPP.",
+      "makeDocx": "Stáhnout Word",
+      "savedDocx": "Výstup je stažený jako dokument Word"
     },
     "n": {
       "cases_one": "{{count}} případ",

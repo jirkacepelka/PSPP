@@ -21,7 +21,7 @@ import { useUi } from '../../store/ui';
 import { caseCount } from '../../lib/variables';
 import { chartToSvgString } from '../../charts/export';
 import { INTERPRETABLE, interpret } from '../../lib/interpret';
-import { describeFact, pickLang } from './interpretText';
+import { describeFact, pickLang, type InterpretText } from './interpretText';
 import { entryTitle, singleCommand, visibleItems } from './outputHelpers';
 import { ChartView } from './ChartView';
 
@@ -30,7 +30,7 @@ export interface OutputExportOptions {
   interpret: boolean;
   toc: boolean;
   /** 'pdf' adds page rules and is printed right away */
-  mode: 'html' | 'pdf';
+  mode: 'html' | 'pdf' | 'docx';
 }
 
 const t = (k: string, o?: Record<string, unknown>) => i18n.t(k, o) as string;
@@ -104,19 +104,26 @@ interface Ctx {
   pThreshold: boolean;
 }
 
-function interpretation(command: string | undefined, items: OutputItem[], ctx: Ctx): string {
-  if (!ctx.opts.interpret || !command || !INTERPRETABLE.includes(command.toUpperCase())) return '';
+/** Plain-language interpretation of a procedure's tables (empty when there is none). */
+export function explainTexts(command: string | undefined, items: OutputItem[]): InterpretText[] {
+  if (!command || !INTERPRETABLE.includes(command.toUpperCase())) return [];
   const tables = items.filter((i): i is Extract<OutputItem, { kind: 'table' }> => i.kind === 'table').map((i) => ({ title: i.title, html: i.html }));
-  if (!tables.length) return '';
-  let facts;
+  if (!tables.length) return [];
+  const s = useSettings.getState();
   try {
-    facts = interpret(command.toUpperCase(), tables);
+    return interpret(command.toUpperCase(), tables)
+      .slice(0, 8)
+      .map((f) => describeFact(f, i18n.t, { style: { dec: s.decimalSeparator, leadingZero: s.leadingZero }, pThreshold: s.pFormat === 'threshold' }));
   } catch {
-    return '';
+    return [];
   }
-  if (!facts.length) return '';
+}
+
+function interpretation(command: string | undefined, items: OutputItem[], ctx: Ctx): string {
+  if (!ctx.opts.interpret) return '';
+  const texts = explainTexts(command, items);
+  if (!texts.length) return '';
   const lang = i18n.language;
-  const texts = facts.slice(0, 8).map((f) => describeFact(f, i18n.t, { style: ctx.style, pThreshold: ctx.pThreshold }));
   const caveat = texts.find((x) => x.caveat)?.caveat;
   const li = texts
     .map((x) => {

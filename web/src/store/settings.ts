@@ -54,7 +54,7 @@ export interface Settings {
   /** Data export: value labels instead of codes; CSV with ';' and decimal comma. */
   exportOptions: { labels: boolean; semicolon: boolean };
   /** Output export (HTML / PDF): what to include. */
-  outputExport: { syntax: boolean; interpret: boolean; toc: boolean };
+  outputExport: { syntax: boolean; interpret: boolean; toc: boolean; format?: 'pdf' | 'docx' | 'html' };
   /** Re-running an output result replaces it instead of appending. */
   rerunReplaces: boolean;
   /** How variables are listed in dialogs and pickers. */

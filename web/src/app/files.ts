@@ -405,6 +405,24 @@ export function exportOutputPdf(opts?: Partial<Omit<OutputExportOptions, 'mode'>
   printDocument(html, `${outputBase()}-${t('io.out.fileSuffix')}`);
 }
 
+/** Saves the output as a Word document. */
+export async function exportOutputDocx(opts?: Partial<Omit<OutputExportOptions, 'mode'>>) {
+  const entries = useOutput.getState().entries;
+  if (!entries.length) {
+    toast(t('output.empty'));
+    return;
+  }
+  try {
+    const { buildOutputDocx } = await import('../features/output/exportDocx');
+    const bytes = await buildOutputDocx(entries, { ...useSettings.getState().outputExport, ...opts });
+    downloadBlob(`${outputBase()}-${t('io.out.fileSuffix')}.docx`, bytes as BlobPart, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    toast(t('io.out.savedDocx'), { kind: 'success' });
+  } catch (e) {
+    console.error(e);
+    toast(t('files.saveFailed', { message: e instanceof Error ? e.message : String(e) }), { kind: 'error' });
+  }
+}
+
 export function printOutput() {
   exportOutputPdf();
 }
