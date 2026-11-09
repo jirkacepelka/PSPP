@@ -42,6 +42,11 @@ npm run migrate:local
 npm run dev            # http://localhost:8787
 ```
 
+## Access tokens
+
+Tokens that start with `pat_` authenticate the MCP server (see `mcp/`). They reach only the account summary
+and the documents (`/api/me`, `/api/projects*`); creating tokens, settings and sign-out stay session-only.
+
 ## API
 
 | Method and path | Purpose |
@@ -51,4 +56,5 @@ npm run dev            # http://localhost:8787
 | `GET /api/me`, `POST /api/logout` | account info and quota, end the session |
 | `GET/POST /api/projects` | list, create |
 | `GET/PATCH/DELETE /api/projects/:id` | metadata, rename, delete |
+| `GET/POST /api/tokens`, `DELETE /api/tokens/:id` | personal access tokens for AI agents (prefix `pat_`, shown once, only the hash is stored, 90 days by default, at most 10) |
 | `GET/PUT /api/projects/:id/doc` | document blob; `PUT` needs `If-Match: <rev>`, 409 on conflict |

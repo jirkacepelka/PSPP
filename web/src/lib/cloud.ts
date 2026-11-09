@@ -138,3 +138,20 @@ export async function getSettings<T>() {
 export async function putSettings(settings: unknown) {
   return (await (await call('/api/settings', jsonInit('PUT', settings))).json()) as { ok: true; updated: number };
 }
+
+export interface AgentToken {
+  id: string;
+  name: string;
+  created_at: number;
+  expires_at: number;
+  last_used_at: number | null;
+}
+export async function listTokens() {
+  return ((await (await call('/api/tokens')).json()) as { tokens: AgentToken[] }).tokens;
+}
+export async function createToken(name: string, days: number) {
+  return (await (await call('/api/tokens', jsonInit('POST', { name, days }))).json()) as { id: string; name: string; token: string; expires_at: number };
+}
+export async function deleteToken(id: string) {
+  await call(`/api/tokens/${id}`, { method: 'DELETE' });
+}

@@ -514,3 +514,63 @@
   align-items: center;
   gap: var(--s-1);
 }
+
+/* AI agent tokens */
+.ag-intro {
+  padding: var(--s-4);
+}
+.ag-fresh {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0 var(--s-4) var(--s-4);
+  padding: var(--s-3);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+.ag-token {
+  display: block;
+  padding: var(--s-2);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  border: var(--hairline) solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.ag-actions {
+  display: flex;
+  gap: var(--s-2);
+}
+.ag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--s-4);
+  display: grid;
+}
+.ag-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) 0;
+  border-top: var(--hairline) solid var(--line);
+}
+.ag-name {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  font-weight: var(--fw-medium);
+}
+.ag-name small {
+  font-weight: var(--fw-regular);
+  color: var(--ink-3);
+}
+.ag-create {
+  display: flex;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4) var(--s-4);
+}
+.ag-create .input {
+  flex: 1;
+}

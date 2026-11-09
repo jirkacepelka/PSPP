@@ -60,5 +60,21 @@
     "skip": "Skip",
     "go": "Continue",
     "progress": "Moving {{done}} of {{total}}…"
+  },
+  "agents": {
+    "title": "AI agents",
+    "intro": "Let an AI assistant open and analyse the documents in your account through the PSPP Studio MCP server. Results it produces are saved into the document and appear here. Each token gives full access to your documents, so keep it secret and revoke it when you no longer use it.",
+    "defaultName": "AI agent",
+    "namePlaceholder": "Token name, e.g. Claude Desktop",
+    "create": "Create token",
+    "copyNow": "Copy the token for \"{{name}}\" now. It is shown only once.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "done": "Done",
+    "connect": "Connect it to Claude Code (other clients: see mcp/README.md):",
+    "apiNote": "The server talks to {{api}}.",
+    "revoke": "Revoke",
+    "never": "never",
+    "meta": "Created {{created}} · expires {{expires}} · last used {{used}}"
   }
 }

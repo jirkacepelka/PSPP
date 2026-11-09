@@ -42,16 +42,30 @@ async function body<T>(request: Request): Promise<T> {
   }
 }
 
-async function auth(request: Request, env: Env): Promise<{ userId: string; tokenHash: string }> {
+const API_PREFIX = 'pat_';
+
+/**
+ * Session tokens (browser) and personal API tokens (AI agents, prefix pat_) both authenticate a user.
+ * API tokens only reach documents and the account summary, never tokens, settings or sign-out.
+ */
+async function auth(request: Request, env: Env): Promise<{ userId: string; tokenHash: string; viaApi: boolean }> {
   const header = request.headers.get('authorization') ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) throw new HttpError(401, 'unauthorized');
   const tokenHash = await sha256(token);
+  if (token.startsWith(API_PREFIX)) {
+    const row = await env.DB.prepare('SELECT id, user_id, expires_at FROM api_tokens WHERE token_hash = ?')
+      .bind(tokenHash)
+      .first<{ id: string; user_id: string; expires_at: number }>();
+    if (!row || row.expires_at < Date.now()) throw new HttpError(401, 'unauthorized');
+    await env.DB.prepare('UPDATE api_tokens SET last_used_at = ? WHERE id = ?').bind(Date.now(), row.id).run();
+    return { userId: row.user_id, tokenHash, viaApi: true };
+  }
   const row = await env.DB.prepare('SELECT user_id, expires_at FROM sessions WHERE token_hash = ?')
     .bind(tokenHash)
     .first<{ user_id: string; expires_at: number }>();
   if (!row || row.expires_at < Date.now()) throw new HttpError(401, 'unauthorized');
-  return { userId: row.user_id, tokenHash };
+  return { userId: row.user_id, tokenHash, viaApi: false };
 }
 
 function requireAdmin(request: Request, env: Env): void {
@@ -179,7 +193,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     return json({ codes });
   }
 
-  const { userId, tokenHash } = await auth(request, env);
+  const { userId, tokenHash, viaApi } = await auth(request, env);
+  if (viaApi && !(path === '/api/me' || path.startsWith('/api/projects'))) throw new HttpError(403, 'forbidden_for_api_token');
 
   if (path === '/api/me' && m === 'GET') {
     const user = await env.DB.prepare('SELECT id, email FROM users WHERE id = ?').bind(userId).first();
@@ -207,6 +222,32 @@ async function route(request: Request, env: Env): Promise<Response> {
     const updated = Date.now();
     await env.DB.prepare('UPDATE users SET settings = ?, settings_updated_at = ? WHERE id = ?').bind(text, updated, userId).run();
     return json({ ok: true, updated });
+  }
+  if (path === '/api/tokens' && m === 'GET') {
+    const { results } = await env.DB.prepare('SELECT id, name, created_at, expires_at, last_used_at FROM api_tokens WHERE user_id = ? ORDER BY created_at DESC')
+      .bind(userId)
+      .all();
+    return json({ tokens: results });
+  }
+  if (path === '/api/tokens' && m === 'POST') {
+    const { name, days = 90 } = await body<{ name?: string; days?: number }>(request);
+    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM api_tokens WHERE user_id = ?').bind(userId).first<{ n: number }>();
+    if ((count?.n ?? 0) >= 10) throw new HttpError(409, 'too_many_tokens');
+    const clean = String(name ?? '').trim().slice(0, 60) || 'AI agent';
+    const token = API_PREFIX + randomToken(32);
+    const now = Date.now();
+    const expires = now + Math.min(Math.max(1, Math.floor(days)), 365) * DAY;
+    const id = crypto.randomUUID();
+    await env.DB.prepare('INSERT INTO api_tokens (id, user_id, name, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(id, userId, clean, await sha256(token), now, expires)
+      .run();
+    // the token is shown once: only its hash is stored
+    return json({ id, name: clean, token, expires_at: expires }, 201);
+  }
+  const tok = path.match(/^\/api\/tokens\/([\w-]+)$/);
+  if (tok && m === 'DELETE') {
+    await env.DB.prepare('DELETE FROM api_tokens WHERE id = ? AND user_id = ?').bind(tok[1], userId).run();
+    return new Response(null, { status: 204 });
   }
   if (path === '/api/logout' && m === 'POST') {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();

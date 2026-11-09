@@ -62,5 +62,21 @@
     "skip": "Přeskočit",
     "go": "Pokračovat",
     "progress": "Přenáším {{done}} z {{total}}…"
+  },
+  "agents": {
+    "title": "AI agenti",
+    "intro": "Nech AI asistenta otevírat a analyzovat dokumenty ve tvém účtu přes MCP server PSPP Studia. Výsledky, které vytvoří, se uloží do dokumentu a objeví se tady. Každý token dává plný přístup k tvým dokumentům, proto ho drž v tajnosti a zruš, když ho už nepoužíváš.",
+    "defaultName": "AI agent",
+    "namePlaceholder": "Název tokenu, např. Claude Desktop",
+    "create": "Vytvořit token",
+    "copyNow": "Zkopíruj si token „{{name}}“ hned. Zobrazí se jen jednou.",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "done": "Hotovo",
+    "connect": "Připojení ke Claude Code (další klienti: viz mcp/README.md):",
+    "apiNote": "Server komunikuje s {{api}}.",
+    "revoke": "Zrušit",
+    "never": "nikdy",
+    "meta": "Vytvořen {{created}} · platí do {{expires}} · naposledy použit {{used}}"
   }
 }
