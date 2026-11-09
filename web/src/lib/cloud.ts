@@ -136,5 +136,5 @@ export async function getSettings<T>() {
   return (await (await call('/api/settings')).json()) as { settings: T | null; updated: number | null };
 }
 export async function putSettings(settings: unknown) {
-  await call('/api/settings', jsonInit('PUT', settings));
+  return (await (await call('/api/settings', jsonInit('PUT', settings))).json()) as { ok: true; updated: number };
 }

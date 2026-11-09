@@ -195,8 +195,9 @@ async function route(request: Request, env: Env): Promise<Response> {
     } catch {
       throw new HttpError(400, 'bad_json');
     }
-    await env.DB.prepare('UPDATE users SET settings = ?, settings_updated_at = ? WHERE id = ?').bind(text, Date.now(), userId).run();
-    return json({ ok: true });
+    const updated = Date.now();
+    await env.DB.prepare('UPDATE users SET settings = ?, settings_updated_at = ? WHERE id = ?').bind(text, updated, userId).run();
+    return json({ ok: true, updated });
   }
   if (path === '/api/logout' && m === 'POST') {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();

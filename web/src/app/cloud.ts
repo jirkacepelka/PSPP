@@ -212,9 +212,13 @@ async function doPull(): Promise<void> {
 // ------------------------------------------------------------------ settings in the account
 
 const settingsFlagKey = (uid: string) => `pspp-studio.settingsSync.${uid}`;
+/** Server time of the settings version this browser last pushed or applied. */
+const settingsRevKey = (uid: string) => `pspp-studio.settingsRev.${uid}`;
 let settingsTimer: ReturnType<typeof setTimeout> | null = null;
 let unsubSettings: (() => void) | null = null;
 let applyingRemote = false;
+/** When the settings last changed in this browser: a pull that started earlier must not overwrite them. */
+let localChangeAt = 0;
 
 function settingsSyncOn(): boolean {
   const u = useAccount.getState().user;
@@ -234,6 +238,23 @@ function setSettingsSync(on: boolean) {
     /* ignore */
   }
 }
+function knownSettingsRev(): number {
+  const u = useAccount.getState().user;
+  try {
+    return u ? Number(localStorage.getItem(settingsRevKey(u.id)) ?? '0') : 0;
+  } catch {
+    return 0;
+  }
+}
+function rememberSettingsRev(rev: number | null | undefined) {
+  const u = useAccount.getState().user;
+  if (!u || !rev) return;
+  try {
+    localStorage.setItem(settingsRevKey(u.id), String(rev));
+  } catch {
+    /* ignore */
+  }
+}
 
 /** The part of the settings that follows you: appearance and preferences, not this browser's onboarding state. */
 function portableSettings(): Partial<Settings> {
@@ -244,26 +265,41 @@ function portableSettings(): Partial<Settings> {
   return out;
 }
 
+async function pushSettings() {
+  try {
+    rememberSettingsRev((await api.putSettings(portableSettings())).updated);
+  } catch {
+    /* retried on the next change */
+  }
+}
+
 function startSettingsSync() {
   unsubSettings?.();
   unsubSettings = useSettings.subscribe(() => {
     if (applyingRemote || !signedIn() || !settingsSyncOn()) return;
+    localChangeAt = Date.now();
     if (settingsTimer) clearTimeout(settingsTimer);
-    settingsTimer = setTimeout(() => void api.putSettings(portableSettings()).catch(() => undefined), 1500);
+    settingsTimer = setTimeout(() => {
+      settingsTimer = null;
+      void pushSettings();
+    }, 1500);
   });
 }
 
+/** Applies the account's settings only when they are newer than what this browser has and nothing local is pending. */
 async function pullSettings() {
-  if (!signedIn() || !settingsSyncOn()) return;
+  if (!signedIn() || !settingsSyncOn() || settingsTimer) return;
+  const started = Date.now();
   try {
-    const { settings } = await api.getSettings<Partial<Settings>>();
-    if (!settings) return;
-    const mine = JSON.stringify(portableSettings());
-    if (JSON.stringify({ ...portableSettings(), ...settings }) === mine) return;
+    const { settings, updated } = await api.getSettings<Partial<Settings>>();
+    if (!settings || !updated || updated <= knownSettingsRev()) return;
+    if (settingsTimer || localChangeAt >= started) return; // edited here while we were asking
     applyingRemote = true;
     useSettings.getState().set(settings);
-    applyingRemote = false;
+    rememberSettingsRev(updated);
   } catch {
+    /* try again later */
+  } finally {
     applyingRemote = false;
   }
 }
@@ -271,7 +307,7 @@ async function pullSettings() {
 export const settingsSyncEnabled = settingsSyncOn;
 export async function setSettingsSyncEnabled(on: boolean) {
   setSettingsSync(on);
-  if (on) await api.putSettings(portableSettings()).catch(() => undefined);
+  if (on) await pushSettings();
 }
 
 // ------------------------------------------------------------------ migration after signing in
@@ -328,10 +364,10 @@ export async function runMigration(docIds: string[], settings: SettingsChoice, o
 
   if (settings === 'upload') {
     setSettingsSync(true);
-    await api.putSettings(portableSettings()).catch(() => undefined);
+    await pushSettings();
   } else if (settings === 'download') {
     setSettingsSync(true);
-    await pullSettings();
+    await pullSettings(); // the account's settings are newer than anything this browser has seen
   }
   try {
     localStorage.setItem(migratedKey(user.id), '1');
