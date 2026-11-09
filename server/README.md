@@ -17,7 +17,7 @@ encrypted: the operator could read it. Users who need that keep working locally,
 cd server
 npm install
 npx wrangler login
-npx wrangler d1 create pspp-studio        # copy the printed database_id into wrangler.toml
+npx wrangler d1 create pspp-studio        # already created for the demo deployment; put your own database_id in wrangler.toml
 npm run migrate:remote
 npx wrangler secret put ADMIN_KEY         # any long random string, used to create invitations
 npm run deploy                            # prints https://pspp-studio-api.<you>.workers.dev

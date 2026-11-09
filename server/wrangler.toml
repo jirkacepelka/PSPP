@@ -8,7 +8,7 @@ compatibility_date = "2025-11-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "pspp-studio"
-database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+database_id = "40539e3a-c856-4e08-8d4a-d5ef6127a17f"
 migrations_dir = "migrations"
 
 [[durable_objects.bindings]]
