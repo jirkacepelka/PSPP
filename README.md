@@ -45,6 +45,8 @@ unchanged statistics engine.
 |---|---|
 | [`engine/`](engine/README.md) | GNU PSPP 2.1.3 sources with small changes, a C bridge, and scripts that build the WebAssembly engine |
 | [`web/`](web/README.md) | The React/TypeScript front end |
+| [`server/`](server/README.md) | Optional invitation-only accounts: a Cloudflare Worker (free plan) that saves documents online |
+| [`mcp/`](mcp/README.md) | MCP server that lets AI agents load data and run PSPP analyses locally (no browser needed) |
 | `vercel.json` | Static deployment configuration |
 
 ## Quick start
