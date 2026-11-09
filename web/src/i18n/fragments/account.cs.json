@@ -39,5 +39,28 @@
     "quotaFull": "Místo v cloudu je plné. Tento dokument zůstává jen v tomto prohlížeči.",
     "tooLarge": "Dokument je pro cloud příliš velký a zůstává jen v tomto prohlížeči.",
     "sessionEnded": "Byl jsi odhlášen. Tvoje práce zůstává v tomto prohlížeči."
+  },
+  "migrate": {
+    "title": "Přenést práci do účtu",
+    "intro": "Vyber, co se má z tohoto prohlížeče přenést. Nic se tu nemaže.",
+    "docs_one": "{{count}} dokument v tomto prohlížeči",
+    "docs_few": "{{count}} dokumenty v tomto prohlížeči",
+    "docs_many": "{{count}} dokumentu v tomto prohlížeči",
+    "docs_other": "{{count}} dokumentů v tomto prohlížeči",
+    "docInfo": "{{cases}} případů · {{vars}} proměnných · {{date}}",
+    "docsHelp": "Dokumenty, které nevybereš, zůstanou jen v tomto prohlížeči a nikdy se nenahrají. Nové dokumenty vytvořené po přihlášení se ukládají do účtu.",
+    "selectAll": "Vybrat vše",
+    "selectNone": "Zrušit výběr",
+    "settings": "Nastavení",
+    "saveSettings": "Uložit nastavení z tohoto prohlížeče do účtu",
+    "saveSettingsHelp": "Jazyk, motiv, vzhled a profil půjdou s tebou na další zařízení.",
+    "useAccountSettings": "Použít nastavení z mého účtu",
+    "useAccountSettingsHelp": "Nahradí nastavení v tomto prohlížeči tím, které je uložené v účtu.",
+    "replaceAccountSettings": "Použít nastavení z tohoto prohlížeče a přepsat jimi účet",
+    "replaceAccountSettingsHelp": "Ostatní zařízení převezmou toto nastavení.",
+    "keepSeparate": "Nastavení ponechat zvlášť (nesynchronizovat)",
+    "skip": "Přeskočit",
+    "go": "Pokračovat",
+    "progress": "Přenáším {{done}} z {{total}}…"
   }
 }

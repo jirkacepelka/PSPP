@@ -36,6 +36,7 @@ import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
 import { ConfirmDialog, FindDialog, GotoDialog, SaveAsDialog } from './features/misc/SmallDialogs';
 import { AccountDialog } from './features/misc/AccountDialog';
+import { MigrateDialog } from './features/misc/MigrateDialog';
 import { ImportDialog } from './features/misc/ImportDialog';
 import { ExportOutputDialog } from './features/output/ExportOutputDialog';
 import { MissingDialog, TypeDialog, ValueLabelsDialog } from './features/variables/VariableDialogs';
@@ -113,6 +114,8 @@ function Modals() {
       return <FindDialog />;
     case 'account':
       return <AccountDialog />;
+    case 'migrate':
+      return <MigrateDialog plan={modal.plan} />;
     case 'saveAs':
       return <SaveAsDialog />;
     case 'import':

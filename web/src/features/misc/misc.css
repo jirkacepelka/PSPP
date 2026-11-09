@@ -225,3 +225,45 @@
   font-size: var(--fs-sm);
   color: var(--ink-3);
 }
+
+/* migration dialog */
+.mig-section + .mig-section {
+  margin-top: var(--s-5);
+}
+.mig-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-2);
+}
+.mig-head h3 {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+.mig-list {
+  list-style: none;
+  margin: 0 0 var(--s-2);
+  padding: var(--s-2);
+  display: grid;
+  gap: var(--s-2);
+  max-height: 240px;
+  overflow: auto;
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-control);
+}
+.mig-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-right: auto;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
+
+/* the mode switch is as wide as its content, not stretched across the dialog */
+.dlg-fields > .segmented {
+  justify-self: start;
+  width: fit-content;
+}

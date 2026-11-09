@@ -1,7 +1,7 @@
 /*
  * Cloud documents. While signed in, every document you edit is saved to your account a moment
- * after it is saved in the browser (no button), and documents from your other devices appear on
- * the start screen. Work done before signing in stays in the browser until you edit it again.
+ * after it is saved in the browser (no button), changes from your other devices arrive by
+ * themselves (also in the document you have open), and settings can follow you too.
  * Conflicts never lose data: the version from the other device is kept as a separate copy.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -9,8 +9,9 @@ import { t } from 'i18next';
 import * as api from '../lib/cloud';
 import { kvGet, kvSet } from '../lib/storage';
 import { useAccount } from '../store/account';
+import { getSettings, useSettings, type Settings } from '../store/settings';
 import { useUi } from '../store/ui';
-import { docHooks, getCurrentDocId, makeDocId, readDocument, storeDocument, type AutosaveState } from './files';
+import { deleteDocumentLocal, docHooks, flushAutosave, getCurrentDocId, makeDocId, readDocIndex, readDocument, reloadCurrentDocument, storeDocument, type AutosaveState, type DocMeta } from './files';
 
 interface Link {
   cloudId: string;
@@ -20,10 +21,15 @@ interface Link {
   name: string;
 }
 const LINKS_KEY = 'cloud.links.v1';
+const LOCAL_ONLY_KEY = 'cloud.localonly.v1';
 let links: Record<string, Link> | null = null;
-const toast = (m: string, o?: Parameters<ReturnType<typeof useUi.getState>['toast']>[1]) => useUi.getState().toast(m, o);
+let localOnly: Set<string> | null = null;
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
-const PUSH_DELAY = 2500;
+/** Local autosave already waits ~1 s, so the cloud follows quickly: about 2 s from keystroke to server. */
+const PUSH_DELAY = 800;
+const POLL_MS = 30_000;
+
+const toast = (m: string, o?: Parameters<ReturnType<typeof useUi.getState>['toast']>[1]) => useUi.getState().toast(m, o);
 
 async function readLinks() {
   if (!links) links = (await kvGet<Record<string, Link>>(LINKS_KEY)) ?? {};
@@ -31,6 +37,13 @@ async function readLinks() {
 }
 async function writeLinks() {
   if (links) await kvSet(LINKS_KEY, links);
+}
+async function readLocalOnly() {
+  if (!localOnly) localOnly = new Set((await kvGet<string[]>(LOCAL_ONLY_KEY)) ?? []);
+  return localOnly;
+}
+async function writeLocalOnly() {
+  if (localOnly) await kvSet(LOCAL_ONLY_KEY, [...localOnly]);
 }
 
 const setSync = (sync: ReturnType<typeof useAccount.getState>['sync']) => useAccount.getState().set({ sync });
@@ -44,6 +57,7 @@ let tooLargeShown = false;
 
 async function push(localId: string): Promise<void> {
   if (!signedIn()) return;
+  if ((await readLocalOnly()).has(localId)) return;
   const state = await readDocument(localId);
   if (!state) return;
   const all = await readLinks();
@@ -99,6 +113,7 @@ async function push(localId: string): Promise<void> {
 function schedule(localId: string, delay = PUSH_DELAY) {
   const old = timers.get(localId);
   if (old) clearTimeout(old);
+  if (delay <= PUSH_DELAY) setSync('saving'); // shown at once, not after the delay
   timers.set(
     localId,
     setTimeout(() => {
@@ -108,68 +123,242 @@ function schedule(localId: string, delay = PUSH_DELAY) {
   );
 }
 
-async function refreshUsage() {
-  try {
-    const { projects: _p, ...usage } = await api.listProjects();
-    useAccount.getState().set({ usage });
-  } catch {
-    /* shown next time */
-  }
+/** Runs `fn` over `items` with a few requests in flight at once. */
+async function inParallel<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (next < items.length) await fn(items[next++]);
+    }),
+  );
 }
 
-/** Downloads documents that are new or newer in the cloud. Skips the document that is open. */
-export async function pullFromCloud(): Promise<void> {
-  if (!signedIn()) return;
+let pulling: Promise<void> | null = null;
+
+/** Brings in documents that are new or newer in the cloud; the open document is updated in place. */
+export function pullFromCloud(): Promise<void> {
+  if (!signedIn()) return Promise.resolve();
+  if (pulling) return pulling;
+  pulling = doPull().finally(() => (pulling = null));
+  return pulling;
+}
+
+async function doPull(): Promise<void> {
   try {
     const { projects, ...usage } = await api.listProjects();
     useAccount.getState().set({ usage });
     const all = await readLinks();
+    const only = await readLocalOnly();
     const byCloud = new Map(Object.entries(all).map(([local, l]) => [l.cloudId, local]));
-    for (const p of projects) {
+    const wanted = projects.filter((p) => {
       const local = byCloud.get(p.id);
-      if (local && all[local].rev >= p.rev) continue;
-      if (local && local === getCurrentDocId()) continue;
+      return !local || all[local].rev < p.rev;
+    });
+    await inParallel(wanted, 4, async (p) => {
+      const local = byCloud.get(p.id);
       const remote = await api.getDoc<AutosaveState>(p.id);
-      if (!remote.value) continue;
-      if (local) {
-        const mine = await readDocument(local);
-        if (mine && mine.time > all[local].time) {
-          // edited here and elsewhere since the last sync: keep both
-          await storeDocument(makeDocId(), { ...remote.value, title: t('cloud.otherDevice', { name: docName(remote.value) }) }, remote.value.time);
-          all[local].rev = remote.rev;
-          schedule(local, 500);
-          continue;
-        }
-        await storeDocument(local, remote.value, remote.value.time);
-        all[local] = { cloudId: p.id, rev: remote.rev, time: remote.value.time, name: p.name };
-      } else {
+      if (!remote.value) return;
+      if (!local) {
         const id = makeDocId();
-        await storeDocument(id, remote.value, p.created_at);
         all[id] = { cloudId: p.id, rev: remote.rev, time: remote.value.time, name: p.name };
+        await storeDocument(id, remote.value, p.created_at);
+        return;
       }
-    }
+      if (local === getCurrentDocId()) await flushAutosave(); // our own pending edit must be on disk before we compare
+      const mine = await readDocument(local);
+      const editedHere = !!mine && (mine.time > all[local].time || timers.has(local));
+      if (editedHere) {
+        // edited here and elsewhere since the last sync: keep both
+        await storeDocument(makeDocId(), { ...remote.value, title: t('cloud.otherDevice', { name: docName(remote.value) }) }, remote.value.time);
+        all[local].rev = remote.rev;
+        toast(t('cloud.conflict'), { kind: 'info' });
+        schedule(local, 300);
+        return;
+      }
+      all[local] = { cloudId: p.id, rev: remote.rev, time: remote.value.time, name: p.name };
+      only.delete(local);
+      await storeDocument(local, remote.value, p.created_at);
+      if (local === getCurrentDocId()) await reloadCurrentDocument(remote.value);
+    });
     // deleted on another device
     const alive = new Set(projects.map((p) => p.id));
     for (const [local, l] of Object.entries(all)) {
       if (!alive.has(l.cloudId) && local !== getCurrentDocId()) {
         delete all[local];
-        const { deleteDocumentLocal } = await import('./files');
         await deleteDocumentLocal(local);
       }
     }
     await writeLinks();
-    setSync('saved');
+    await writeLocalOnly();
+    if (useAccount.getState().sync !== 'saving') setSync('saved');
   } catch (e) {
     if (e instanceof api.ApiError && e.status === 401) await signOut(false);
     else setSync('offline');
   }
 }
 
-export async function signIn(mode: 'login' | 'register', email: string, password: string, invite = ''): Promise<void> {
+// ------------------------------------------------------------------ settings in the account
+
+const settingsFlagKey = (uid: string) => `pspp-studio.settingsSync.${uid}`;
+let settingsTimer: ReturnType<typeof setTimeout> | null = null;
+let unsubSettings: (() => void) | null = null;
+let applyingRemote = false;
+
+function settingsSyncOn(): boolean {
+  const u = useAccount.getState().user;
+  try {
+    return !!u && localStorage.getItem(settingsFlagKey(u.id)) === '1';
+  } catch {
+    return false;
+  }
+}
+function setSettingsSync(on: boolean) {
+  const u = useAccount.getState().user;
+  if (!u) return;
+  try {
+    if (on) localStorage.setItem(settingsFlagKey(u.id), '1');
+    else localStorage.removeItem(settingsFlagKey(u.id));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** The part of the settings that follows you: appearance and preferences, not this browser's onboarding state. */
+function portableSettings(): Partial<Settings> {
+  const { onboarded: _o, ...rest } = getSettings();
+  void _o;
+  const out: Partial<Settings> = rest;
+  if (out.profile?.avatar && out.profile.avatar.length > 100_000) out.profile = { ...out.profile, avatar: undefined };
+  return out;
+}
+
+function startSettingsSync() {
+  unsubSettings?.();
+  unsubSettings = useSettings.subscribe(() => {
+    if (applyingRemote || !signedIn() || !settingsSyncOn()) return;
+    if (settingsTimer) clearTimeout(settingsTimer);
+    settingsTimer = setTimeout(() => void api.putSettings(portableSettings()).catch(() => undefined), 1500);
+  });
+}
+
+async function pullSettings() {
+  if (!signedIn() || !settingsSyncOn()) return;
+  try {
+    const { settings } = await api.getSettings<Partial<Settings>>();
+    if (!settings) return;
+    const mine = JSON.stringify(portableSettings());
+    if (JSON.stringify({ ...portableSettings(), ...settings }) === mine) return;
+    applyingRemote = true;
+    useSettings.getState().set(settings);
+    applyingRemote = false;
+  } catch {
+    applyingRemote = false;
+  }
+}
+
+// ------------------------------------------------------------------ migration after signing in
+
+export interface MigrationPlan {
+  docs: DocMeta[];
+  cloudHasSettings: boolean;
+  /** Settings were customised in this browser (set up, or a named profile). */
+  localSettings: boolean;
+}
+
+const migratedKey = (uid: string) => `pspp-studio.migrated.${uid}`;
+
+export async function planMigration(): Promise<MigrationPlan | null> {
+  const user = useAccount.getState().user;
+  if (!user) return null;
+  try {
+    if (localStorage.getItem(migratedKey(user.id)) === '1') return null;
+  } catch {
+    /* ignore */
+  }
+  const all = await readLinks();
+  const docs = (await readDocIndex()).filter((m) => !all[m.id]);
+  let cloudHasSettings = false;
+  try {
+    cloudHasSettings = !!(await api.getSettings()).settings;
+  } catch {
+    /* treat as none */
+  }
+  const localSettings = useSettings.getState().onboarded;
+  if (!docs.length && !cloudHasSettings && !localSettings) return null;
+  return { docs, cloudHasSettings, localSettings };
+}
+
+export type SettingsChoice = 'upload' | 'download' | 'none';
+
+export async function runMigration(docIds: string[], settings: SettingsChoice, onProgress?: (done: number, total: number) => void) {
+  const user = useAccount.getState().user;
+  if (!user) return;
+  const chosen = new Set(docIds);
+  const only = await readLocalOnly();
+  const all = await readLinks();
+  const rest = (await readDocIndex()).filter((m) => !all[m.id] && !chosen.has(m.id));
+  for (const m of rest) only.add(m.id);
+  await writeLocalOnly();
+
+  let done = 0;
+  for (const id of docIds) {
+    only.delete(id);
+    await push(id);
+    onProgress?.(++done, docIds.length);
+  }
+  await writeLocalOnly();
+
+  if (settings === 'upload') {
+    setSettingsSync(true);
+    await api.putSettings(portableSettings()).catch(() => undefined);
+  } else if (settings === 'download') {
+    setSettingsSync(true);
+    await pullSettings();
+  }
+  try {
+    localStorage.setItem(migratedKey(user.id), '1');
+  } catch {
+    /* ignore */
+  }
+}
+
+// ------------------------------------------------------------------ session
+
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+const refresh = () => {
+  if (document.visibilityState === 'visible' && signedIn()) {
+    void pullFromCloud();
+    void pullSettings();
+  }
+};
+
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(refresh, POLL_MS);
+  document.addEventListener('visibilitychange', refresh);
+  window.addEventListener('focus', refresh);
+  window.addEventListener('online', refresh);
+  startSettingsSync();
+}
+
+function stopPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = null;
+  document.removeEventListener('visibilitychange', refresh);
+  window.removeEventListener('focus', refresh);
+  window.removeEventListener('online', refresh);
+  unsubSettings?.();
+  unsubSettings = null;
+}
+
+/** Signs in; resolves to the migration plan when there is something to decide, else null. */
+export async function signIn(mode: 'login' | 'register', email: string, password: string, invite = ''): Promise<MigrationPlan | null> {
   const res = mode === 'register' ? await api.register(email, password, invite) : await api.login(email, password);
   api.setToken(res.token);
   useAccount.getState().set({ user: res.user, sync: 'idle' });
+  startPolling();
   await pullFromCloud();
+  return planMigration();
 }
 
 export async function signOut(remote = true): Promise<void> {
@@ -177,18 +366,24 @@ export async function signOut(remote = true): Promise<void> {
   api.setToken(null);
   for (const timer of timers.values()) clearTimeout(timer);
   timers.clear();
+  stopPolling();
   useAccount.getState().set({ user: null, usage: null, sync: 'idle' });
 }
 
 /** Called once at startup: restores the session and hooks into document saving. */
 export async function initCloud(): Promise<void> {
   docHooks.onSaved = (id) => {
-    if (signedIn()) schedule(id);
+    if (!signedIn()) return;
+    void readLocalOnly().then((only) => {
+      if (!only.has(id)) schedule(id);
+    });
   };
   docHooks.onDeleted = (id) => {
     void (async () => {
       const all = await readLinks();
       const link = all[id];
+      (await readLocalOnly()).delete(id);
+      await writeLocalOnly();
       if (!link) return;
       delete all[id];
       await writeLinks();
@@ -199,11 +394,12 @@ export async function initCloud(): Promise<void> {
   try {
     const info = await api.me();
     useAccount.getState().set({ user: info.user, usage: { used: info.used, quota: info.quota } });
+    await readLinks();
+    startPolling();
     await pullFromCloud();
+    await pullSettings();
   } catch (e) {
     if (e instanceof api.ApiError && e.status === 401) api.setToken(null);
     // offline: stay signed out in the UI until the next start; local work is unaffected
   }
 }
-
-export { refreshUsage };

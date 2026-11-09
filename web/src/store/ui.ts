@@ -2,6 +2,7 @@
  * Transient UI state: active view, open dialogs, toasts, engine status.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import type { MigrationPlan } from '../app/cloud';
 import { create } from 'zustand';
 import { flushSync } from 'react-dom';
 
@@ -31,6 +32,7 @@ export type Modal =
   | { kind: 'settings'; section?: string }
   | { kind: 'about' }
   | { kind: 'account' }
+  | { kind: 'migrate'; plan: MigrationPlan }
   | { kind: 'shortcuts' }
   | { kind: 'varType'; index: number }
   | { kind: 'valueLabels'; index: number }

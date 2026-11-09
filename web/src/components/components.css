@@ -1129,7 +1129,8 @@ button.chip[aria-pressed='true']:hover {
   align-items: flex-start;
   gap: var(--s-3);
   min-height: 60px;
-  padding: var(--s-3) var(--s-3) var(--s-3) var(--dialog-pad);
+  /* the same gap above and left of the icon; the close button keeps its own padding on the right */
+  padding: var(--dialog-pad) calc(var(--dialog-pad) - var(--s-2)) var(--s-1) var(--dialog-pad);
   /* no divider under the title: the header and the body read as one sheet */
 }
 .dialog-heading {
@@ -1152,7 +1153,7 @@ button.chip[aria-pressed='true']:hover {
   letter-spacing: var(--ls-tight);
   line-height: var(--lh-tight);
 }
-.dialog-description {
+.dialog-header .dialog-description {
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--ink-3);
@@ -1212,7 +1213,7 @@ button.chip[aria-pressed='true']:hover {
     border-radius: var(--radius-panel);
   }
   .dialog-header {
-    padding-left: var(--s-4);
+    padding: var(--s-4) var(--s-2) var(--s-3) var(--s-4);
   }
   .dialog-body,
   .dialog-footer {

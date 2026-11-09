@@ -181,6 +181,23 @@ async function route(request: Request, env: Env): Promise<Response> {
     const user = await env.DB.prepare('SELECT id, email FROM users WHERE id = ?').bind(userId).first();
     return json({ user, ...(await usage(env, userId)) });
   }
+  if (path === '/api/settings' && m === 'GET') {
+    const row = await env.DB.prepare('SELECT settings, settings_updated_at AS updated FROM users WHERE id = ?')
+      .bind(userId)
+      .first<{ settings: string | null; updated: number | null }>();
+    return json({ settings: row?.settings ? JSON.parse(row.settings) : null, updated: row?.updated ?? null });
+  }
+  if (path === '/api/settings' && m === 'PUT') {
+    const text = await request.text();
+    if (text.length > 200_000) throw new HttpError(413, 'too_large');
+    try {
+      JSON.parse(text);
+    } catch {
+      throw new HttpError(400, 'bad_json');
+    }
+    await env.DB.prepare('UPDATE users SET settings = ?, settings_updated_at = ? WHERE id = ?').bind(text, Date.now(), userId).run();
+    return json({ ok: true });
+  }
   if (path === '/api/logout' && m === 'POST') {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();
     return json({ ok: true });

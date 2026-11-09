@@ -131,3 +131,10 @@ export async function getDoc<T>(id: string): Promise<{ rev: number; value: T | n
   const bytes = new Uint8Array(await res.arrayBuffer());
   return { rev, value: bytes.length ? await unpack<T>(bytes) : null };
 }
+
+export async function getSettings<T>() {
+  return (await (await call('/api/settings')).json()) as { settings: T | null; updated: number | null };
+}
+export async function putSettings(settings: unknown) {
+  await call('/api/settings', jsonInit('PUT', settings));
+}

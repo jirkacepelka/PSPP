@@ -39,5 +39,26 @@
     "quotaFull": "Your cloud storage is full. This document stays in this browser only.",
     "tooLarge": "This document is too large for the cloud and stays in this browser only.",
     "sessionEnded": "You were signed out. Your work stays in this browser."
+  },
+  "migrate": {
+    "title": "Bring your work into your account",
+    "intro": "Choose what to move from this browser. Nothing is removed from here.",
+    "docs_one": "{{count}} document in this browser",
+    "docs_other": "{{count}} documents in this browser",
+    "docInfo": "{{cases}} cases · {{vars}} variables · {{date}}",
+    "docsHelp": "Documents you do not choose stay in this browser only and are never uploaded. New documents you create while signed in are saved to your account.",
+    "selectAll": "Select all",
+    "selectNone": "Select none",
+    "settings": "Settings",
+    "saveSettings": "Save this browser's settings to my account",
+    "saveSettingsHelp": "Language, theme, appearance and profile follow you to your other devices.",
+    "useAccountSettings": "Use the settings from my account",
+    "useAccountSettingsHelp": "Replaces the settings in this browser with the ones saved in your account.",
+    "replaceAccountSettings": "Use this browser's settings and replace the ones in my account",
+    "replaceAccountSettingsHelp": "Your other devices will pick up these settings.",
+    "keepSeparate": "Keep the settings separate (do not sync them)",
+    "skip": "Skip",
+    "go": "Continue",
+    "progress": "Moving {{done}} of {{total}}…"
   }
 }

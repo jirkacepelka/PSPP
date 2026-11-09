@@ -499,6 +499,7 @@ export async function storeDocument(id: string, state: AutosaveState, created: n
   return true;
 }
 
+export const readDocIndex = () => readIndex();
 export const readDocument = (id: string) => kvGet<AutosaveState>(docKey(id));
 export const makeDocId = () => newDocId();
 
@@ -597,6 +598,17 @@ export async function openDocument(id: string) {
   restoreAutosave(a);
   useData.getState().markSaved();
   // merely opening a document is not an edit: drop the autosave the restore just scheduled
+  if (autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = null;
+}
+
+/**
+ * Replaces the open document with a newer version from the cloud (edited on another device).
+ * Not an edit of its own: the autosave the restore schedules is dropped.
+ */
+export async function reloadCurrentDocument(state: AutosaveState) {
+  restoreAutosave(state);
+  useData.getState().markSaved();
   if (autosaveTimer) clearTimeout(autosaveTimer);
   autosaveTimer = null;
 }

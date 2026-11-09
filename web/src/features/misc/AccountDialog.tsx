@@ -32,8 +32,9 @@ export function AccountDialog() {
     setBusy(true);
     setError(null);
     try {
-      await signIn(mode, email.trim(), password, invite.trim());
+      const plan = await signIn(mode, email.trim(), password, invite.trim());
       close();
+      if (plan) useUi.getState().openModal({ kind: 'migrate', plan });
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'server_error';
       const known = ['bad_credentials', 'bad_email', 'weak_password', 'invalid_invite', 'bad_invite', 'email_taken', 'beta_full', 'too_many_attempts', 'network'];
