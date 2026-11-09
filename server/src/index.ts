@@ -136,7 +136,11 @@ async function login(request: Request, env: Env): Promise<Response> {
 }
 
 async function usage(env: Env, userId: string): Promise<{ used: number; quota: number }> {
-  const row = await env.DB.prepare('SELECT COALESCE(SUM(size), 0) AS used FROM projects WHERE user_id = ?')
+  // documents plus the account settings (which carry the profile photo): both count towards the quota
+  const row = await env.DB.prepare(
+    `SELECT COALESCE((SELECT SUM(size) FROM projects WHERE user_id = ?1), 0)
+          + COALESCE((SELECT LENGTH(CAST(settings AS BLOB)) FROM users WHERE id = ?1), 0) AS used`,
+  )
     .bind(userId)
     .first<{ used: number }>();
   return { used: row?.used ?? 0, quota: Number(env.USER_QUOTA_BYTES) };
@@ -195,6 +199,11 @@ async function route(request: Request, env: Env): Promise<Response> {
     } catch {
       throw new HttpError(400, 'bad_json');
     }
+    // the new settings replace the old ones (so a changed photo frees the old one); only the growth is checked
+    const old = await env.DB.prepare('SELECT COALESCE(LENGTH(CAST(settings AS BLOB)), 0) AS n FROM users WHERE id = ?').bind(userId).first<{ n: number }>();
+    const { used, quota } = await usage(env, userId);
+    const bytes = new TextEncoder().encode(text).length;
+    if (used - (old?.n ?? 0) + bytes > quota) throw new HttpError(413, 'quota_exceeded');
     const updated = Date.now();
     await env.DB.prepare('UPDATE users SET settings = ?, settings_updated_at = ? WHERE id = ?').bind(text, updated, userId).run();
     return json({ ok: true, updated });
