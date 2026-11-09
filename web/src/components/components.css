@@ -1124,34 +1124,40 @@ button.chip[aria-pressed='true']:hover {
   }
 }
 .dialog-header {
+  /* One row height for the icon, the title's first line and the close button, so they share a centre line.
+     Spacing is a single token on all four sides; the body then starts directly below. */
+  --head-row: var(--icon-btn);
   display: flex;
-  /* top-aligned: a title with a description grows downwards, never above the icon */
   align-items: flex-start;
   gap: var(--s-3);
-  min-height: 60px;
-  /* the same gap above and left of the icon; the close button keeps its own padding on the right */
-  padding: var(--dialog-pad) calc(var(--dialog-pad) - var(--s-2)) var(--s-1) var(--dialog-pad);
-  /* no divider under the title: the header and the body read as one sheet */
+  padding: var(--dialog-pad);
 }
+.dialog-header + .dialog-body {
+  padding-top: 0;
+}
+.dialog-header > h2,
 .dialog-heading {
   flex: 1;
   min-width: 0;
+}
+.dialog-heading {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-.dialog-header > h2 {
-  /* a lone title stays centred against the icon and the close button */
-  align-self: center;
 }
 .dialog-header h2 {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: var(--head-row);
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-xl);
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-tight);
   line-height: var(--lh-tight);
+}
+/* with a description below, the title sits at the top edge of the icon and the text grows downwards */
+.dialog-heading h2 {
+  min-height: 0;
 }
 .dialog-header .dialog-description {
   margin: 0;
@@ -1161,8 +1167,8 @@ button.chip[aria-pressed='true']:hover {
 .dialog-header .dialog-icon {
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: var(--head-row);
+  height: var(--head-row);
   border: var(--hairline) solid var(--line);
   border-radius: var(--radius-control);
   background: var(--surface-sunken);
@@ -1213,7 +1219,7 @@ button.chip[aria-pressed='true']:hover {
     border-radius: var(--radius-panel);
   }
   .dialog-header {
-    padding: var(--s-4) var(--s-2) var(--s-3) var(--s-4);
+    padding: var(--s-4);
   }
   .dialog-body,
   .dialog-footer {
