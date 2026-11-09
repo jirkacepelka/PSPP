@@ -1125,7 +1125,8 @@ button.chip[aria-pressed='true']:hover {
 }
 .dialog-header {
   display: flex;
-  align-items: center;
+  /* top-aligned: a title with a description grows downwards, never above the icon */
+  align-items: flex-start;
   gap: var(--s-3);
   min-height: 60px;
   padding: var(--s-3) var(--s-3) var(--s-3) var(--dialog-pad);
@@ -1137,6 +1138,10 @@ button.chip[aria-pressed='true']:hover {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+.dialog-header > h2 {
+  /* a lone title stays centred against the icon and the close button */
+  align-self: center;
 }
 .dialog-header h2 {
   flex: 1;

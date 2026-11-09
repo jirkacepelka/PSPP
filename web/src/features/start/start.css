@@ -608,7 +608,7 @@
 
 .hm-empty {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--s-4);
   padding: var(--s-5);
   border: var(--hairline) dashed var(--line-control);
