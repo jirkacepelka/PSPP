@@ -469,3 +469,48 @@
     max-width: 360px;
   }
 }
+
+/* profile: the avatar itself is the photo button */
+.set-profile-who {
+  display: grid;
+  gap: var(--s-1);
+  justify-items: start;
+}
+.set-avatar-btn {
+  position: relative;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--radius-panel);
+  cursor: pointer;
+}
+.set-avatar-edit {
+  position: absolute;
+  right: calc(var(--s-1) * -1);
+  bottom: calc(var(--s-1) * -1);
+  display: grid;
+  place-items: center;
+  width: var(--control-h-sm);
+  height: var(--control-h-sm);
+  border-radius: var(--radius-control);
+  border: var(--hairline) solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: background var(--dur-short) var(--ease-standard);
+}
+.set-avatar-btn:hover .set-avatar-edit,
+.set-avatar-btn:focus-visible .set-avatar-edit {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.set-usage {
+  flex: none;
+  width: 220px;
+  max-width: 100%;
+}
+.set-profile-who .set-row-desc {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}

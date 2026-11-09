@@ -10,6 +10,7 @@ import { Icon } from '../../components/Icon';
 import { Popover } from '../../components/Popover';
 import { Segmented } from '../../components/Segmented';
 import { useSettings, type Profile } from '../../store/settings';
+import { signOut } from '../../app/cloud';
 import { useAccount } from '../../store/account';
 import { useUi } from '../../store/ui';
 
@@ -17,7 +18,7 @@ export function Avatar({ profile, large }: { profile: Profile; large?: boolean }
   return (
     <span
       className={`avatar sh-avatar ${large ? 'lg' : ''}`}
-      style={{ backgroundColor: profile.avatar ? 'transparent' : profile.color, backgroundImage: profile.avatar ? `url(${profile.avatar})` : undefined }}
+      style={profile.avatar ? { backgroundImage: `url(${profile.avatar})` } : undefined}
       aria-hidden="true"
     >
       {profile.avatar ? '' : profile.initials || <Icon name="person" filled size={large ? 40 : 20} />}
@@ -97,9 +98,15 @@ export function ProfileButton() {
           <Button variant="ghost" size="sm" iconStart="settings" onClick={() => go(() => openModal({ kind: 'settings' }))}>
             {t('actions.settings')}
           </Button>
-          <Button variant="ghost" size="sm" iconStart={cloudUser ? 'cloud_done' : 'cloud'} onClick={() => go(() => openModal({ kind: 'account' }))}>
-            {cloudUser ? t('account.title') : t('account.signIn')}
-          </Button>
+          {cloudUser ? (
+            <Button variant="ghost" size="sm" iconStart="logout" onClick={() => go(() => void signOut())}>
+              {t('account.signOut')}
+            </Button>
+          ) : (
+            <Button variant="ghost" size="sm" iconStart="login" onClick={() => go(() => openModal({ kind: 'account' }))}>
+              {t('account.signIn')}
+            </Button>
+          )}
           <Button variant="ghost" size="sm" iconStart="person" onClick={() => go(() => openModal({ kind: 'settings', section: 'profile' }))}>
             {t('profile.title')}
           </Button>

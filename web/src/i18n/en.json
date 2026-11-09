@@ -151,6 +151,9 @@
     "lightTheme": "Switch to light theme"
   },
   "profile": {
+    "changePhoto": "Change photo",
+    "syncSettings": "Sync settings across devices",
+    "syncSettingsDesc": "Language, theme and appearance follow you to your other devices.",
     "open": "Profile: {{name}}",
     "title": "Profile",
     "greeting": "Hi, {{name}}!",
@@ -160,10 +163,6 @@
     "name": "Display name",
     "initials": "Initials",
     "initialsDesc": "Shown in the avatar when there is no photo",
-    "color": "Avatar color",
-    "photo": "Photo",
-    "photoDesc": "Optional – stored as an image in this browser",
-    "upload": "Upload photo",
     "removePhoto": "Remove",
     "greetingAnon": "Hi there!",
     "defaultName": "Local profile",

@@ -345,9 +345,6 @@
 [data-theme='dark'] .onb-swatches.is-accent .onb-swatch {
   background: var(--sw-dark);
 }
-[data-theme='dark'] .onb-swatches.is-avatar .onb-swatch {
-  color: var(--ink);
-}
 .onb-swatch .icon {
   opacity: 0;
   transform: scale(0.4);

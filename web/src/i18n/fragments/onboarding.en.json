@@ -33,8 +33,6 @@
       "name": "Name",
       "namePlaceholder": "e.g. Jana Nováková",
       "nameHelp": "Initials are filled in automatically.",
-      "color": "Avatar colour",
-      "colorN": "Colour {{n}}",
       "preview": "Preview",
       "anonymous": "Anonymous",
       "local": "Stored only in this browser."

@@ -133,6 +133,18 @@ async function inParallel<T>(items: T[], limit: number, fn: (item: T) => Promise
   );
 }
 
+/** Re-reads the storage used (shown in the profile). */
+export async function refreshUsage() {
+  if (!signedIn()) return;
+  try {
+    const { projects: _p, ...usage } = await api.listProjects();
+    void _p;
+    useAccount.getState().set({ usage });
+  } catch {
+    /* shown next time */
+  }
+}
+
 let pulling: Promise<void> | null = null;
 
 /** Brings in documents that are new or newer in the cloud; the open document is updated in place. */
@@ -254,6 +266,12 @@ async function pullSettings() {
   } catch {
     applyingRemote = false;
   }
+}
+
+export const settingsSyncEnabled = settingsSyncOn;
+export async function setSettingsSyncEnabled(on: boolean) {
+  setSettingsSync(on);
+  if (on) await api.putSettings(portableSettings()).catch(() => undefined);
 }
 
 // ------------------------------------------------------------------ migration after signing in

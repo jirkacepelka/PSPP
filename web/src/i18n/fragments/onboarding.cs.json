@@ -33,8 +33,6 @@
       "name": "Jméno",
       "namePlaceholder": "např. Jana Nováková",
       "nameHelp": "Iniciály doplníme automaticky.",
-      "color": "Barva avataru",
-      "colorN": "Barva {{n}}",
       "preview": "Náhled",
       "anonymous": "Anonym",
       "local": "Uloženo jen v tomto prohlížeči."

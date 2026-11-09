@@ -15,7 +15,6 @@ export type Lang = 'cs' | 'en';
 export interface Profile {
   name: string;
   initials: string;
-  color: string;
   avatar?: string;
 }
 
@@ -77,7 +76,6 @@ export interface Settings {
 
 /** Accent preset colours (light-theme values) from the design system; see lib/color.ts. */
 export const ACCENT_PRESETS = PRESETS.map((p) => p.light);
-export const AVATAR_COLORS = ['#0f7b5f', '#2f6a9a', '#86497a', '#93600c', '#4a55b0', '#0e6e80', '#b3412e', '#4d5966', '#6e8b3d', '#8a4f87'];
 
 export function detectLanguage(): Lang {
   try {
@@ -102,7 +100,7 @@ export function initialsOf(name: string): string {
 export const defaultSettings = (): Settings => {
   const lang = detectLanguage();
   return {
-    profile: { name: '', initials: '', color: AVATAR_COLORS[0] },
+    profile: { name: '', initials: '' },
     theme: 'system',
     accent: DEFAULT_ACCENT,
     density: 'comfortable',

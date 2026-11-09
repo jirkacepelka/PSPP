@@ -20,7 +20,7 @@ import { Segmented } from '../../components/Segmented';
 import { Switch } from '../../components/Choice';
 import { trapTab } from '../../components/focus';
 import { ACCENT_PRESETS, findPreset } from '../../lib/color';
-import { AVATAR_COLORS, initialsOf, useSettings } from '../../store/settings';
+import { initialsOf, useSettings } from '../../store/settings';
 import { UI_PRESETS, activePreset, applyPreset, getPreset, useActivePreset, type PresetId } from '../../app/presets';
 import { newDataset, openFileDialog, openSample } from '../../app/files';
 import { Avatar } from '../shell/ProfileMenu';
@@ -298,7 +298,7 @@ function ProfileStep({ titleId, onEnter }: { titleId: string; onEnter: () => voi
       <StepHead titleId={titleId} title={t('onboarding.profile.title')} lead={t('onboarding.profile.lead')} />
       <div className="onb-profile">
         <div className="onb-profile-preview" aria-label={t('onboarding.profile.preview')} role="img">
-          <div className="onb-avatar-wrap" key={profile.color}>
+          <div className="onb-avatar-wrap">
             <Avatar profile={profile} large />
           </div>
           <span className="onb-profile-name">{profile.name.trim() || t('onboarding.profile.anonymous')}</span>
@@ -328,18 +328,6 @@ function ProfileStep({ titleId, onEnter }: { titleId: string; onEnter: () => voi
               }
             }}
           />
-          <div className="onb-field">
-            <span className="field-label" id={`${titleId}-color`}>
-              {t('onboarding.profile.color')}
-            </span>
-            <SwatchGroup
-              labelledBy={`${titleId}-color`}
-              kind="avatar"
-              value={profile.color}
-              onChange={(c) => setProfile({ color: c })}
-              items={AVATAR_COLORS.map((c, i) => ({ id: c, light: c, dark: c, label: t('onboarding.profile.colorN', { n: i + 1 }) }))}
-            />
-          </div>
         </div>
       </div>
     </>
@@ -354,7 +342,7 @@ interface Swatch {
 }
 
 /** Colour radiogroup with roving focus and arrow keys. */
-function SwatchGroup({ items, value, onChange, labelledBy, kind }: { items: Swatch[]; value: string | undefined; onChange: (v: string) => void; labelledBy: string; kind: 'accent' | 'avatar' }) {
+function SwatchGroup({ items, value, onChange, labelledBy, kind }: { items: Swatch[]; value: string | undefined; onChange: (v: string) => void; labelledBy: string; kind: 'accent' }) {
   const ref = useRef<HTMLDivElement>(null);
   const idx = items.findIndex((s) => s.id === value);
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {

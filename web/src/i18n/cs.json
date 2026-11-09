@@ -153,6 +153,9 @@
     "lightTheme": "Přepnout na světlý motiv"
   },
   "profile": {
+    "changePhoto": "Změnit fotku",
+    "syncSettings": "Synchronizovat nastavení mezi zařízeními",
+    "syncSettingsDesc": "Jazyk, motiv a vzhled půjdou s tebou na další zařízení.",
     "open": "Profil: {{name}}",
     "title": "Profil",
     "greeting": "Ahoj, {{name}}!",
@@ -162,10 +165,6 @@
     "name": "Zobrazované jméno",
     "initials": "Iniciály",
     "initialsDesc": "Zobrazí se v avataru, pokud nemáte fotku",
-    "color": "Barva avataru",
-    "photo": "Fotka",
-    "photoDesc": "Volitelné – uloží se jako obrázek v tomto prohlížeči",
-    "upload": "Nahrát fotku",
     "removePhoto": "Odebrat",
     "greetingAnon": "Ahoj!",
     "defaultName": "Místní profil",
