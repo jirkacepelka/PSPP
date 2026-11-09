@@ -114,7 +114,7 @@
   background: var(--c-surface);
   color: var(--c-ink);
   border: 1px solid var(--c-border);
-  border-radius: 8px;
+  border-radius: 10px;
   font-family: var(--c-font);
   overflow: hidden;
 }
@@ -294,7 +294,7 @@
   display: flex;
   gap: 2px;
   padding: 2px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--c-surface);
   border: 1px solid var(--c-border);
   opacity: 0;
@@ -321,7 +321,7 @@
   min-width: 26px;
   padding: 0 6px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--c-ink-2);
   font: 600 11px/1 var(--c-font);
@@ -354,7 +354,7 @@
   min-width: 96px;
   max-width: 260px;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--c-tip-bg);
   color: var(--c-ink);
   border: 1px solid var(--c-border);

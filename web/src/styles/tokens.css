@@ -37,9 +37,9 @@
   --s-8: 48px;
 
   /* radii — sharp, never pill-shaped */
-  --radius-chip: 4px; /* chips, tags, badges, kbd, tooltips */
-  --radius-control: 6px; /* buttons, inputs, menu items, segmented */
-  --radius-panel: 8px; /* panels, cards, menus, popovers, dialogs */
+  --radius-chip: 5px; /* chips, tags, badges, kbd, tooltips */
+  --radius-control: 8px; /* buttons, inputs, menu items, segmented */
+  --radius-panel: 10px; /* panels, cards, menus, popovers, dialogs */
   --radius-round: 999px; /* only true circles: avatars, dots, switch track */
 
   /* typography */
