@@ -42,10 +42,27 @@ npm run migrate:local
 npm run dev            # http://localhost:8787
 ```
 
-## Access tokens
+## MCP connector for AI assistants
 
-Tokens that start with `pat_` authenticate the MCP server (see `mcp/`). They reach only the account summary
-and the documents (`/api/me`, `/api/projects*`); creating tokens, settings and sign-out stay session-only.
+`/mcp` is a remote MCP server (Streamable HTTP) with OAuth 2.1 (dynamic client registration, PKCE, a sign-in
+and consent page on the Worker itself). Users add it to Claude Desktop or claude.ai with **Settings, Connectors,
+Add custom connector** and the address `https://<worker>/mcp`; they sign in with their PSPP Studio account in
+the browser. Other MCP clients that support remote OAuth servers work the same way.
+
+| Tool | What it does |
+|---|---|
+| `list_documents`, `describe_document`, `get_output` | See the account's documents, their variables and stored output. |
+| `run_syntax` | Run PSPP syntax on a document; the result is saved into the document and shows up in the web app. |
+| `create_document` | Create a document from CSV text. |
+| `reference` | PSPP syntax cheat sheet. |
+
+The PSPP engine (WebAssembly, 2.4 MB) runs in a Durable Object (`EngineDO`): a plain Worker request on the free
+plan has a 10 ms CPU limit, too little to start the engine. Connector access tokens (`pat_…`, 7 days, refreshed by
+the client) reach only the documents and can be disconnected in Settings, Profile. `test/mcp.mjs` runs the whole
+flow against `npm run dev`.
+
+Storage note: documents live in Durable Objects, fine for a small free quota. Large quotas (tens of GB per user)
+belong in R2, which costs far less per GB; all MCP document access goes through `src/mcp/docs.ts`.
 
 ## API
 
@@ -56,5 +73,5 @@ and the documents (`/api/me`, `/api/projects*`); creating tokens, settings and s
 | `GET /api/me`, `POST /api/logout` | account info and quota, end the session |
 | `GET/POST /api/projects` | list, create |
 | `GET/PATCH/DELETE /api/projects/:id` | metadata, rename, delete |
-| `GET/POST /api/tokens`, `DELETE /api/tokens/:id` | personal access tokens for AI agents (prefix `pat_`, shown once, only the hash is stored, 90 days by default, at most 10) |
+| `GET /api/tokens`, `DELETE /api/tokens/:id` | connected apps (connector tokens) of the account, revocable |
 | `GET/PUT /api/projects/:id/doc` | document blob; `PUT` needs `If-Match: <rev>`, 409 on conflict |

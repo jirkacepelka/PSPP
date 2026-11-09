@@ -1,25 +1,13 @@
-import { b64url, fromB64url, hashPassword, randomToken, sha256, timingSafeEqual } from './crypto';
+import { b64url, hashPassword, randomToken, sha256, timingSafeEqual } from './crypto';
 import { ProjectDO } from './project';
+import { EngineDO } from './mcp/engine';
+import { mcp } from './mcp';
+import { authorizationServerMetadata, authorize, protectedResourceMetadata, registerClient, token as oauthToken } from './oauth';
+import { DAY, HttpError, authenticate, json, usage, validEmail } from './shared';
 
-export { ProjectDO };
+export { ProjectDO, EngineDO };
 
-const DAY = 86_400_000;
 const SESSION_DAYS = 30;
-const MAX_FAILURES = 8;
-const FAILURE_WINDOW = 15 * 60_000;
-
-class HttpError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-  ) {
-    super(code);
-  }
-}
-
-function json(data: unknown, status = 200, extra: HeadersInit = {}): Response {
-  return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json', ...extra } });
-}
 
 function corsHeaders(request: Request, env: Env): Record<string, string> {
   const origin = request.headers.get('origin') ?? '';
@@ -73,10 +61,6 @@ function requireAdmin(request: Request, env: Env): void {
   if (!env.ADMIN_KEY || !timingSafeEqual(key, env.ADMIN_KEY)) throw new HttpError(403, 'forbidden');
 }
 
-function validEmail(email: unknown): email is string {
-  return typeof email === 'string' && email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 async function newSession(env: Env, userId: string): Promise<string> {
   const token = randomToken();
   await env.DB.prepare('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)')
@@ -120,44 +104,8 @@ async function register(request: Request, env: Env): Promise<Response> {
 
 async function login(request: Request, env: Env): Promise<Response> {
   const { email, password } = await body<{ email?: string; password?: string }>(request);
-  if (!validEmail(email) || typeof password !== 'string') throw new HttpError(400, 'bad_credentials');
-  const normalized = email.trim().toLowerCase();
-
-  const now = Date.now();
-  const attempts = await env.DB.prepare('SELECT failures, window_start FROM login_attempts WHERE key = ?')
-    .bind(normalized)
-    .first<{ failures: number; window_start: number }>();
-  const inWindow = attempts && now - attempts.window_start < FAILURE_WINDOW;
-  if (inWindow && attempts.failures >= MAX_FAILURES) throw new HttpError(429, 'too_many_attempts');
-
-  const user = await env.DB.prepare('SELECT id, pw_salt, pw_hash FROM users WHERE email = ?')
-    .bind(normalized)
-    .first<{ id: string; pw_salt: string; pw_hash: string }>();
-  // Hash even for unknown e-mails so the response time does not reveal which accounts exist.
-  const hash = await hashPassword(password, user ? fromB64url(user.pw_salt) : new Uint8Array(16));
-  if (!user || !timingSafeEqual(hash, user.pw_hash)) {
-    await env.DB.prepare(
-      `INSERT INTO login_attempts (key, failures, window_start) VALUES (?, 1, ?)
-       ON CONFLICT(key) DO UPDATE SET failures = CASE WHEN ? - window_start >= ? THEN 1 ELSE failures + 1 END,
-                                      window_start = CASE WHEN ? - window_start >= ? THEN ? ELSE window_start END`,
-    )
-      .bind(normalized, now, now, FAILURE_WINDOW, now, FAILURE_WINDOW, now)
-      .run();
-    throw new HttpError(401, 'bad_credentials');
-  }
-  await env.DB.prepare('DELETE FROM login_attempts WHERE key = ?').bind(normalized).run();
-  return json({ token: await newSession(env, user.id), user: { id: user.id, email: normalized } });
-}
-
-async function usage(env: Env, userId: string): Promise<{ used: number; quota: number }> {
-  // documents plus the account settings (which carry the profile photo): both count towards the quota
-  const row = await env.DB.prepare(
-    `SELECT COALESCE((SELECT SUM(size) FROM projects WHERE user_id = ?1), 0)
-          + COALESCE((SELECT LENGTH(CAST(settings AS BLOB)) FROM users WHERE id = ?1), 0) AS used`,
-  )
-    .bind(userId)
-    .first<{ used: number }>();
-  return { used: row?.used ?? 0, quota: Number(env.USER_QUOTA_BYTES) };
+  const user = await authenticate(env, email ?? '', password ?? '');
+  return json({ token: await newSession(env, user.id), user });
 }
 
 async function ownedProject(env: Env, userId: string, id: string) {
@@ -174,6 +122,13 @@ async function route(request: Request, env: Env): Promise<Response> {
   const m = request.method;
 
   if (path === '/api/health') return json({ ok: true });
+  // MCP connector: discovery, OAuth and the endpoint itself (see oauth.ts and mcp/)
+  if (path.startsWith('/.well-known/oauth-protected-resource')) return protectedResourceMetadata(request);
+  if (path.startsWith('/.well-known/oauth-authorization-server')) return authorizationServerMetadata(request);
+  if (path === '/oauth/register' && m === 'POST') return registerClient(request, env);
+  if (path === '/oauth/authorize') return authorize(request, env);
+  if (path === '/oauth/token' && m === 'POST') return oauthToken(request, env);
+  if (path === '/mcp') return mcp(request, env);
   if (path === '/api/register' && m === 'POST') return register(request, env);
   if (path === '/api/login' && m === 'POST') return login(request, env);
 
@@ -228,21 +183,6 @@ async function route(request: Request, env: Env): Promise<Response> {
       .bind(userId)
       .all();
     return json({ tokens: results });
-  }
-  if (path === '/api/tokens' && m === 'POST') {
-    const { name, days = 90 } = await body<{ name?: string; days?: number }>(request);
-    const count = await env.DB.prepare('SELECT COUNT(*) AS n FROM api_tokens WHERE user_id = ?').bind(userId).first<{ n: number }>();
-    if ((count?.n ?? 0) >= 10) throw new HttpError(409, 'too_many_tokens');
-    const clean = String(name ?? '').trim().slice(0, 60) || 'AI agent';
-    const token = API_PREFIX + randomToken(32);
-    const now = Date.now();
-    const expires = now + Math.min(Math.max(1, Math.floor(days)), 365) * DAY;
-    const id = crypto.randomUUID();
-    await env.DB.prepare('INSERT INTO api_tokens (id, user_id, name, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)')
-      .bind(id, userId, clean, await sha256(token), now, expires)
-      .run();
-    // the token is shown once: only its hash is stored
-    return json({ id, name: clean, token, expires_at: expires }, 201);
   }
   const tok = path.match(/^\/api\/tokens\/([\w-]+)$/);
   if (tok && m === 'DELETE') {

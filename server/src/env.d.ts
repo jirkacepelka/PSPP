@@ -2,3 +2,7 @@
 interface Env {
   ADMIN_KEY?: string;
 }
+declare module '*.wasm' {
+  const module: WebAssembly.Module;
+  export default module;
+}

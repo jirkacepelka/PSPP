@@ -2,7 +2,7 @@
  * Turns PSPP output items into compact Markdown that language models read well.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import type { Dataset, OutputItem } from '../../web/src/engine/types';
+import type { Dataset, OutputItem } from '../../../web/src/engine/types';
 
 const entities: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
 const decode = (s: string) => s.replace(/&(amp|lt|gt|quot|nbsp|#39);/g, (m) => entities[m] ?? m);

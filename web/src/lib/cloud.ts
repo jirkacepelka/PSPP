@@ -149,9 +149,6 @@ export interface AgentToken {
 export async function listTokens() {
   return ((await (await call('/api/tokens')).json()) as { tokens: AgentToken[] }).tokens;
 }
-export async function createToken(name: string, days: number) {
-  return (await (await call('/api/tokens', jsonInit('POST', { name, days }))).json()) as { id: string; name: string; token: string; expires_at: number };
-}
 export async function deleteToken(id: string) {
   await call(`/api/tokens/${id}`, { method: 'DELETE' });
 }

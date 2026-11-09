@@ -62,19 +62,17 @@
     "progress": "Moving {{done}} of {{total}}…"
   },
   "agents": {
-    "title": "AI agents",
-    "intro": "Let an AI assistant open and analyse the documents in your account through the PSPP Studio MCP server. Results it produces are saved into the document and appear here. Each token gives full access to your documents, so keep it secret and revoke it when you no longer use it.",
-    "defaultName": "AI agent",
-    "namePlaceholder": "Token name, e.g. Claude Desktop",
-    "create": "Create token",
-    "copyNow": "Copy the token for \"{{name}}\" now. It is shown only once.",
+    "title": "AI assistants",
+    "intro": "Let Claude (or another AI assistant) open and analyse the documents in your account. Results it produces are saved into the document and appear here. You sign in once in the browser; you never paste a password or key.",
+    "step1": "In Claude (the desktop app or claude.ai) open Settings, then Connectors, then Add custom connector.",
+    "step2": "Paste this address and name the connector PSPP Studio.",
+    "step3": "Click Connect and sign in with your PSPP Studio account when asked.",
     "copy": "Copy",
     "copied": "Copied",
-    "done": "Done",
-    "connect": "Connect it to Claude Code (other clients: see mcp/README.md):",
-    "apiNote": "The server talks to {{api}}.",
-    "revoke": "Revoke",
+    "plan": "Custom connectors may need a paid Claude plan. Anyone who connects can read and change all your documents, so disconnect apps you no longer use.",
+    "connected": "Connected apps",
+    "disconnect": "Disconnect",
     "never": "never",
-    "meta": "Created {{created}} · expires {{expires}} · last used {{used}}"
+    "meta": "Connected {{created}} · last used {{used}}"
   }
 }

@@ -519,14 +519,26 @@
 .ag-intro {
   padding: var(--s-4);
 }
-.ag-fresh {
+.ag-steps {
+  margin: 0;
+  padding: 0 var(--s-4) var(--s-3) calc(var(--s-4) + var(--s-5));
   display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+}
+.ag-url {
+  display: flex;
+  align-items: center;
   gap: var(--s-2);
-  margin: 0 var(--s-4) var(--s-4);
-  padding: var(--s-3);
-  border: var(--hairline) solid var(--line);
-  border-radius: var(--radius-control);
-  background: var(--surface-sunken);
+  margin: 0 var(--s-4) var(--s-3);
+}
+.ag-url .ag-token {
+  flex: 1;
+}
+.ag-sub {
+  margin: var(--s-3) var(--s-4) var(--s-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
 }
 .ag-token {
   display: block;
@@ -538,10 +550,6 @@
   font-size: var(--fs-sm);
   overflow-wrap: anywhere;
   user-select: all;
-}
-.ag-actions {
-  display: flex;
-  gap: var(--s-2);
 }
 .ag-list {
   list-style: none;
@@ -565,12 +573,4 @@
 .ag-name small {
   font-weight: var(--fw-regular);
   color: var(--ink-3);
-}
-.ag-create {
-  display: flex;
-  gap: var(--s-2);
-  padding: var(--s-3) var(--s-4) var(--s-4);
-}
-.ag-create .input {
-  flex: 1;
 }

@@ -64,19 +64,17 @@
     "progress": "Přenáším {{done}} z {{total}}…"
   },
   "agents": {
-    "title": "AI agenti",
-    "intro": "Nech AI asistenta otevírat a analyzovat dokumenty ve tvém účtu přes MCP server PSPP Studia. Výsledky, které vytvoří, se uloží do dokumentu a objeví se tady. Každý token dává plný přístup k tvým dokumentům, proto ho drž v tajnosti a zruš, když ho už nepoužíváš.",
-    "defaultName": "AI agent",
-    "namePlaceholder": "Název tokenu, např. Claude Desktop",
-    "create": "Vytvořit token",
-    "copyNow": "Zkopíruj si token „{{name}}“ hned. Zobrazí se jen jednou.",
+    "title": "AI asistenti",
+    "intro": "Nech Clauda (nebo jiného AI asistenta) otevírat a analyzovat dokumenty ve tvém účtu. Výsledky, které vytvoří, se uloží do dokumentu a objeví se tady. Přihlásíš se jednou v prohlížeči, žádné heslo ani klíč nikam nevkládáš.",
+    "step1": "V Claude (desktopová aplikace nebo claude.ai) otevři Nastavení, Konektory a Přidat vlastní konektor.",
+    "step2": "Vlož tuto adresu a konektor pojmenuj PSPP Studio.",
+    "step3": "Klikni na Připojit a až se zeptá, přihlas se svým účtem PSPP Studia.",
     "copy": "Kopírovat",
     "copied": "Zkopírováno",
-    "done": "Hotovo",
-    "connect": "Připojení ke Claude Code (další klienti: viz mcp/README.md):",
-    "apiNote": "Server komunikuje s {{api}}.",
-    "revoke": "Zrušit",
+    "plan": "Vlastní konektory mohou vyžadovat placený plán Claude. Kdokoli, kdo se připojí, může číst a měnit všechny tvé dokumenty, proto odpoj aplikace, které už nepoužíváš.",
+    "connected": "Připojené aplikace",
+    "disconnect": "Odpojit",
     "never": "nikdy",
-    "meta": "Vytvořen {{created}} · platí do {{expires}} · naposledy použit {{used}}"
+    "meta": "Připojeno {{created}} · naposledy použito {{used}}"
   }
 }

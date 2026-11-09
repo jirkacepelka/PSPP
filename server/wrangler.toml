@@ -15,9 +15,17 @@ migrations_dir = "migrations"
 name = "PROJECT"
 class_name = "ProjectDO"
 
+[[durable_objects.bindings]]
+name = "ENGINE"
+class_name = "EngineDO"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ProjectDO"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["EngineDO"]
 
 [vars]
 # Comma separated list of web origins that may call the API (CORS).
