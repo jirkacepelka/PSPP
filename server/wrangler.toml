@@ -1,0 +1,29 @@
+name = "pspp-studio-api"
+main = "src/index.ts"
+compatibility_date = "2025-11-01"
+
+# Free plan only: D1 for accounts and the project index, a SQLite-backed Durable Object per project for its data.
+# No R2 (it asks for a payment card even on the free tier).
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pspp-studio"
+database_id = "REPLACE_WITH_ID_FROM_wrangler_d1_create"
+migrations_dir = "migrations"
+
+[[durable_objects.bindings]]
+name = "PROJECT"
+class_name = "ProjectDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ProjectDO"]
+
+[vars]
+# Comma separated list of web origins that may call the API (CORS).
+ALLOWED_ORIGINS = "https://pspp-studio.vercel.app,http://localhost:5173,http://localhost:4181"
+# Hard caps that keep the beta inside the free tier.
+MAX_USERS = "30"
+USER_QUOTA_BYTES = "52428800"
+PROJECT_MAX_BYTES = "20971520"
+# ADMIN_KEY is a secret: `npx wrangler secret put ADMIN_KEY`
