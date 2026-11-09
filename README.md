@@ -4,7 +4,7 @@
 
 PSPP is a free alternative to SPSS with an excellent statistical core. PSPP Studio puts a
 new interface on top of the original engine, compiled to WebAssembly: nothing to install,
-and your data never leaves your computer. It is available in English and Czech.
+and your data stays on your computer unless you choose to sign in to the optional, invitation-only cloud account (see `server/`). It is available in English and Czech.
 
 **Live demo: <https://pspp-studio.vercel.app>**
 

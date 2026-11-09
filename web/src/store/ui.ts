@@ -30,6 +30,7 @@ export type Modal =
   | { kind: 'assistant' }
   | { kind: 'settings'; section?: string }
   | { kind: 'about' }
+  | { kind: 'account' }
   | { kind: 'shortcuts' }
   | { kind: 'varType'; index: number }
   | { kind: 'valueLabels'; index: number }

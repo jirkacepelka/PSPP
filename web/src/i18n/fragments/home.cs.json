@@ -13,6 +13,7 @@
     "samplesTitle": "Ukázková data",
     "work": "Vaše práce",
     "workHint": "Ukládá se automaticky, průběžně, jen v tomto prohlížeči.",
+    "workHintCloud": "Ukládá se automaticky, průběžně, v tomto prohlížeči i v tvém účtu.",
     "workEmptyTitle": "Zatím tu nic není",
     "workEmptyDesc": "Jakmile otevřete soubor nebo začnete psát, práce se sem sama uloží. Nic nemusíte ukládat.",
     "current": "Otevřeno",

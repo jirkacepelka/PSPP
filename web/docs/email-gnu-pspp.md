@@ -15,7 +15,7 @@ My name is [Jiří Čepelka]. First of all, thank you for PSPP.
 
 **Why I built this.** It started at my university, where we wanted a user-friendly, free alternative to SPSS for students. PSPP has an excellent statistical core, but for people who are new to statistics it was missing some of the analyses they need, and its interface looked dated and was hard to find your way around. I wanted to see how far a modern, approachable interface on top of the PSPP engine could go.
 
-**What came out of it: PSPP Studio.** It is the PSPP 2.1.3 engine compiled to WebAssembly, with a new interface that runs entirely in the browser (nothing to install, and no data ever leaves the user's computer). It is available in Czech and English, and PSPP's own messages are translated into Czech too.
+**What came out of it: PSPP Studio.** It is the PSPP 2.1.3 engine compiled to WebAssembly, with a new interface that runs entirely in the browser (nothing to install, and by default no data leaves the user's computer; an optional, invitation-only account for saving documents online is in a closed beta). It is available in Czech and English, and PSPP's own messages are translated into Czech too.
 
 - Live demo: https://pspp-studio.vercel.app
 - Source code (GPL-3.0-or-later): https://github.com/jirkacepelka/PSPP
@@ -30,6 +30,7 @@ My name is [Jiří Čepelka]. First of all, thank you for PSPP.
 - extra analyses that PSPP lacks, implemented in the browser on top of the engine (for example GLM with repeated measures and profile plots, line charts, and others)
 - plain-language explanations of results, with effect sizes, aimed at beginners
 - import and export of CSV, Excel, OpenDocument and JSON next to .sav/.zsav/.por, and export of the output to PDF, Word and HTML
+- an optional online account (closed beta, free Cloudflare Workers backend in `server/`) that saves documents automatically and opens them on any device
 - a guided first-run setup and a modern, accessible design (light and dark themes)
 
 **About the engine.** My changes to the upstream sources are small, and are in `engine/pspp` (see `git log -- engine/pspp`): an optional `--without-cairo` build, an `html_table_to_string()` helper, and Emscripten portability fixes. A small C bridge (`engine/bridge`) exposes the library to JavaScript, and the build scripts are in `engine/scripts`. The compiled engine is committed so the app can be built without Emscripten.

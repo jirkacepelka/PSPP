@@ -483,6 +483,25 @@ const docKey = (id: string) => `doc:${id}`;
 let currentDocId: string | null = null;
 let currentCreated = 0;
 
+/** Optional listeners (the cloud layer): a document was stored locally, or deleted. */
+export const docHooks: {
+  onSaved?: (id: string, state: AutosaveState) => void;
+  onDeleted?: (id: string) => void;
+} = {};
+
+/** Writes a document and its index entry; used by autosave and by cloud downloads. */
+export async function storeDocument(id: string, state: AutosaveState, created: number): Promise<boolean> {
+  const ok = await kvSet(docKey(id), state);
+  if (!ok) return false;
+  const list = await readIndex();
+  await kvSet(DOCS_KEY, [metaOf(id, state, created), ...list.filter((m) => m.id !== id)]);
+  docsChanged();
+  return true;
+}
+
+export const readDocument = (id: string) => kvGet<AutosaveState>(docKey(id));
+export const makeDocId = () => newDocId();
+
 export function getCurrentDocId() {
   return currentDocId;
 }
@@ -587,6 +606,14 @@ export async function deleteDocument(id: string) {
   await kvSet(DOCS_KEY, (await readIndex()).filter((m) => m.id !== id));
   if (id === currentDocId) currentDocId = null;
   docsChanged();
+  docHooks.onDeleted?.(id);
+}
+
+/** Removes a document from this browser without telling the cloud layer (used by cloud sync itself). */
+export async function deleteDocumentLocal(id: string) {
+  await kvDel(docKey(id));
+  await kvSet(DOCS_KEY, (await readIndex()).filter((m) => m.id !== id));
+  docsChanged();
 }
 
 export async function duplicateDocument(id: string) {
@@ -662,14 +689,10 @@ async function writeNow() {
     currentCreated = state.time;
   }
   const id = currentDocId;
-  const ok = await kvSet(docKey(id), state);
-  if (!ok) return;
-  const meta = metaOf(id, state, currentCreated);
-  const list = await readIndex();
-  await kvSet(DOCS_KEY, [meta, ...list.filter((m) => m.id !== id)]);
+  if (!(await storeDocument(id, state, currentCreated))) return;
   lastSaved = Date.now();
   window.dispatchEvent(new CustomEvent('pspp-autosaved', { detail: lastSaved }));
-  docsChanged();
+  docHooks.onSaved?.(id, state);
 }
 
 /** Writes pending changes of the current document right away. */

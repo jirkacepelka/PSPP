@@ -29,6 +29,7 @@ import {
   type SampleId,
 } from '../../app/files';
 import { useUi } from '../../store/ui';
+import { useAccount } from '../../store/account';
 import { useSettings } from '../../store/settings';
 import { SPECS_BY_ID } from '../dialogs/specs';
 import { GUIDED_TASKS, runGuidedTask } from './guidedTasks';
@@ -260,6 +261,7 @@ export function StartScreen() {
   const [view, setView] = useState<ViewMode>(() => (lsGet(LS_VIEW) === 'list' ? 'list' : 'grid'));
   const [sideHidden, setSideHidden] = useState(() => lsGet(LS_SIDE) === '1');
   const name = useSettings((s) => s.profile.name);
+  const cloudUser = useAccount((s) => s.user);
   const currentId = getCurrentDocId();
 
   useEffect(() => {
@@ -361,7 +363,7 @@ export function StartScreen() {
               </h3>
               <span className="hm-h-hint">
                 <Icon name="cloud_done" size={16} />
-                {t('home.workHint')}
+                {t(cloudUser ? 'home.workHintCloud' : 'home.workHint')}
               </span>
             </div>
             <div className="hm-work-tools">

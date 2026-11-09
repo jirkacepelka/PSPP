@@ -1,0 +1,43 @@
+{
+  "appbar": {
+    "cloudSaving": "Saving to your account…",
+    "cloudSaved": "Saved to your account",
+    "cloudOffline": "Offline – will retry",
+    "cloudSkipped": "Kept in this browser only"
+  },
+  "account": {
+    "title": "Account",
+    "optional": "Optional. Without an account everything stays in this browser.",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "create": "Create account",
+    "email": "E-mail",
+    "password": "Password",
+    "passwordHelp": "At least 10 characters.",
+    "invite": "Invitation code",
+    "inviteHelp": "Accounts are in a closed beta, by invitation only.",
+    "privacy": "While you are signed in, the documents you edit are also stored on the server, protected by HTTPS and encrypted at rest, but not end-to-end encrypted. Do not store personal data of respondents there. Work done before signing in stays in this browser until you edit it.",
+    "signedInNote": "Documents you edit are saved to your account automatically and appear on your other devices. No save button needed.",
+    "storage": "Storage used",
+    "used": "{{used}} MB of {{quota}} MB used",
+    "err": {
+      "bad_credentials": "Wrong e-mail or password.",
+      "bad_email": "That e-mail address does not look right.",
+      "weak_password": "Use a password of at least 10 characters.",
+      "invalid_invite": "This invitation code is invalid, used or expired.",
+      "bad_invite": "Enter your invitation code.",
+      "email_taken": "An account with this e-mail already exists.",
+      "beta_full": "The closed beta is full.",
+      "too_many_attempts": "Too many attempts. Try again in a few minutes.",
+      "network": "Cannot reach the server. Check your connection.",
+      "server_error": "Something went wrong. Try again later."
+    }
+  },
+  "cloud": {
+    "otherDevice": "{{name}} (from another device)",
+    "conflict": "This document was changed on another device. The other version is kept as a separate copy.",
+    "quotaFull": "Your cloud storage is full. This document stays in this browser only.",
+    "tooLarge": "This document is too large for the cloud and stays in this browser only.",
+    "sessionEnded": "You were signed out. Your work stays in this browser."
+  }
+}

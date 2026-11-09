@@ -13,6 +13,7 @@
     "samplesTitle": "Sample data",
     "work": "Your work",
     "workHint": "Saved automatically as you go, only in this browser.",
+    "workHintCloud": "Saved automatically as you go, in this browser and in your account.",
     "workEmptyTitle": "Nothing here yet",
     "workEmptyDesc": "As soon as you open a file or start typing, your work is saved here on its own. No need to save.",
     "current": "Open",

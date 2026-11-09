@@ -10,6 +10,7 @@ import { Icon } from '../../components/Icon';
 import { Popover } from '../../components/Popover';
 import { Segmented } from '../../components/Segmented';
 import { useSettings, type Profile } from '../../store/settings';
+import { useAccount } from '../../store/account';
 import { useUi } from '../../store/ui';
 
 export function Avatar({ profile, large }: { profile: Profile; large?: boolean }) {
@@ -31,6 +32,7 @@ export function ProfileButton() {
   const theme = useSettings((s) => s.theme);
   const set = useSettings((s) => s.set);
   const openModal = useUi((s) => s.openModal);
+  const cloudUser = useAccount((s) => s.user);
   const [open, setOpen] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
   const name = profile.name || t('profile.defaultName');
@@ -57,8 +59,8 @@ export function ProfileButton() {
           <div className="sh-profile-who">
             <span className="sh-profile-name">{name}</span>
             <span className="sh-profile-sub">
-              <Icon name="lock" size={14} />
-              {t('profile.localOnly')}
+              <Icon name={cloudUser ? 'cloud_done' : 'lock'} size={14} />
+              {cloudUser ? cloudUser.email : t('profile.localOnly')}
             </span>
           </div>
         </div>
@@ -94,6 +96,9 @@ export function ProfileButton() {
         <div className="sh-profile-foot">
           <Button variant="ghost" size="sm" iconStart="settings" onClick={() => go(() => openModal({ kind: 'settings' }))}>
             {t('actions.settings')}
+          </Button>
+          <Button variant="ghost" size="sm" iconStart={cloudUser ? 'cloud_done' : 'cloud'} onClick={() => go(() => openModal({ kind: 'account' }))}>
+            {cloudUser ? t('account.title') : t('account.signIn')}
           </Button>
           <Button variant="ghost" size="sm" iconStart="person" onClick={() => go(() => openModal({ kind: 'settings', section: 'profile' }))}>
             {t('profile.title')}

@@ -10,6 +10,7 @@ import { Icon } from '../../components/Icon';
 import { IconButton } from '../../components/IconButton';
 import { Spinner } from '../../components/Button';
 import { useData } from '../../store/data';
+import { useAccount } from '../../store/account';
 import { useSettings } from '../../store/settings';
 import { useUi } from '../../store/ui';
 import { formatShortcut, openPalette } from '../../app/actions';
@@ -22,6 +23,8 @@ function SaveStatus() {
   const dirty = useData((s) => s.dirty);
   const hasData = useData((s) => !!s.dataset);
   const autosave = useSettings((s) => s.autosave);
+  const cloudUser = useAccount((s) => s.user);
+  const cloud = useAccount((s) => s.sync);
   const [saved, setSaved] = useState<number | null>(null);
   useEffect(() => {
     const on = (e: Event) => setSaved((e as CustomEvent<number>).detail);
@@ -39,6 +42,23 @@ function SaveStatus() {
   } else if (autosave && dirty && !saved) {
     icon = 'sync';
     text = t('appbar.saving');
+  }
+  if (cloudUser && autosave) {
+    if (cloud === 'saving') {
+      icon = 'sync';
+      text = t('appbar.cloudSaving');
+    } else if (cloud === 'offline') {
+      icon = 'cloud_off';
+      text = t('appbar.cloudOffline');
+      tone = 'warn';
+    } else if (cloud === 'tooLarge' || cloud === 'quota') {
+      icon = 'cloud_off';
+      text = t('appbar.cloudSkipped');
+      tone = 'warn';
+    } else if (cloud === 'saved') {
+      icon = 'cloud_done';
+      text = t('appbar.cloudSaved');
+    }
   }
   const tip = `${saved ? t('appbar.lastSaved', { time: new Date(saved).toLocaleTimeString() }) : text}. ${t('shell.saveHint', { key: formatShortcut('Mod+S') })}`;
   return (

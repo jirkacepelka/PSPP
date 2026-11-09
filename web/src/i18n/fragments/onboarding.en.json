@@ -21,8 +21,8 @@
       "lead": "A modern workspace for the PSPP statistics engine. Let’s set it up for you in about a minute.",
       "point1Title": "Runs right in your browser",
       "point1": "No installation. Descriptives, tests, regression and charts.",
-      "point2Title": "Your data stay on your computer",
-      "point2": "Nothing is uploaded. Files are processed locally.",
+      "point2Title": "Your data stay on your computer by default",
+      "point2": "Nothing is uploaded unless you sign in to the optional account. Files are processed locally.",
       "point3Title": "Results you can understand",
       "point3": "Plain-language explanations next to the tables.",
       "language": "Language"

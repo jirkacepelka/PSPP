@@ -23,6 +23,7 @@ import { useUi } from './store/ui';
 import { useSettings } from './store/settings';
 import { useData } from './store/data';
 import { ACTIONS, currentScope, matchShortcut, runAction } from './app/actions';
+import { initCloud } from './app/cloud';
 import { openFiles, startAutosave } from './app/files';
 import { initEngine } from './app/engine';
 import { startAppearance } from './app/theme';
@@ -34,6 +35,7 @@ import { OnboardingGate } from './features/onboarding/Onboarding';
 import { AboutDialog } from './features/misc/AboutDialog';
 import { ShortcutsDialog } from './features/misc/ShortcutsDialog';
 import { ConfirmDialog, FindDialog, GotoDialog, SaveAsDialog } from './features/misc/SmallDialogs';
+import { AccountDialog } from './features/misc/AccountDialog';
 import { ImportDialog } from './features/misc/ImportDialog';
 import { ExportOutputDialog } from './features/output/ExportOutputDialog';
 import { MissingDialog, TypeDialog, ValueLabelsDialog } from './features/variables/VariableDialogs';
@@ -109,6 +111,8 @@ function Modals() {
       return <GotoDialog />;
     case 'find':
       return <FindDialog />;
+    case 'account':
+      return <AccountDialog />;
     case 'saveAs':
       return <SaveAsDialog />;
     case 'import':
@@ -138,6 +142,7 @@ export function App() {
     void useSettings.getState().load();
     void initEngine();
     const stopAutosave = startAutosave();
+    void initCloud();
     // value labels: the persisted setting drives the grid's transient flag
     const syncLabels = () => {
       const want = useSettings.getState().showValueLabels;

@@ -1,0 +1,43 @@
+{
+  "appbar": {
+    "cloudSaving": "Ukládám do účtu…",
+    "cloudSaved": "Uloženo v účtu",
+    "cloudOffline": "Offline – zkusím znovu",
+    "cloudSkipped": "Jen v tomto prohlížeči"
+  },
+  "account": {
+    "title": "Účet",
+    "optional": "Nepovinný. Bez účtu zůstává všechno v tomto prohlížeči.",
+    "signIn": "Přihlásit se",
+    "signOut": "Odhlásit se",
+    "create": "Vytvořit účet",
+    "email": "E-mail",
+    "password": "Heslo",
+    "passwordHelp": "Alespoň 10 znaků.",
+    "invite": "Kód pozvánky",
+    "inviteHelp": "Účty jsou v uzavřené betě, jen na pozvání.",
+    "privacy": "Po přihlášení se dokumenty, které upravíš, ukládají i na server. Je chráněný HTTPS a šifrovaný na disku, ale není šifrovaný end-to-end. Neukládej tam osobní údaje respondentů. Práce z doby před přihlášením zůstává v tomto prohlížeči, dokud ji znovu neupravíš.",
+    "signedInNote": "Dokumenty, které upravíš, se ukládají do účtu automaticky a objeví se na tvých dalších zařízeních. Tlačítko pro uložení není potřeba.",
+    "storage": "Využité místo",
+    "used": "Využito {{used}} z {{quota}} MB",
+    "err": {
+      "bad_credentials": "Nesprávný e-mail nebo heslo.",
+      "bad_email": "E-mailová adresa nevypadá správně.",
+      "weak_password": "Použij heslo alespoň o 10 znacích.",
+      "invalid_invite": "Kód pozvánky je neplatný, použitý nebo vypršel.",
+      "bad_invite": "Zadej kód pozvánky.",
+      "email_taken": "Účet s tímto e-mailem už existuje.",
+      "beta_full": "Uzavřená beta je plná.",
+      "too_many_attempts": "Příliš mnoho pokusů. Zkus to za pár minut.",
+      "network": "Server není dostupný. Zkontroluj připojení.",
+      "server_error": "Něco se nepovedlo. Zkus to později."
+    }
+  },
+  "cloud": {
+    "otherDevice": "{{name}} (z jiného zařízení)",
+    "conflict": "Dokument se změnil na jiném zařízení. Druhá verze je uložená jako samostatná kopie.",
+    "quotaFull": "Místo v cloudu je plné. Tento dokument zůstává jen v tomto prohlížeči.",
+    "tooLarge": "Dokument je pro cloud příliš velký a zůstává jen v tomto prohlížeči.",
+    "sessionEnded": "Byl jsi odhlášen. Tvoje práce zůstává v tomto prohlížeči."
+  }
+}

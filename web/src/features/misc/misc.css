@@ -188,3 +188,40 @@
 .sa-opts .set-row-desc {
   display: block;
 }
+
+/* account dialog */
+.acc-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  line-height: var(--lh-normal, 1.5);
+}
+.acc-error {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--danger-text, var(--ink-1));
+}
+.acc-usage {
+  display: grid;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
+}
+.acc-usage-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-sunken);
+  border: var(--hairline) solid var(--line);
+  overflow: hidden;
+}
+.acc-usage-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+.acc-usage-text {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+}
