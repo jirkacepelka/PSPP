@@ -29,7 +29,7 @@ export interface SlotDef {
 }
 
 /** Canvas positions: axes, legend-like roles (colour, size, cluster) and panel rows/columns. */
-export type SlotPlace = 'x' | 'y' | 'z' | 'legend' | 'size' | 'panelCols' | 'panelRows' | 'detail';
+export type SlotPlace = 'x' | 'y' | 'y2' | 'z' | 'legend' | 'size' | 'panelCols' | 'panelRows' | 'detail';
 
 export interface Choice {
   value: string;
@@ -518,10 +518,68 @@ export function normalizeOptions(def: GraphDef): GraphDef {
 /** The 'panel by' slot every kind (but the scatterplot matrix) offers. */
 const panelSlot = (): SlotDef => slot('panel', 'graphstudio.slot.panel', 'category', { maxDistinct: MAX_PANELS, hint: 'graphstudio.slotHint.panel', icon: 'grid_view' });
 
+/**
+ * Canvas place of each slot id, per kind (the same for every variant). Kinds that are not listed
+ * (or slot ids that are not) fall back to the rules in `defaultPlace`.
+ */
+const PLACES: Partial<Record<GraphKind, Record<string, SlotPlace>>> = {
+  bar: { x: 'x', value: 'y', group: 'legend' },
+  line: { x: 'x', value: 'y', group: 'legend' },
+  area: { x: 'x', value: 'y', group: 'legend' },
+  pie: { x: 'legend', value: 'size' },
+  histogram: { value: 'x', group: 'legend' },
+  pyramid: { value: 'y', group: 'legend' },
+  boxplot: { value: 'y', x: 'x', group: 'legend' },
+  errorbar: { x: 'x', value: 'y', group: 'legend' },
+  scatter: { x: 'x', y: 'y', group: 'legend' },
+  dot: { value: 'x', group: 'legend' },
+  pareto: { x: 'x', value: 'y' },
+  scattermatrix: { vars: 'detail', group: 'legend' },
+  heatmap: { x: 'x', y: 'y' },
+  highlow: { x: 'x', high: 'y', low: 'y', close: 'y' },
+  dualaxis: { x: 'x', left: 'y', right: 'y2' },
+  qq: { value: 'y' },
+  pp: { value: 'y' },
+  sequence: { value: 'y', x: 'x' },
+  control: { value: 'y', subgroup: 'x' },
+  violin: { value: 'y', x: 'x' },
+  density: { value: 'x', group: 'legend' },
+  scatter3d: { x: 'x', y: 'y', z: 'z', group: 'legend' },
+  bar3d: { x: 'x', y: 'y', value: 'z' },
+  surface3d: { x: 'x', y: 'y', z: 'z' },
+};
+
+/** Place for a slot id nobody listed: panel by, colour/group roles and everything else. */
+const defaultPlace = (id: string): SlotPlace => (id === 'panel' ? 'panelCols' : id === 'group' ? 'legend' : 'detail');
+
+/** True when the chart is drawn with the value along x and the categories along y. */
+export const isHorizontal = (def: GraphDef): boolean => def.variant === 'horizontal' || def.options.horizontal === true;
+
+/** Where a raw slot of DEF sits on the canvas: its table place, with x and y swapped for horizontal charts. */
+function resolvePlace(def: GraphDef, s: SlotDef): SlotPlace {
+  const p = s.place ?? PLACES[def.kind]?.[s.id] ?? defaultPlace(s.id);
+  if (isHorizontal(def)) return p === 'x' ? 'y' : p === 'y' ? 'x' : p;
+  return p;
+}
+
 export function slotsOf(def: GraphDef): SlotDef[] {
   const m = KINDS[def.kind];
   if (!m) return [];
-  return [...m.slots(def), ...(m.panels && !m.panels(def) ? [] : [panelSlot()])];
+  return [...m.slots(def), ...(m.panels && !m.panels(def) ? [] : [panelSlot()])].map((s) => ({ ...s, place: resolvePlace(def, s) }));
+}
+
+/**
+ * Summary kinds (bar, line, area, pie, 3D bars) have no value slot while the summary is a count or
+ * percent. The canvas still shows the value zone: this is the slot a variable dropped there fills.
+ */
+export function summaryValueSlot(def: GraphDef): SlotDef | null {
+  const m = KINDS[def.kind];
+  if (!m || slotsOf(def).some((s) => s.id === 'value')) return null;
+  const f = optionsOf(def).find((o) => o.id === 'func');
+  const choices = f ? (typeof f.choices === 'function' ? f.choices(def) : (f.choices ?? [])) : [];
+  if (!choices.some((c) => c.value === 'count')) return null;
+  const s = valueSlot(0);
+  return { ...s, place: resolvePlace(def, { ...s, place: PLACES[def.kind]?.value ?? 'y' }) };
 }
 
 const hasPanel = (d: GraphDef) => (d.bind.panel?.length ?? 0) > 0;
