@@ -230,3 +230,52 @@ export interface PanelsSpec {
   sharedAxes: boolean;
   panels: { title: string; chart: unknown }[];
 }
+
+/* ---- phase 3: 3D (SVG with a software projection, rotated by dragging) ---- */
+
+/** 3D scatter; optional least squares plane. Groups colour the points like the 2D scatter. */
+export interface Scatter3dSpec {
+  type: 'scatter3d';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  zlabel: string;
+  points: { x: number; y: number; z: number; group: string | null }[];
+  /** 'plane' draws the least squares plane z = a + bx + cy (computed by the renderer) */
+  fit?: 'none' | 'plane';
+  groupLabel?: string | null;
+}
+
+/** 3D bars over a grid of two categorical axes; values[yi][xi], null = no bar. */
+export interface Bar3dSpec {
+  type: 'bar3d';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  zlabel: string;
+  xs: string[];
+  ys: string[];
+  values: (number | null)[][];
+}
+
+/** 3D surface over a regular grid; z[yi][xi], null = hole. */
+export interface Surface3dSpec {
+  type: 'surface3d';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  zlabel: string;
+  xs: number[];
+  ys: number[];
+  z: (number | null)[][];
+}
+
+/* ChartStyle additions for 3D (optional): azimuth/elevation in degrees (initial view), perspective: boolean.
+   Stored in `chart.view3d` = { azimuth, elevation, perspective } so a rotated view survives save and edit. */
+export interface View3d {
+  azimuth: number;
+  elevation: number;
+  perspective: boolean;
+  /** zoom factor, 1 = fit */
+  zoom?: number;
+}
