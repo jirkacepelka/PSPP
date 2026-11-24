@@ -961,7 +961,7 @@ export function individualsParts(def: GraphDef, p: Prepared, t: Tf): { i: Contro
   const mrUcl = mrBar * (1 + (k * D3_2) / D2[2]);
   const mrLcl = Math.max(0, mrBar * (1 - (k * D3_2) / D2[2]));
   return {
-    i: { title: t('graphstudio.chart.control.individuals', { y }), ylabel: t('graphstudio.chart.individual', { v: y }), labels, values: vals, center, ucl: vals.map(() => center + half), lcl: vals.map(() => center - half) },
+    i: { title: t('graphstudio.chart.control.individuals', { y }), ylabel: t('graphstudio.chart.individual'), labels, values: vals, center, ucl: vals.map(() => center + half), lcl: vals.map(() => center - half) },
     mr: { title: t('graphstudio.chart.control.movingrange', { y }), ylabel: t('graphstudio.chart.movingRange'), labels, values: [null, ...mrs], center: mrBar, ucl: vals.map(() => mrUcl), lcl: vals.map(() => mrLcl) },
   };
 }
@@ -999,7 +999,7 @@ export function xbarParts(def: GraphDef, p: Prepared, t: Tf): ControlParts | nul
   const y = varTitle(col.v);
   return {
     title: t('graphstudio.chart.control.xbar', { y, x: varTitle(p.cols.subgroup[0].v) }),
-    ylabel: t('graphstudio.chart.subgroupMean', { v: y }),
+    ylabel: t('graphstudio.chart.subgroupMean'),
     labels: used.map((x) => x.label),
     values: means,
     center,
@@ -1241,9 +1241,8 @@ function panelsChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record
     const chart = buildOne(def, sub, t, notes);
     if (!chart) return;
     base = base || String(chart.title ?? '');
-    const title = t('graphstudio.chart.panel', { g, level: lv.labels[li] });
-    chart.title = title;
-    panels.push({ title, chart });
+    // the chart keeps its own title (some renderers use it as the axis title); the panel heading is `title`
+    panels.push({ title: t('graphstudio.chart.panel', { g, level: lv.labels[li] }), chart });
   });
   if (!panels.length) return null;
   const shared = def.options.sharedAxes !== false;
