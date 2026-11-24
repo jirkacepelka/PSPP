@@ -130,3 +130,96 @@ export interface PyramidSpec {
 }
 
 export type StudioSpecType = AreaSpec['type'] | DotSpec['type'] | ParetoSpec['type'] | MatrixSpec['type'] | HeatmapSpec['type'] | PyramidSpec['type'];
+
+/* ---- phase 2 ---- */
+/* BoxSpec:      group?: string | null (clustered boxplot: boxes with the same label form a cluster, colour by group) */
+/* ScatterSpec:  fitCi?: boolean (confidence band around the fit, 95 %) */
+
+/** High-low-close / range bars / difference area over categories. */
+export interface HighLowSpec {
+  type: 'highlow';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  /** 'hlc' bar from low to high with a close tick, 'range' plain bars, 'diff' area between low and high */
+  mode: 'hlc' | 'range' | 'diff';
+  categories: string[];
+  high: (number | null)[];
+  low: (number | null)[];
+  close: (number | null)[] | null;
+}
+
+/** Two value axes over one categorical axis; each side is bars or a line. */
+export interface DualAxisSpec {
+  type: 'dualaxis';
+  title: string;
+  xlabel: string;
+  categories: string[];
+  left: { name: string; ylabel: string; kind: 'bar' | 'line'; values: (number | null)[] };
+  right: { name: string; ylabel: string; kind: 'bar' | 'line'; values: (number | null)[] };
+}
+
+/** Q-Q (observed vs theoretical quantiles) or P-P (observed vs expected cumulative proportion). */
+export interface ProbPlotSpec {
+  type: 'probplot';
+  title: string;
+  mode: 'qq' | 'pp';
+  xlabel: string;
+  ylabel: string;
+  /** [theoretical, observed], sorted by theoretical */
+  points: [number, number][];
+  /** the reference line as two end points in the same coordinates */
+  reference: [[number, number], [number, number]] | null;
+}
+
+/** Line chart over a numeric x (case number, time). */
+export interface SequenceSpec {
+  type: 'sequence';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  x: number[];
+  series: { name: string; values: (number | null)[] }[];
+}
+
+/** Shewhart style control chart: points, centre line and per point limits, flagged points out of limits. */
+export interface ControlSpec {
+  type: 'control';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  labels: string[];
+  values: (number | null)[];
+  center: number;
+  ucl: number[];
+  lcl: number[];
+  flags: boolean[];
+}
+
+/** Kernel density curves (one per group), optionally filled. */
+export interface DensitySpec {
+  type: 'density';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  curves: { name: string; points: [number, number][] }[];
+  fill: boolean;
+}
+
+/** Violin plot: mirrored density per category with median and quartiles. */
+export interface ViolinSpec {
+  type: 'violin';
+  title: string;
+  ylabel: string;
+  violins: { label: string; points: [number, number][]; median: number; q1: number; q3: number }[];
+}
+
+/** Small multiples: the same chart type once per level of a panel variable. Each `chart` is a full chart JSON. */
+export interface PanelsSpec {
+  type: 'panels';
+  title: string;
+  columns: number;
+  /** true: all panels share axis ranges (the studio computes them and writes them into each panel's style) */
+  sharedAxes: boolean;
+  panels: { title: string; chart: unknown }[];
+}
