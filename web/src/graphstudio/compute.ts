@@ -9,7 +9,7 @@ import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef, GraphKind } from '../charts/studioTypes';
 import { activeRows, caseCount, isMissing, valueText, varTitle, weights, type Cell } from '../ext/data';
 import { lgamma, normCdf, normInv, tInv } from '../ext/dist';
-import { CATEGORY_WARN, MAX_PANELS, needsVariable, slotsOf, missingSlots } from './model';
+import { CATEGORY_CROWDED, CATEGORY_WARN, MAX_PANELS, MERGE_KINDS, needsVariable, slotsOf, missingSlots } from './model';
 
 export type Tf = (key: string, args?: Record<string, unknown>) => string;
 
@@ -157,8 +157,10 @@ interface Prepared {
   w: number[];
   cols: Record<string, Col[]>;
   info: ComputeInfo;
-  /** category variables with many values: name and number of distinct values */
-  crowded: { name: string; count: number }[];
+  /** number of categories each category variable ended up with (for the crowded notes) */
+  seen: { name: string; count: number }[];
+  /** merge values of the x slot into intervals */
+  merge?: Merge;
 }
 
 const keyOf = (x: Cell) => (typeof x === 'number' ? `n${x}` : `s${String(x).trimEnd()}`);
@@ -172,17 +174,87 @@ interface CatSet {
   cells: Cell[];
 }
 
-/** Categories of column C over ROWS, ordered by value and named by value labels. */
-function categories(c: Col, rows: number[], universe: number[] = rows): CatSet {
+/** Settings of "merge values into intervals" for the category (x) slot. */
+export interface Merge {
+  mode: 'width' | 'count';
+  width: number;
+  count: number;
+}
+
+/** The merge setting of DEF, or undefined when merging is off or the kind has no merge option. */
+export function mergeOf(def: GraphDef): Merge | undefined {
+  const mode = def.options.mergeMode;
+  if (!MERGE_KINDS.includes(def.kind) || (mode !== 'width' && mode !== 'count')) return undefined;
+  return { mode, width: optNum(def, 'mergeWidth', 0), count: optNum(def, 'mergeCount', 0) };
+}
+
+/** Interval width and aligned start for the sorted distinct values CELLS, or null when nothing merges. */
+export function intervalsFor(cells: number[], m: Merge): { width: number; start: number; integer: boolean } | null {
+  if (cells.length < 2) return null;
+  const integer = cells.every(Number.isInteger);
+  let width: number;
+  if (m.mode === 'width') width = m.width;
+  else {
+    if (!(m.count >= 1) || cells.length <= m.count) return null;
+    width = niceStep((cells[cells.length - 1] - cells[0]) / m.count);
+  }
+  if (!(width > 0)) return null;
+  if (integer && width < 1) width = 1;
+  return { width, start: Math.floor(cells[0] / width + 1e-9) * width, integer };
+}
+
+/**
+ * Categories of column C over ROWS, ordered by value and named by value labels. With MERGE and a numeric
+ * column the values are grouped into intervals [a, a + width) aligned to multiples of the width; an
+ * interval holding one value keeps that value's label, others read "a-b" (integer data: "1900-1901").
+ */
+function categories(c: Col, rows: number[], universe: number[] = rows, merge?: Merge): CatSet {
   const uniq = new Map<string, Cell>();
   for (const r of universe) uniq.set(keyOf(c.col[r]), c.col[r]);
   const cells = [...uniq.values()].sort(cmpCells);
-  const index = new Map(cells.map((x, i) => [keyOf(x), i]));
-  return { cells, labels: cells.map((x) => valueText(c.v, x)), idx: rows.map((r) => index.get(keyOf(c.col[r])) ?? -1) };
+  const iv = merge && cells.every((x) => typeof x === 'number') ? intervalsFor(cells as number[], merge) : null;
+  if (!iv) {
+    const index = new Map(cells.map((x, i) => [keyOf(x), i]));
+    return { cells, labels: cells.map((x) => valueText(c.v, x)), idx: rows.map((r) => index.get(keyOf(c.col[r])) ?? -1) };
+  }
+  const binOf = (x: number) => Math.floor((x - iv.start) / iv.width + 1e-9);
+  const members = new Map<number, number[]>();
+  for (const x of cells as number[]) {
+    const b = binOf(x);
+    const list = members.get(b);
+    if (list) list.push(x);
+    else members.set(b, [x]);
+  }
+  const order = [...members.keys()].sort((a, b) => a - b);
+  const position = new Map(order.map((b, i) => [b, i]));
+  const dec = Math.min(10, Math.max(0, 1 - Math.floor(Math.log10(iv.width))));
+  const label = (b: number): string => {
+    const m = members.get(b)!;
+    if (m.length === 1) return valueText(c.v, m[0]);
+    const lo = iv.start + b * iv.width;
+    const hi = iv.integer && Number.isInteger(iv.width) ? lo + iv.width - 1 : lo + iv.width;
+    return `${roundTo(lo, dec)}\u2013${roundTo(hi, dec)}`;
+  };
+  return {
+    // the representative of an interval is the middle of the values it holds
+    cells: order.map((b) => {
+      const m = members.get(b)!;
+      return (m[0] + m[m.length - 1]) / 2;
+    }),
+    labels: order.map(label),
+    idx: rows.map((r) => {
+      const x = c.col[r];
+      return typeof x === 'number' ? (position.get(binOf(x)) ?? -1) : -1;
+    }),
+  };
 }
 
 /** Categories of C over the rows of P; inside a panel the category set comes from the whole chart. */
-const cat = (p: Prepared, c: Col): CatSet => categories(c, p.rows, p.universe);
+function cat(p: Prepared, c: Col): CatSet {
+  const set = categories(c, p.rows, p.universe, c === p.cols.x?.[0] ? p.merge : undefined);
+  p.seen.push({ name: varTitle(c.v), count: set.cells.length });
+  return set;
+}
 
 function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
   const slots = slotsOf(def);
@@ -210,16 +282,6 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
   }
   const all = Object.values(cols).flat();
   const rows = active.filter((r) => all.every((c) => !isMissing(c.v, c.col[r])));
-  // category variables: any number of distinct values is fine, a note warns when the chart may be crowded
-  const crowded: Prepared['crowded'] = [];
-  for (const s of slots) {
-    if (s.accepts !== 'category') continue;
-    for (const c of cols[s.id]) {
-      const uniq = new Set<string>();
-      for (const r of rows) uniq.add(keyOf(c.col[r]));
-      if (uniq.size > CATEGORY_WARN) crowded.push({ name: varTitle(c.v), count: uniq.size });
-    }
-  }
   const total = caseCount(ds);
   const info: ComputeInfo = {
     total,
@@ -231,7 +293,7 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
     weight: ds.weight ?? null,
   };
   if (!rows.length) return { ok: false, reason: 'nodata' };
-  return { rows, universe: rows, w, cols, info, crowded };
+  return { rows, universe: rows, w, cols, info, seen: [], merge: mergeOf(def) };
 }
 
 const isPrepared = (p: Prepared | ComputeResult): p is Prepared => 'rows' in p;
@@ -1322,6 +1384,12 @@ export function computeChart(def: GraphDef, ds: Dataset, t: Tf): ComputeResult {
     chart = r;
   } else chart = buildOne(def, p, t, notes);
   if (!chart) return { ok: false, reason: 'nodata' };
-  for (const c of p.crowded) notes.push(t('graphstudio.note.manyCategories', { name: c.name, count: c.count }));
+  // one message per variable: the stronger one (above 500 categories a warning, above 50 a hint)
+  const most = new Map<string, number>();
+  for (const x of p.seen) most.set(x.name, Math.max(most.get(x.name) ?? 0, x.count));
+  for (const [name, count] of most) {
+    if (count > CATEGORY_CROWDED) notes.push(t('graphstudio.note.crowdedWarn', { name, count }));
+    else if (count > CATEGORY_WARN) notes.push(t('graphstudio.note.manyCategories', { name, count }));
+  }
   return { ok: true, chart, info: p.info, notes: [...new Set(notes)] };
 }

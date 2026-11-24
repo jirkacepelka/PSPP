@@ -221,6 +221,9 @@
 .gs-slot-go {
   color: var(--accent-text);
 }
+.gs-slot-why.gs-slot-warn {
+  color: var(--warning-ink);
+}
 .gs-slot-select {
   width: 100%;
 }

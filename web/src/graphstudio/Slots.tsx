@@ -11,7 +11,7 @@ import { MeasureIcon } from '../components/Chip';
 import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef } from '../charts/studioTypes';
 import { displayMeasure } from '../features/dialogs/dialogData';
-import { distinctCapped, rejection, slotsOf, type Rejection, type SlotDef } from './model';
+import { CATEGORY_CROWDED, MERGE_KINDS, distinctCapped, rejection, slotsOf, type Rejection, type SlotDef } from './model';
 
 const DRAG_TYPE = 'application/x-pspp-variable';
 
@@ -173,6 +173,16 @@ export function SlotsPanel({ p }: { p: Picking }) {
               })}
               {bound.length === 0 && <span className="gs-slot-empty">{t(slot.hint ?? 'graphstudio.slotHint.default')}</span>}
             </div>
+            {(() => {
+              // a category variable with a huge number of values: still drawn in full, but say it is crowded
+              const i = slot.id === 'x' && MERGE_KINDS.includes(def.kind) && (def.options.mergeMode ?? 'none') === 'none' ? ds.variables.findIndex((x) => x.name === bound[0]) : -1;
+              return i >= 0 && distinct[i] > CATEGORY_CROWDED ? (
+                <p className="gs-slot-why gs-slot-warn" role="status" title={t('graphstudio.slotCrowded', { name: bound[0], max: CATEGORY_CROWDED })}>
+                  <Icon name="priority_high" />
+                  {t('graphstudio.slotCrowded', { name: bound[0], max: CATEGORY_CROWDED })}
+                </p>
+              ) : null;
+            })()}
             {reason && (
               <p className="gs-slot-why" role="status">
                 <Icon name="block" />

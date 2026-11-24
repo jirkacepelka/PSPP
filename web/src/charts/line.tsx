@@ -22,6 +22,8 @@ import {
 import { clamp, formatValue, linearScale, measureText, niceTicks, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { LineSpec } from './lineSpec';
+import { thinEvery } from './bar';
+import { DENSE } from './denseHover';
 import { avoidText, useAxisReg, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 
@@ -124,8 +126,9 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
   };
 
   // thin the category labels when they would collide
-  const maxLab = Math.max(0, ...spec.categories.map((c) => c.length));
-  const every = band < 28 && maxLab > 2 ? Math.ceil(28 / band) : 1;
+  const longest = spec.categories.reduce((a, b) => (b.length > a.length ? b : a), '');
+  const every = thinEvery(measureText(longest, FONT.tick * fs), band);
+  const dense = n > DENSE;
 
   return (
     <g>
@@ -148,8 +151,15 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
         const px = sx(si);
         return (
           <g key={si}>
+            {s.lo && s.hi && dense && (
+              <path
+                d={s.values.map((_, i) => (s.lo![i] === null || s.hi![i] === null ? '' : `M${f1(px[i])},${f1(sy(s.lo![i] as number))}V${f1(sy(s.hi![i] as number))}`)).join('')}
+                style={{ stroke: colors[si], strokeWidth: 1, fill: 'none', opacity: 0.75 }}
+              />
+            )}
             {s.lo &&
               s.hi &&
+              !dense &&
               s.values.map((_, i) => {
                 const l = s.lo![i];
                 const h = s.hi![i];
@@ -176,7 +186,14 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
                   </text>
                 );
               })}
+            {markers && dense && (
+              <path
+                d={s.values.map((v, i) => (v === null ? '' : `M${f1(px[i] - 1)},${f1(sy(v) - 1)}h2v2h-2Z`)).join('')}
+                style={{ fill: colors[si] }}
+              />
+            )}
             {markers &&
+              !dense &&
               s.values.map((v, i) =>
                 v === null ? null : <Marker key={i} shape={GROUP_SHAPES[si % GROUP_SHAPES.length]} x={px[i]} y={sy(v)} r={hi === i ? r + 1.5 : r} color={colors[si]} />,
               )}

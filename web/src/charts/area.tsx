@@ -3,7 +3,8 @@
 
 import { useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { AxisTitles, Baseline, ChartShell, FONT, YAxis, plotMargins, seriesColor, useTip, type ChartCommonProps, type LegendItem, type PlotArea, type TipContent } from './shell';
-import { clamp, formatPercent, formatValue, linearScale, niceTicks, percentTickFormatter, tickFormatter, truncateText } from './scale';
+import { clamp, formatPercent, formatValue, linearScale, measureText, niceTicks, percentTickFormatter, tickFormatter, truncateText } from './scale';
+import { thinEvery } from './bar';
 import { tr } from './strings';
 import type { AreaSpec } from './studioTypes';
 import { useAxisReg, useStyle } from './styleLayer';
@@ -130,7 +131,8 @@ function AreaPlot({ spec, area, locale, t }: { spec: AreaSpec; area: PlotArea; l
   };
 
   const band = n > 1 ? (plotW - 2 * inset) / (n - 1) : plotW;
-  const every = band < 28 && Math.max(0, ...spec.categories.map((c) => c.length)) > 2 ? Math.ceil(28 / band) : 1;
+  const longest = spec.categories.reduce((a, b) => (b.length > a.length ? b : a), '');
+  const every = thinEvery(measureText(longest, FONT.tick * fs), band);
   const hasData = vals.some((s) => s.some((v) => v !== null));
 
   return (

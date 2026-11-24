@@ -477,13 +477,22 @@ function Legend({ layout, y, fs = 1 }: { layout: LegendLayout; y: number; fs?: n
 
 /* ------------------------------------------------------------------ table */
 
-const MAX_TABLE_ROWS = 500;
+/** Rows are windowed once there are more than this many (the full data stays reachable by scrolling). */
+const VIRTUAL_FROM = 200;
+const ROW_H = 27;
+const VIEW_H = 320;
 
-function DataTable({ table, title, t }: { table: TableSpec; title: string; t: ChartT }) {
-  const rows = table.rows.slice(0, MAX_TABLE_ROWS);
+function DataTable({ table, title }: { table: TableSpec; title: string; t: ChartT }) {
+  const [scrollTop, setScrollTop] = useState(0);
+  const all = table.rows;
+  const virtual = all.length > VIRTUAL_FROM;
+  const first = virtual ? Math.max(0, Math.floor(scrollTop / ROW_H) - 8) : 0;
+  const last = virtual ? Math.min(all.length, first + Math.ceil(VIEW_H / ROW_H) + 16) : all.length;
+  const rows = all.slice(first, last);
+  const cols = table.columns.length;
   return (
-    <div className="pspp-chart__table-wrap">
-      <table className="pspp-chart__table">
+    <div className="pspp-chart__table-wrap" onScroll={virtual ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined} tabIndex={virtual ? 0 : undefined}>
+      <table className="pspp-chart__table" aria-rowcount={virtual ? all.length + 1 : undefined}>
         <caption className="pspp-chart__sr">{title}</caption>
         <thead>
           <tr>
@@ -495,8 +504,13 @@ function DataTable({ table, title, t }: { table: TableSpec; title: string; t: Ch
           </tr>
         </thead>
         <tbody>
+          {virtual && first > 0 && (
+            <tr aria-hidden="true" style={{ height: first * ROW_H }}>
+              <td colSpan={cols} style={{ padding: 0, border: 0 }} />
+            </tr>
+          )}
           {rows.map((r, ri) => (
-            <tr key={ri}>
+            <tr key={first + ri} style={virtual ? { height: ROW_H } : undefined} aria-rowindex={virtual ? first + ri + 2 : undefined}>
               {r.map((cell, ci) =>
                 ci === 0 && !table.numeric?.[0] ? (
                   <th key={ci} scope="row">
@@ -510,13 +524,14 @@ function DataTable({ table, title, t }: { table: TableSpec; title: string; t: Ch
               )}
             </tr>
           ))}
+          {virtual && last < all.length && (
+            <tr aria-hidden="true" style={{ height: (all.length - last) * ROW_H }}>
+              <td colSpan={cols} style={{ padding: 0, border: 0 }} />
+            </tr>
+          )}
         </tbody>
       </table>
-      {(table.rows.length > MAX_TABLE_ROWS || table.note) && (
-        <p className="pspp-chart__note">
-          {table.rows.length > MAX_TABLE_ROWS && tr(t, 'tableTruncated', { shown: MAX_TABLE_ROWS, total: table.rows.length })} {table.note}
-        </p>
-      )}
+      {table.note && <p className="pspp-chart__note">{table.note}</p>}
     </div>
   );
 }

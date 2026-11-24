@@ -132,6 +132,14 @@ const valueSlot = (min: number, label = 'graphstudio.slot.value') => slot('value
 /** Space the categories in proportion to their numeric value (years, ages); the category variable must be numeric. */
 const NUMERIC_AXIS: OptionDef = { id: 'numericAxis', type: 'bool', label: 'graphstudio.opt.numericAxis' };
 
+/** Merging of numeric category values into intervals (options shown when the mode is on). */
+const MERGE_OPTIONS: OptionDef[] = [
+  { id: 'mergeMode', type: 'select', label: 'graphstudio.opt.mergeMode', choices: ['none', 'width', 'count'].map((value) => ({ value, label: `graphstudio.merge.${value}` })) },
+  { id: 'mergeWidth', type: 'number', label: 'graphstudio.opt.mergeWidth', min: 0, step: 1, when: (d) => opt(d, 'mergeMode') === 'width' },
+  { id: 'mergeCount', type: 'number', label: 'graphstudio.opt.mergeCount', min: 1, step: 1, when: (d) => opt(d, 'mergeMode') === 'count' },
+];
+const MERGE_DEFAULTS = { mergeMode: 'none', mergeWidth: 2, mergeCount: 100 };
+
 const DISTS: Choice[] = ['normal', 'exponential', 'uniform', 'lognormal'].map((value) => ({ value, label: `graphstudio.dist.${value}` }));
 
 const v = (id: string, label: string, icon: string): VariantDef => ({ id, label: `graphstudio.variant.${label}`, icon });
@@ -432,7 +440,7 @@ export const modelOf = (kind: GraphKind): KindModel | undefined => KINDS[kind];
 
 export function defaultDef(kind: GraphKind, variant?: string): GraphDef {
   const m = KINDS[kind]!;
-  return { v: 1, kind, variant: variant ?? m.variants[0].id, bind: {}, options: { ...m.defaults, ...PANEL_DEFAULTS } };
+  return { v: 1, kind, variant: variant ?? m.variants[0].id, bind: {}, options: { ...m.defaults, ...(MERGE_KINDS.includes(kind) ? MERGE_DEFAULTS : {}), ...PANEL_DEFAULTS } };
 }
 
 /** Switches the variant, dropping bindings of slots that no longer exist and fixing option values. */
@@ -477,7 +485,7 @@ const PANEL_DEFAULTS: Record<string, unknown> = { sharedAxes: true, panelCols: n
 export function optionsOf(def: GraphDef): OptionDef[] {
   const m = KINDS[def.kind];
   if (!m) return [];
-  return [...m.options, ...(slotsOf(def).some((s) => s.id === 'panel') ? PANEL_OPTIONS : [])];
+  return [...m.options, ...(MERGE_KINDS.includes(def.kind) ? MERGE_OPTIONS : []), ...(slotsOf(def).some((s) => s.id === 'panel') ? PANEL_OPTIONS : [])];
 }
 
 /** Required slots that are still empty, in order. */
@@ -487,6 +495,10 @@ export function missingSlots(def: GraphDef): SlotDef[] {
 
 /** Above this many categories the studio warns that the chart may be crowded. */
 export const CATEGORY_WARN = 50;
+/** Above this many categories the chart is crowded: a warning marks the slot and the preview. */
+export const CATEGORY_CROWDED = 500;
+/** Kinds whose category (x) slot can merge numeric values into intervals. */
+export const MERGE_KINDS: GraphKind[] = ['bar', 'line', 'area', 'errorbar', 'highlow', 'dualaxis', 'pareto', 'boxplot'];
 /** Most levels of a panel variable. */
 export const MAX_PANELS = 12;
 
@@ -506,8 +518,8 @@ export function rejection(s: SlotDef, variable: Variable, distinct: number): Rej
 /** Variable names bound anywhere in the definition. */
 export const boundNames = (def: GraphDef): string[] => [...new Set(Object.values(def.bind).flat())];
 
-/** Cheap distinct count of a column, capped just above CATEGORY_WARN. */
-export function distinctCapped(col: Cell[] | undefined, cap = CATEGORY_WARN + 1): number {
+/** Cheap distinct count of a column, capped just above CATEGORY_CROWDED. */
+export function distinctCapped(col: Cell[] | undefined, cap = CATEGORY_CROWDED + 1): number {
   const s = new Set<string | number>();
   for (const x of col ?? []) {
     if (x === null || x === '') continue;

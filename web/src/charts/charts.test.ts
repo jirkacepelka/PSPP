@@ -7,6 +7,7 @@ import { applyDomain, parseStyle } from './styleSpec';
 import { alignedTicks, clusterBoxes, cumulativePercent, dotRadius, fitBand, fitCurve, intTicks, loessAt, polyFit, rampColor, rampPercent, stackSegments, stepPoints, tQuantile975 } from './studioMath';
 import { chartStrings } from './strings';
 import { niceTicks } from './scale';
+import { thinEvery } from './bar';
 
 const fx = fixtures as Record<string, unknown>;
 
@@ -318,5 +319,13 @@ describe('phase 2 math', () => {
     expect(intTicks(3, 6).ticks).toEqual([1, 2, 3]);
     expect(intTicks(100, 5).ticks.every(Number.isInteger)).toBe(true);
     expect(stepPoints([1, 2], [5, 6])).toEqual([[0.5, 5], [1.5, 5], [1.5, 6], [2.5, 6]]);
+  });
+});
+
+describe('dense axes', () => {
+  it('thinEvery picks nice steps and never thins roomy labels', () => {
+    expect(thinEvery(30, 100)).toBe(1);
+    expect(thinEvery(28, 0.2)).toBe(200);
+    for (const band of [0.13, 0.5, 1.7, 3, 9]) expect([1, 2, 5].includes(thinEvery(30, band) / Math.pow(10, Math.floor(Math.log10(thinEvery(30, band)))))).toBe(true);
   });
 });

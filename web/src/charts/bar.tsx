@@ -6,20 +6,47 @@ import type { BarSpec } from './types';
 import { avoidText, axisTitle, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 import { stackSegments } from './studioMath';
+import { DENSE, DenseHover } from './denseHover';
 
 const GAP = 2;
 const MAX_BAR = 24;
 const MAX_ROTATED = 110;
 
-/** How category labels fit a band: flat, tilted 45°, or vertical (thinned if still too dense). */
+/** Widest label width, measured on at most ~400 evenly spread labels plus the longest by length. */
+function widestLabel(cats: string[], size: number): number {
+  const stride = Math.max(1, Math.floor(cats.length / 400));
+  let w = 0;
+  let longest = '';
+  for (let i = 0; i < cats.length; i += stride) {
+    if (cats[i].length > longest.length) longest = cats[i];
+    w = Math.max(w, measureText(cats[i], size));
+  }
+  return Math.max(w, longest ? measureText(longest, size) : 0);
+}
+
+/** Every k-th label with k on a nice step (1, 2, 5, 10, 20, 50 ...) so that labels `width` px wide keep clear in bands of `band` px. */
+export function thinEvery(width: number, band: number): number {
+  const need = Math.ceil((width + 10) / Math.max(0.01, band));
+  if (need <= 1) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(need)));
+  for (const m of [1, 2, 5, 10]) if (m * p >= need) return m * p;
+  return 10 * p;
+}
+
+/** How category labels fit a band: flat, tilted 45°, or vertical (thinned if still too dense).  With many
+    categories (over 24) labels stay flat and only every k-th (a nice step) is shown. */
 export function catLabels(cats: string[], band: number) {
-  const maxLabel = Math.max(0, ...cats.map((s) => measureText(s, FONT.tick)));
+  const maxLabel = widestLabel(cats, FONT.tick);
   let mode: 'flat' | 'tilt' | 'vertical' = 'flat';
   let every = 1;
-  if (maxLabel > band - 6) mode = band >= 18 ? 'tilt' : 'vertical';
+  if (maxLabel > band - 6) {
+    if (cats.length > 24) every = thinEvery(maxLabel, band);
+    else mode = band >= 18 ? 'tilt' : 'vertical';
+  }
   if (mode === 'vertical' && band < 13) every = Math.ceil(13 / band);
-  const labels = cats.map((s) => truncateText(s, mode === 'flat' ? band - 4 : MAX_ROTATED, FONT.tick));
-  const longest = Math.max(0, ...labels.map((s) => measureText(s, FONT.tick)));
+  const room = mode === 'flat' ? Math.max(24, band * every - 4) : MAX_ROTATED;
+  const labels = cats.map((s, i) => (i % every ? '' : truncateText(s, room, FONT.tick)));
+  const longest = every > 1 && mode === 'flat' ? 0 : Math.max(0, ...labels.map((s) => measureText(s, FONT.tick)));
   const labelBand = mode === 'flat' ? 18 : mode === 'tilt' ? longest * Math.SQRT1_2 + 18 : longest + 12;
   return { mode, every, labels, labelBand };
 }
@@ -58,10 +85,12 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
   const cell = new Map<string, number>();
   const errOf = new Map<string, { lo: number; hi: number } | null>();
   const grouped = spec.bars.some((b) => b.group !== null);
+  const catSet = new Set<string>();
+  const groupSet = new Set<string>();
   spec.bars.forEach((b, bi) => {
-    if (!cats.includes(b.x)) cats.push(b.x);
+    if (!catSet.has(b.x)) (catSet.add(b.x), cats.push(b.x));
     const g = b.group ?? '';
-    if (grouped && !groups.includes(g)) groups.push(g);
+    if (grouped && !groupSet.has(g)) (groupSet.add(g), groups.push(g));
     const key = b.x + '\u0000' + g;
     cell.set(key, (cell.get(key) ?? 0) + b.count);
     if (spec.err) errOf.set(key, spec.err[bi] ?? null);
@@ -152,7 +181,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         const segText = (s: Seg) => (pct100 ? formatPercent(s.v1 - s.v0 === 0 ? 0 : Math.abs(s.v1 - s.v0) / 100, locale) : fmtVal(s.count));
         const valueName = pct100 ? tr(t, 'percent') : yName;
         const autoLabels = !grouped;
-        const wantLabels = style?.valueLabels === true || (style?.valueLabels !== false && autoLabels);
+        const wantLabels = cats.length <= 60 && (style?.valueLabels === true || (style?.valueLabels !== false && autoLabels));
         const nBars = cats.length;
 
         const tipOf = (s: Seg) => ({
@@ -246,7 +275,10 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         const band = plotW / nBars;
         const { mode, every, labels: rotLabels, labelBand } = catLabels(cats, band);
 
-        const fitsAll = !grouped
+        // thousands of categories: one path per group, no gaps or rounded caps, one hover overlay
+        const dense = nBars > DENSE;
+        const gp = dense ? 0 : GAP;
+        const fitsAll = nBars > 24 ? false : !grouped
           ? cats.every((cName) => measureText(fmtVal(cell.get(cName + '\u0000') ?? 0), FONT.label * fs) <= band - 4)
           : true;
         const labelsOn = wantLabels && nBars <= 24 && (style?.valueLabels === true || fitsAll);
@@ -255,12 +287,26 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         const plotH = area.height - top - labelBand - 4 - (xT ? 20 : 0);
         const sy = linearScale(vt.domain, [top + plotH, top]);
         const base = sy(Math.max(vt.domain[0], Math.min(0, vt.domain[1])));
-        const cluster = Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
-        const slot = stacked ? cluster : Math.max(1, (cluster - (nG - 1) * GAP) / nG);
+        const cluster = dense ? band * (band >= 3 ? 0.85 : 1) : Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
+        const slot = stacked ? cluster : Math.max(dense ? 0.3 : 1, (cluster - (nG - 1) * gp) / nG);
         area.reg.x = (i: number) => m.left + band * (i + 0.5);
         area.reg.top = top;
         area.reg.height = plotH;
         const labelEls: ReactNode[] = [];
+        const f1 = (v: number) => v.toFixed(2);
+        const denseD: string[] = gList.map(() => '');
+        let denseErr = '';
+        const byCat: Seg[][] = [];
+        if (dense) {
+          for (const s of segs) {
+            (byCat[s.cat] ??= []).push(s);
+            const x = (stacked ? m.left + band * (s.cat + 0.5) - slot / 2 : m.left + band * (s.cat + 0.5) - cluster / 2 + s.group * slot);
+            const ya = sy(s.v0);
+            const yb = sy(s.v1);
+            denseD[s.group] += `M${f1(x)},${f1(Math.min(ya, yb))}h${f1(slot)}v${f1(Math.abs(yb - ya))}h${f1(-slot)}Z`;
+            if (s.err) denseErr += `M${f1(x + slot / 2)},${f1(sy(value(s.err.lo)))}V${f1(sy(value(s.err.hi)))}`;
+          }
+        }
 
         return (
           <g>
@@ -290,10 +336,31 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                 )
               ) : null;
             })}
+            {dense && (
+              <>
+                <g clipPath={`url(#${area.uid}-bc)`} pointerEvents="none">
+                  {denseD.map((d, gi) => (
+                    <path key={gi} d={d} style={{ fill: gColor(gi) }} />
+                  ))}
+                  {denseErr && <path className="pspp-chart__whisker" d={denseErr} fill="none" style={{ strokeWidth: 1 }} />}
+                </g>
+                <DenseHover
+                  tip={area.tip}
+                  left={m.left}
+                  top={top}
+                  width={plotW}
+                  height={plotH}
+                  n={nBars}
+                  xAt={(i) => m.left + band * (i + 0.5)}
+                  ariaLabel={`${xT ?? ''} / ${valueName}`}
+                  tipFor={(i) => ({ title: cats[i], rows: (byCat[i] ?? []).flatMap((sg) => tipOf(sg).rows) })}
+                />
+              </>
+            )}
             <g clipPath={`url(#${area.uid}-bc)`}>
-              {segs.map((s, k) => {
+              {(dense ? [] : segs).map((s, k) => {
                 const cx = m.left + band * (s.cat + 0.5);
-                const x = stacked ? cx - slot / 2 : cx - cluster / 2 + s.group * (slot + GAP);
+                const x = stacked ? cx - slot / 2 : cx - cluster / 2 + s.group * (slot + gp);
                 const ya = sy(s.v0);
                 const yb = sy(s.v1);
                 const txt = segText(s);

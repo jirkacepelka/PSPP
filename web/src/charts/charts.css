@@ -591,3 +591,12 @@
   font-size: 13px;
   text-align: center;
 }
+
+/* windowed data tables keep a fixed row height */
+.pspp-chart__table-wrap[tabindex] .pspp-chart__table td,
+.pspp-chart__table-wrap[tabindex] .pspp-chart__table th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}

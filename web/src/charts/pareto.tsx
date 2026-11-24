@@ -9,6 +9,7 @@ import { avoidText, axisTitle, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 import { cumulativePercent } from './studioMath';
 import { catLabels } from './bar';
+import { DENSE, DenseHover } from './denseHover';
 
 const MAX_BAR = 40;
 
@@ -70,11 +71,12 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
         const labels = spec.bars.map((b) => b.label);
         const { mode, every, labels: rot, labelBand } = catLabels(labels, band);
         const showValues = style?.valueLabels === true && n <= 24;
+        const dense = n > DENSE;
         const top = m.top + (showValues ? 14 * fs : 0);
         const plotH = area.height - top - labelBand - 4 - (xT ? 20 : 0);
         const sy = linearScale(yt.domain, [top + plotH, top]);
         const base = sy(clamp(0, yt.domain[0], yt.domain[1]));
-        const barW = Math.min(MAX_BAR, band * 0.7);
+        const barW = dense ? Math.max(0.5, band * (band >= 3 ? 0.85 : 1)) : Math.min(MAX_BAR, band * 0.7);
         const xAt = (i: number) => m.left + band * (i + 0.5);
         // the cumulative line uses the count scale: p percent sits at p/100 of the total
         const py = (p: number) => sy((p * spec.total) / 100);
@@ -99,27 +101,57 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
               ))}
             </g>
             <g clipPath={`url(#${area.uid}-pc)`}>
+              {dense ? (
+                <path
+                  pointerEvents="none"
+                  d={spec.bars.map((b, i) => `M${(xAt(i) - barW / 2).toFixed(2)},${sy(b.count).toFixed(2)}h${barW.toFixed(2)}V${base.toFixed(2)}h${(-barW).toFixed(2)}Z`).join('')}
+                  style={{ fill: seriesColor(0) }}
+                />
+              ) : (
+                <>
               {spec.bars.map((b, i) => {
-                const tip = {
-                  title: b.label,
-                  rows: [
-                    { label: yName, value: formatValue(b.count, locale), color: seriesColor(0), key: 'rect' as const },
-                    { label: tr(t, 'percent'), value: pctText((b.count * 100) / spec.total), key: 'none' as const },
-                    { label: cumName, value: pctText(cum[i]), color: seriesColor(1), key: 'line' as const },
-                  ],
-                };
-                return (
-                  <g key={i} className="pspp-chart__mark" {...markTip(area.tip, tip, `${b.label}: ${formatValue(b.count, locale)}, ${cumName} ${pctText(cum[i])}`)}>
-                    <rect x={xAt(i) - band / 2} y={top} width={band} height={plotH} className="pspp-chart__hitband" data-export="omit" />
-                    <path d={barPath(xAt(i) - barW / 2, barW, base, sy(b.count))} style={{ fill: seriesColor(0) }} />
-                  </g>
-                );
-              })}
+                    const tip = {
+                      title: b.label,
+                      rows: [
+                        { label: yName, value: formatValue(b.count, locale), color: seriesColor(0), key: 'rect' as const },
+                        { label: tr(t, 'percent'), value: pctText((b.count * 100) / spec.total), key: 'none' as const },
+                        { label: cumName, value: pctText(cum[i]), color: seriesColor(1), key: 'line' as const },
+                      ],
+                    };
+                    return (
+                      <g key={i} className="pspp-chart__mark" {...markTip(area.tip, tip, `${b.label}: ${formatValue(b.count, locale)}, ${cumName} ${pctText(cum[i])}`)}>
+                        <rect x={xAt(i) - band / 2} y={top} width={band} height={plotH} className="pspp-chart__hitband" data-export="omit" />
+                        <path d={barPath(xAt(i) - barW / 2, barW, base, sy(b.count))} style={{ fill: seriesColor(0) }} />
+                      </g>
+                    );
+                  })}
+                </>
+              )}
               <path className="pspp-chart__line" d={line} style={{ stroke: seriesColor(1) }} pointerEvents="none" />
-              {cum.map((p, i) => (
+              {(dense ? [] : cum).map((p, i) => (
                 <Marker key={i} shape="circle" x={xAt(i)} y={py(p)} r={n > 24 ? 2 : 3.5} color={seriesColor(1)} />
               ))}
             </g>
+            {dense && (
+              <DenseHover
+                tip={area.tip}
+                left={m.left}
+                top={top}
+                width={plotW}
+                height={plotH}
+                n={n}
+                xAt={xAt}
+                ariaLabel={`${title}`}
+                tipFor={(i) => ({
+                  title: spec.bars[i].label,
+                  rows: [
+                    { label: yName, value: formatValue(spec.bars[i].count, locale), color: seriesColor(0), key: 'rect' as const },
+                    { label: tr(t, 'percent'), value: pctText((spec.bars[i].count * 100) / spec.total), key: 'none' as const },
+                    { label: cumName, value: pctText(cum[i]), color: seriesColor(1), key: 'line' as const },
+                  ],
+                })}
+              />
+            )}
             {showValues && (
               <g aria-hidden="true" pointerEvents="none">
                 {spec.bars.map((b, i) => {

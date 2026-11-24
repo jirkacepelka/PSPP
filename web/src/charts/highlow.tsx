@@ -9,6 +9,7 @@ import { axisTitle, useStyle } from './styleLayer';
 import { applyDomain } from './styleSpec';
 import { catLabels } from './bar';
 import { CatLabels } from './catAxis';
+import { DENSE, DenseHover } from './denseHover';
 
 export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommonProps) {
   const { t, locale } = c;
@@ -86,7 +87,8 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
         area.reg.x = xAt;
         area.reg.top = m.top;
         area.reg.height = plotH;
-        const barW = Math.min(spec.mode === 'hlc' ? 7 : 26, band * 0.6);
+        const dense = n > DENSE;
+        const barW = dense ? Math.max(0.5, band * (band >= 3 ? 0.8 : 1)) : Math.min(spec.mode === 'hlc' ? 7 : 26, band * 0.6);
         const f1 = (v: number) => v.toFixed(1);
         // the area between low and high: consecutive categories with both values form one run
         const runs: number[][] = [];
@@ -116,7 +118,23 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
                     <path className="pspp-chart__line" d={line(run, spec.low)} style={{ stroke: colLow }} />
                   </g>
                 ))}
-              {spec.categories.map((cat, i) => {
+              {dense && spec.mode !== 'diff' && (
+                <g pointerEvents="none">
+                  <path
+                    d={spec.categories
+                      .map((_c, i) => (has(i) ? `M${f1(xAt(i) - barW / 2)},${f1(sy(Math.max(spec.high[i] as number, spec.low[i] as number)))}h${f1(barW)}V${f1(sy(Math.min(spec.high[i] as number, spec.low[i] as number)))}h${f1(-barW)}Z` : ''))
+                      .join('')}
+                    style={{ fill: colHigh }}
+                  />
+                  {showClose && (
+                    <path
+                      d={spec.categories.map((_c, i) => (has(i) && spec.close![i] !== null ? `M${f1(xAt(i))},${f1(sy(spec.close![i] as number))}h${f1(Math.max(1, barW / 2 + 1))}` : '')).join('')}
+                      style={{ stroke: 'var(--c-ink)', strokeWidth: 1, fill: 'none' }}
+                    />
+                  )}
+                </g>
+              )}
+              {(dense ? [] : spec.categories).map((cat, i) => {
                 if (!has(i)) return null;
                 const hi = spec.high[i] as number;
                 const lo = spec.low[i] as number;
@@ -152,6 +170,28 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
                 );
               })}
             </g>
+            {dense && (
+              <DenseHover
+                tip={area.tip}
+                left={m.left}
+                top={m.top}
+                width={plotW}
+                height={plotH}
+                n={n}
+                xAt={xAt}
+                ariaLabel={`${xT ?? ''} / ${yName}`}
+                tipFor={(i) => ({
+                  title: spec.categories[i],
+                  rows: has(i)
+                    ? [
+                        { label: tr(t, 'high'), value: fv(spec.high[i]), key: 'none' as const },
+                        { label: tr(t, 'low'), value: fv(spec.low[i]), key: 'none' as const },
+                        ...(showClose && spec.close![i] !== null ? [{ label: tr(t, 'close'), value: fv(spec.close![i]), key: 'none' as const }] : []),
+                      ]
+                    : [],
+                })}
+              />
+            )}
             <CatLabels info={info} n={n} xAt={xAt} bottom={m.top + plotH} />
             <Baseline x1={m.left} x2={m.left + plotW} y={m.top + plotH} />
             <AxisTitles xTitle={xT} yTitle={yName} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />

@@ -312,7 +312,7 @@ describe('many categories', () => {
     ];
     for (const [d2, field] of defs) {
       const r = ok(d2, d);
-      expect(r.notes.some((x) => x.includes('manyCategories'))).toBe(true);
+      expect(r.notes.some((x) => x.includes('crowdedWarn'))).toBe(true);
       expect(r.info.used).toBe(n);
       if (field === 'categories') expect((r.chart.categories as unknown[]).length).toBe(n);
       if (field === 'bars') expect((r.chart.bars as unknown[]).length).toBe(n);
@@ -342,5 +342,64 @@ describe('scatter fit band', () => {
     const d = ds([['x', Z], ['y', Y]]);
     expect(ok(def('scatter', 'simple', { x: ['x'], y: ['y'] }, { fit: 'linear', fitCi: true }), d).chart.fitCi).toBe(true);
     expect(ok(def('scatter', 'simple', { x: ['x'], y: ['y'] }, { fit: 'none', fitCi: true }), d).chart.fitCi).toBe(false);
+  });
+});
+
+describe('merge values into intervals', () => {
+  const years = Array.from({ length: 10 }, (_, i) => 1900 + i);
+  const books = [3, 5, 1, 7, 2, 4, 6, 8, 10, 12];
+  const data = () => ds([['year', years], ['n', books]]);
+  it('width: aligned intervals, integer labels, summaries over all cases of the interval', () => {
+    const r = ok(def('bar', 'simple', { x: ['year'], value: ['n'] }, { func: 'mean', mergeMode: 'width', mergeWidth: 4 }), data());
+    const bars = r.chart.bars as { x: string; count: number }[];
+    // multiples of 4 from 1900: 1900-1903, 1904-1907, 1908-1911
+    expect(bars.map((b) => b.x)).toEqual(['1900–1903', '1904–1907', '1908–1911']);
+    // mean of cases, not of means: (3 + 5 + 1 + 7) / 4, (2 + 4 + 6 + 8) / 4, (10 + 12) / 2
+    expect(bars.map((b) => b.count)).toEqual([4, 5, 11]);
+    const counts = ok(def('bar', 'simple', { x: ['year'] }, { mergeMode: 'width', mergeWidth: 4 }), data());
+    expect((counts.chart.bars as { count: number }[]).map((b) => b.count)).toEqual([4, 4, 2]);
+  });
+  it('width 2 gives 1900-1901 style labels; an interval with one value keeps its own label; width of the step changes nothing', () => {
+    const two = ok(def('bar', 'simple', { x: ['year'] }, { mergeMode: 'width', mergeWidth: 2 }), data());
+    expect((two.chart.bars as { x: string }[]).map((b) => b.x)).toEqual(['1900–1901', '1902–1903', '1904–1905', '1906–1907', '1908–1909']);
+    const odd = ok(def('bar', 'simple', { x: ['year'] }, { mergeMode: 'width', mergeWidth: 4 }), ds([['year', [1900, 1900, 1901, 1908]]]));
+    expect((odd.chart.bars as { x: string }[]).map((b) => b.x)).toEqual(['1900–1903', '1908']);
+    const one = ok(def('bar', 'simple', { x: ['year'] }, { mergeMode: 'width', mergeWidth: 1 }), data());
+    expect((one.chart.bars as { x: string }[]).map((b) => b.x)).toEqual(years.map(String));
+  });
+  it('count: a nice width from the range gives about that many intervals; fewer values than that merge nothing', () => {
+    const r = ok(def('line', 'simple', { x: ['year'], value: ['n'] }, { mergeMode: 'count', mergeCount: 2 }), data());
+    expect(r.chart.categories).toEqual(['1900–1904', '1905–1909']);
+    expect((r.chart.series as { values: number[] }[])[0].values).toEqual([(3 + 5 + 1 + 7 + 2) / 5, (4 + 6 + 8 + 10 + 12) / 5]);
+    expect(ok(def('line', 'simple', { x: ['year'], value: ['n'] }, { mergeMode: 'count', mergeCount: 50 }), data()).chart.categories).toEqual(years.map(String));
+  });
+  it('non-integer data use a-b labels; the option is ignored for kinds without it and when off', () => {
+    const r = ok(def('bar', 'simple', { x: ['v'] }, { mergeMode: 'width', mergeWidth: 0.5 }), ds([['v', [0.1, 0.2, 0.7, 1.2]]]));
+    expect((r.chart.bars as { x: string }[]).map((b) => b.x)).toEqual(['0–0.5', '0.7', '1.2']);
+    expect((ok(def('bar', 'simple', { x: ['year'] }), data()).chart.bars as unknown[]).length).toBe(10);
+    expect(ok(def('pie', 'simple', { x: ['year'] }, { mergeMode: 'width', mergeWidth: 4 }), data()).chart.slices).toHaveLength(10);
+  });
+  it('merged categories keep the numeric axis, boxplot and panels work on intervals', () => {
+    const l = ok(def('line', 'simple', { x: ['year'], value: ['n'] }, { mergeMode: 'width', mergeWidth: 5, numericAxis: true }), data());
+    expect(l.chart.type).toBe('sequence');
+    expect((l.chart.x as number[]).length).toBe(2);
+    const b = ok(def('boxplot', 'simple', { value: ['n'], x: ['year'] }, { mergeMode: 'width', mergeWidth: 5 }), data());
+    expect((b.chart.boxes as unknown[]).length).toBe(2);
+  });
+  it('5000 years merged into 100 intervals', () => {
+    const n = 5000;
+    const d = ds([['c', Array.from({ length: n }, (_, i) => i)], ['y', Array.from({ length: n }, () => 1)]]);
+    const r = ok(def('bar', 'simple', { x: ['c'] }, { mergeMode: 'count', mergeCount: 100 }), d);
+    expect((r.chart.bars as unknown[]).length).toBeLessThanOrEqual(100);
+    expect((r.chart.bars as { count: number }[]).reduce((s, b) => s + b.count, 0)).toBe(n);
+  });
+  it('notes: one message per variable, the stronger one; the crowded warning also with merging still too fine', () => {
+    const mk = (n: number) => ds([['c', Array.from({ length: n }, (_, i) => i)]]);
+    const keys = (n: number, o: Record<string, unknown> = {}) => ok(def('bar', 'simple', { x: ['c'] }, o), mk(n)).notes.map((x) => x.split(':')[0]);
+    expect(keys(40)).toEqual([]);
+    expect(keys(80)).toEqual(['graphstudio.note.manyCategories']);
+    expect(keys(600)).toEqual(['graphstudio.note.crowdedWarn']);
+    expect(keys(600, { mergeMode: 'count', mergeCount: 20 })).toEqual([]);
+    expect((ok(def('bar', 'simple', { x: ['c'] }), mk(600)).chart.bars as unknown[]).length).toBe(600);
   });
 });
