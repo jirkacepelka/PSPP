@@ -65,7 +65,8 @@ export interface ChartStyle {
 /* BarSpec:       stack?: 'none'|'stack'|'stack100'; horizontal?: boolean; xlabel?: string;
                   err?: ({lo:number;hi:number}|null)[] aligned with bars (error whiskers) */
 /* HistogramSpec: series?: {name:string; counts:number[]}[] (stacked, same bins) ; mode?: 'bars'|'polygon' */
-/* LineSpec:      connect?: boolean (false = markers + error bars only, i.e. error bar chart) */
+/* LineSpec:      connect?: boolean (false = markers + error bars only, i.e. error bar chart);
+                  xValues?: number[] (numeric position per category, ascending; proportional numeric x axis; also on AreaSpec and HighLowSpec) */
 /* ScatterSpec:   fit?: 'linear'|'quadratic'|'cubic'|'loess'|'none'; fitByGroup?: boolean; showR2?: boolean */
 
 export interface AreaSpec {
@@ -75,6 +76,8 @@ export interface AreaSpec {
   ylabel: string;
   legendTitle: string;
   categories: string[];
+  /** optional numeric position per category (ascending): proportional numeric x axis instead of category labels */
+  xValues?: number[];
   series: { name: string; values: (number | null)[] }[];
   stack: 'none' | 'stack' | 'stack100';
 }
@@ -144,6 +147,8 @@ export interface HighLowSpec {
   /** 'hlc' bar from low to high with a close tick, 'range' plain bars, 'diff' area between low and high */
   mode: 'hlc' | 'range' | 'diff';
   categories: string[];
+  /** optional numeric position per category (ascending), see AreaSpec.xValues */
+  xValues?: number[];
   high: (number | null)[];
   low: (number | null)[];
   close: (number | null)[] | null;
@@ -179,6 +184,8 @@ export interface SequenceSpec {
   xlabel: string;
   ylabel: string;
   x: number[];
+  /** how to print x: 'number' (default) or 'date', where x is then days since 1970-01-01 (not PSPP seconds since 1582) */
+  xFormat?: 'number' | 'date';
   series: { name: string; values: (number | null)[] }[];
 }
 

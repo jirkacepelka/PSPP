@@ -2,6 +2,7 @@
    control, density, violin, panels).  The shapes are declared in studioTypes.ts.
    SPDX-License-Identifier: GPL-3.0-or-later */
 
+import { parseXValues } from './xvalues';
 import type { ControlSpec, DensitySpec, DualAxisSpec, HighLowSpec, PanelsSpec, ProbPlotSpec, SequenceSpec, ViolinSpec } from './studioTypes';
 
 type Obj = Record<string, unknown>;
@@ -35,6 +36,7 @@ export function parseHighLow(c: Obj, title: string): HighLowSpec {
     ylabel: str(c.ylabel),
     mode: c.mode === 'range' || c.mode === 'diff' ? c.mode : 'hlc',
     categories,
+    ...(parseXValues(c.xValues, n) ? { xValues: parseXValues(c.xValues, n) } : {}),
     high: nums(c.high, n),
     low: nums(c.low, n),
     close,
@@ -77,6 +79,7 @@ export function parseSequence(c: Obj, title: string): SequenceSpec {
     title,
     xlabel: str(c.xlabel),
     ylabel: str(c.ylabel),
+    ...(c.xFormat === 'date' ? { xFormat: 'date' as const } : c.xFormat === 'number' ? { xFormat: 'number' as const } : {}),
     x: keep.map((i) => x[i] as number),
     series: arr(c.series)
       .filter(isObj)

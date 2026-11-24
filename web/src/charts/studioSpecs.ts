@@ -1,6 +1,7 @@
 /* Defensive parsing of the studio-only chart types (area, dot, pareto, matrix, heatmap, pyramid).
    The shapes are declared in studioTypes.ts.  SPDX-License-Identifier: GPL-3.0-or-later */
 
+import { parseXValues } from './xvalues';
 import type { AreaSpec, DotSpec, HeatmapSpec, MatrixSpec, ParetoSpec, PyramidSpec } from './studioTypes';
 
 type Obj = Record<string, unknown>;
@@ -20,6 +21,7 @@ export function parseArea(c: Obj, title: string): AreaSpec {
     ylabel: str(c.ylabel),
     legendTitle: str(c.legendTitle),
     categories,
+    ...(parseXValues(c.xValues, n) ? { xValues: parseXValues(c.xValues, n) } : {}),
     stack: c.stack === 'stack' || c.stack === 'stack100' ? c.stack : 'none',
     series: arr(c.series)
       .filter(isObj)

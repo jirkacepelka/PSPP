@@ -195,16 +195,33 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
         const ariaOf = (s: Seg) => `${cats[s.cat]}${grouped ? ', ' + gList[s.group] : ''}: ${fmtVal(s.count)}`;
 
         if (horizontal) {
-          const labels = cats.map((cName) => truncateText(cName, catW(area.width), FONT.tick * fs));
+          const labels = cats.map((cName, i) => (nBars > DENSE && i % thinEvery(FONT.tick * fs, (area.height - 60) / nBars) ? '' : truncateText(cName, catW(area.width), FONT.tick * fs)));
           const valLabW = wantLabels && !stacked ? Math.max(...segs.map((s) => measureText(segText(s), FONT.label * fs))) + 8 : 0;
           const m = plotMargins({ yTickLabels: labels, yTitle: xT, xTitle: valueName, right: Math.max(16, valLabW), style });
           const plotW = area.width - m.left - m.right;
           const plotH = area.height - m.top - m.bottom;
           const sx = linearScale(vt.domain, [m.left, m.left + plotW]);
           const band = plotH / nBars;
-          const cluster = Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
-          const slot = stacked ? cluster : Math.max(1, (cluster - (nG - 1) * GAP) / nG);
+          // thousands of categories: thinned labels, one path per group, one hover overlay
+          const dense = nBars > DENSE;
+          const hEvery = thinEvery(FONT.tick * fs, band);
+          const gp = dense ? 0 : GAP;
+          const cluster = dense ? band * (band >= 3 ? 0.85 : 1) : Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
+          const slot = stacked ? cluster : Math.max(dense ? 0.3 : 1, (cluster - (nG - 1) * gp) / nG);
           const base = sx(Math.max(vt.domain[0], Math.min(0, vt.domain[1])));
+          const denseD: string[] = gList.map(() => '');
+          const byCat: Seg[][] = [];
+          if (dense) {
+            const f1 = (v: number) => v.toFixed(2);
+            for (const s of segs) {
+              (byCat[s.cat] ??= []).push(s);
+              const cy = m.top + band * (s.cat + 0.5);
+              const y = stacked ? cy - slot / 2 : cy - cluster / 2 + s.group * slot;
+              const xa = sx(s.v0);
+              const xb = sx(s.v1);
+              denseD[s.group] += `M${f1(Math.min(xa, xb))},${f1(y)}h${f1(Math.abs(xb - xa))}v${f1(slot)}h${f1(-Math.abs(xb - xa))}Z`;
+            }
+          }
           area.reg.y = (i: number) => m.top + band * (i + 0.5);
           // value labels are drawn outside the clip so a bar that reaches the axis maximum keeps its label
           const labelEls: ReactNode[] = [];
@@ -216,15 +233,36 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                 </clipPath>
               </defs>
               <XAxis axis={{ scale: sx, ticks: vt.ticks, format: fv }} top={m.top} height={plotH} left={m.left} width={plotW} grid />
-              {cats.map((_c, ci) => (
+              {cats.map((_c, ci) => (ci % hEvery ? null : (
                 <text key={ci} className="pspp-chart__tick pspp-chart__tick--cat" x={m.left - 8} y={m.top + band * (ci + 0.5)} textAnchor="end" dominantBaseline="central">
                   {labels[ci]}
                 </text>
-              ))}
+              )))}
+              {dense && (
+                <>
+                  <g clipPath={`url(#${area.uid}-bc)`} pointerEvents="none">
+                    {denseD.map((d, gi) => (
+                      <path key={gi} d={d} style={{ fill: gColor(gi) }} />
+                    ))}
+                  </g>
+                  <DenseHover
+                    tip={area.tip}
+                    left={m.left}
+                    top={m.top}
+                    width={plotW}
+                    height={plotH}
+                    n={nBars}
+                    vertical
+                    xAt={(i) => m.top + band * (i + 0.5)}
+                    ariaLabel={`${xT ?? ''} / ${valueName}`}
+                    tipFor={(i) => ({ title: cats[i], rows: (byCat[i] ?? []).flatMap((sg) => tipOf(sg).rows) })}
+                  />
+                </>
+              )}
               <g clipPath={`url(#${area.uid}-bc)`}>
-                {segs.map((s, k) => {
+                {(dense ? [] : segs).map((s, k) => {
                   const cy = m.top + band * (s.cat + 0.5);
-                  const y = stacked ? cy - slot / 2 : cy - cluster / 2 + s.group * (slot + GAP);
+                  const y = stacked ? cy - slot / 2 : cy - cluster / 2 + s.group * (slot + gp);
                   const xa = sx(s.v0);
                   const xb = sx(s.v1);
                   const x = Math.min(xa, xb);

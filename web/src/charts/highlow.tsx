@@ -1,7 +1,7 @@
 /* High-low charts over categories: high-low-close bars, plain range bars, or the area between the
    two series.  Studio only (HighLowSpec in studioTypes.ts).  SPDX-License-Identifier: GPL-3.0-or-later */
 
-import { AxisTitles, Baseline, ChartShell, Marker, YAxis, markTip, plotMargins, seriesColor, type ChartCommonProps, type LegendItem } from './shell';
+import { AxisTitles, Baseline, ChartShell, Marker, XAxis, YAxis, markTip, plotMargins, seriesColor, type ChartCommonProps, type LegendItem } from './shell';
 import { clamp, formatValue, linearScale, niceTicks, padExtent, tickFormatter } from './scale';
 import { tr } from './strings';
 import type { HighLowSpec } from './studioTypes';
@@ -10,6 +10,8 @@ import { applyDomain } from './styleSpec';
 import { catLabels } from './bar';
 import { CatLabels } from './catAxis';
 import { DENSE, DenseHover } from './denseHover';
+import { numericAxis } from './xvalues';
+
 
 export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommonProps) {
   const { t, locale } = c;
@@ -80,15 +82,18 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
         const m = plotMargins({ yTickLabels: yt.ticks.map(fy), yTitle: yName, style });
         const plotW = area.width - m.left - m.right;
         const band = plotW / Math.max(1, n);
+        const nax = spec.xValues ? numericAxis(spec.xValues, m.left, plotW, clamp(Math.floor(area.width / 90), 3, 10), locale) : null;
         const info = catLabels(spec.categories, band);
-        const plotH = area.height - m.top - info.labelBand - 4 - (xT ? 20 : 0);
+        const plotH = area.height - m.top - (nax ? 18 : info.labelBand) - 4 - (xT ? 20 : 0);
         const sy = linearScale(yt.domain, [m.top + plotH, m.top]);
-        const xAt = (i: number) => m.left + band * (i + 0.5);
-        area.reg.x = xAt;
+        const xAt = (i: number) => (nax ? nax.xs[i] : m.left + band * (i + 0.5));
+        area.reg.x = nax ? nax.scale : xAt;
+        // with numeric positions a category's slot is its distance to the nearest neighbour
+        const slotW = nax ? Math.max(1, Math.min(...nax.xs.slice(1).map((x, i) => x - nax.xs[i]).filter((d) => d > 0), band)) : band;
         area.reg.top = m.top;
         area.reg.height = plotH;
         const dense = n > DENSE;
-        const barW = dense ? Math.max(0.5, band * (band >= 3 ? 0.8 : 1)) : Math.min(spec.mode === 'hlc' ? 7 : 26, band * 0.6);
+        const barW = dense ? Math.max(0.5, slotW * (slotW >= 3 ? 0.8 : 1)) : Math.min(spec.mode === 'hlc' ? 7 : 26, slotW * 0.6);
         const f1 = (v: number) => v.toFixed(1);
         // the area between low and high: consecutive categories with both values form one run
         const runs: number[][] = [];
@@ -152,7 +157,7 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
                 const yBot = sy(Math.min(hi, lo));
                 return (
                   <g key={i} className="pspp-chart__mark" {...markTip(area.tip, tip, `${cat}: ${tr(t, 'low')} ${fv(lo)}, ${tr(t, 'high')} ${fv(hi)}${showClose && cl !== null ? `, ${tr(t, 'close')} ${fv(cl)}` : ''}`)}>
-                    <rect x={xAt(i) - band / 2} y={m.top} width={band} height={plotH} className="pspp-chart__hitband" data-export="omit" />
+                    <rect x={xAt(i) - slotW / 2} y={m.top} width={slotW} height={plotH} className="pspp-chart__hitband" data-export="omit" />
                     {spec.mode === 'diff' ? (
                       <>
                         <Marker shape="circle" x={xAt(i)} y={sy(hi)} r={n > 24 ? 2 : 3.5} color={colHigh} />
@@ -179,6 +184,7 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
                 height={plotH}
                 n={n}
                 xAt={xAt}
+                xs={nax ? nax.xs : undefined}
                 ariaLabel={`${xT ?? ''} / ${yName}`}
                 tipFor={(i) => ({
                   title: spec.categories[i],
@@ -192,7 +198,7 @@ export function HighLowChart({ spec, ...c }: { spec: HighLowSpec } & ChartCommon
                 })}
               />
             )}
-            <CatLabels info={info} n={n} xAt={xAt} bottom={m.top + plotH} />
+            {nax ? <XAxis axis={{ scale: nax.scale, ticks: nax.ticks, format: nax.format }} top={m.top} height={plotH} left={m.left} width={plotW} /> : <CatLabels info={info} n={n} xAt={xAt} bottom={m.top + plotH} />}
             <Baseline x1={m.left} x2={m.left + plotW} y={m.top + plotH} />
             <AxisTitles xTitle={xT} yTitle={yName} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
           </g>

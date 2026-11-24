@@ -3,6 +3,7 @@
    SPDX-License-Identifier: GPL-3.0-or-later */
 
 import { useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { nearestIndex } from './xvalues';
 import type { TipApi, TipContent } from './shell';
 
 /** Above this many categories charts switch to the dense drawing mode. */
@@ -18,6 +19,8 @@ export function DenseHover({
   xAt,
   tipFor,
   ariaLabel,
+  xs,
+  vertical,
 }: {
   tip: TipApi;
   left: number;
@@ -29,9 +32,13 @@ export function DenseHover({
   xAt: (i: number) => number;
   tipFor: (i: number) => TipContent;
   ariaLabel: string;
+  /** pixel x of every category when they are not evenly spaced (ascending) */
+  xs?: number[];
+  /** categories run top to bottom (horizontal bars): xAt then gives the pixel y of category i */
+  vertical?: boolean;
 }) {
   const [hi, setHi] = useState<number | null>(null);
-  const band = width / Math.max(1, n);
+  const band = (vertical ? height : width) / Math.max(1, n);
   const pick = (i: number, at: { clientX: number; clientY: number }) => {
     setHi(i);
     tip.show(at, tipFor(i));
@@ -42,7 +49,8 @@ export function DenseHover({
   };
   const onMove = (e: PointerEvent<SVGRectElement>) => {
     const rc = e.currentTarget.getBoundingClientRect();
-    pick(Math.min(n - 1, Math.max(0, Math.floor((e.clientX - rc.left) / band))), e);
+    const off = vertical ? e.clientY - rc.top : e.clientX - rc.left;
+    pick(xs ? nearestIndex(xs, off + left) : Math.min(n - 1, Math.max(0, Math.floor(off / band))), e);
   };
   const onKey = (e: KeyboardEvent<SVGRectElement>) => {
     if (!n) return;
@@ -60,11 +68,11 @@ export function DenseHover({
     } else return;
     e.preventDefault();
     const rc = e.currentTarget.getBoundingClientRect();
-    pick(i, { clientX: rc.left + xAt(i) - left, clientY: rc.top + height / 2 });
+    pick(i, vertical ? { clientX: rc.left + width / 2, clientY: rc.top + xAt(i) - top } : { clientX: rc.left + xAt(i) - left, clientY: rc.top + height / 2 });
   };
   return (
     <g>
-      {hi !== null && <line data-export="omit" pointerEvents="none" className="pspp-chart__grid" x1={xAt(hi)} x2={xAt(hi)} y1={top} y2={top + height} style={{ strokeDasharray: '3 3', stroke: 'var(--c-axis)' }} />}
+      {hi !== null && <line data-export="omit" pointerEvents="none" className="pspp-chart__grid" x1={vertical ? left : xAt(hi)} x2={vertical ? left + width : xAt(hi)} y1={vertical ? xAt(hi) : top} y2={vertical ? xAt(hi) : top + height} style={{ strokeDasharray: '3 3', stroke: 'var(--c-axis)' }} />}
       <rect
         data-export="omit"
         className="pspp-chart__hit"

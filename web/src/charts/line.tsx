@@ -10,6 +10,7 @@ import {
   FONT,
   GROUP_SHAPES,
   Marker,
+  XAxis,
   YAxis,
   plotMargins,
   seriesColor,
@@ -23,6 +24,7 @@ import { clamp, formatValue, linearScale, measureText, niceTicks, tickFormatter,
 import { tr } from './strings';
 import type { LineSpec } from './lineSpec';
 import { thinEvery } from './bar';
+import { nearestIndex, numericAxis } from './xvalues';
 import { DENSE } from './denseHover';
 import { avoidText, useAxisReg, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
@@ -65,9 +67,10 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
   const plotW = Math.max(40, area.width - m.left - m.right);
   const plotH = Math.max(40, area.height - m.top - m.bottom);
   const band = plotW / Math.max(1, n);
-  const xs = spec.categories.map((_, i) => m.left + band * (i + 0.5));
+  const nax = spec.xValues ? numericAxis(spec.xValues, m.left, plotW, clamp(Math.floor(area.width / 90), 3, 10), locale) : null;
+  const xs = nax ? nax.xs : spec.categories.map((_, i) => m.left + band * (i + 0.5));
   const sy = linearScale(y.domain, [m.top + plotH, m.top]);
-  reg.x = (i: number) => m.left + band * (i + 0.5);
+  reg.x = nax ? nax.scale : (i: number) => m.left + band * (i + 0.5);
   reg.top = m.top;
   reg.height = plotH;
   const S = spec.series.length;
@@ -100,7 +103,7 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
   };
   const onMove = (e: PointerEvent<SVGRectElement>) => {
     const rc = e.currentTarget.getBoundingClientRect();
-    const ci = clamp(Math.floor((e.clientX - rc.left) / band), 0, n - 1);
+    const ci = nax ? nearestIndex(xs, e.clientX - rc.left + m.left) : clamp(Math.floor((e.clientX - rc.left) / band), 0, n - 1);
     pick(ci, e);
   };
   const onKey = (e: KeyboardEvent<SVGRectElement>) => {
@@ -133,8 +136,9 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
   return (
     <g>
       <YAxis axis={{ scale: sy, ticks: y.ticks, format: fy }} left={m.left} width={plotW} />
+      {nax && <XAxis axis={{ scale: nax.scale, ticks: nax.ticks, format: nax.format }} top={m.top} height={plotH} left={m.left} width={plotW} />}
       <g className="pspp-chart__axis pspp-chart__axis--x" aria-hidden="true">
-        {spec.categories.map((c, i) =>
+        {(nax ? [] : spec.categories).map((c, i) =>
           i % every ? null : (
             <g key={i}>
               <line className="pspp-chart__tickmark" x1={Math.round(xs[i]) + 0.5} x2={Math.round(xs[i]) + 0.5} y1={m.top + plotH} y2={m.top + plotH + 4} />

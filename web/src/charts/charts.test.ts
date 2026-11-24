@@ -8,6 +8,7 @@ import { alignedTicks, clusterBoxes, cumulativePercent, dotRadius, fitBand, fitC
 import { chartStrings } from './strings';
 import { niceTicks } from './scale';
 import { thinEvery } from './bar';
+import { dateTicks, nearestIndex, parseXValues } from './xvalues';
 
 const fx = fixtures as Record<string, unknown>;
 
@@ -327,5 +328,39 @@ describe('dense axes', () => {
     expect(thinEvery(30, 100)).toBe(1);
     expect(thinEvery(28, 0.2)).toBe(200);
     for (const band of [0.13, 0.5, 1.7, 3, 9]) expect([1, 2, 5].includes(thinEvery(30, band) / Math.pow(10, Math.floor(Math.log10(thinEvery(30, band)))))).toBe(true);
+  });
+});
+
+describe('numeric x positions and dates', () => {
+  it('parseXValues needs one ascending finite number per category', () => {
+    expect(parseXValues([1990, 1995, 2000], 3)).toEqual([1990, 1995, 2000]);
+    expect(parseXValues([1, 3, 2], 3)).toBeUndefined();
+    expect(parseXValues([1, 2], 3)).toBeUndefined();
+    expect(parseXValues([1, null, 3], 3)).toBeUndefined();
+    expect(parseXValues(undefined, 3)).toBeUndefined();
+  });
+  it('line, area and highlow keep xValues', () => {
+    const base = { categories: ['a', 'b', 'c'], xValues: [1, 5, 6], series: [{ name: 's', values: [1, 2, 3] }], high: [3, 4, 5], low: [1, 2, 3] };
+    for (const type of ['line', 'area', 'highlow']) {
+      const s = parseChart({ type, ...base }) as unknown as { xValues?: number[] };
+      expect(s.xValues).toEqual([1, 5, 6]);
+    }
+    expect((parseChart({ type: 'line', ...base, xValues: [3, 1, 2] }) as unknown as { xValues?: number[] }).xValues).toBeUndefined();
+  });
+  it('nearestIndex', () => {
+    expect(nearestIndex([0, 10, 100], 12)).toBe(1);
+    expect(nearestIndex([0, 10, 100], 70)).toBe(2);
+    expect(nearestIndex([0, 10, 100], -5)).toBe(0);
+  });
+  it('date ticks land on calendar boundaries', () => {
+    const day = (y: number, m: number, d: number) => Date.UTC(y, m, d) / 86400000;
+    const yrs = dateTicks(day(1990, 3, 1), day(2024, 5, 1), 6, 'en');
+    expect(yrs.ticks.length).toBeGreaterThanOrEqual(3);
+    expect(yrs.ticks.every((d) => new Date(d * 86400000).getUTCMonth() === 0 && new Date(d * 86400000).getUTCDate() === 1)).toBe(true);
+    expect(yrs.format(day(2000, 0, 1))).toBe('2000');
+    const mon = dateTicks(day(2021, 0, 10), day(2021, 8, 20), 6, 'en');
+    expect(mon.ticks.every((d) => new Date(d * 86400000).getUTCDate() === 1)).toBe(true);
+    const days = dateTicks(day(2021, 0, 1), day(2021, 0, 15), 6, 'en');
+    expect(days.ticks.length).toBeGreaterThan(2);
   });
 });

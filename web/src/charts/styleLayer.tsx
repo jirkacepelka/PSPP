@@ -115,7 +115,10 @@ export function StyleOverlay({ reg, style, fs, uid }: { reg: AxisReg; style?: Ch
           }
           if (p < top - 0.5 || p > bottom + 0.5) return null;
           const y = Math.round(p) + 0.5;
-          const below = y < top + fsz + 6;
+          const lw = l.label ? measureText(truncateText(l.label, Math.max(60, width * 0.6), fsz), fsz) : 0;
+          const labelBox = (ty: number): Box => ({ x0: right - 4 - lw, x1: right - 4, y0: ty - fsz, y1: ty + 3 });
+          // above the line unless the room is short or a value label is there already
+          const below = y < top + fsz + 6 || ((reg.avoid ?? []).some((b) => hit(b, labelBox(y - 5))) && !(reg.avoid ?? []).some((b) => hit(b, labelBox(y + fsz))));
           return (
             <g key={i}>
               <line className="pspp-chart__ref pspp-chart__ref--user" x1={left} x2={right} y1={y} y2={y} style={{ stroke: color, strokeDasharray: dash }} />

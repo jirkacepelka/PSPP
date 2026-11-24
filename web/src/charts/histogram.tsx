@@ -24,6 +24,8 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
   const style = useStyle();
   const name = spec.title || tr(t, 'untitled');
   const title = tr(t, 'histogramOf', { name });
+  // the x axis names the variable; a studio chart says so in xlabel, an engine chart's title is the variable label
+  const xName = spec.xlabel || name;
   const freq = tr(t, 'frequency');
   const stats: string[] = [];
   if (spec.mean !== null) stats.push(`${tr(t, 'mean')} ${formatValue(spec.mean, locale, 2)}`);
@@ -91,7 +93,7 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
         const yCount = clamp(Math.floor(area.height / 48), 3, 8);
         const yt = applyDomain(niceTicks(0, Math.max(maxCount, Math.min(peak, maxCount * 1.6), 1), yCount), style?.yMin, style?.yMax, yCount);
         const fy = tickFormatter(yt.step, yt.ticks, locale);
-        const m = plotMargins({ yTickLabels: yt.ticks.map(fy), yTitle: freq, xTitle: name, style });
+        const m = plotMargins({ yTickLabels: yt.ticks.map(fy), yTitle: freq, xTitle: xName, style });
         const plotW = area.width - m.left - m.right;
         const plotH = area.height - m.top - m.bottom;
         const sx = linearScale([x0, x1], [m.left, m.left + plotW]);
@@ -192,7 +194,7 @@ export function HistogramChart({ spec, ...c }: { spec: HistogramSpec } & ChartCo
             )}
             {canNormal && <polyline className="pspp-chart__line" points={curve} clipPath={`url(#${area.uid}-hc)`} style={{ stroke: seriesColor(1) }} pointerEvents="none" />}
             <Baseline x1={m.left} x2={m.left + plotW} y={base} />
-            <AxisTitles xTitle={name} yTitle={freq} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
+            <AxisTitles xTitle={xName} yTitle={freq} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
           </g>
         );
       }}

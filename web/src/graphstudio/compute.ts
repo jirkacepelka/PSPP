@@ -414,6 +414,11 @@ function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
  * Values of the category variable as numbers when the numeric axis option is on (years, ages), so the
  * x axis can be proportional; null otherwise. The categories themselves stay in value order.
  */
+/** PSPP date formats store seconds since 1582-10-14; the renderer wants days since 1970-01-01. */
+const DATE_FORMATS = new Set(['DATE', 'ADATE', 'EDATE', 'SDATE', 'JDATE', 'QYR', 'MOYR', 'WKYR', 'DATETIME']);
+const isDateVar = (v: { format?: { type: string } }): boolean => !!v.format && DATE_FORMATS.has(v.format.type.toUpperCase());
+const secondsToDays = (sec: number): number => sec / 86400 - 141428;
+
 function numericX(def: GraphDef, c: Cells, p: Prepared): number[] | null {
   if (def.options.numericAxis !== true || p.cols.x[0].v.type !== 'numeric') return null;
   return c.x.cells.every((x) => typeof x === 'number') ? (c.x.cells as number[]) : null;
@@ -439,7 +444,10 @@ function lineSeries(def: GraphDef, p: Prepared, t: Tf, withLines: boolean): Reco
   const gTitle = p.cols.group?.[0] ? varTitle(p.cols.group[0].v) : undefined;
   const xs = numericX(def, c, p);
   // a line over a numeric x without error bars is a sequence chart (x proportional to the value)
-  if (xs && withLines && !hasInterval) return { type: 'sequence', title: byTitle(t, y, xTitle, gTitle), xlabel: xTitle, ylabel: y, x: xs, series: series.map((s) => ({ name: s.name, values: s.values })) };
+  if (xs && withLines && !hasInterval) {
+    const dated = isDateVar(p.cols.x[0].v);
+    return { type: 'sequence', xFormat: dated ? 'date' : 'number', title: byTitle(t, y, xTitle, gTitle), xlabel: xTitle, ylabel: y, x: dated ? xs.map(secondsToDays) : xs, series: series.map((s) => ({ name: s.name, values: s.values })) };
+  }
   return {
     ...(xs ? { xValues: xs } : {}),
     type: 'line',
@@ -881,7 +889,8 @@ function sequenceChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Reco
   const xcol = p.cols.x?.[0];
   const transform = optStr(def, 'transform', 'none');
   const order = [...p.rows].sort((a, b) => (xcol ? num(xcol, a) - num(xcol, b) : a - b));
-  const x = order.map((r) => (xcol ? num(xcol, r) : r + 1));
+  const dated = !!xcol && isDateVar(xcol.v);
+  const x = order.map((r) => (xcol ? (dated ? secondsToDays(num(xcol, r)) : num(xcol, r)) : r + 1));
   let nonPositive = 0;
   const series = p.cols.value.map((col) => {
     const raw = order.map((r) => num(col, r));
@@ -900,6 +909,7 @@ function sequenceChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Reco
   const y = p.cols.value.length > 1 ? t('graphstudio.chart.values') : names;
   return {
     type: 'sequence',
+    xFormat: dated ? 'date' : 'number',
     title: t('graphstudio.chart.sequence', { y: names }),
     xlabel: xcol ? varTitle(xcol.v) : t('graphstudio.chart.caseNumber'),
     ylabel: transform === 'none' ? y : t(`graphstudio.transform.${transform}Of`, { v: y }),

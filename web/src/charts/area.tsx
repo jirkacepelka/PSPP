@@ -2,9 +2,10 @@
    (AreaSpec in studioTypes.ts).  SPDX-License-Identifier: GPL-3.0-or-later */
 
 import { useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { AxisTitles, Baseline, ChartShell, FONT, YAxis, plotMargins, seriesColor, useTip, type ChartCommonProps, type LegendItem, type PlotArea, type TipContent } from './shell';
+import { AxisTitles, Baseline, ChartShell, FONT, XAxis, YAxis, plotMargins, seriesColor, useTip, type ChartCommonProps, type LegendItem, type PlotArea, type TipContent } from './shell';
 import { clamp, formatPercent, formatValue, linearScale, measureText, niceTicks, percentTickFormatter, tickFormatter, truncateText } from './scale';
 import { thinEvery } from './bar';
+import { nearestIndex, numericAxis } from './xvalues';
 import { tr } from './strings';
 import type { AreaSpec } from './studioTypes';
 import { useAxisReg, useStyle } from './styleLayer';
@@ -45,8 +46,9 @@ function AreaPlot({ spec, area, locale, t }: { spec: AreaSpec; area: PlotArea; l
   const plotH = Math.max(40, area.height - m.top - m.bottom);
   const sy = linearScale(yt.domain, [m.top + plotH, m.top]);
   const inset = n > 1 ? Math.min(14, plotW / 8) : 0;
-  const xs = spec.categories.map((_, i) => (n > 1 ? m.left + inset + ((plotW - 2 * inset) * i) / (n - 1) : m.left + plotW / 2));
-  reg.x = (i: number) => (n > 1 ? m.left + inset + ((plotW - 2 * inset) * i) / (n - 1) : m.left + plotW / 2);
+  const nax = spec.xValues && n > 1 ? numericAxis(spec.xValues, m.left, plotW, clamp(Math.floor(area.width / 90), 3, 10), locale, inset) : null;
+  const xs = nax ? nax.xs : spec.categories.map((_, i) => (n > 1 ? m.left + inset + ((plotW - 2 * inset) * i) / (n - 1) : m.left + plotW / 2));
+  reg.x = nax ? nax.scale : (i: number) => (n > 1 ? m.left + inset + ((plotW - 2 * inset) * i) / (n - 1) : m.left + plotW / 2);
   reg.top = m.top;
   reg.height = plotH;
   const base = sy(clamp(0, yt.domain[0], yt.domain[1]));
@@ -105,8 +107,7 @@ function AreaPlot({ spec, area, locale, t }: { spec: AreaSpec; area: PlotArea; l
     if (!n) return;
     const rc = e.currentTarget.getBoundingClientRect();
     const px = e.clientX - rc.left + m.left;
-    let best = 0;
-    for (let i = 1; i < n; i++) if (Math.abs(xs[i] - px) < Math.abs(xs[best] - px)) best = i;
+    const best = nearestIndex(xs, px);
     pick(best, e);
   };
   const onKey = (e: KeyboardEvent<SVGRectElement>) => {
@@ -143,8 +144,9 @@ function AreaPlot({ spec, area, locale, t }: { spec: AreaSpec; area: PlotArea; l
         </clipPath>
       </defs>
       <YAxis axis={{ scale: sy, ticks: yt.ticks, format: fy }} left={m.left} width={plotW} />
+      {nax && <XAxis axis={{ scale: nax.scale, ticks: nax.ticks, format: nax.format }} top={m.top} height={plotH} left={m.left} width={plotW} />}
       <g className="pspp-chart__axis pspp-chart__axis--x" aria-hidden="true">
-        {spec.categories.map((c, i) =>
+        {(nax ? [] : spec.categories).map((c, i) =>
           i % every ? null : (
             <g key={i}>
               <line className="pspp-chart__tickmark" x1={Math.round(xs[i]) + 0.5} x2={Math.round(xs[i]) + 0.5} y1={m.top + plotH} y2={m.top + plotH + 4} />

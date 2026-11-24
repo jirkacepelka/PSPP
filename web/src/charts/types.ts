@@ -43,6 +43,8 @@ export interface HistogramSpec {
   series?: { name: string; counts: number[] }[];
   /** studio: 'polygon' draws a frequency polygon instead of bars */
   mode?: 'bars' | 'polygon';
+  /** studio: x axis title; without it the chart title (the variable label of engine charts) is used */
+  xlabel?: string;
 }
 
 export interface BarSpec {
@@ -240,6 +242,7 @@ function parseChartBody(input: unknown): ChartSpec {
         bins,
         ...(series.length ? { series } : {}),
         ...(c.mode === 'polygon' || c.mode === 'bars' ? { mode: c.mode } : {}),
+        ...(typeof c.xlabel === 'string' && c.xlabel ? { xlabel: clean(c.xlabel) } : {}),
       };
     }
     case 'bar':

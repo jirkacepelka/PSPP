@@ -195,6 +195,10 @@
 
 .pspp-chart__value {
   fill: var(--c-ink-2);
+  stroke: var(--c-surface);
+  stroke-width: 3px;
+  paint-order: stroke;
+  stroke-linejoin: round;
   font-size: calc(11px * var(--c-fs, 1));
   font-variant-numeric: tabular-nums;
 }
@@ -243,7 +247,7 @@
   font-size: calc(11px * var(--c-fs, 1));
   font-variant-numeric: tabular-nums;
   stroke: var(--c-surface);
-  stroke-width: 3px;
+  stroke-width: 4px;
   paint-order: stroke;
   stroke-linejoin: round;
 }

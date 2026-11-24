@@ -7,6 +7,7 @@ import { formatValue, niceTicks, padExtent } from './scale';
 import { tr } from './strings';
 import type { ControlSpec, SequenceSpec } from './studioTypes';
 import { intTicks, stepPoints } from './studioMath';
+import { dateTicks, formatDay } from './xvalues';
 import { XYPlot, extent, xCount, xyTable, yCount, type XYSeries } from './xy';
 import type { Pt } from './types';
 
@@ -21,9 +22,11 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
   const showMarkers = spec.x.length <= 60;
   const series: XYSeries[] = spec.series.map((s, i) => ({ name: s.name || `${tr(t, 'variable')} ${i + 1}`, color: seriesColor(i), shape: GROUP_SHAPES[i % 8], points: pts(spec.x, s.values), line: true, markers: showMarkers, r: 3 }));
   const legend: LegendItem[] | undefined = named ? series.map((s) => ({ label: s.name, kind: 'line', color: s.color })) : undefined;
+  const isDate = spec.xFormat === 'date';
+  const fx = (v: number) => (isDate ? formatDay(v, locale) : formatValue(v, locale));
   const xIndex = new Map<number, number>();
   spec.x.forEach((x, i) => !xIndex.has(x) && xIndex.set(x, i));
-  const table = xyTable(xName, yName, series, locale);
+  const table = isDate ? { columns: [xName, ...(named ? series.map((s) => s.name) : [yName])], rows: spec.x.map((x, i) => [fx(x), ...spec.series.map((s) => formatValue(s.values[i], locale))]), numeric: [false, ...series.map(() => true)] } : xyTable(xName, yName, series, locale);
   return (
     <ChartShell
       {...c}
@@ -34,8 +37,8 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
         named
           ? {
               columns: [xName, ...series.map((s) => s.name)],
-              rows: spec.x.map((x, i) => [formatValue(x, locale), ...spec.series.map((s) => formatValue(s.values[i], locale))]),
-              numeric: [true, ...series.map(() => true)],
+              rows: spec.x.map((x, i) => [fx(x), ...spec.series.map((s) => formatValue(s.values[i], locale))]),
+              numeric: [isDate ? false : true, ...series.map(() => true)],
             }
           : table
       }
@@ -46,7 +49,8 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
         const [y0, y1] = extent(all.map((p) => p[1]));
         const xd = padExtent(x0, x1, 0.02);
         const yd = padExtent(y0, y1, 0.06);
-        const xt = niceTicks(xd[0], xd[1], xCount(area.width));
+        const dt = isDate ? dateTicks(xd[0], xd[1], xCount(area.width), locale) : null;
+        const xt = dt ? { ticks: dt.ticks, step: dt.step, domain: xd } : niceTicks(xd[0], xd[1], xCount(area.width));
         const yt = niceTicks(yd[0], yd[1], yCount(area.height));
         return (
           <XYPlot
@@ -55,6 +59,7 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
             locale={locale}
             x={xt}
             y={yt}
+            xFormat={dt?.format}
             xTitle={xName}
             yTitle={yName}
             series={series}
@@ -62,7 +67,7 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
             tipFor={(_s, p) => {
               const i = xIndex.get(p[0]);
               return {
-                title: `${xName}: ${formatValue(p[0], locale)}`,
+                title: `${xName}: ${fx(p[0])}`,
                 rows: series.map((o, k) => ({
                   label: named ? o.name : yName,
                   value: formatValue(i === undefined ? null : spec.series[k].values[i], locale),

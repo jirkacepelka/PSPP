@@ -3,6 +3,8 @@
    Each series has one value per category (null = missing, the line breaks there) and optional
    error bars (lo/hi).  All text arrives in the spec, already translated.  Rendered by line.tsx. */
 
+import { parseXValues } from './xvalues';
+
 export interface LineSeries {
   name: string;
   values: (number | null)[];
@@ -25,6 +27,8 @@ export interface LineSpec {
   markers: boolean;
   /** studio: false = markers and error bars only (an error bar chart), default true */
   connect?: boolean;
+  /** studio: numeric position of every category (ascending); categories are then placed proportionally on a numeric axis */
+  xValues?: number[];
 }
 
 type Obj = Record<string, unknown>;
@@ -47,6 +51,7 @@ export function parseLine(c: Obj, title: string): LineSpec {
     categories,
     markers: c.markers !== false,
     ...(c.connect === false ? { connect: false } : {}),
+    ...(parseXValues(c.xValues, n) ? { xValues: parseXValues(c.xValues, n) } : {}),
     series: arr(c.series)
       .filter(isObj)
       .map((s) => ({ name: str(s.name), values: vals(s.values), ...(Array.isArray(s.lo) && Array.isArray(s.hi) ? { lo: vals(s.lo), hi: vals(s.hi) } : {}) })),
