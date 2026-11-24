@@ -257,7 +257,8 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
                 onChange={setStyle}
                 series={series}
                 decimal={decimal}
-                auto={{ title: String(spec?.title ?? ''), xlabel: String(spec?.xlabel ?? ''), ylabel: String(spec?.ylabel ?? '') }}
+                auto={{ title: String(spec?.title ?? ''), xlabel: String(spec?.xlabel ?? ''), ylabel: String(spec?.ylabel ?? ''), zlabel: String(spec?.zlabel ?? '') }}
+                three={threeChart}
               />
             </TabPanel>
             {!threeChart && (

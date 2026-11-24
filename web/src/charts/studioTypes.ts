@@ -7,7 +7,8 @@ export type GraphKind =
   | 'bar' | 'line' | 'area' | 'pie' | 'histogram' | 'pyramid' | 'boxplot' | 'errorbar' | 'scatter'
   | 'dot' | 'pareto' | 'scattermatrix' | 'heatmap'
   | 'highlow' | 'dualaxis' | 'qq' | 'pp' | 'sequence' | 'control' | 'violin' | 'density'
-  | 'bar3d' | 'scatter3d' | 'surface3d';
+  | 'bar3d' | 'scatter3d' | 'surface3d'
+  | 'overlay' | 'bubble' | 'mosaic' | 'ridgeline' | 'radar' | 'lollipop' | 'waterfall' | 'forest' | 'treemap' | 'blandaltman' | 'forecast';
 
 /** Saved with the chart so the studio can reopen it. `bind` maps a slot id to variable names. */
 export interface GraphDef {
@@ -284,4 +285,68 @@ export interface View3d {
   perspective: boolean;
   /** zoom factor, 1 = fit */
   zoom?: number;
+}
+
+/* ---- phase 4: more chart types ---- */
+/* ScatterSpec:  marginals?: 'none'|'histogram'|'density'|'box' (small marginal plots on top and right of the scatter) */
+/* DensitySpec:  layout?: 'overlay'|'ridge' (ridge = curves offset vertically, one baseline per group) */
+/* BarSpec:      lollipop?: boolean (stem and dot instead of a bar) */
+/* SequenceSpec: series[].dash?: boolean; bands?: { name: string; lo: (number|null)[]; hi: (number|null)[] }[] (translucent
+                 prediction bands; x positions as in the sequence x array, forecasts simply extend x) */
+
+export interface BubbleSpec {
+  type: 'bubble';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  sizeLabel: string;
+  points: { x: number; y: number; size: number; group: string | null; label?: string }[];
+}
+
+/** Mosaic plot: tile widths by x totals, heights by the y share within each x; counts[yi][xi]. `shade` colours tiles by Pearson residual. */
+export interface MosaicSpec {
+  type: 'mosaic';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  xs: string[];
+  ys: string[];
+  counts: number[][];
+  shade: boolean;
+}
+
+export interface RadarSpec {
+  type: 'radar';
+  title: string;
+  axes: string[];
+  series: { name: string; values: (number | null)[] }[];
+  min: number | null;
+  max: number | null;
+}
+
+/** Waterfall: running total; steps with total=true draw the cumulative sum as a full bar. */
+export interface WaterfallSpec {
+  type: 'waterfall';
+  title: string;
+  xlabel: string;
+  ylabel: string;
+  steps: { label: string; value: number; total?: boolean }[];
+}
+
+/** Forest plot: estimates with intervals on a common axis, a reference line (null effect). */
+export interface ForestSpec {
+  type: 'forest';
+  title: string;
+  xlabel: string;
+  refValue: number;
+  /** draw the x axis on a log scale (ratios) */
+  log: boolean;
+  rows: { label: string; est: number; lo: number; hi: number; weight?: number | null; group?: string | null }[];
+}
+
+/** Treemap: squarified tiles by value, optionally coloured by group. */
+export interface TreemapSpec {
+  type: 'treemap';
+  title: string;
+  tiles: { label: string; value: number; group?: string | null }[];
 }

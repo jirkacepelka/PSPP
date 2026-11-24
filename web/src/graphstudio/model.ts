@@ -24,7 +24,12 @@ export interface SlotDef {
   icon: string;
   /** category slots: most distinct values the variable may have (panel by); absent = any number */
   maxDistinct?: number;
+  /** where the slot sits on the chart canvas (SPSS style): on the axis it belongs to. Absent = slot list only. */
+  place?: SlotPlace;
 }
+
+/** Canvas positions: axes, legend-like roles (colour, size, cluster) and panel rows/columns. */
+export type SlotPlace = 'x' | 'y' | 'z' | 'legend' | 'size' | 'panelCols' | 'panelRows' | 'detail';
 
 export interface Choice {
   value: string;

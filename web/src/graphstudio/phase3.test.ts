@@ -225,3 +225,15 @@ describe('stored view', () => {
     expect(seriesNames(ok(g, data).chart)).toHaveLength(3);
   });
 });
+
+describe('3D axis style', () => {
+  const data = ds([['x', [1, 2, 3]], ['y', [1, 2, 3]], ['z', [1, 4, 9]]]);
+  const d = def('scatter3d', { x: ['x'], y: ['y'], z: ['z'] });
+  const style = { zTitle: 'Height', zMin: 0, zMax: 10, xMin: null };
+  it('passes z title and range through studioChart and restyleChart', () => {
+    const chart = studioChart(ok(d, data).chart, d, style);
+    expect(chart.style).toEqual({ zTitle: 'Height', zMin: 0, zMax: 10 });
+    const r = restyleChart(chart, { zMax: 5, zMin: null }) as { style: unknown };
+    expect(r.style).toEqual({ zMax: 5 });
+  });
+});

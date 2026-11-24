@@ -88,7 +88,7 @@ export function cleanStyle(style: ChartStyle): ChartStyle {
   for (const [k, v] of Object.entries(style)) {
     if (v === undefined || v === '' || (Array.isArray(v) && v.length === 0)) continue;
     if (k === 'palette' && Array.isArray(v) && v.every((x) => x === null)) continue;
-    if ((k === 'xMin' || k === 'xMax' || k === 'yMin' || k === 'yMax') && v === null) continue;
+    if ((k === 'xMin' || k === 'xMax' || k === 'yMin' || k === 'yMax' || k === 'zMin' || k === 'zMax') && v === null) continue;
     if (k === 'fontScale' && v === 1) continue;
     out[k] = v;
   }

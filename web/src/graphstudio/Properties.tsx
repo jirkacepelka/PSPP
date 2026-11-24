@@ -75,12 +75,14 @@ interface AppearanceProps {
   style: ChartStyle;
   onChange: (style: ChartStyle) => void;
   /** automatic texts shown as placeholders */
-  auto: { title: string; xlabel: string; ylabel: string };
+  auto: { title: string; xlabel: string; ylabel: string; zlabel?: string };
+  /** 3D chart: x and y are the first and second data axis, z is the vertical one */
+  three?: boolean;
   series: string[];
   decimal: '.' | ',';
 }
 
-export function AppearanceTab({ style, onChange, auto, series, decimal }: AppearanceProps) {
+export function AppearanceTab({ style, onChange, auto, series, decimal, three }: AppearanceProps) {
   const { t } = useTranslation();
   const set = (patch: Partial<ChartStyle>) => onChange({ ...style, ...patch });
   const rows = series.slice(0, PALETTE_ROWS);
@@ -90,8 +92,9 @@ export function AppearanceTab({ style, onChange, auto, series, decimal }: Appear
     palette[i] = color;
     set({ palette });
   };
-  const range = (key: 'xMin' | 'xMax' | 'yMin' | 'yMax', label: string) => (
-    <NumberField label={t(label)} value={style[key] ?? null} decimalSeparator={decimal} steppers={false} step={1} size="sm" placeholder={t('graphstudio.auto')} onValueChange={(n) => set({ [key]: n } as Partial<ChartStyle>)} />
+  const axisName = (key: 'x' | 'y' | 'z') => (key === 'x' ? auto.xlabel : key === 'y' ? auto.ylabel : (auto.zlabel ?? '')) || t(`graphstudio.app.axis3d.${key}`);
+  const range = (key: 'xMin' | 'xMax' | 'yMin' | 'yMax' | 'zMin' | 'zMax', label: string) => (
+    <NumberField label={three ? t(key.endsWith('Min') ? 'graphstudio.app.axisMin' : 'graphstudio.app.axisMax', { name: axisName(key[0] as 'x' | 'y' | 'z') }) : t(label)} value={style[key] ?? null} decimalSeparator={decimal} steppers={false} step={1} size="sm" placeholder={t('graphstudio.auto')} onValueChange={(n) => set({ [key]: n } as Partial<ChartStyle>)} />
   );
   return (
     <div className="gs-form">
@@ -104,6 +107,7 @@ export function AppearanceTab({ style, onChange, auto, series, decimal }: Appear
           <TextField label={t('graphstudio.app.xTitle')} value={style.xTitle ?? ''} placeholder={auto.xlabel} size="sm" onChange={(e) => set({ xTitle: e.target.value })} />
           <TextField label={t('graphstudio.app.yTitle')} value={style.yTitle ?? ''} placeholder={auto.ylabel} size="sm" onChange={(e) => set({ yTitle: e.target.value })} />
         </div>
+        {three && <TextField label={t('graphstudio.app.zTitle')} value={style.zTitle ?? ''} placeholder={auto.zlabel} size="sm" onChange={(e) => set({ zTitle: e.target.value })} />}
       </fieldset>
 
       <fieldset className="gs-fieldset">
@@ -113,6 +117,8 @@ export function AppearanceTab({ style, onChange, auto, series, decimal }: Appear
           {range('xMax', 'graphstudio.app.xMax')}
           {range('yMin', 'graphstudio.app.yMin')}
           {range('yMax', 'graphstudio.app.yMax')}
+          {three && range('zMin', 'graphstudio.app.zMin')}
+          {three && range('zMax', 'graphstudio.app.zMax')}
         </div>
         <Switch label={t('graphstudio.app.grid')} checked={style.grid !== false} onChange={(e) => set({ grid: e.target.checked ? undefined : false })} />
       </fieldset>
