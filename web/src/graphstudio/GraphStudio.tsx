@@ -3,13 +3,14 @@
  * edit it afterwards. Charts of the engine (no definition) only get the appearance editor.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../components/Dialog';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { Tabs, TabPanel } from '../components/Tabs';
-import type { ChartStyle, GraphDef } from '../charts/studioTypes';
+import { Icon } from '../components/Icon';
+import type { ChartStyle, GraphDef, View3d } from '../charts/studioTypes';
 import { useData } from '../store/data';
 import { useOutput } from '../store/output';
 import { useSettings } from '../store/settings';
@@ -20,9 +21,9 @@ import { Gallery } from './Gallery';
 import { AppearanceTab, ElementsTab, OptionsTab } from './Properties';
 import type { Dataset } from '../engine/types';
 import { SlotsPanel, VariableList, usePicking } from './Slots';
-import { boundNames, defaultDef, KINDS, modelOf, normalizeOptions, rejection, slotsOf, withVariant } from './model';
+import { boundNames, defaultDef, is3d, KINDS, modelOf, normalizeOptions, rejection, slotsOf, withVariant } from './model';
 import { findChartItem, insertStudioChart, restyleChart, studioChart, updateStudioChart } from './outputBridge';
-import { innerChart, seriesNames } from './series';
+import { innerChart, seriesNames, view3dOf } from './series';
 import './graphstudio.css';
 
 const NO_DATA: Dataset = { name: '', variables: [], columns: [] };
@@ -57,6 +58,17 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
   const distinct = picking.distinct;
   const [style, setStyle] = useState<ChartStyle>(storedStyle);
   const [tab, setTab] = useState<PropTab>(appearanceOnly ? 'appearance' : 'options');
+  // 3D: the view the user rotated to. `view` feeds the preview (updated a moment after a drag ends so
+  // style edits keep the rotation); the ref always holds the latest and is what Insert/Update stores.
+  const [view, setView3d] = useState<View3d | null>(() => view3dOf(stored));
+  const viewRef = useRef<View3d | null>(view);
+  const viewTimer = useRef<ReturnType<typeof setTimeout>>();
+  const onView3dChange = useCallback((v: View3d) => {
+    viewRef.current = v;
+    clearTimeout(viewTimer.current);
+    viewTimer.current = setTimeout(() => setView3d(v), 250);
+  }, []);
+  useEffect(() => () => clearTimeout(viewTimer.current), []);
   const [live, setLive] = useState(def);
   useEffect(() => {
     const id = setTimeout(() => setLive(def), 160);
@@ -76,9 +88,9 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
 
   const spec = result?.ok ? result.chart : appearanceOnly && stored ? stored : null;
   const preview = useMemo(() => {
-    if (appearanceOnly) return target ? restyleChart(target.item.chart, style) : null;
-    return result?.ok ? studioChart(result.chart, live, style) : null;
-  }, [appearanceOnly, target, result, live, style]);
+    if (appearanceOnly) return target ? restyleChart(target.item.chart, style, view) : null;
+    return result?.ok ? studioChart(result.chart, live, style, view) : null;
+  }, [appearanceOnly, target, result, live, style, view]);
   const quick = useMemo(() => {
     if (appearanceOnly || !dataset || !result?.ok) return null;
     try {
@@ -89,6 +101,9 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
   }, [appearanceOnly, dataset, live, result]);
   const series = useMemo(() => (spec ? seriesNames(spec) : []), [spec]);
   const model = modelOf(def.kind)!;
+  const three = is3d(def.kind);
+  // an engine-less appearance edit of a stored 3D chart has no definition: look at the spec type
+  const threeChart = appearanceOnly ? ['scatter3d', 'bar3d', 'surface3d'].includes(String(stored?.type)) : three;
 
   const pick = (kind: string, variant: string) => {
     if (kind === def.kind) {
@@ -105,13 +120,13 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
       if (keep.length) next.bind[s.id] = keep.slice(0, s.max);
     }
     setDef(normalizeOptions(next));
-    setStyle((s) => ({ ...s, palette: undefined, xMin: undefined, xMax: undefined, yMin: undefined, yMax: undefined, xTitle: undefined, yTitle: undefined }));
+    setStyle((s) => ({ ...s, ...(is3d(next.kind) ? { refLines: undefined, annotations: undefined } : {}), palette: undefined, xMin: undefined, xMax: undefined, yMin: undefined, yMax: undefined, xTitle: undefined, yTitle: undefined }));
   };
 
   const submit = () => {
     if (appearanceOnly) {
       if (!target || !preview) return;
-      useOutput.getState().replaceItem(target.item.id, { ...target.item, chart: preview });
+      useOutput.getState().replaceItem(target.item.id, { ...target.item, chart: restyleChart(target.item.chart, style, viewRef.current) });
       closeModal();
       toast(t('graphstudio.updated'));
       return;
@@ -119,7 +134,7 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
     if (!dataset) return;
     const fresh = computeChart(def, dataset, tf);
     if (!fresh.ok) return;
-    const chart = studioChart(fresh.chart, def, style);
+    const chart = studioChart(fresh.chart, def, style, viewRef.current);
     const title = t(model.label);
     const itemTitle = style.title || String(fresh.chart.title ?? title);
     if (target) {
@@ -143,6 +158,10 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
     if (i.weight) noteLines.push(t('graphstudio.info.weight', { name: i.weight }));
     noteLines.push(...result.notes);
   }
+
+  useEffect(() => {
+    if (threeChart && tab === 'elements') setTab(appearanceOnly ? 'appearance' : 'options');
+  }, [threeChart, tab, appearanceOnly]);
 
   const title = target ? (appearanceOnly ? t('graphstudio.editAppearance') : t('graphstudio.editTitle')) : t('graphstudio.title');
   const missingNames = result && !result.ok && result.reason === 'missing' ? result.slots.map((id) => slotsOf(def).find((s) => s.id === id)).filter(Boolean).map((s) => t(s!.label)) : [];
@@ -186,7 +205,7 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
           <section className="gs-preview" aria-label={t('graphstudio.preview')} aria-live="polite">
             {preview ? (
               <div className="gs-chart">
-                <ChartView chart={preview} title={String((innerChart(preview)?.title as string) ?? '')} />
+                <ChartView chart={preview} title={String((innerChart(preview)?.title as string) ?? '')} onView3dChange={onView3dChange} />
               </div>
             ) : !dataset ? (
               <EmptyState icon="dataset" title={t('graphstudio.noData')} description={t('graphstudio.noDataHint')} />
@@ -200,6 +219,12 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
               <EmptyState icon={model.icon} title={t('graphstudio.missing', { slots: missingNames.join(', ') })} description={t('graphstudio.missingHint')} />
             )}
           </section>
+          {three && result?.ok && (
+            <p className="gs-hint" role="note">
+              <Icon name="info" />
+              <span>{t(`graphstudio.hint3d.${def.kind}`)}</span>
+            </p>
+          )}
           {noteLines.length > 0 && (
             <p className="gs-notes" role="status">
               {noteLines.join(' · ')}
@@ -216,13 +241,14 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
             items={[
               ...(appearanceOnly ? [] : [{ id: 'options' as const, label: t('graphstudio.tab.options') }]),
               { id: 'appearance' as const, label: t('graphstudio.tab.appearance') },
-              { id: 'elements' as const, label: t('graphstudio.tab.elements') },
+              ...(threeChart ? [] : [{ id: 'elements' as const, label: t('graphstudio.tab.elements') }]),
             ]}
           />
           <div className="gs-props-body">
             {!appearanceOnly && (
               <TabPanel tabsId="gs-props" value="options" active={tab === 'options'}>
                 <OptionsTab def={def} onChange={(d) => setDef(normalizeOptions(d))} decimal={decimal} />
+                {three && <p className="gs-muted">{t('graphstudio.el.not3d')}</p>}
               </TabPanel>
             )}
             <TabPanel tabsId="gs-props" value="appearance" active={tab === 'appearance'}>
@@ -234,9 +260,11 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
                 auto={{ title: String(spec?.title ?? ''), xlabel: String(spec?.xlabel ?? ''), ylabel: String(spec?.ylabel ?? '') }}
               />
             </TabPanel>
-            <TabPanel tabsId="gs-props" value="elements" active={tab === 'elements'}>
-              <ElementsTab style={style} onChange={setStyle} decimal={decimal} quick={quick} />
-            </TabPanel>
+            {!threeChart && (
+              <TabPanel tabsId="gs-props" value="elements" active={tab === 'elements'}>
+                <ElementsTab style={style} onChange={setStyle} decimal={decimal} quick={quick} />
+              </TabPanel>
+            )}
           </div>
         </div>
       </div>

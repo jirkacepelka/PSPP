@@ -604,3 +604,200 @@
   text-overflow: ellipsis;
   max-width: 240px;
 }
+
+/* ------------------------------------------------------------ studio: 3D charts */
+
+.pspp-chart__frame3d path {
+  fill: none;
+}
+
+.pspp-chart__axis3d {
+  stroke: var(--c-axis);
+  stroke-width: 1px;
+  stroke-linecap: round;
+}
+
+.pspp-chart__axis3d--front {
+  stroke-opacity: 0.75;
+}
+
+.pspp-chart__tick3d {
+  fill: var(--c-ink-2);
+  stroke: var(--c-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font-size: calc(11px * var(--c-fs, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.pspp-chart__axis-title.pspp-chart__tick3d {
+  font-size: calc(12px * var(--c-fs, 1));
+}
+
+.pspp-chart__hit--3d:focus-visible {
+  stroke: var(--c-ink);
+  stroke-width: 1px;
+  stroke-dasharray: 4 3;
+}
+
+.pspp-chart__p3 {
+  stroke: var(--c-surface);
+  stroke-width: 0.6px;
+}
+
+.pspp-chart__p3--0 {
+  fill: var(--c-series-1);
+}
+
+.pspp-chart__p3--1 {
+  fill: var(--c-series-2);
+}
+
+.pspp-chart__p3--2 {
+  fill: var(--c-series-3);
+}
+
+.pspp-chart__p3--3 {
+  fill: var(--c-series-4);
+}
+
+.pspp-chart__p3--4 {
+  fill: var(--c-series-5);
+}
+
+.pspp-chart__p3--5 {
+  fill: var(--c-series-6);
+}
+
+.pspp-chart__p3--6 {
+  fill: var(--c-series-7);
+}
+
+.pspp-chart__p3--7 {
+  fill: var(--c-series-8);
+}
+
+.pspp-chart__p3--o {
+  fill: var(--c-other);
+}
+
+.pspp-chart__plane3d {
+  fill: var(--c-ink);
+  fill-opacity: 0.1;
+  stroke: var(--c-ink-2);
+  stroke-opacity: 0.55;
+  stroke-width: 1px;
+}
+
+.pspp-chart__drop3d {
+  stroke: var(--c-ink-2);
+  stroke-width: 1px;
+  stroke-dasharray: 3 3;
+}
+
+.pspp-chart__drop3d-dot {
+  fill: none;
+  stroke: var(--c-ink-2);
+  stroke-width: 1.5px;
+}
+
+.pspp-chart__b3 {
+  stroke: var(--c-surface);
+  stroke-width: 0.6px;
+  stroke-linejoin: round;
+}
+
+.pspp-chart__b3--top {
+  fill: color-mix(in srgb, var(--c-series-1) 72%, white);
+}
+
+.pspp-chart__b3--sx {
+  fill: color-mix(in srgb, var(--c-series-1) 86%, black);
+}
+
+.pspp-chart__b3--sy {
+  fill: color-mix(in srgb, var(--c-series-1) 70%, black);
+}
+
+.pspp-chart__b3--bottom {
+  fill: color-mix(in srgb, var(--c-series-1) 55%, black);
+}
+
+.pspp-chart__b3-sel {
+  fill: none;
+  stroke: var(--c-ink);
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+}
+
+.pspp-chart__s3 {
+  stroke: var(--c-ink);
+  stroke-opacity: 0.22;
+  stroke-width: 0.4px;
+  stroke-linejoin: round;
+}
+
+.pspp-chart__s3--0 {
+  fill: color-mix(in srgb, var(--c-series-1) 26%, var(--c-surface));
+}
+
+.pspp-chart__s3--1 {
+  fill: color-mix(in srgb, var(--c-series-1) 31%, var(--c-surface));
+}
+
+.pspp-chart__s3--2 {
+  fill: color-mix(in srgb, var(--c-series-1) 36%, var(--c-surface));
+}
+
+.pspp-chart__s3--3 {
+  fill: color-mix(in srgb, var(--c-series-1) 41%, var(--c-surface));
+}
+
+.pspp-chart__s3--4 {
+  fill: color-mix(in srgb, var(--c-series-1) 46%, var(--c-surface));
+}
+
+.pspp-chart__s3--5 {
+  fill: color-mix(in srgb, var(--c-series-1) 51%, var(--c-surface));
+}
+
+.pspp-chart__s3--6 {
+  fill: color-mix(in srgb, var(--c-series-1) 56%, var(--c-surface));
+}
+
+.pspp-chart__s3--7 {
+  fill: color-mix(in srgb, var(--c-series-1) 61%, var(--c-surface));
+}
+
+.pspp-chart__s3--8 {
+  fill: color-mix(in srgb, var(--c-series-1) 65%, var(--c-surface));
+}
+
+.pspp-chart__s3--9 {
+  fill: color-mix(in srgb, var(--c-series-1) 70%, var(--c-surface));
+}
+
+.pspp-chart__s3--10 {
+  fill: color-mix(in srgb, var(--c-series-1) 75%, var(--c-surface));
+}
+
+.pspp-chart__s3--11 {
+  fill: color-mix(in srgb, var(--c-series-1) 80%, var(--c-surface));
+}
+
+.pspp-chart__s3--12 {
+  fill: color-mix(in srgb, var(--c-series-1) 85%, var(--c-surface));
+}
+
+.pspp-chart__s3--13 {
+  fill: color-mix(in srgb, var(--c-series-1) 90%, var(--c-surface));
+}
+
+.pspp-chart__s3--14 {
+  fill: color-mix(in srgb, var(--c-series-1) 95%, var(--c-surface));
+}
+
+.pspp-chart__s3--15 {
+  fill: color-mix(in srgb, var(--c-series-1) 100%, var(--c-surface));
+}

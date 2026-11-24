@@ -3,9 +3,10 @@
  * style), insert it as a new result, or replace an existing one in place.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import type { GraphDef, ChartStyle } from '../charts/studioTypes';
+import type { GraphDef, ChartStyle, View3d } from '../charts/studioTypes';
 import type { OutputItem } from '../engine/types';
 import { useOutput, type OutputEntry } from '../store/output';
+import { is3d } from './model';
 import { cleanStyle, innerChart } from './series';
 
 type ChartItem = Extract<OutputItem, { kind: 'chart' }>;
@@ -38,10 +39,21 @@ function stylePanels(panels: unknown, def: GraphDef, s: ChartStyle): unknown {
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
-/** The chart object stored in the output: the resolved spec plus the definition and the style. */
-export function studioChart(spec: Record<string, unknown>, def: GraphDef, style: ChartStyle): Record<string, unknown> {
+/** Elements that make no sense on a 3D chart. */
+function style3d(style: ChartStyle): ChartStyle {
+  const { refLines: _r, annotations: _a, ...rest } = style;
+  return rest;
+}
+
+/**
+ * The chart object stored in the output: the resolved spec plus the definition and the style.
+ * 3D charts also carry the user's rotated view (`view3d`) so it survives saving and editing.
+ */
+export function studioChart(spec: Record<string, unknown>, def: GraphDef, style: ChartStyle, view?: View3d | null): Record<string, unknown> {
   const out: Record<string, unknown> = { ...spec, studio: def };
-  const s = cleanStyle(style);
+  const three = is3d(def.kind);
+  if (three && view) out.view3d = view;
+  const s = cleanStyle(three ? style3d(style) : style);
   if (spec.type === 'panels') out.panels = stylePanels(spec.panels, def, s);
   if (Object.keys(s).length) out.style = s;
   else delete out.style;
@@ -82,11 +94,12 @@ export function updateStudioChart(entry: OutputEntry, item: ChartItem, chart: Re
 }
 
 /** Applies a style to a chart of the engine (appearance-only editing), keeping everything else. */
-export function restyleChart(chart: unknown, style: ChartStyle): unknown {
+export function restyleChart(chart: unknown, style: ChartStyle, view?: View3d | null): unknown {
   const inner = innerChart(chart);
   if (!inner) return chart;
   const s = cleanStyle(style);
   const next: Record<string, unknown> = { ...inner };
+  if (view && ['scatter3d', 'bar3d', 'surface3d'].includes(String(inner.type))) next.view3d = view;
   if (Object.keys(s).length) next.style = s;
   else delete next.style;
   return inner === chart ? next : { ...(chart as Record<string, unknown>), chart: next };

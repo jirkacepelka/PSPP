@@ -33,6 +33,10 @@ import { ControlChart, SequenceChart } from './sequence';
 import { DensityChart } from './density';
 import { ViolinChart } from './violin';
 import { PanelsChart } from './panels';
+import { Scatter3dChart } from './scatter3d';
+import { Bar3dChart } from './bar3d';
+import { Surface3dChart } from './surface3d';
+import type { View3d } from './studioTypes';
 
 export interface PsppChartProps {
   /** The `chart` member of an output item (or the whole item). */
@@ -47,13 +51,15 @@ export interface PsppChartProps {
   locale?: string;
   /** Used by the panels chart for its cells: no title and no toolbar, legend and data table on request. */
   embedded?: { legend: boolean; table: boolean };
+  /** 3D charts: called, debounced, with the view after the user rotated or zoomed it (so the studio can save it in chart.view3d). */
+  onView3dChange?: (v: View3d) => void;
 }
 
-export function PsppChart({ chart, width, height, t = defaultT, locale, embedded }: PsppChartProps) {
+export function PsppChart({ chart, width, height, t = defaultT, locale, embedded, onView3dChange }: PsppChartProps) {
   const spec = useMemo<StyledSpec>(() => parseChart(chart), [chart]);
   return (
     <StyleCtx.Provider value={spec.style}>
-      <ChartBody spec={spec} common={{ t, locale, width, height, embedded }} />
+      <ChartBody spec={spec} common={{ t, locale, width, height, embedded, onView3dChange }} />
     </StyleCtx.Provider>
   );
 }
@@ -114,6 +120,12 @@ function ChartBody({ spec, common }: { spec: StyledSpec; common: ChartCommonProp
       return <ViolinChart spec={spec} {...common} />;
     case 'panels':
       return <PanelsChart spec={spec} {...common} />;
+    case 'scatter3d':
+      return <Scatter3dChart spec={spec} {...common} />;
+    case 'bar3d':
+      return <Bar3dChart spec={spec} {...common} />;
+    case 'surface3d':
+      return <Surface3dChart spec={spec} {...common} />;
     default:
       return (
         <figure className="pspp-chart pspp-chart--fallback" style={width ? { width } : undefined} role="img" aria-label={spec.title || tr(t, 'untitled')}>
@@ -138,5 +150,5 @@ export default PsppChart;
 export { chartStrings, tr, type ChartT, type ChartStringKey } from './strings';
 export { chartToSvgString, chartToPngBlob, downloadSvg, downloadPng } from './export';
 export { parseChart, type ChartSpec, type StyledSpec } from './types';
-export type { ChartStyle, GraphDef, GraphKind, RefLine, Annotation } from './studioTypes';
+export type { ChartStyle, GraphDef, GraphKind, RefLine, Annotation, View3d } from './studioTypes';
 export { niceTicks, ticksWithin, linearScale, tickFormatter, formatValue } from './scale';

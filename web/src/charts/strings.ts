@@ -130,6 +130,21 @@ const en = {
   ariaViolins: '{count} violins',
   ariaPanels: '{count} panels',
   ariaFlagged: '{count} points out of limits',
+  scatter3d: '3D scatterplot',
+  bar3d: '3D bar chart',
+  surface3d: '3D surface',
+  resetView: 'Reset view',
+  perspective: 'Perspective',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  view3dHelp: 'Drag to rotate, arrow keys rotate, plus and minus zoom, Home resets the view.',
+  view3dState: 'Azimuth {azimuth}°, elevation {elevation}°, zoom {zoom}',
+  planeFit: 'Least squares plane',
+  decimated3d: 'Drawn with {shown} of {total} points, evenly spread; the table lists all of them.',
+  gridReduced: 'Drawn with every {step}th grid line; the table lists the full grid.',
+  ariaBars3d: '{count} bars',
+  ariaGrid3d: 'grid {nx} by {ny}',
+  floorLevel: 'Floor level',
 } as const;
 
 export type ChartStringKey = keyof typeof en;
@@ -258,6 +273,21 @@ const cs: Record<ChartStringKey, string> = {
   ariaViolins: 'houslí: {count}',
   ariaPanels: 'panelů: {count}',
   ariaFlagged: 'bodů mimo meze: {count}',
+  scatter3d: 'Trojrozměrný bodový graf',
+  bar3d: 'Trojrozměrný sloupcový graf',
+  surface3d: 'Trojrozměrná plocha',
+  resetView: 'Obnovit pohled',
+  perspective: 'Perspektiva',
+  zoomIn: 'Přiblížit',
+  zoomOut: 'Oddálit',
+  view3dHelp: 'Tažením otáčíte, šipky otáčejí, plus a minus mění přiblížení, klávesa Home obnoví pohled.',
+  view3dState: 'Azimut {azimuth}°, elevace {elevation}°, přiblížení {zoom}',
+  planeFit: 'Rovina metodou nejmenších čtverců',
+  decimated3d: 'Vykresleno {shown} z {total} bodů, rovnoměrně vybraných; tabulka obsahuje všechny.',
+  gridReduced: 'Vykreslena každá {step}. čára mřížky; tabulka obsahuje celou mřížku.',
+  ariaBars3d: 'sloupců: {count}',
+  ariaGrid3d: 'mřížka {nx} × {ny}',
+  floorLevel: 'Úroveň podlahy',
 };
 
 /** Every key with its English and Czech text, e.g. for i18next resources:

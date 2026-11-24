@@ -19,7 +19,7 @@ import { clamp, measureText, setMeasureFont, truncateText, wrapText, type Linear
 import { tr, type ChartT } from './strings';
 import { RegCtx, StyleOverlay, axisTitle, useAxisReg, useStyle, type AxisReg } from './styleLayer';
 import { fontScaleOf } from './styleSpec';
-import type { ChartStyle } from './studioTypes';
+import type { ChartStyle, View3d } from './studioTypes';
 
 /* ------------------------------------------------------------------ types */
 
@@ -32,6 +32,8 @@ export interface ChartCommonProps {
   height?: number;
   /** Set by the panels chart: no title, no toolbar, optionally the legend and the data table (driven by the panels). */
   embedded?: { legend: boolean; table: boolean };
+  /** 3D charts: called (debounced) with the current view after the user rotates or zooms it. */
+  onView3dChange?: (v: View3d) => void;
 }
 
 export type MarkerShape =
@@ -142,7 +144,7 @@ function TipKey({ row, pad }: { row: TipRow; pad: boolean }) {
 
 /* ---------------------------------------------------------------- markers */
 
-function shapePath(shape: MarkerShape, x: number, y: number, r: number): string {
+export function shapePath(shape: MarkerShape, x: number, y: number, r: number): string {
   const poly = (n: number, rot: number, rr = r) => {
     const pts: string[] = [];
     for (let i = 0; i < n; i++) {
@@ -551,12 +553,13 @@ const IconDownload = () => (
   </svg>
 );
 
-export function ChartToolbar({ t, showTable, onTable, onSvg, onPng }: { t: ChartT; showTable: boolean; onTable: () => void; onSvg: () => void; onPng: () => void }) {
+export function ChartToolbar({ t, showTable, onTable, onSvg, onPng, extra }: { t: ChartT; showTable: boolean; onTable: () => void; onSvg: () => void; onPng: () => void; extra?: ReactNode }) {
   const tableLabel = showTable ? tr(t, 'hideDataTable') : tr(t, 'showDataTable');
   const svgLabel = tr(t, 'downloadSvg');
   const pngLabel = tr(t, 'downloadPng');
   return (
     <div className="pspp-chart__toolbar" role="toolbar" aria-label={tr(t, 'chartTools')}>
+      {extra}
       <button type="button" className="pspp-chart__btn" aria-pressed={showTable} title={tableLabel} aria-label={tableLabel} onClick={onTable}>
         <IconTable />
       </button>
@@ -594,6 +597,8 @@ export interface ChartShellProps extends ChartCommonProps {
   legendTitle?: string;
   /** Plot-area height for a given inner width (when no fixed height is set). */
   plotHeight?: (innerWidth: number) => number;
+  /** Extra toolbar buttons placed before the data table button (the 3D view controls). */
+  toolbarExtra?: ReactNode;
   children: (area: PlotArea) => ReactNode;
 }
 
@@ -668,7 +673,7 @@ export function ChartShell(props: ChartShellProps) {
   // Header layout (all inside the SVG, so exports carry the title and legend).
   const titleLH = Math.round(20 * fs);
   const subLH = Math.round(17 * fs);
-  const titleLines = width && title ? wrapText(title, Math.max(80, innerW - TOOLBAR_RESERVE), FONT.title * fs, 600, 3) : [];
+  const titleLines = width && title ? wrapText(title, Math.max(80, innerW - TOOLBAR_RESERVE - (props.toolbarExtra ? 64 : 0)), FONT.title * fs, 600, 3) : [];
   const subLines = width && subtitle ? wrapText(subtitle, innerW, FONT.subtitle * fs, 400, 3) : [];
   const legendLayout = width && legend && legend.length ? layoutLegend(legend, innerW, fs) : null;
   let y = titleLines.length || subLines.length || legendLayout ? 14 : 6;
@@ -743,7 +748,7 @@ export function ChartShell(props: ChartShellProps) {
           <div style={{ height: 320 }} />
         )}
       </TipCtx.Provider>
-      {!props.embedded && <ChartToolbar t={t} showTable={showTable} onTable={() => setShowTable((v) => !v)} onSvg={doSvg} onPng={doPng} />}
+      {!props.embedded && <ChartToolbar t={t} showTable={showTable} onTable={() => setShowTable((v) => !v)} onSvg={doSvg} onPng={doPng} extra={props.toolbarExtra} />}
       {tip && (
         <div
           className="pspp-chart__tooltip"

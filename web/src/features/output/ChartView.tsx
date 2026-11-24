@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { PsppChart } from '../../charts';
 import { useData } from '../../store/data';
 import type { Dataset } from '../../engine/types';
+import type { View3d } from '../../charts/studioTypes';
 
 const norm = (x: string) => x.replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -57,7 +58,8 @@ function niceMax(v: number) {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
 }
 
-export function ChartView({ chart, title }: { chart: unknown; title: string }) {
+/** `onView3dChange` reports the rotated view of 3D charts (the studio stores it with the chart). */
+export function ChartView({ chart, title, onView3dChange }: { chart: unknown; title: string; onView3dChange?: (view: View3d) => void }) {
   const { t, i18n } = useTranslation();
   const ds = useData((s) => s.dataset);
   const hinted = useMemo(() => withIntegerHint(chart, ds, title), [chart, ds, title]);
@@ -67,6 +69,7 @@ export function ChartView({ chart, title }: { chart: unknown; title: string }) {
         chart={hinted}
         t={(key, fallback) => t(key, { ns: 'charts', defaultValue: fallback })}
         locale={i18n.language}
+        onView3dChange={onView3dChange}
       />
     );
   }

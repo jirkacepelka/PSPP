@@ -247,6 +247,20 @@
   color: var(--ink-3);
 }
 
+.gs-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.gs-hint .icon {
+  flex: none;
+  font-size: var(--fs-md);
+  color: var(--ink-3);
+}
+
 /* properties */
 .gs-props {
   border-left: var(--hairline) solid var(--line);

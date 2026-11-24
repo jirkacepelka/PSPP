@@ -7,6 +7,7 @@ import { parseDendrogram, type DendrogramSpec } from './dendrogram';
 import { parseLine, type LineSpec } from './lineSpec';
 import { parseStyle } from './styleSpec';
 import { parseArea, parseDot, parseHeatmap, parseMatrix, parsePareto, parsePyramid } from './studioSpecs';
+import { parseBar3d, parseScatter3d, parseSurface3d, parseView3d } from './spec3d';
 import { parseControl, parseDensity, parseDualAxis, parseHighLow, parsePanels, parseProbPlot, parseSequence, parseViolin } from './phase2Specs';
 import type {
   AreaSpec,
@@ -22,7 +23,11 @@ import type {
   ParetoSpec,
   ProbPlotSpec,
   PyramidSpec,
+  Bar3dSpec,
+  Scatter3dSpec,
   SequenceSpec,
+  Surface3dSpec,
+  View3d,
   ViolinSpec,
 } from './studioTypes';
 
@@ -172,10 +177,14 @@ export type ChartSpec =
   | DensitySpec
   | ViolinSpec
   | PanelsSpec
+  | Scatter3dSpec
+  | Bar3dSpec
+  | Surface3dSpec
   | UnknownSpec;
 
 /** Every parsed spec may carry the appearance overrides of `chart.style`. */
-export type StyledSpec = ChartSpec & { style?: ChartStyle };
+/** `view3d` is the saved view of the 3D chart types (chart.view3d). */
+export type StyledSpec = ChartSpec & { style?: ChartStyle; view3d?: Required<View3d> };
 
 type Obj = Record<string, unknown>;
 
@@ -206,7 +215,8 @@ export function parseChart(input: unknown): StyledSpec {
   const spec = parseChartBody(input);
   const inner = isObj(input) && isObj(input.chart) ? input.chart : input;
   const style = parseStyle(isObj(inner) && inner.style !== undefined ? inner.style : wrapperStyle);
-  return style ? { ...spec, style } : spec;
+  const view3d = isObj(inner) ? parseView3d(inner.view3d) : undefined;
+  return { ...spec, ...(style ? { style } : {}), ...(view3d ? { view3d } : {}) };
 }
 
 function parseChartBody(input: unknown): ChartSpec {
@@ -398,6 +408,12 @@ function parseChartBody(input: unknown): ChartSpec {
       return parseViolin(c, title);
     case 'panels':
       return parsePanels(c, title);
+    case 'scatter3d':
+      return parseScatter3d(c, title);
+    case 'bar3d':
+      return parseBar3d(c, title);
+    case 'surface3d':
+      return parseSurface3d(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }

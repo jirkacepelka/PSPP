@@ -79,6 +79,11 @@ const fn = (id: Func): Choice => ({ value: id, label: `graphstudio.func.${id}` }
 const ALL_FUNCS: Choice[] = FUNCS.map(fn);
 /** Summaries of a numeric variable (no count/percent). */
 const VALUE_FUNCS: Choice[] = (['mean', 'median', 'sum', 'min', 'max', 'sd'] as Func[]).map(fn);
+/** Summaries of the 3D bars: the 2D bar's, without the standard deviation. */
+const BAR3D_FUNCS: Choice[] = (['count', 'pct', 'mean', 'median', 'sum', 'min', 'max'] as Func[]).map(fn);
+export const SURFACE_GRID_MIN = 10;
+export const SURFACE_GRID_MAX = 60;
+export const SURFACE_GRID_DEFAULT = 25;
 const ADDITIVE_FUNCS: Choice[] = (['count', 'pct', 'sum'] as Func[]).map(fn);
 
 const opt = (def: GraphDef, id: string): unknown => def.options[id];
@@ -414,10 +419,52 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     ],
     defaults: { fill: true, bwFactor: 1 },
   },
+  scatter3d: {
+    kind: 'scatter3d',
+    group: '3d',
+    label: 'graphstudio.kind.scatter3d',
+    icon: 'view_in_ar',
+    variants: [v('simple', 'scatter3d', 'view_in_ar')],
+    slots: () => [
+      slot('x', 'graphstudio.slot.xAxis', 'numeric', { min: 1 }),
+      slot('y', 'graphstudio.slot.yAxis', 'numeric', { min: 1 }),
+      slot('z', 'graphstudio.slot.zAxis', 'numeric', { min: 1 }),
+      groupSlot(0, 'graphstudio.slot.colorBy'),
+    ],
+    options: [{ id: 'fit', type: 'select', label: 'graphstudio.opt.fit3d', choices: ['none', 'plane'].map((value) => ({ value, label: `graphstudio.fit.${value}` })) }],
+    defaults: { fit: 'none' },
+    panels: () => false,
+  },
+  bar3d: {
+    kind: 'bar3d',
+    group: '3d',
+    label: 'graphstudio.kind.bar3d',
+    icon: 'deployed_code',
+    variants: [v('simple', 'bar3d', 'deployed_code')],
+    slots: (d) => [catX(), slot('y', 'graphstudio.slot.yCategory', 'category', { min: 1, hint: 'graphstudio.slotHint.category' }), ...(needsVariable(opt(d, 'func')) ? [valueSlot(1)] : [])],
+    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: BAR3D_FUNCS }],
+    defaults: { func: 'count' },
+    panels: () => false,
+  },
+  surface3d: {
+    kind: 'surface3d',
+    group: '3d',
+    label: 'graphstudio.kind.surface3d',
+    icon: 'landscape',
+    variants: [v('simple', 'surface3d', 'landscape')],
+    slots: () => [
+      slot('x', 'graphstudio.slot.xAxis', 'numeric', { min: 1 }),
+      slot('y', 'graphstudio.slot.yAxis', 'numeric', { min: 1 }),
+      slot('z', 'graphstudio.slot.zSurface', 'numeric', { hint: 'graphstudio.slotHint.zSurface' }),
+    ],
+    options: [{ id: 'grid', type: 'number', label: 'graphstudio.opt.grid', min: SURFACE_GRID_MIN, max: SURFACE_GRID_MAX, step: 1 }],
+    defaults: { grid: SURFACE_GRID_DEFAULT },
+    panels: () => false,
+  },
 };
 
 /** Gallery group order (ids of KindModel.group). */
-export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'highlow', 'boxplot', 'errorbar', 'dualaxis', 'probplot', 'sequence', 'pareto', 'matrix'];
+export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'highlow', 'boxplot', 'errorbar', 'dualaxis', 'probplot', 'sequence', 'pareto', 'matrix', '3d'];
 
 export interface GalleryEntry {
   id: string;
@@ -488,6 +535,10 @@ export function optionsOf(def: GraphDef): OptionDef[] {
   return [...m.options, ...(MERGE_KINDS.includes(def.kind) ? MERGE_OPTIONS : []), ...(slotsOf(def).some((s) => s.id === 'panel') ? PANEL_OPTIONS : [])];
 }
 
+/** The 3D kinds: no reference lines, annotations or panels; the view (rotation) is stored with the chart. */
+export const KINDS_3D: GraphKind[] = ['scatter3d', 'bar3d', 'surface3d'];
+export const is3d = (kind: GraphKind): boolean => KINDS_3D.includes(kind);
+
 /** Required slots that are still empty, in order. */
 export function missingSlots(def: GraphDef): SlotDef[] {
   return slotsOf(def).filter((s) => (def.bind[s.id]?.length ?? 0) < s.min);
@@ -498,7 +549,7 @@ export const CATEGORY_WARN = 50;
 /** Above this many categories the chart is crowded: a warning marks the slot and the preview. */
 export const CATEGORY_CROWDED = 500;
 /** Kinds whose category (x) slot can merge numeric values into intervals. */
-export const MERGE_KINDS: GraphKind[] = ['bar', 'line', 'area', 'errorbar', 'highlow', 'dualaxis', 'pareto', 'boxplot'];
+export const MERGE_KINDS: GraphKind[] = ['bar', 'line', 'area', 'errorbar', 'highlow', 'dualaxis', 'pareto', 'boxplot', 'bar3d'];
 /** Most levels of a panel variable. */
 export const MAX_PANELS = 12;
 

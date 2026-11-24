@@ -3,7 +3,7 @@
  * of an output item, for the appearance editor of engine charts.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-import type { ChartStyle } from '../charts/studioTypes';
+import type { ChartStyle, View3d } from '../charts/studioTypes';
 
 type Obj = Record<string, unknown>;
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -51,6 +51,13 @@ export function seriesNames(chart: unknown): string[] {
       const groups = [...new Set(arr(c.boxes).filter(isObj).map((b) => b.group).filter((g): g is string => typeof g === 'string'))];
       return groups.length ? groups.map(str) : [str(c.title)];
     }
+    case 'scatter3d': {
+      const groups = [...new Set(arr(c.points).filter(isObj).map((p) => p.group).filter((g): g is string => typeof g === 'string'))];
+      return groups.length ? groups.map(str) : [str(c.zlabel) || str(c.title)];
+    }
+    case 'bar3d':
+    case 'surface3d':
+      return [str(c.zlabel) || str(c.title)];
     case 'pareto':
     case 'heatmap':
     case 'highlow':
@@ -86,4 +93,16 @@ export function cleanStyle(style: ChartStyle): ChartStyle {
     out[k] = v;
   }
   return out as ChartStyle;
+}
+
+/** The saved 3D view of a chart (`chart.view3d`), or null when it has none or it is malformed. */
+export function view3dOf(chart: unknown): View3d | null {
+  const v = innerChart(chart)?.view3d;
+  if (!isObj(v) || typeof v.azimuth !== 'number' || typeof v.elevation !== 'number' || !Number.isFinite(v.azimuth) || !Number.isFinite(v.elevation)) return null;
+  return {
+    azimuth: v.azimuth,
+    elevation: v.elevation,
+    perspective: v.perspective === true,
+    ...(typeof v.zoom === 'number' && Number.isFinite(v.zoom) ? { zoom: v.zoom } : {}),
+  };
 }

@@ -9,7 +9,7 @@ import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef, GraphKind } from '../charts/studioTypes';
 import { activeRows, caseCount, isMissing, valueText, varTitle, weights, type Cell } from '../ext/data';
 import { lgamma, normCdf, normInv, tInv } from '../ext/dist';
-import { CATEGORY_CROWDED, CATEGORY_WARN, MAX_PANELS, MERGE_KINDS, needsVariable, slotsOf, missingSlots } from './model';
+import { CATEGORY_CROWDED, CATEGORY_WARN, MAX_PANELS, MERGE_KINDS, SURFACE_GRID_DEFAULT, SURFACE_GRID_MAX, SURFACE_GRID_MIN, needsVariable, slotsOf, missingSlots } from './model';
 
 export type Tf = (key: string, args?: Record<string, unknown>) => string;
 
@@ -161,6 +161,8 @@ interface Prepared {
   seen: { name: string; count: number }[];
   /** merge values of the x slot into intervals */
   merge?: Merge;
+  /** 3D bars: the y slot is merged with the same setting */
+  mergeY?: boolean;
 }
 
 const keyOf = (x: Cell) => (typeof x === 'number' ? `n${x}` : `s${String(x).trimEnd()}`);
@@ -251,7 +253,7 @@ function categories(c: Col, rows: number[], universe: number[] = rows, merge?: M
 
 /** Categories of C over the rows of P; inside a panel the category set comes from the whole chart. */
 function cat(p: Prepared, c: Col): CatSet {
-  const set = categories(c, p.rows, p.universe, c === p.cols.x?.[0] ? p.merge : undefined);
+  const set = categories(c, p.rows, p.universe, c === p.cols.x?.[0] || (p.mergeY && c === p.cols.y?.[0]) ? p.merge : undefined);
   p.seen.push({ name: varTitle(c.v), count: set.cells.length });
   return set;
 }
@@ -293,7 +295,7 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
     weight: ds.weight ?? null,
   };
   if (!rows.length) return { ok: false, reason: 'nodata' };
-  return { rows, universe: rows, w, cols, info, seen: [], merge: mergeOf(def) };
+  return { rows, universe: rows, w, cols, info, seen: [], merge: mergeOf(def), mergeY: def.kind === 'bar3d' };
 }
 
 const isPrepared = (p: Prepared | ComputeResult): p is Prepared => 'rows' in p;
@@ -736,6 +738,147 @@ function heatmapChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
     if (xi >= 0 && yi >= 0) counts[yi][xi] += p.w[r];
   }
   return { type: 'heatmap', title: t('graphstudio.chart.vs', { y: varTitle(Y.v), x: varTitle(X.v) }), xlabel: varTitle(X.v), ylabel: varTitle(Y.v), xEdges, yEdges, counts };
+}
+
+/* ------------------------------------------------------------------ 3D (phase 3) */
+
+/** Most points a 3D scatter carries; beyond it every n-th case is kept (the renderer thins further for drawing). */
+export const SCATTER3D_MAX_CASES = 20000;
+/** Grid cells farther than this (in cells, either direction) from any data cell stay empty on a surface. */
+export const SURFACE_FILL_REACH = 2;
+
+function scatter3dChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> {
+  const [X, Y, Z] = [p.cols.x[0], p.cols.y[0], p.cols.z[0]];
+  const g = p.cols.group?.[0] ? cat(p, p.cols.group[0]) : null;
+  const n = p.rows.length;
+  // deterministic sampling: every stride-th case, so the same data always gives the same chart
+  const stride = Math.max(1, Math.ceil(n / SCATTER3D_MAX_CASES));
+  const picked = p.rows.map((_, k) => k).filter((k) => k % stride === 0).slice(0, SCATTER3D_MAX_CASES);
+  if (picked.length < n) notes.push(t('graphstudio.note.sampled', { used: picked.length, total: n }));
+  return {
+    type: 'scatter3d',
+    title: byTitle(t, varTitle(Z.v), varTitle(X.v), varTitle(Y.v)),
+    xlabel: varTitle(X.v),
+    ylabel: varTitle(Y.v),
+    zlabel: varTitle(Z.v),
+    points: picked.map((k) => ({ x: num(X, p.rows[k]), y: num(Y, p.rows[k]), z: num(Z, p.rows[k]), group: g ? g.labels[g.idx[k]] : null })),
+    fit: optStr(def, 'fit', 'none') === 'plane' ? 'plane' : 'none',
+    groupLabel: g ? varTitle(p.cols.group[0].v) : null,
+  };
+}
+
+/** Two categorical axes, one bar per cell; cells without cases have no bar (null). */
+function bar3dChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> {
+  const func = optStr(def, 'func', 'count');
+  const [X, Y] = [p.cols.x[0], p.cols.y[0]];
+  const xs = cat(p, X);
+  const ys = cat(p, Y);
+  const at: number[][][] = ys.cells.map(() => xs.cells.map(() => [] as number[]));
+  p.rows.forEach((_, k) => {
+    if (xs.idx[k] >= 0 && ys.idx[k] >= 0) at[ys.idx[k]][xs.idx[k]].push(k);
+  });
+  const val = p.cols.value?.[0];
+  const total = p.info.usedWeight;
+  const z = funcLabel(t, func, needsVariable(func) ? val : undefined);
+  if (p.merge && (X.v.type === 'numeric' || Y.v.type === 'numeric')) notes.push(t('graphstudio.note.mergeBoth'));
+  return {
+    type: 'bar3d',
+    title: byTitle(t, z, varTitle(X.v), varTitle(Y.v)),
+    xlabel: varTitle(X.v),
+    ylabel: varTitle(Y.v),
+    zlabel: z,
+    xs: xs.labels,
+    ys: ys.labels,
+    values: at.map((row) => row.map((pos) => cellValue(def, p, pos, total, val).value)),
+  };
+}
+
+/** Evenly spaced edges of N cells over [min, max] (exactly N cells, unlike the nice-step bins of histograms). */
+export function gridEdges(min: number, max: number, n: number): number[] {
+  if (!(max > min)) return [min - 0.5, min + 0.5];
+  return Array.from({ length: n + 1 }, (_, i) => (i === n ? max : min + ((max - min) * i) / n));
+}
+
+/**
+ * Fills the empty cells of GRID (null) by inverse distance weighting (weight 1 / d squared, d the
+ * distance between cell centres in cells) from the cells that hold data within REACH cells in each
+ * direction; cells with no such neighbour stay null. Only the original data cells are used as sources.
+ * Returns the number of cells filled.
+ */
+export function fillHoles(grid: (number | null)[][], reach = SURFACE_FILL_REACH): number {
+  const ny = grid.length;
+  const nx = grid[0]?.length ?? 0;
+  const out = grid.map((row) => row.slice());
+  let filled = 0;
+  for (let yi = 0; yi < ny; yi++) {
+    for (let xi = 0; xi < nx; xi++) {
+      if (grid[yi][xi] !== null) continue;
+      let sw = 0;
+      let sv = 0;
+      for (let dy = -reach; dy <= reach; dy++) {
+        for (let dx = -reach; dx <= reach; dx++) {
+          const [y2, x2] = [yi + dy, xi + dx];
+          if ((dx === 0 && dy === 0) || y2 < 0 || y2 >= ny || x2 < 0 || x2 >= nx) continue;
+          const v = grid[y2][x2];
+          if (v === null) continue;
+          const wgt = 1 / (dx * dx + dy * dy);
+          sw += wgt;
+          sv += wgt * v;
+        }
+      }
+      if (sw > 0) {
+        out[yi][xi] = sv / sw;
+        filled++;
+      }
+    }
+  }
+  for (let yi = 0; yi < ny; yi++) grid[yi] = out[yi];
+  return filled;
+}
+
+/**
+ * Surface over a regular grid of N x N bins of x and y (cell centres on the axes). With a z variable
+ * the height is the weighted mean of z in each cell and empty cells are filled from neighbours (see
+ * fillHoles); without it the height is the weighted count of cases per cell (an empty cell is 0).
+ */
+function surface3dChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> {
+  const [X, Y] = [p.cols.x[0], p.cols.y[0]];
+  const Z = p.cols.z?.[0];
+  const n = Math.round(Math.min(SURFACE_GRID_MAX, Math.max(SURFACE_GRID_MIN, optNum(def, 'grid', SURFACE_GRID_DEFAULT))));
+  const range = (c: Col) => {
+    const s = sortedValues(c, p.universe);
+    return [s[0], s[s.length - 1]] as const;
+  };
+  const xe = gridEdges(...range(X), n);
+  const ye = gridEdges(...range(Y), n);
+  const nx = xe.length - 1;
+  const sum = ye.slice(0, -1).map(() => new Array<number>(nx).fill(0));
+  const wsum = ye.slice(0, -1).map(() => new Array<number>(nx).fill(0));
+  for (const r of p.rows) {
+    const xi = binIndex(xe, num(X, r));
+    const yi = binIndex(ye, num(Y, r));
+    if (xi < 0 || yi < 0) continue;
+    wsum[yi][xi] += p.w[r];
+    sum[yi][xi] += p.w[r] * (Z ? num(Z, r) : 1);
+  }
+  const mid = (e: number[]) => e.slice(0, -1).map((lo, i) => (lo + e[i + 1]) / 2);
+  let z: (number | null)[][];
+  if (Z) {
+    z = sum.map((row, yi) => row.map((s, xi) => (wsum[yi][xi] > 0 ? s / wsum[yi][xi] : null)));
+    const filled = fillHoles(z);
+    if (filled) notes.push(t('graphstudio.note.surfaceFilled', { count: filled, reach: SURFACE_FILL_REACH }));
+  } else z = wsum.map((row) => row.slice());
+  const zlabel = Z ? varTitle(Z.v) : funcLabel(t, 'count');
+  return {
+    type: 'surface3d',
+    title: Z ? byTitle(t, zlabel, varTitle(X.v), varTitle(Y.v)) : t('graphstudio.chart.surfaceCount', { x: varTitle(X.v), y: varTitle(Y.v) }),
+    xlabel: varTitle(X.v),
+    ylabel: varTitle(Y.v),
+    zlabel,
+    xs: mid(xe),
+    ys: mid(ye),
+    z,
+  };
 }
 
 /* ------------------------------------------------------------------ summaries over categories (phase 2) */
@@ -1372,6 +1515,12 @@ function buildOne(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | nul
       return violinChart(def, p, t, notes);
     case 'density':
       return densityChart(def, p, t, notes);
+    case 'scatter3d':
+      return scatter3dChart(def, p, t, notes);
+    case 'bar3d':
+      return bar3dChart(def, p, t, notes);
+    case 'surface3d':
+      return surface3dChart(def, p, t, notes);
     default:
       return null;
   }
