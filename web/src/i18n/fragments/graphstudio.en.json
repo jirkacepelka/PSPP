@@ -1,0 +1,116 @@
+{
+  "actions": { "graphStudio": "Graph Studio..." },
+  "graphstudio": {
+    "title": "Graph Studio",
+    "desc": "Pick a chart, drop variables into its slots and adjust the look. The preview updates as you go.",
+    "editTitle": "Edit chart",
+    "editAppearance": "Edit chart appearance",
+    "engineDesc": "This chart comes from an analysis, so its variables are fixed. You can change how it looks.",
+    "noVarsDesc": "The variables of this chart are not in the current data, so only its appearance can be changed.",
+    "editChart": "Edit chart",
+    "insert": "Insert into output",
+    "update": "Update chart",
+    "inserted": "Chart added to the output",
+    "updated": "Chart updated",
+    "recomputeNote": "Values are recomputed from the current data when you update.",
+    "gallery": "Chart types",
+    "searchCharts": "Search charts",
+    "noChartFound": "No chart matches.",
+    "variables": "Variables",
+    "searchVariables": "Search variables",
+    "variablesHint": "Drag a variable into a slot, or select it and click the slot. Double click picks the best slot.",
+    "slots": "Chart slots",
+    "required": "Required",
+    "optional": "Optional",
+    "addVariable": "Add variable...",
+    "removeVariable": "Remove {{name}}",
+    "clickToAdd": "Click to add {{name}}",
+    "preview": "Preview",
+    "properties": "Chart properties",
+    "noData": "No data to chart",
+    "noDataHint": "Open a data file or a sample first, then come back to Graph Studio.",
+    "noVars": "Variables not found in the data: {{names}}",
+    "noCases": "No valid cases to draw",
+    "noCasesHint": "Every case is filtered out or has a missing value in one of the chosen variables.",
+    "missing": "Missing: {{slots}}",
+    "missingHint": "Fill the required slots to see the chart.",
+    "noOptions": "This chart has no extra options.",
+    "auto": "Automatic",
+    "tab": { "options": "Options", "appearance": "Appearance", "elements": "Elements" },
+    "group": {
+      "bar": "Bar", "line": "Line", "area": "Area", "pie": "Pie", "histogram": "Histogram", "pyramid": "Population pyramid",
+      "scatter": "Scatter and dot", "boxplot": "Boxplot", "errorbar": "Error bar", "pareto": "Pareto", "matrix": "Matrix and heatmap"
+    },
+    "kind": {
+      "bar": "Bar chart", "line": "Line chart", "area": "Area chart", "pie": "Pie chart", "histogram": "Histogram", "pyramid": "Population pyramid",
+      "boxplot": "Boxplot", "errorbar": "Error bar chart", "scatter": "Scatterplot", "dot": "Dot plot", "pareto": "Pareto chart",
+      "scattermatrix": "Scatterplot matrix", "heatmap": "Binned scatterplot"
+    },
+    "variant": {
+      "simple": "Simple bar", "clustered": "Clustered bar", "stacked": "Stacked bar", "stacked100": "100% stacked bar", "horizontal": "Horizontal bar",
+      "lineSimple": "Simple line", "lineMultiple": "Multiple lines", "areaSimple": "Simple area", "areaStacked": "Stacked area", "areaStacked100": "100% stacked area",
+      "pie": "Pie", "histSimple": "Histogram", "histStacked": "Stacked histogram", "polygon": "Frequency polygon", "pyramid": "Pyramid",
+      "boxSimple": "Simple boxplot", "boxClustered": "Clustered boxplot", "errSimple": "Simple error bar", "errClustered": "Clustered error bar",
+      "scatterSimple": "Simple scatter", "scatterGrouped": "Grouped scatter", "dot": "Dot plot", "pareto": "Pareto", "matrix": "Matrix", "heatmap": "Heatmap"
+    },
+    "slot": {
+      "category": "Category (x axis)", "group": "Group (optional)", "cluster": "Cluster by", "stack": "Stack by", "lines": "Separate lines by", "areas": "Separate areas by",
+      "value": "Variable to summarise", "measure": "Variable", "splitBy": "Group by", "age": "Variable (e.g. age)", "sides": "Sides (two groups)",
+      "xAxis": "X axis", "yAxis": "Y axis", "colorBy": "Colour by", "sumOf": "Sum of (optional)", "matrixVars": "Variables (2 to 8)"
+    },
+    "slotHint": {
+      "default": "Drop a variable here",
+      "category": "Drop a grouping variable",
+      "group": "Drop a grouping variable",
+      "value": "Drop a numeric variable",
+      "measure": "Drop a numeric variable",
+      "age": "Drop a numeric variable",
+      "matrixVars": "Drop numeric variables"
+    },
+    "reject": {
+      "text": "{{name}} is a text variable; this slot needs numbers.",
+      "manyValues": "{{name}} has {{count}} or more distinct values (limit {{max}}); change its measure to nominal or ordinal to use it as a category."
+    },
+    "func": {
+      "count": "Count", "pct": "Percent", "mean": "Mean", "median": "Median", "sum": "Sum", "min": "Minimum", "max": "Maximum", "sd": "Standard deviation"
+    },
+    "interval": { "none": "None", "ci": "Confidence interval", "se": "Standard error", "sd": "Standard deviation" },
+    "binRule": { "fd": "Automatic (Freedman-Diaconis)", "sturges": "Sturges rule", "count": "Number of bins", "width": "Bin width" },
+    "sort": { "category": "By category", "asc": "By value, ascending", "desc": "By value, descending" },
+    "fit": { "none": "None", "linear": "Linear", "quadratic": "Quadratic", "cubic": "Cubic", "loess": "Loess" },
+    "opt": {
+      "func": "Summary", "interval": "Error bars", "level": "Confidence level (%)", "mult": "Multiplier", "sort": "Order of categories", "horizontal": "Horizontal bars",
+      "markers": "Show markers", "binRule": "Bins", "bins": "Number of bins", "binWidth": "Bin width", "normal": "Show normal curve", "swap": "Swap the two sides",
+      "outliers": "Show outliers", "fit": "Fit line", "fitByGroup": "Fit each group separately", "showR2": "Show R squared", "xBins": "Bins along x", "yBins": "Bins along y"
+    },
+    "chart": {
+      "by": "{{y}} by {{x}}", "byGroup": "{{y}} by {{x}} and {{g}}", "of": "{{y}} of {{x}}", "vs": "{{y}} vs. {{x}}",
+      "pyramid": "{{x}} by {{g}}", "pareto": "Pareto chart of {{x}}", "matrix": "Scatterplot matrix",
+      "ci": "{{level}}% CI", "se": "±{{mult}} SE", "sd": "±{{mult}} SD"
+    },
+    "info": {
+      "cases": "{{used}} of {{total}} cases drawn",
+      "excluded": "{{count}} left out for missing values",
+      "filter": "filter {{name}} applied",
+      "weight": "weighted by {{name}}"
+    },
+    "note": {
+      "pyramidTwo": "The grouping variable has {{count}} values; only {{a}} and {{b}} are drawn.",
+      "sampled": "Showing a sample of {{used}} of {{total}} cases."
+    },
+    "app": {
+      "texts": "Titles", "showTitle": "Show titles", "title": "Title", "subtitle": "Subtitle", "xTitle": "X axis title", "yTitle": "Y axis title",
+      "axes": "Axes", "xMin": "X minimum", "xMax": "X maximum", "yMin": "Y minimum", "yMax": "Y maximum", "grid": "Grid lines",
+      "legend": "Legend", "legendAuto": "Automatic", "legendNone": "Hidden", "legendTitle": "Legend title",
+      "colors": "Colours", "noSeries": "This chart has no series to colour.", "colorOf": "Colour of {{name}}", "resetColor": "Use the default colour", "moreSeries": "{{count}} more series keep their default colours.",
+      "text": "Text", "valueLabels": "Show values", "fontSize": "Text size", "fontSmall": "Small", "fontNormal": "Normal", "fontLarge": "Large", "fontLarger": "Larger"
+    },
+    "el": {
+      "refLines": "Reference lines", "refHint": "Draw a line at a value of an axis, for example a norm or a cut-off.",
+      "refLine": "Reference line {{n}}", "axis": "Axis", "axisX": "X axis", "axisY": "Y axis", "value": "Value", "label": "Label", "color": "Colour", "dashed": "Dashed",
+      "addRef": "Add reference line", "remove": "Remove",
+      "annotations": "Annotations", "noteHint": "Place a text at data coordinates. On a category axis, x is the position of the category (0 is the first).",
+      "annotation": "Annotation {{n}}", "text": "Text", "addNote": "Add annotation"
+    }
+  }
+}

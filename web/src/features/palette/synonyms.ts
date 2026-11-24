@@ -66,12 +66,13 @@ export const GOALS: Goal[] = [
   {
     label: 'shell.goals.chart',
     words: 'graf grafy obrazek vizualizace vykreslit plot chart charts graph picture visualise visualize',
-    actions: ['dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT'],
+    actions: ['graphs.studio', 'dialog:histogram|tpl:GRAPH HISTOGRAM', 'dialog:barChart|dialog:bar|tpl:GRAPH BAR', 'dialog:scatterplot|dialog:scatter|tpl:GRAPH SCATTERPLOT'],
   },
 ];
 
 /** Extra search words for single actions (common misnomers and the other language). */
 export const ACTION_WORDS: Record<string, string> = {
+  'graphs.studio': 'graf grafy sloupcovy kolacovy histogram krabicovy bodovy tvorba upravit chart graph bar pie boxplot scatter editor builder',
   'dialog:frequencies': 'frekvence frequency cetnosti tabulka cetnosti',
   'dialog:descriptives': 'popisne prumer mean average sd',
   'dialog:crosstabs': 'kontingencni tabulka chi kvadrat chi square krizove',

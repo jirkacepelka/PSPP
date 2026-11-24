@@ -29,6 +29,8 @@ export type Modal =
   /** PRESET pre-fills dialog fields (field id → value), e.g. variables selected in the grid. */
   | { kind: 'analysis'; specId: string; preset?: Record<string, unknown>; replaceEntryId?: string }
   | { kind: 'assistant' }
+  /** EDIT reopens a chart of the output (full definition for studio charts, appearance for engine charts). */
+  | { kind: 'graphstudio'; edit?: { entryId: string; itemId: string } }
   | { kind: 'settings'; section?: string }
   | { kind: 'about' }
   | { kind: 'account' }

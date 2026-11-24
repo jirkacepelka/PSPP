@@ -20,7 +20,7 @@ function withIntegerHint(chart: unknown, ds: Dataset | null, itemTitle: string):
   if (!ds || typeof chart !== 'object' || chart === null) return chart;
   const outer = chart as Record<string, unknown>;
   const inner = (typeof outer.chart === 'object' && outer.chart ? outer.chart : outer) as Record<string, unknown>;
-  if (inner.type !== 'histogram') return chart;
+  if (inner.type !== 'histogram' || inner.studio) return chart;
   const title = norm(String(inner.title || outer.title || itemTitle || ''));
   if (!title) return chart;
   const idx = ds.variables.findIndex((v) => v.type !== 'string' && (norm(v.label ?? '') === title || norm(v.name) === title));

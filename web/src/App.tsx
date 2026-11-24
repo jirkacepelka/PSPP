@@ -39,6 +39,7 @@ import { AccountDialog } from './features/misc/AccountDialog';
 import { MigrateDialog } from './features/misc/MigrateDialog';
 import { ImportDialog } from './features/misc/ImportDialog';
 import { ExportOutputDialog } from './features/output/ExportOutputDialog';
+import { GraphStudio } from './graphstudio/GraphStudio';
 import { MissingDialog, TypeDialog, ValueLabelsDialog } from './features/variables/VariableDialogs';
 import './features/shell/shell.css';
 
@@ -96,6 +97,8 @@ function Modals() {
     }
     case 'assistant':
       return <AssistantDialog />;
+    case 'graphstudio':
+      return <GraphStudio key={modal.edit ? `${modal.edit.entryId}/${modal.edit.itemId}` : 'new'} edit={modal.edit} />;
     case 'settings':
       return <SettingsDialog section={modal.section} />;
     case 'about':

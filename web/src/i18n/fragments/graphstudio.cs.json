@@ -1,0 +1,116 @@
+{
+  "actions": { "graphStudio": "Studio grafů..." },
+  "graphstudio": {
+    "title": "Studio grafů",
+    "desc": "Vyberte graf, přetáhněte proměnné do jeho polí a upravte vzhled. Náhled se průběžně aktualizuje.",
+    "editTitle": "Upravit graf",
+    "editAppearance": "Upravit vzhled grafu",
+    "engineDesc": "Tento graf pochází z analýzy, takže jeho proměnné jsou pevné. Měnit lze jen vzhled.",
+    "noVarsDesc": "Proměnné tohoto grafu nejsou v aktuálních datech, proto lze měnit jen jeho vzhled.",
+    "editChart": "Upravit graf",
+    "insert": "Vložit do výstupu",
+    "update": "Aktualizovat graf",
+    "inserted": "Graf byl přidán do výstupu",
+    "updated": "Graf byl aktualizován",
+    "recomputeNote": "Při aktualizaci se hodnoty znovu spočítají z aktuálních dat.",
+    "gallery": "Typy grafů",
+    "searchCharts": "Hledat graf",
+    "noChartFound": "Žádný graf neodpovídá.",
+    "variables": "Proměnné",
+    "searchVariables": "Hledat proměnnou",
+    "variablesHint": "Přetáhněte proměnnou do pole, nebo ji vyberte a klikněte na pole. Dvojklik zvolí nejvhodnější pole.",
+    "slots": "Pole grafu",
+    "required": "Povinné",
+    "optional": "Volitelné",
+    "addVariable": "Přidat proměnnou...",
+    "removeVariable": "Odebrat {{name}}",
+    "clickToAdd": "Kliknutím přidáte {{name}}",
+    "preview": "Náhled",
+    "properties": "Vlastnosti grafu",
+    "noData": "Není co vykreslit",
+    "noDataHint": "Nejdřív otevřete datový soubor nebo ukázku a pak se vraťte do Studia grafů.",
+    "noVars": "Proměnné nejsou v datech: {{names}}",
+    "noCases": "Žádné platné případy k vykreslení",
+    "noCasesHint": "Všechny případy jsou odfiltrované nebo mají chybějící hodnotu v některé z vybraných proměnných.",
+    "missing": "Chybí: {{slots}}",
+    "missingHint": "Vyplňte povinná pole a graf se zobrazí.",
+    "noOptions": "Tento graf nemá další volby.",
+    "auto": "Automaticky",
+    "tab": { "options": "Volby", "appearance": "Vzhled", "elements": "Prvky" },
+    "group": {
+      "bar": "Sloupcový", "line": "Čárový", "area": "Plošný", "pie": "Výsečový", "histogram": "Histogram", "pyramid": "Populační pyramida",
+      "scatter": "Bodový a tečkový", "boxplot": "Krabicový", "errorbar": "Chybové úsečky", "pareto": "Paretův", "matrix": "Matice a teplotní mapa"
+    },
+    "kind": {
+      "bar": "Sloupcový graf", "line": "Čárový graf", "area": "Plošný graf", "pie": "Výsečový graf", "histogram": "Histogram", "pyramid": "Populační pyramida",
+      "boxplot": "Krabicový graf", "errorbar": "Graf s chybovými úsečkami", "scatter": "Bodový graf", "dot": "Tečkový graf", "pareto": "Paretův graf",
+      "scattermatrix": "Matice bodových grafů", "heatmap": "Binovaný bodový graf"
+    },
+    "variant": {
+      "simple": "Jednoduchý sloupcový", "clustered": "Seskupený sloupcový", "stacked": "Skládaný sloupcový", "stacked100": "100% skládaný sloupcový", "horizontal": "Vodorovný sloupcový",
+      "lineSimple": "Jedna čára", "lineMultiple": "Více čar", "areaSimple": "Jednoduchý plošný", "areaStacked": "Skládaný plošný", "areaStacked100": "100% skládaný plošný",
+      "pie": "Výseč", "histSimple": "Histogram", "histStacked": "Skládaný histogram", "polygon": "Polygon četností", "pyramid": "Pyramida",
+      "boxSimple": "Jednoduchý krabicový", "boxClustered": "Seskupený krabicový", "errSimple": "Jednoduché chybové úsečky", "errClustered": "Seskupené chybové úsečky",
+      "scatterSimple": "Jednoduchý bodový", "scatterGrouped": "Bodový podle skupin", "dot": "Tečkový graf", "pareto": "Pareto", "matrix": "Matice", "heatmap": "Teplotní mapa"
+    },
+    "slot": {
+      "category": "Kategorie (osa x)", "group": "Skupina (volitelné)", "cluster": "Seskupit podle", "stack": "Skládat podle", "lines": "Samostatné čáry podle", "areas": "Samostatné plochy podle",
+      "value": "Proměnná k shrnutí", "measure": "Proměnná", "splitBy": "Rozdělit podle", "age": "Proměnná (např. věk)", "sides": "Strany (dvě skupiny)",
+      "xAxis": "Osa x", "yAxis": "Osa y", "colorBy": "Barva podle", "sumOf": "Součet (volitelné)", "matrixVars": "Proměnné (2 až 8)"
+    },
+    "slotHint": {
+      "default": "Sem přetáhněte proměnnou",
+      "category": "Sem přetáhněte seskupující proměnnou",
+      "group": "Sem přetáhněte seskupující proměnnou",
+      "value": "Sem přetáhněte číselnou proměnnou",
+      "measure": "Sem přetáhněte číselnou proměnnou",
+      "age": "Sem přetáhněte číselnou proměnnou",
+      "matrixVars": "Sem přetáhněte číselné proměnné"
+    },
+    "reject": {
+      "text": "{{name}} je textová proměnná, toto pole vyžaduje čísla.",
+      "manyValues": "{{name}} má {{count}} a více různých hodnot (limit {{max}}). Chcete-li ji použít jako kategorii, změňte její úroveň měření na nominální nebo ordinální."
+    },
+    "func": {
+      "count": "Počet", "pct": "Procento", "mean": "Průměr", "median": "Medián", "sum": "Součet", "min": "Minimum", "max": "Maximum", "sd": "Směrodatná odchylka"
+    },
+    "interval": { "none": "Žádné", "ci": "Interval spolehlivosti", "se": "Směrodatná chyba", "sd": "Směrodatná odchylka" },
+    "binRule": { "fd": "Automaticky (Freedman-Diaconis)", "sturges": "Sturgesovo pravidlo", "count": "Počet tříd", "width": "Šířka třídy" },
+    "sort": { "category": "Podle kategorie", "asc": "Podle hodnoty, vzestupně", "desc": "Podle hodnoty, sestupně" },
+    "fit": { "none": "Žádná", "linear": "Lineární", "quadratic": "Kvadratická", "cubic": "Kubická", "loess": "Loess" },
+    "opt": {
+      "func": "Shrnutí", "interval": "Chybové úsečky", "level": "Hladina spolehlivosti (%)", "mult": "Násobek", "sort": "Pořadí kategorií", "horizontal": "Vodorovné sloupce",
+      "markers": "Zobrazit značky", "binRule": "Třídy", "bins": "Počet tříd", "binWidth": "Šířka třídy", "normal": "Zobrazit normální křivku", "swap": "Prohodit obě strany",
+      "outliers": "Zobrazit odlehlé hodnoty", "fit": "Proložená křivka", "fitByGroup": "Prokládat každou skupinu zvlášť", "showR2": "Zobrazit R na druhou", "xBins": "Třídy podél x", "yBins": "Třídy podél y"
+    },
+    "chart": {
+      "by": "{{y}} podle {{x}}", "byGroup": "{{y}} podle {{x}} a {{g}}", "of": "{{y}}: {{x}}", "vs": "{{y}} a {{x}}",
+      "pyramid": "{{x}} podle {{g}}", "pareto": "Paretův graf: {{x}}", "matrix": "Matice bodových grafů",
+      "ci": "{{level}} % IS", "se": "±{{mult}} SE", "sd": "±{{mult}} SD"
+    },
+    "info": {
+      "cases": "Vykresleno {{used}} z {{total}} případů",
+      "excluded": "{{count}} vynecháno kvůli chybějícím hodnotám",
+      "filter": "použit filtr {{name}}",
+      "weight": "vážení proměnnou {{name}}"
+    },
+    "note": {
+      "pyramidTwo": "Seskupující proměnná má {{count}} hodnot, vykresleny jsou jen {{a}} a {{b}}.",
+      "sampled": "Zobrazen vzorek {{used}} z {{total}} případů."
+    },
+    "app": {
+      "texts": "Nadpisy", "showTitle": "Zobrazit nadpisy", "title": "Nadpis", "subtitle": "Podnadpis", "xTitle": "Název osy x", "yTitle": "Název osy y",
+      "axes": "Osy", "xMin": "Minimum x", "xMax": "Maximum x", "yMin": "Minimum y", "yMax": "Maximum y", "grid": "Mřížka",
+      "legend": "Legenda", "legendAuto": "Automaticky", "legendNone": "Skrytá", "legendTitle": "Název legendy",
+      "colors": "Barvy", "noSeries": "Tento graf nemá řady, které by šlo obarvit.", "colorOf": "Barva řady {{name}}", "resetColor": "Použít výchozí barvu", "moreSeries": "Dalších {{count}} řad si ponechá výchozí barvy.",
+      "text": "Text", "valueLabels": "Zobrazit hodnoty", "fontSize": "Velikost textu", "fontSmall": "Malý", "fontNormal": "Normální", "fontLarge": "Velký", "fontLarger": "Větší"
+    },
+    "el": {
+      "refLines": "Referenční čáry", "refHint": "Nakreslí čáru v dané hodnotě osy, například normu nebo mezní hodnotu.",
+      "refLine": "Referenční čára {{n}}", "axis": "Osa", "axisX": "Osa x", "axisY": "Osa y", "value": "Hodnota", "label": "Popisek", "color": "Barva", "dashed": "Čárkovaná",
+      "addRef": "Přidat referenční čáru", "remove": "Odebrat",
+      "annotations": "Poznámky", "noteHint": "Umístí text na souřadnice dat. Na kategoriální ose je x pořadí kategorie (0 je první).",
+      "annotation": "Poznámka {{n}}", "text": "Text", "addNote": "Přidat poznámku"
+    }
+  }
+}

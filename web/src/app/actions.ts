@@ -320,6 +320,7 @@ export const ACTIONS: Action[] = [
   tpl('MATRIX', 'actions.matrix', 'data_array'),
 
   // ---- graphs
+  { id: 'graphs.studio', label: 'actions.graphStudio', icon: 'add_chart', keywords: 'graph studio chart builder gallery graf grafy tvorba grafu editor', run: () => ui().openModal({ kind: 'graphstudio' }), enabled: hasData },
   tpl('GRAPH SCATTERPLOT', 'actions.scatter', 'scatter_plot'),
   tpl('GRAPH HISTOGRAM', 'actions.histogram', 'equalizer'),
   tpl('GRAPH BAR', 'actions.barChart', 'bar_chart'),

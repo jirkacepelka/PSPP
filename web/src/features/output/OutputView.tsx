@@ -88,6 +88,7 @@ function useRemoveWithUndo() {
 function Item({ item, entry, depth }: { item: OutputItem; entry: OutputEntry; depth: number }) {
   const { t } = useTranslation();
   const toast = useUi((s) => s.toast);
+  const openModal = useUi((s) => s.openModal);
   const selectedId = useOutput((s) => s.selectedId);
   const leadingZero = useSettings((s) => s.leadingZero);
   const apaLocale = useSettings((s) => s.apaLocale);
@@ -174,9 +175,11 @@ function Item({ item, entry, depth }: { item: OutputItem; entry: OutputEntry; de
     case 'chart': {
       const svg = () => ref.current?.querySelector('svg');
       const name = item.title || 'chart';
+      const editChart = () => openModal({ kind: 'graphstudio', edit: { entryId: entry.id, itemId: item.id } });
       return (
-        <figure className={`output-item out-chart ${selected ? 'selected' : ''}`} id={`out-${item.id}`} data-chart-id={item.id} ref={ref as unknown as React.RefObject<HTMLElement>}>
+        <figure className={`output-item out-chart ${selected ? 'selected' : ''}`} id={`out-${item.id}`} data-chart-id={item.id} ref={ref as unknown as React.RefObject<HTMLElement>} onDoubleClick={editChart}>
           <div className="item-actions floating">
+            <IconButton icon="edit" small label={t('graphstudio.editChart')} onClick={editChart} />
             <IconButton
               icon="content_copy"
               small
