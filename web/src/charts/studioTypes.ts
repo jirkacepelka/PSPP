@@ -306,6 +306,8 @@ export interface BubbleSpec {
   xlabel: string;
   ylabel: string;
   sizeLabel: string;
+  /** name of the grouping variable, shown as the legend title */
+  byvar?: string | null;
   points: { x: number; y: number; size: number; group: string | null; label?: string }[];
 }
 

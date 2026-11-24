@@ -17,7 +17,7 @@ import {
 import { downloadPng, downloadSvg } from './export';
 import { clamp, measureText, setMeasureFont, truncateText, wrapText, type LinearScale } from './scale';
 import { tr, type ChartT } from './strings';
-import { RegCtx, StyleOverlay, axisTitle, useAxisReg, useStyle, type AxisReg } from './styleLayer';
+import { RegCtx, StyleOverlay, axisTitle, refLabelRoom, useAxisReg, useStyle, type AxisReg } from './styleLayer';
 import { fontScaleOf } from './styleSpec';
 import type { ChartStyle, View3d } from './studioTypes';
 
@@ -55,6 +55,8 @@ export interface LegendItem {
   kind: 'rect' | 'line' | 'marker';
   color: string;
   shape?: MarkerShape;
+  /** line swatches only: draw the swatch dashed */
+  dash?: boolean;
 }
 
 export interface TableSpec {
@@ -274,8 +276,10 @@ export function plotMargins(opts: {
   const xTitle = axisTitle(opts.style, 'x', opts.xTitle);
   const tickW = opts.yTickLabels.reduce((m, s) => Math.max(m, measureText(s, FONT.tick * fs)), 0);
   const left = Math.ceil(tickW + 8 + (yTitle ? 22 * fs : 0));
+  // labelled horizontal reference lines print their label to the right of the plot, clear of the data
+  const refW = refLabelRoom(opts.style);
   const bottom = Math.ceil((opts.xTickLabels === false ? 4 : 20 * fs) + (xTitle ? 22 * fs : 0) + (opts.extraBottom ?? 0));
-  return { left, right: opts.right ?? 12, top: 10, bottom };
+  return { left, right: (opts.right ?? 12) + refW, top: 10, bottom };
 }
 
 /** Horizontal gridlines + y tick labels (left of plot). */
@@ -455,7 +459,7 @@ function layoutLegend(items: LegendItem[], maxW: number, fs = 1): LegendLayout {
 
 export function LegendSwatch({ item, x, y }: { item: LegendItem; x: number; y: number }) {
   if (item.kind === 'rect') return <rect x={x + 2} y={y - 6} width={12} height={12} rx={2} style={{ fill: item.color }} />;
-  if (item.kind === 'line') return <line x1={x} x2={x + SWATCH} y1={y} y2={y} style={{ stroke: item.color, strokeWidth: 2, strokeLinecap: 'round' }} />;
+  if (item.kind === 'line') return <line x1={x} x2={x + SWATCH} y1={y} y2={y} style={{ stroke: item.color, strokeWidth: 2, strokeLinecap: item.dash ? 'butt' : 'round', ...(item.dash ? { strokeDasharray: '5 3' } : {}) }} />;
   return <Marker shape={item.shape ?? 'circle'} x={x + SWATCH / 2} y={y} r={4} color={item.color} />;
 }
 
@@ -669,6 +673,7 @@ export function ChartShell(props: ChartShellProps) {
   const width = props.width ?? measured;
   const px = width < 480 ? 12 : 16;
   const innerW = Math.max(120, width - px * 2);
+  reg.outerWidth = innerW;
 
   // Header layout (all inside the SVG, so exports carry the title and legend).
   const titleLH = Math.round(20 * fs);

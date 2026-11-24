@@ -510,6 +510,8 @@ describe('Bland-Altman', () => {
     const spec = chartOf(def('blandaltman', { a: ['a'], b: ['b'] }), data);
     const stored = studioChart(spec, def('blandaltman', { a: ['a'], b: ['b'] }), {});
     expect((stored.style as Obj).refLines).toHaveLength(3);
+    const emptied = studioChart(spec, def('blandaltman', { a: ['a'], b: ['b'] }), { refLines: [] });
+    expect((emptied.style as Obj | undefined)?.refLines).toBeUndefined();
     const own = studioChart(spec, def('blandaltman', { a: ['a'], b: ['b'] }), {
       refLines: [{ axis: 'y', value: 5 }],
       title: 'T',

@@ -2,7 +2,7 @@
    (RadarSpec in studioTypes.ts).  SPDX-License-Identifier: GPL-3.0-or-later */
 
 import { ChartShell, FONT, Marker, markTip, seriesColor, type ChartCommonProps, type LegendItem } from './shell';
-import { clamp, formatValue, measureText, niceTicks, tickFormatter, ticksWithin, truncateText } from './scale';
+import { clamp, formatValue, measureText, niceTicks, tickFormatter, ticksWithin, wrapText } from './scale';
 import { radarAngle, radarFraction, radarPath, radarPoint, radarRange } from './phase4Math';
 import { EmptyPlot } from './p4shared';
 import { tr } from './strings';
@@ -45,8 +45,11 @@ export function RadarChart({ spec, ...c }: { spec: RadarSpec } & ChartCommonProp
         if (!(hi > lo)) [lo, hi] = [dMin, dMax];
         const ring = ticksWithin(lo, hi, 4);
         const fr = tickFormatter(ring.step, ring.ticks, locale);
-        const labelMax = Math.min(area.width * 0.28, Math.max(...spec.axes.map((a) => measureText(a, size))));
-        const R = Math.max(30, Math.min(area.height / 2 - size - 10, area.width / 2 - labelMax - 12));
+        // axis names wrap to two lines inside a side margin of about a fifth of the width
+        const labelMax = Math.ceil(Math.min(Math.max(56, area.width * 0.2), Math.max(...spec.axes.map((a) => measureText(a, size)))));
+        const lineH = size + 2;
+        const wrapped = spec.axes.map((a) => wrapText(a, labelMax, size, 400, 2));
+        const R = Math.max(30, Math.min(area.height / 2 - 2 * lineH - 8, area.width / 2 - labelMax - 8));
         const cx = area.width / 2;
         const cy = area.height / 2;
         const grid = style?.grid !== false;
@@ -81,14 +84,22 @@ export function RadarChart({ spec, ...c }: { spec: RadarSpec } & ChartCommonProp
                       </text>
                     ),
                   )}
-              {spec.axes.map((a, i) => {
+              {spec.axes.map((_a, i) => {
                 const ang = radarAngle(i, n);
-                const [x, y] = radarPoint(cx, cy, R + 8, i, n, 1);
+                const lines = wrapped[i];
+                const [x, y0] = radarPoint(cx, cy, R + 8, i, n, 1);
                 const dx = Math.cos(ang);
+                const dy = Math.sin(ang);
                 const anchor = Math.abs(dx) < 0.25 ? 'middle' : dx > 0 ? 'start' : 'end';
+                // names above the rim grow upwards, below it downwards, at the sides they are centred on the spoke
+                const first = dy < -0.5 ? y0 - (lines.length - 1) * lineH - 4 : dy > 0.5 ? y0 + 6 : y0 - ((lines.length - 1) * lineH) / 2;
                 return (
-                  <text key={i} className="pspp-chart__tick pspp-chart__tick--cat" x={x} y={y + Math.sin(ang) * 6} textAnchor={anchor} dominantBaseline="central">
-                    {truncateText(a, labelMax + 4, size)}
+                  <text key={i} className="pspp-chart__tick pspp-chart__tick--cat" textAnchor={anchor} dominantBaseline="central">
+                    {lines.map((l, k) => (
+                      <tspan key={k} x={x} y={first + k * lineH}>
+                        {l}
+                      </tspan>
+                    ))}
                   </text>
                 );
               })}

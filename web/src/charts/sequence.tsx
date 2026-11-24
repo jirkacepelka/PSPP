@@ -42,7 +42,7 @@ export function SequenceChart({ spec, ...c }: { spec: SequenceSpec } & ChartComm
   });
   const legend: LegendItem[] | undefined =
     named || bandInfo.length
-      ? [...series.map((s) => ({ label: s.name, kind: 'line' as const, color: s.color })), ...bandInfo.map((b) => ({ label: b.name, kind: 'rect' as const, color: b.color }))]
+      ? [...series.map((s, i) => ({ label: s.name, kind: 'line' as const, color: s.color, dash: spec.series[i].dash === true })), ...bandInfo.map((b) => ({ label: b.name, kind: 'rect' as const, color: b.color }))]
       : undefined;
   const isDate = spec.xFormat === 'date';
   const fx = (v: number) => (isDate ? formatDay(v, locale) : formatValue(v, locale));

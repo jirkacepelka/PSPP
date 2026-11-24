@@ -20,6 +20,8 @@ export interface AxisReg {
   height?: number;
   /** Pixel boxes of drawn value labels; annotations are placed clear of them. Reset by the shell on every render. */
   avoid?: Box[];
+  /** width of the whole plot area (set by the shell): reference labels go outside the plot when the margin holds them */
+  outerWidth?: number;
 }
 
 export interface Box {
@@ -35,6 +37,17 @@ const hit = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y
 export function avoidText(reg: AxisReg, x: number, baseline: number, width: number, size: number, anchor: 'start' | 'middle' | 'end' = 'middle'): void {
   const x0 = anchor === 'middle' ? x - width / 2 : anchor === 'start' ? x : x - width;
   (reg.avoid ??= []).push({ x0, x1: x0 + width, y0: baseline - size, y1: baseline + 3 });
+}
+
+/** Widest label a horizontal reference line may print right of the plot (px). */
+const REF_LABEL_MAX = 96;
+
+/** Extra right margin that lets labelled horizontal reference lines print their label outside the plot. */
+export function refLabelRoom(style?: ChartStyle): number {
+  const labels = (style?.refLines ?? []).filter((l) => l.axis === 'y' && l.label);
+  if (!labels.length) return 0;
+  const fsz = 11 * (style?.fontScale ?? 1);
+  return Math.ceil(Math.max(...labels.map((l) => measureText(truncateText(l.label!, REF_LABEL_MAX, fsz), fsz)))) + 8;
 }
 
 const NOOP_REG: AxisReg = {};
@@ -116,13 +129,20 @@ export function StyleOverlay({ reg, style, fs, uid }: { reg: AxisReg; style?: Ch
           if (p < top - 0.5 || p > bottom + 0.5) return null;
           const y = Math.round(p) + 0.5;
           const lw = l.label ? measureText(truncateText(l.label, Math.max(60, width * 0.6), fsz), fsz) : 0;
+          const outText = l.label ? truncateText(l.label, REF_LABEL_MAX, fsz) : '';
+          const outside = !!l.label && reg.outerWidth !== undefined && right + 6 + measureText(outText, fsz) <= reg.outerWidth + 0.5;
           const labelBox = (ty: number): Box => ({ x0: right - 4 - lw, x1: right - 4, y0: ty - fsz, y1: ty + 3 });
           // above the line unless the room is short or a value label is there already
           const below = y < top + fsz + 6 || ((reg.avoid ?? []).some((b) => hit(b, labelBox(y - 5))) && !(reg.avoid ?? []).some((b) => hit(b, labelBox(y + fsz))));
           return (
             <g key={i}>
               <line className="pspp-chart__ref pspp-chart__ref--user" x1={left} x2={right} y1={y} y2={y} style={{ stroke: color, strokeDasharray: dash }} />
-              {l.label && (
+              {l.label && outside && (
+                <text className="pspp-chart__note-text" x={right + 6} y={y} dominantBaseline="central" style={{ fontSize: fsz }}>
+                  {outText}
+                </text>
+              )}
+              {l.label && !outside && (
                 <text className="pspp-chart__note-text" x={right - 4} y={below ? y + fsz : y - 5} textAnchor="end" style={{ fontSize: fsz }}>
                   {truncateText(l.label, Math.max(60, width * 0.6), fsz)}
                 </text>

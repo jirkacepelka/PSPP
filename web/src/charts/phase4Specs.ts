@@ -30,7 +30,7 @@ export function parseBubble(c: Obj, title: string): BubbleSpec {
     const label = str(p.label);
     points.push({ x, y, size, group: strOrNull(p.group), ...(label ? { label } : {}) });
   }
-  return { type: 'bubble', title, xlabel: str(c.xlabel), ylabel: str(c.ylabel), sizeLabel: str(c.sizeLabel), points };
+  return { type: 'bubble', title, xlabel: str(c.xlabel), ylabel: str(c.ylabel), sizeLabel: str(c.sizeLabel), ...(str(c.byvar) ? { byvar: str(c.byvar) } : {}), points };
 }
 
 export function parseMosaic(c: Obj, title: string): MosaicSpec {

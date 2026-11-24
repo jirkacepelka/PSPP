@@ -71,6 +71,7 @@ export function BubbleChart({ spec, ...c }: { spec: BubbleSpec } & ChartCommonPr
       {...c}
       title={title}
       legend={legend}
+      legendTitle={grouped ? spec.byvar || undefined : undefined}
       ariaLabel={`${title}. ${xName} / ${yName} / ${sName}. ${tr(t, 'ariaPoints', { count: spec.points.length })}${grouped ? ', ' + tr(t, 'ariaGroups', { count: groups.length }) : ''}.`}
       table={table}
       plotHeight={(w) => clamp(Math.round(w * 0.6), 260, 460) + stripH(w)}

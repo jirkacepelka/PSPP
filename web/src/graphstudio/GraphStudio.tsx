@@ -107,6 +107,23 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
     }
   }, [appearanceOnly, dataset, live, tf]);
 
+  // Default reference lines computed with the chart (Bland-Altman limits) are seeded into the style once, so the Elements
+  // tab shows them; lines the user changed since are kept (only an untouched or empty list is replaced).
+  const seeded = useRef<string>('');
+  useEffect(() => {
+    if (appearanceOnly || !result?.ok) return;
+    const st = result.chart.style as ChartStyle | undefined;
+    const next = JSON.stringify(st?.refLines ?? []);
+    if (next === seeded.current) return;
+    const prev = seeded.current;
+    seeded.current = next;
+    setStyle((s) => {
+      const cur = JSON.stringify(s.refLines ?? []);
+      if (cur !== '[]' && cur !== (prev || '[]')) return s;
+      return { ...s, refLines: st?.refLines?.length ? st.refLines : undefined };
+    });
+  }, [appearanceOnly, result]);
+
   const spec = result?.ok ? result.chart : appearanceOnly && stored ? stored : null;
   const preview = useMemo(() => {
     if (appearanceOnly) return target ? restyleChart(target.item.chart, style, view) : null;

@@ -11869,7 +11869,8 @@
      "group": "Americas",
      "label": "Lima"
     }
-   ]
+   ],
+   "byvar": "Region"
   }
  },
  "bubble-many": {

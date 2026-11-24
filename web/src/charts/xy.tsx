@@ -490,6 +490,7 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
       {...c}
       title={title}
       legend={legend}
+      legendTitle={spec.byvar ?? undefined}
       ariaLabel={`${title}. ${tr(t, 'ariaPoints', { count: spec.points.length })}${spec.byvar ? ', ' + tr(t, 'ariaGroups', { count: series.length }) : ''}.`}
       table={{ ...xyTable(xName, yName, series, locale, spec.byvar ?? undefined), note: fitResults.map(fitLabel).join('; ') || undefined }}
       plotHeight={marginal ? (w) => clamp(Math.round(w * 0.56), 240, 420) + marginalSize(w) : undefined}

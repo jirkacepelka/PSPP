@@ -1,0 +1,13 @@
+import { createRoot } from 'react-dom/client';
+import { PsppChart } from '../src/charts';
+import fixtures from '../src/charts/fixtures.json';
+const q = new URLSearchParams(location.search);
+const theme = q.get('theme') ?? 'light';
+document.documentElement.setAttribute('data-theme', theme);
+document.body.style.background = theme === 'dark' ? '#1a1a19' : '#fcfcfb';
+const names = (q.get('fx') ?? '').split(',').filter(Boolean);
+const w = q.get('w') ? Number(q.get('w')) : undefined;
+const style = q.get('style') ? JSON.parse(q.get('style')!) : undefined;
+const fx = fixtures as Record<string, any>;
+createRoot(document.getElementById('root')!).render(<div>{names.map((n) => { const item = fx[n]; const chart = style ? { ...item, chart: { ...item.chart, style } } : item; return <div key={n} style={{ width: w, marginBottom: 16 }}><PsppChart chart={chart} width={w} /></div>; })}</div>);
+setTimeout(() => ((window as any).__ready = true), 600);

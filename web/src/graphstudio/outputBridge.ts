@@ -57,8 +57,11 @@ export function studioChart(spec: Record<string, unknown>, def: GraphDef, style:
   const three = is3d(def.kind);
   if (three && view) out.view3d = view;
   // appearance defaults carried by the spec itself (e.g. the Bland-Altman limits) sit under the user's style
+  const { refLines: defaultLines, ...defaults } = (isObj(spec.style) ? spec.style : {}) as ChartStyle;
+  // a reference line list the user has emptied stays empty; otherwise the spec's default lines show
   const s = cleanStyle({
-    ...(isObj(spec.style) ? (spec.style as ChartStyle) : {}),
+    ...defaults,
+    ...(Array.isArray(style.refLines) ? {} : { refLines: defaultLines }),
     ...cleanStyle(three ? style3d(style) : style),
   });
   if (spec.type === 'panels') out.panels = stylePanels(spec.panels, def, s);
