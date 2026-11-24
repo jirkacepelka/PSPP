@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import fixtures from './fixtures.json';
 import { parseChart } from './types';
 import { applyDomain, parseStyle } from './styleSpec';
-import { cumulativePercent, dotRadius, fitCurve, loessAt, polyFit, rampColor, rampPercent, stackSegments } from './studioMath';
+import { alignedTicks, clusterBoxes, cumulativePercent, dotRadius, fitBand, fitCurve, intTicks, loessAt, polyFit, rampColor, rampPercent, stackSegments, stepPoints, tQuantile975 } from './studioMath';
 import { chartStrings } from './strings';
 import { niceTicks } from './scale';
 
@@ -218,5 +218,105 @@ describe('strings', () => {
     for (const k of ['areaChart', 'dotPlot', 'paretoChart', 'scatterMatrix', 'heatmap', 'pyramid', 'cumulativePercent']) {
       expect((chartStrings.cs as Record<string, string>)[k]).toBeTruthy();
     }
+  });
+});
+
+describe('phase 2 parsing', () => {
+  const types = ['highlow-hlc', 'highlow-range', 'highlow-diff', 'dualaxis', 'probplot-qq', 'probplot-pp', 'sequence', 'control', 'density', 'violin', 'panels'];
+  const want = ['highlow', 'highlow', 'highlow', 'dualaxis', 'probplot', 'probplot', 'sequence', 'control', 'density', 'violin', 'panels'];
+  it('every fixture parses to its type', () => {
+    types.forEach((k, i) => expect(parseChart(fx[k]).type).toBe(want[i]));
+  });
+  it('is defensive about garbage', () => {
+    for (const type of ['highlow', 'dualaxis', 'probplot', 'sequence', 'control', 'density', 'violin', 'panels']) {
+      expect(parseChart({ type }).type).toBe(type);
+      expect(parseChart({ type, categories: 5, points: 'x', x: [null], series: [1], curves: [2], violins: [{}], panels: [7] }).type).toBe(type);
+    }
+  });
+  it('control computes flags from limits when absent and pads limits', () => {
+    const s = parseChart({ type: 'control', values: [1, 9, 2], center: 2, ucl: [5, 5, 5], lcl: [0] });
+    if (s.type !== 'control') throw new Error('type');
+    expect(s.flags).toEqual([false, true, false]);
+    expect(s.lcl).toEqual([0, 2, 2]);
+  });
+  it('highlow pads short arrays; probplot sorts and drops a degenerate reference', () => {
+    const h = parseChart({ type: 'highlow', mode: 'x', categories: ['a', 'b'], high: [3], low: [1, 2] });
+    if (h.type !== 'highlow') throw new Error('type');
+    expect(h.mode).toBe('hlc');
+    expect(h.high).toEqual([3, null]);
+    const p = parseChart({ type: 'probplot', points: [[2, 1], [1, 5], ['a', 1]], reference: [[0, 0], [0, 0]] });
+    if (p.type !== 'probplot') throw new Error('type');
+    expect(p.points).toEqual([[1, 5], [2, 1]]);
+    expect(p.reference).toBeNull();
+  });
+  it('violin drops incomplete violins; sequence drops positions without x', () => {
+    const v = parseChart({ type: 'violin', violins: [{ label: 'a', points: [[0, 1]], median: 0, q1: 0, q3: 1 }, { label: 'b', points: [[0, 1], [1, 2]], median: 0.5, q1: 0.8, q3: 0.2 }] });
+    if (v.type !== 'violin') throw new Error('type');
+    expect(v.violins).toHaveLength(1);
+    expect(v.violins[0].q1).toBe(0.2);
+    const q = parseChart({ type: 'sequence', x: [1, null, 3], series: [{ name: 'a', values: [1, 2, 3] }] });
+    if (q.type !== 'sequence') throw new Error('type');
+    expect(q.x).toEqual([1, 3]);
+    expect(q.series[0].values).toEqual([1, 3]);
+  });
+  it('panels do not nest and keep columns in range', () => {
+    const p = parseChart({ type: 'panels', columns: 99, panels: [{ title: 'a', chart: { type: 'panels', panels: [] } }, { title: 'b', chart: { type: 'pie', slices: [] } }, { title: 'c' }] });
+    if (p.type !== 'panels') throw new Error('type');
+    expect(p.panels.map((x) => x.title)).toEqual(['b']);
+    expect(p.columns).toBe(6);
+  });
+  it('boxplot group and scatter fitCi', () => {
+    const b = parseChart(fx['boxplot-clustered']);
+    if (b.type !== 'boxplot') throw new Error('type');
+    expect(b.boxes[0].group).toBe('Male');
+    const s = parseChart(fx['scatter-fit-ci']);
+    expect(s.type === 'scatter' && s.fitCi).toBe(true);
+  });
+});
+
+describe('phase 2 math', () => {
+  it('clusterBoxes groups boxes of one label', () => {
+    const l = clusterBoxes([{ label: 'a', group: 'x' }, { label: 'a', group: 'y' }, { label: 'b', group: 'y' }]);
+    expect(l.clustered).toBe(true);
+    expect(l.labels).toEqual(['a', 'b']);
+    expect(l.groups).toEqual(['x', 'y']);
+    expect(l.cell).toEqual([{ li: 0, gi: 0 }, { li: 0, gi: 1 }, { li: 1, gi: 1 }]);
+    expect(clusterBoxes([{ label: 'a' }, { label: 'a' }]).clustered).toBe(false);
+  });
+  it('t quantile matches the table and tends to the normal', () => {
+    expect(tQuantile975(10)).toBeCloseTo(2.228, 3);
+    expect(tQuantile975(40)).toBeCloseTo(2.021, 2);
+    expect(tQuantile975(1e6)).toBeCloseTo(1.96, 2);
+  });
+  it('linear band is centred on the fit, widest at the ends, and zero without noise', () => {
+    const pts: [number, number][] = Array.from({ length: 30 }, (_, i) => [i, 2 * i + 1 + (i % 2 ? 0.5 : -0.5)]);
+    const band = fitBand(pts, 'linear', 0, 29, 30)!;
+    expect(band).toHaveLength(30);
+    for (const b of band) expect(b.hi).toBeGreaterThan(b.lo);
+    const w = (i: number) => band[i].hi - band[i].lo;
+    expect(w(0)).toBeGreaterThan(w(15));
+    expect(w(29)).toBeGreaterThan(w(15));
+    const exact: [number, number][] = Array.from({ length: 10 }, (_, i) => [i, 3 * i]);
+    expect(fitBand(exact, 'linear', 0, 9, 5)!.every((b) => b.hi - b.lo < 1e-6)).toBe(true);
+    expect(fitBand(exact.slice(0, 2), 'linear', 0, 1, 5)).toBeNull();
+  });
+  it('loess band exists and brackets the fit', () => {
+    const pts: [number, number][] = Array.from({ length: 40 }, (_, i) => [i, Math.sin(i / 6) * 5 + (i % 3)]);
+    const band = fitBand(pts, 'loess', 0, 39, 20)!;
+    expect(band.length).toBeGreaterThan(10);
+    for (const b of band) expect(b.lo).toBeLessThan(b.hi);
+  });
+  it('alignedTicks has exactly n intervals and covers the data', () => {
+    for (const [lo, hi] of [[0, 97], [0.12, 0.26], [-3, 40], [5, 5]] as const) {
+      const t = alignedTicks(lo, hi, 5);
+      expect(t.ticks).toHaveLength(6);
+      expect(t.domain[0]).toBeLessThanOrEqual(lo);
+      expect(t.domain[1]).toBeGreaterThanOrEqual(hi);
+    }
+  });
+  it('intTicks and stepPoints', () => {
+    expect(intTicks(3, 6).ticks).toEqual([1, 2, 3]);
+    expect(intTicks(100, 5).ticks.every(Number.isInteger)).toBe(true);
+    expect(stepPoints([1, 2], [5, 6])).toEqual([[0.5, 5], [1.5, 5], [1.5, 6], [2.5, 6]]);
   });
 });

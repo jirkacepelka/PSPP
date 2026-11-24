@@ -129,6 +129,9 @@ const catX = (min = 1) => slot('x', 'graphstudio.slot.category', 'category', { m
 const groupSlot = (min: number, label = 'graphstudio.slot.group') => slot('group', label, 'category', { min, hint: 'graphstudio.slotHint.group' });
 const valueSlot = (min: number, label = 'graphstudio.slot.value') => slot('value', label, 'numeric', { min, hint: 'graphstudio.slotHint.value' });
 
+/** Space the categories in proportion to their numeric value (years, ages); the category variable must be numeric. */
+const NUMERIC_AXIS: OptionDef = { id: 'numericAxis', type: 'bool', label: 'graphstudio.opt.numericAxis' };
+
 const DISTS: Choice[] = ['normal', 'exponential', 'uniform', 'lognormal'].map((value) => ({ value, label: `graphstudio.dist.${value}` }));
 
 const v = (id: string, label: string, icon: string): VariantDef => ({ id, label: `graphstudio.variant.${label}`, icon });
@@ -172,8 +175,9 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
       { id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: ALL_FUNCS },
       ...intervalOptions((d) => opt(d, 'func') === 'mean'),
       { id: 'markers', type: 'bool', label: 'graphstudio.opt.markers' },
+      NUMERIC_AXIS,
     ],
-    defaults: { func: 'mean', interval: 'none', level: 95, mult: 2, markers: true },
+    defaults: { func: 'mean', interval: 'none', level: 95, mult: 2, markers: true, numericAxis: false },
   },
   area: {
     kind: 'area',
@@ -182,8 +186,8 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     icon: 'area_chart',
     variants: [v('simple', 'areaSimple', 'area_chart'), v('stacked', 'areaStacked', 'stacked_line_chart'), v('stacked100', 'areaStacked100', 'percent')],
     slots: (d) => summarySlots(d, catX(), groupSlot(grouped(d, 'stacked', 'stacked100') ? 1 : 0, 'graphstudio.slot.areas')),
-    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: (d) => (grouped(d, 'stacked', 'stacked100') ? ADDITIVE_FUNCS : ALL_FUNCS) }],
-    defaults: { func: 'count' },
+    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: (d) => (grouped(d, 'stacked', 'stacked100') ? ADDITIVE_FUNCS : ALL_FUNCS) }, NUMERIC_AXIS],
+    defaults: { func: 'count', numericAxis: false },
   },
   pie: {
     kind: 'pie',
@@ -235,8 +239,8 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     icon: 'vital_signs',
     variants: [v('simple', 'errSimple', 'vital_signs'), v('clustered', 'errClustered', 'bar_chart_4_bars')],
     slots: (d) => [catX(), ...(d.variant === 'clustered' ? [groupSlot(1, 'graphstudio.slot.cluster')] : []), valueSlot(1, 'graphstudio.slot.measure')],
-    options: intervalOptions(undefined, false),
-    defaults: { interval: 'ci', level: 95, mult: 2 },
+    options: [...intervalOptions(undefined, false), NUMERIC_AXIS],
+    defaults: { interval: 'ci', level: 95, mult: 2, numericAxis: false },
   },
   scatter: {
     kind: 'scatter',
@@ -314,8 +318,8 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
       slot('low', 'graphstudio.slot.low', 'numeric', { min: 1, hint: 'graphstudio.slotHint.value' }),
       ...(d.variant === 'hlc' ? [slot('close', 'graphstudio.slot.close', 'numeric', { hint: 'graphstudio.slotHint.value' })] : []),
     ],
-    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: VALUE_FUNCS }],
-    defaults: { func: 'mean' },
+    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: VALUE_FUNCS }, NUMERIC_AXIS],
+    defaults: { func: 'mean', numericAxis: false },
   },
   dualaxis: {
     kind: 'dualaxis',
@@ -483,8 +487,6 @@ export function missingSlots(def: GraphDef): SlotDef[] {
 
 /** Above this many categories the studio warns that the chart may be crowded. */
 export const CATEGORY_WARN = 50;
-/** Hard safety ceiling: further categories are left out so the computation stays fast. */
-export const CATEGORY_CAP = 500;
 /** Most levels of a panel variable. */
 export const MAX_PANELS = 12;
 
@@ -504,8 +506,8 @@ export function rejection(s: SlotDef, variable: Variable, distinct: number): Rej
 /** Variable names bound anywhere in the definition. */
 export const boundNames = (def: GraphDef): string[] => [...new Set(Object.values(def.bind).flat())];
 
-/** Cheap distinct count of a column, capped just above CATEGORY_CAP. */
-export function distinctCapped(col: Cell[] | undefined, cap = CATEGORY_CAP + 1): number {
+/** Cheap distinct count of a column, capped just above CATEGORY_WARN. */
+export function distinctCapped(col: Cell[] | undefined, cap = CATEGORY_WARN + 1): number {
   const s = new Set<string | number>();
   for (const x of col ?? []) {
     if (x === null || x === '') continue;

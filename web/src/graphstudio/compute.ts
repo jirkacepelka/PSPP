@@ -9,7 +9,7 @@ import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef, GraphKind } from '../charts/studioTypes';
 import { activeRows, caseCount, isMissing, valueText, varTitle, weights, type Cell } from '../ext/data';
 import { lgamma, normCdf, normInv, tInv } from '../ext/dist';
-import { CATEGORY_CAP, CATEGORY_WARN, MAX_PANELS, needsVariable, slotsOf, missingSlots } from './model';
+import { CATEGORY_WARN, MAX_PANELS, needsVariable, slotsOf, missingSlots } from './model';
 
 export type Tf = (key: string, args?: Record<string, unknown>) => string;
 
@@ -112,9 +112,9 @@ export function summarize(func: Summary, vals: Obs[]): number | null {
     case 'sum':
       return vals.reduce((s, p) => s + p.y * p.w, 0);
     case 'min':
-      return Math.min(...vals.map((p) => p.y));
+      return vals.reduce((m, p) => Math.min(m, p.y), Infinity);
     case 'max':
-      return Math.max(...vals.map((p) => p.y));
+      return vals.reduce((m, p) => Math.max(m, p.y), -Infinity);
     case 'sd': {
       if (W <= 1) return null;
       const m = vals.reduce((s, p) => s + p.y * p.w, 0) / W;
@@ -157,8 +157,8 @@ interface Prepared {
   w: number[];
   cols: Record<string, Col[]>;
   info: ComputeInfo;
-  /** category variables with many values: [name, distinct count, values left out above the ceiling] */
-  crowded: { name: string; count: number; left: number }[];
+  /** category variables with many values: name and number of distinct values */
+  crowded: { name: string; count: number }[];
 }
 
 const keyOf = (x: Cell) => (typeof x === 'number' ? `n${x}` : `s${String(x).trimEnd()}`);
@@ -209,22 +209,15 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
     w = new Array(active.length).fill(1);
   }
   const all = Object.values(cols).flat();
-  let rows = active.filter((r) => all.every((c) => !isMissing(c.v, c.col[r])));
-  // category variables: no limit on distinct values, but a safety ceiling keeps the computation fast
+  const rows = active.filter((r) => all.every((c) => !isMissing(c.v, c.col[r])));
+  // category variables: any number of distinct values is fine, a note warns when the chart may be crowded
   const crowded: Prepared['crowded'] = [];
   for (const s of slots) {
     if (s.accepts !== 'category') continue;
     for (const c of cols[s.id]) {
-      const uniq = new Map<string, Cell>();
-      for (const r of rows) uniq.set(keyOf(c.col[r]), c.col[r]);
-      if (uniq.size <= CATEGORY_WARN) continue;
-      let left = 0;
-      if (uniq.size > CATEGORY_CAP) {
-        const keep = new Set([...uniq.values()].sort(cmpCells).slice(0, CATEGORY_CAP).map(keyOf));
-        rows = rows.filter((r) => keep.has(keyOf(c.col[r])));
-        left = uniq.size - CATEGORY_CAP;
-      }
-      crowded.push({ name: varTitle(c.v), count: uniq.size, left });
+      const uniq = new Set<string>();
+      for (const r of rows) uniq.add(keyOf(c.col[r]));
+      if (uniq.size > CATEGORY_WARN) crowded.push({ name: varTitle(c.v), count: uniq.size });
     }
   }
   const total = caseCount(ds);
@@ -355,6 +348,15 @@ function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
   };
 }
 
+/**
+ * Values of the category variable as numbers when the numeric axis option is on (years, ages), so the
+ * x axis can be proportional; null otherwise. The categories themselves stay in value order.
+ */
+function numericX(def: GraphDef, c: Cells, p: Prepared): number[] | null {
+  if (def.options.numericAxis !== true || p.cols.x[0].v.type !== 'numeric') return null;
+  return c.x.cells.every((x) => typeof x === 'number') ? (c.x.cells as number[]) : null;
+}
+
 function lineSeries(def: GraphDef, p: Prepared, t: Tf, withLines: boolean): Record<string, unknown> {
   const func = withLines ? optStr(def, 'func', 'mean') : 'mean';
   const c = cellsOf(p);
@@ -373,7 +375,11 @@ function lineSeries(def: GraphDef, p: Prepared, t: Tf, withLines: boolean): Reco
   });
   const xTitle = varTitle(p.cols.x[0].v);
   const gTitle = p.cols.group?.[0] ? varTitle(p.cols.group[0].v) : undefined;
+  const xs = numericX(def, c, p);
+  // a line over a numeric x without error bars is a sequence chart (x proportional to the value)
+  if (xs && withLines && !hasInterval) return { type: 'sequence', title: byTitle(t, y, xTitle, gTitle), xlabel: xTitle, ylabel: y, x: xs, series: series.map((s) => ({ name: s.name, values: s.values })) };
   return {
+    ...(xs ? { xValues: xs } : {}),
     type: 'line',
     title: byTitle(t, y, xTitle, gTitle),
     xlabel: xTitle,
@@ -393,7 +399,9 @@ function areaChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
   const val = p.cols.value?.[0];
   const y = funcLabel(t, func, needsVariable(func) ? val : undefined);
   const gTitle = p.cols.group?.[0] ? varTitle(p.cols.group[0].v) : '';
+  const xs = numericX(def, c, p);
   return {
+    ...(xs ? { xValues: xs } : {}),
     type: 'area',
     title: byTitle(t, y, varTitle(p.cols.x[0].v), gTitle || undefined),
     xlabel: varTitle(p.cols.x[0].v),
@@ -555,10 +563,16 @@ function dotChart(def: GraphDef, p: Prepared): Record<string, unknown> {
   const distinct = new Set(sorted).size;
   const integer = sorted.every((x) => Number.isInteger(x));
   const bins: { x: number; count: number; group?: string | null }[] = [];
+  const seen = new Map<string, { x: number; count: number }>();
   const add = (x: number, group: string | null, w: number) => {
-    const hit = bins.find((b) => b.x === x && (b.group ?? null) === group);
+    const key = `${x}|${group ?? ''}`;
+    const hit = seen.get(key);
     if (hit) hit.count += w;
-    else bins.push({ x, count: w, ...(g ? { group } : {}) });
+    else {
+      const b = { x, count: w, ...(g ? { group } : {}) };
+      seen.set(key, b);
+      bins.push(b);
+    }
   };
   const width = optNum(def, 'binWidth', 0);
   if (!width && integer && distinct <= 60) {
@@ -676,7 +690,9 @@ function highLowChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
   const pick = <T,>(a: T[]) => keep.map((i) => a[i]);
   const names = { x: varTitle(p.cols.x[0].v), high: varTitle(p.cols.high[0].v), low: varTitle(p.cols.low[0].v), close: p.cols.close?.[0] ? varTitle(p.cols.close[0].v) : '' };
   const key = mode === 'hlc' ? (close ? 'hlc' : 'hl') : mode;
+  const xs = numericX(def, c, p);
   return {
+    ...(xs ? { xValues: pick(xs) } : {}),
     type: 'highlow',
     title: t(`graphstudio.chart.highlow.${key}`, names),
     xlabel: names.x,
@@ -1053,7 +1069,7 @@ interface Extent {
 
 const rangeOf = (vals: unknown[]): Range | undefined => {
   const f = vals.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
-  return f.length ? [Math.min(...f), Math.max(...f)] : undefined;
+  return f.length ? [f.reduce((m, v) => Math.min(m, v), Infinity), f.reduce((m, v) => Math.max(m, v), -Infinity)] : undefined;
 };
 type Obj = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const list = (v: unknown): any[] => (Array.isArray(v) ? v : []); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -1306,6 +1322,6 @@ export function computeChart(def: GraphDef, ds: Dataset, t: Tf): ComputeResult {
     chart = r;
   } else chart = buildOne(def, p, t, notes);
   if (!chart) return { ok: false, reason: 'nodata' };
-  for (const c of p.crowded) notes.push(c.left ? t('graphstudio.note.categoriesCut', { name: c.name, count: c.count, left: c.left, max: CATEGORY_CAP }) : t('graphstudio.note.manyCategories', { name: c.name, count: c.count }));
+  for (const c of p.crowded) notes.push(t('graphstudio.note.manyCategories', { name: c.name, count: c.count }));
   return { ok: true, chart, info: p.info, notes: [...new Set(notes)] };
 }

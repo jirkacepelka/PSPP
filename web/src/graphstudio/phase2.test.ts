@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef } from '../charts/studioTypes';
 import { blom, c4, computeChart, D2, kde, niceRange, quickStats, silverman, standardQuantile } from './compute';
-import { CATEGORY_CAP, defaultDef, optionsOf, rejection, slotsOf, withVariant } from './model';
+import { defaultDef, optionsOf, rejection, slotsOf, withVariant } from './model';
 import { studioChart } from './outputBridge';
 import { labelNumber, quickLines } from './Properties';
 import { seriesNames } from './series';
@@ -295,11 +295,45 @@ describe('many categories', () => {
   it('is quiet up to 50', () => {
     expect(ok(def('bar', 'simple', { x: ['c'] }), big(50)).notes).toEqual([]);
   });
-  it('caps at the ceiling and says how many were left out', () => {
-    const r = ok(def('bar', 'simple', { x: ['c'] }), big(CATEGORY_CAP + 37));
-    expect((r.chart.bars as unknown[]).length).toBe(CATEGORY_CAP);
-    expect(r.notes.some((n) => n.includes('categoriesCut') && n.includes('"left":37'))).toBe(true);
-    expect(r.info.used).toBe(CATEGORY_CAP);
+  it('never drops categories and stays fast with 5000 of them, for every category based kind', () => {
+    const n = 5000;
+    const d = ds([['c', Array.from({ length: n }, (_, i) => 1000 + i)], ['y', Array.from({ length: n }, (_, i) => (i * 7) % 101)], ['z', Array.from({ length: n }, (_, i) => i % 13)]]);
+    const started = Date.now();
+    const defs: [GraphDef, string][] = [
+      [def('bar', 'simple', { x: ['c'], value: ['y'] }, { func: 'mean' }), 'bars'],
+      [def('line', 'simple', { x: ['c'], value: ['y'] }), 'series'],
+      [def('line', 'simple', { x: ['c'], value: ['y'] }, { numericAxis: true }), 'x'],
+      [def('area', 'simple', { x: ['c'], value: ['y'] }, { func: 'mean' }), 'categories'],
+      [def('errorbar', 'simple', { x: ['c'], value: ['y'] }), 'categories'],
+      [def('highlow', 'range', { x: ['c'], high: ['y'], low: ['z'] }), 'categories'],
+      [def('dualaxis', 'barline', { x: ['c'], left: ['y'], right: ['z'] }), 'categories'],
+      [def('pareto', 'simple', { x: ['c'] }), 'bars'],
+      [def('line', 'multiple', { x: ['c'], group: ['z'], value: ['y'] }), 'categories'],
+    ];
+    for (const [d2, field] of defs) {
+      const r = ok(d2, d);
+      expect(r.notes.some((x) => x.includes('manyCategories'))).toBe(true);
+      expect(r.info.used).toBe(n);
+      if (field === 'categories') expect((r.chart.categories as unknown[]).length).toBe(n);
+      if (field === 'bars') expect((r.chart.bars as unknown[]).length).toBe(n);
+      if (field === 'x') expect((r.chart.x as unknown[]).length).toBe(n);
+      if (field === 'series') expect((r.chart.categories as unknown[]).length).toBe(n);
+    }
+    const dotted = ok(def('dot', 'simple', { value: ['y'] }, { binWidth: 0.001 }), d);
+    expect(dotted.info.used).toBe(n);
+    // generous: the point is that nothing is quadratic (5000 x 5000 scans would take far longer)
+    expect(Date.now() - started).toBeLessThan(5000);
+  });
+  it('numeric axis: a line becomes a sequence spec over the values, other kinds add xValues', () => {
+    const d = ds([['year', [1990, 2000, 1995, 2000, 1990, 1995]], ['n', [1, 2, 3, 4, 5, 6]]]);
+    const line = ok(def('line', 'simple', { x: ['year'], value: ['n'] }, { numericAxis: true }), d);
+    expect(line.chart.type).toBe('sequence');
+    expect(line.chart.x).toEqual([1990, 1995, 2000]);
+    expect((line.chart.series as { values: number[] }[])[0].values).toEqual([3, 4.5, 3]);
+    expect(ok(def('line', 'simple', { x: ['year'], value: ['n'] }, { numericAxis: true, interval: 'ci' }), d).chart.type).toBe('line');
+    const area = ok(def('area', 'simple', { x: ['year'], value: ['n'] }, { func: 'mean', numericAxis: true }), d);
+    expect(area.chart.xValues).toEqual([1990, 1995, 2000]);
+    expect(ok(def('line', 'simple', { x: ['year'], value: ['n'] }), d).chart.type).toBe('line');
   });
 });
 
