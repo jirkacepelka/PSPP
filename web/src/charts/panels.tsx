@@ -65,7 +65,7 @@ export function PanelsChart({ spec, t, locale, width: fixedWidth, height }: { sp
                   {p.title}
                 </div>
               )}
-              <PsppChart chart={p.chart} t={t} locale={locale} height={panelH} embedded={{ legend: i === 0, table: showTable }} />
+              <PsppChart chart={p.chart} t={t} locale={locale} height={panelH} embedded={{ legend: true, table: showTable }} />
             </div>
           ))}
         </div>
