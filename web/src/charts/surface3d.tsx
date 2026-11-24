@@ -3,7 +3,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { ChartShell, FONT, type ChartCommonProps } from './shell';
-import { formatValue, measureText, niceTicks, ticksWithin, tickFormatter } from './scale';
+import { formatValue, measureText, niceTicks, ticksWithin, tickFormatter, truncateText } from './scale';
 import { axisTitle, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 import { boxRadius, clampNum, evenIndices, gridOrder, makeCam, project, rampCss, rampStep, type Box3 } from './proj3d';
@@ -28,6 +28,7 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
   const xName = spec.xlabel || 'X';
   const yName = spec.ylabel || 'Y';
   const zName = spec.zlabel || 'Z';
+  const zTitle = axisTitle(style, 'z', zName) ?? zName;
   const nx = spec.xs.length;
   const ny = spec.ys.length;
   const [sel, setSel] = useState<[number, number] | null>(null);
@@ -54,13 +55,13 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
     };
     const xa = exact(spec.xs, style?.xMin, style?.xMax);
     const ya = exact(spec.ys, style?.yMin, style?.yMax);
-    const zt = niceTicks(zmin, zmax, 5);
+    const zt = applyDomain(niceTicks(zmin, zmax, 5), style?.zMin, style?.zMax, 5);
     const za = { domain: zt.domain, ticks: zt.ticks, fmt: tickFormatter(zt.step, zt.ticks, locale) };
     const keepX = spec.xs.map((v, i) => (v >= xa.domain[0] && v <= xa.domain[1] ? i : -1)).filter((i) => i >= 0);
     const keepY = spec.ys.map((v, i) => (v >= ya.domain[0] && v <= ya.domain[1] ? i : -1)).filter((i) => i >= 0);
     const barTicks = ticksWithin(zmin, zmax, 4);
     return { zmin, zmax, count, xa, ya, za, keepX, keepY, barFmt: tickFormatter(barTicks.step, barTicks.ticks, locale), barTicks: barTicks.ticks };
-  }, [spec, style?.xMin, style?.xMax, style?.yMin, style?.yMax, locale]);
+  }, [spec, style?.xMin, style?.xMax, style?.yMin, style?.yMax, style?.zMin, style?.zMax, locale]);
 
   const table = useMemo(() => {
     const columns = [yName, ...spec.xs.map((x) => formatValue(x, locale))];
@@ -72,7 +73,10 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
 
   const label = `${title}. ${tr(t, 'ariaGrid3d', { nx, ny })}.`;
   const barLabW = Math.ceil(prep.barTicks.reduce((m, v) => Math.max(m, measureText(prep.barFmt(v), FONT.tick * fs)), 0));
-  const reserve = BAR_W + barLabW + 36;
+  // the colour bar title is truncated to what the right margin can hold (the full title is in the table note)
+  const barTitleMax = (w: number) => clampNum(Math.round(w * 0.2), 48, 130);
+  const barTitleW = (w: number) => Math.ceil(measureText(truncateText(zTitle, barTitleMax(w), 12 * fs), 12 * fs));
+  const reserveFor = (w: number) => Math.max(BAR_W + barLabW + 36, barTitleW(w) + 30);
 
   return (
     <ChartShell
@@ -93,6 +97,7 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
         }
         const { xa, ya, za } = prep;
         const view = ctl.view;
+        const reserve = reserveFor(area.width);
         const drawW = Math.max(160, area.width - reserve);
         const cam = makeCam(view, drawW, area.height, boxRadius(BOX));
         const cap = ctl.dragging ? DRAG_CELLS : MAX_CELLS;
@@ -116,7 +121,7 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
               px[b * mx + a] = NaN;
               continue;
             }
-            project(cam, wxs[a], wys[b], ((z - za.domain[0]) / zSpan - 0.5) * BOX.bz, o);
+            project(cam, wxs[a], wys[b], ((clampNum(z, za.domain[0], za.domain[1]) - za.domain[0]) / zSpan - 0.5) * BOX.bz, o);
             px[b * mx + a] = o.x;
             py[b * mx + a] = o.y;
           }
@@ -146,7 +151,7 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
           cam,
           view,
           box: BOX,
-          axes: [numAxisDef(xAxis, axisTitle(style, 'x', xName)), numAxisDef(yAxis, axisTitle(style, 'y', yName)), numAxisDef(za, style?.showTitle === false ? undefined : zName)],
+          axes: [numAxisDef(xAxis, axisTitle(style, 'x', xName)), numAxisDef(yAxis, axisTitle(style, 'y', yName)), numAxisDef(za, axisTitle(style, 'z', zName))],
           grid: style?.grid !== false,
           fs,
           width: drawW,
@@ -187,12 +192,12 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
         };
         let ring: React.ReactNode = null;
         if (sel && spec.z[sel[1]]?.[sel[0]] != null) {
-          const q = project(cam, ((spec.xs[sel[0]] - xa.domain[0]) / xSpan - 0.5) * BOX.bx, ((spec.ys[sel[1]] - ya.domain[0]) / ySpan - 0.5) * BOX.by, (((spec.z[sel[1]][sel[0]] as number) - za.domain[0]) / zSpan - 0.5) * BOX.bz);
+          const q = project(cam, ((spec.xs[sel[0]] - xa.domain[0]) / xSpan - 0.5) * BOX.bx, ((spec.ys[sel[1]] - ya.domain[0]) / ySpan - 0.5) * BOX.by, ((clampNum(spec.z[sel[1]][sel[0]] as number, za.domain[0], za.domain[1]) - za.domain[0]) / zSpan - 0.5) * BOX.bz);
           ring = <circle data-export="omit" pointerEvents="none" cx={q.x} cy={q.y} r={5} className="pspp-chart__hover-ring" />;
         }
 
         // colour bar
-        const barX = area.width - reserve + 18;
+        const barX = area.width - reserve + 14;
         const barTop = 16;
         const barH = Math.min(area.height - 40, 190);
         const gradId = area.uid + '-sg';
@@ -213,7 +218,7 @@ export function Surface3dChart({ spec, ...c }: { spec: Surface3dSpec & { view3d?
             {ring}
             <g aria-hidden="true">
               <text className="pspp-chart__legend-text" x={barX} y={barTop - 6} style={{ fontSize: 12 * fs }}>
-                {zName}
+                {truncateText(zTitle, barTitleMax(area.width), 12 * fs)}
               </text>
               <rect x={barX} y={barTop} width={BAR_W} height={barH} rx={2} style={{ fill: `url(#${gradId})`, stroke: 'var(--c-axis)', strokeWidth: 1 }} />
               {prep.barTicks.map((v) => {

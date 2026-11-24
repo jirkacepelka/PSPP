@@ -51,11 +51,11 @@ export function Bar3dChart({ spec, ...c }: { spec: Bar3dSpec & { view3d?: View3d
           if (v < lo) lo = v;
           if (v > hi) hi = v;
         }
-    const za = numAxis(lo, hi, null, null, locale);
+    const za = numAxis(lo, hi, style?.zMin, style?.zMax, locale);
     const m = Math.max(1, nx, ny);
     const box: Box3 = { bx: Math.max(0.35, nx / m), by: Math.max(0.35, ny / m), bz: 0.7 };
     return { za, box, count };
-  }, [spec, nx, ny, locale]);
+  }, [spec, nx, ny, locale, style?.zMin, style?.zMax]);
 
   const table = useMemo(() => {
     const columns = [yName || tr(t, 'category'), ...spec.xs];
@@ -86,7 +86,7 @@ export function Bar3dChart({ spec, ...c }: { spec: Bar3dSpec & { view3d?: View3d
         const view = ctl.view;
         const cam = makeCam(view, area.width, area.height, boxRadius(box));
         const zSpan = za.domain[1] - za.domain[0] || 1;
-        const zw = (v: number) => ((v - za.domain[0]) / zSpan - 0.5) * box.bz;
+        const zw = (v: number) => ((clampNum(v, za.domain[0], za.domain[1]) - za.domain[0]) / zSpan - 0.5) * box.bz;
         const zero = zw(0);
         const wxOf = (u: number) => (u / nx - 0.5) * box.bx;
         const wyOf = (u: number) => (u / ny - 0.5) * box.by;
@@ -140,7 +140,7 @@ export function Bar3dChart({ spec, ...c }: { spec: Bar3dSpec & { view3d?: View3d
 
         const cat = (names: string[]): Axis3['ticks'] => names.map((s, i) => ({ t: (i + 0.5) / names.length, label: s }));
         const bounds = (n: number) => Array.from({ length: n + 1 }, (_, i) => i / n);
-        const zAxis = numAxisDef(za, style?.showTitle === false ? undefined : zName);
+        const zAxis = numAxisDef(za, axisTitle(style, 'z', zName));
         const frame = buildFrame({
           cam,
           view,

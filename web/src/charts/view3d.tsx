@@ -359,7 +359,7 @@ export function buildFrame(o: {
   const picks = pickAxisEdges(view);
   const centre = P(0, 0, 0);
   const tickSize = FONT.tick * fs;
-  const labels: ReactNode[] = [];
+  const cands: { key: string; x: number; y: number; anchor: 'start' | 'end' | 'middle'; text: string; box: { x0: number; y0: number; x1: number; y1: number }; mark: number }[] = [];
   const titles: ReactNode[] = [];
   const marks: string[] = [];
   ([0, 1, 2] as const).forEach((k) => {
@@ -396,24 +396,56 @@ export function buildFrame(o: {
         const ly = a.y + dy * 11;
         marks.push(`M${fmt(a)}L${r1(a.x + dx * 5)},${r1(a.y + dy * 5)}`);
         const anchor = dx > 0.45 ? 'start' : dx < -0.45 ? 'end' : 'middle';
-        labels.push(
-          <text key={`${k}:${i}`} className="pspp-chart__tick3d" x={r1(lx)} y={r1(ly + (Math.abs(dy) > 0.45 ? dy * (tickSize * 0.5) : 0))} textAnchor={anchor} dominantBaseline="central">
-            {truncateText(ax.ticks[i].label, 96, tickSize)}
-          </text>,
-        );
+        const text = truncateText(ax.ticks[i].label, 96, tickSize);
+        const w = measureText(text, tickSize);
+        const x = lx;
+        const y = ly + (Math.abs(dy) > 0.45 ? dy * (tickSize * 0.5) : 0);
+        const box = { x0: anchor === 'start' ? x : anchor === 'end' ? x - w : x - w / 2, y0: y - tickSize / 2, x1: 0, y1: y + tickSize / 2 };
+        box.x1 = box.x0 + w;
+        cands.push({ key: `${k}:${i}`, x, y, anchor, text, box, mark: marks.length - 1 });
       }
     }
     if (ax.title) {
-      const reach = 14 + Math.abs(dx) * maxW + Math.abs(dy) * tickSize + 12 * fs;
-      const tw = measureText(truncateText(ax.title, Math.max(80, width * 0.4), FONT.axisTitle * fs, 600), FONT.axisTitle * fs, 600);
-      const tx = clampNum(mid.x + dx * reach, tw / 2 + 4, Math.max(tw / 2 + 4, width - tw / 2 - 4));
-      const ty = clampNum(mid.y + dy * reach, 10 * fs, Math.max(10 * fs, height - 8));
+      let tx: number;
+      let ty: number;
+      let text: string;
+      if (k === 2) {
+        // the vertical axis title stands above the axis, centred on it
+        text = truncateText(ax.title, Math.max(60, Math.min(width * 0.5, 220)), FONT.axisTitle * fs, 600);
+        const tw = measureText(text, FONT.axisTitle * fs, 600);
+        const top = p0.y < p1.y ? p0 : p1;
+        tx = clampNum(top.x, tw / 2 + 4, Math.max(tw / 2 + 4, width - tw / 2 - 4));
+        ty = clampNum(top.y - 20 * fs, 10 * fs, Math.max(10 * fs, height - 8));
+      } else {
+        const reach = 14 + Math.abs(dx) * maxW + Math.abs(dy) * tickSize + 12 * fs;
+        text = truncateText(ax.title, Math.max(80, width * 0.4), FONT.axisTitle * fs, 600);
+        const tw = measureText(text, FONT.axisTitle * fs, 600);
+        tx = clampNum(mid.x + dx * reach, tw / 2 + 4, Math.max(tw / 2 + 4, width - tw / 2 - 4));
+        ty = clampNum(mid.y + dy * reach, 10 * fs, Math.max(10 * fs, height - 8));
+      }
       titles.push(
         <text key={`t${k}`} className="pspp-chart__axis-title pspp-chart__tick3d" x={r1(tx)} y={r1(ty)} textAnchor="middle" dominantBaseline="central">
-          {truncateText(ax.title, Math.max(80, width * 0.4), FONT.axisTitle * fs, 600)}
+          {text}
         </text>,
       );
     }
+  });
+
+  // where two axes meet at a corner their end labels can touch: the later one is dropped, with its tick mark
+  const labels: ReactNode[] = [];
+  const placed: (typeof cands)[number]['box'][] = [];
+  cands.forEach((c) => {
+    const hit = placed.some((b) => c.box.x0 < b.x1 + 2 && b.x0 < c.box.x1 + 2 && c.box.y0 < b.y1 && b.y0 < c.box.y1);
+    if (hit) {
+      marks[c.mark] = '';
+      return;
+    }
+    placed.push(c.box);
+    labels.push(
+      <text key={c.key} className="pspp-chart__tick3d" x={r1(c.x)} y={r1(c.y)} textAnchor={c.anchor} dominantBaseline="central">
+        {c.text}
+      </text>,
+    );
   });
 
   return {

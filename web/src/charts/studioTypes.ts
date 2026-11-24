@@ -42,6 +42,8 @@ export interface ChartStyle {
   subtitle?: string;
   xTitle?: string;
   yTitle?: string;
+  /** 3D charts: title of the vertical (z) axis */
+  zTitle?: string;
   /** false hides the title/axis titles entirely */
   showTitle?: boolean;
   legend?: 'auto' | 'none';
@@ -53,6 +55,10 @@ export interface ChartStyle {
   xMax?: number | null;
   yMin?: number | null;
   yMax?: number | null;
+  /* On the 3D charts x = the first data axis, y = the second (depth) axis, z = the vertical axis (zMin/zMax). */
+  /** 3D charts: range of the vertical axis (null = automatic) */
+  zMin?: number | null;
+  zMax?: number | null;
   refLines?: RefLine[];
   annotations?: Annotation[];
   /** print values on bars / points where it makes sense */

@@ -31,13 +31,15 @@ export function parseStyle(input: unknown): ChartStyle | undefined {
   if (xTitle !== undefined) s.xTitle = xTitle;
   const yTitle = text(input.yTitle);
   if (yTitle !== undefined) s.yTitle = yTitle;
+  const zTitle = text(input.zTitle);
+  if (zTitle !== undefined) s.zTitle = zTitle;
   if (typeof input.showTitle === 'boolean') s.showTitle = input.showTitle;
   if (input.legend === 'auto' || input.legend === 'none') s.legend = input.legend;
   const legendTitle = text(input.legendTitle);
   if (legendTitle !== undefined) s.legendTitle = legendTitle;
   if (Array.isArray(input.palette)) s.palette = input.palette.slice(0, 8).map(safeColor);
   if (typeof input.grid === 'boolean') s.grid = input.grid;
-  for (const k of ['xMin', 'xMax', 'yMin', 'yMax'] as const) {
+  for (const k of ['xMin', 'xMax', 'yMin', 'yMax', 'zMin', 'zMax'] as const) {
     const b = bound(input[k]);
     if (b !== undefined) s[k] = b;
   }

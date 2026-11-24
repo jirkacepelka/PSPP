@@ -291,6 +291,14 @@ describe('parsing', () => {
   });
 });
 
+describe('style additions for 3D', () => {
+  it('parses zTitle, zMin and zMax defensively', () => {
+    const s = parseChart({ type: 'bar3d', xs: [], ys: [], values: [], style: { zTitle: ' Height  ', zMin: -2, zMax: null } });
+    expect(s.style).toEqual({ zTitle: 'Height', zMin: -2, zMax: null });
+    expect(parseChart({ type: 'bar3d', style: { zTitle: 5, zMin: 'a', zMax: NaN } }).style).toEqual({});
+  });
+});
+
 describe('strings', () => {
   it('has Czech twins with the same placeholders for every key', () => {
     for (const k of Object.keys(chartStrings.en) as (keyof typeof chartStrings.en)[]) {

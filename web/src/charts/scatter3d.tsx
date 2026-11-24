@@ -42,9 +42,9 @@ export function Scatter3dChart({ spec, ...c }: { spec: Scatter3dSpec & { view3d?
     };
     const xa = numAxis(...ext((p) => p.x), style?.xMin, style?.xMax, locale);
     const ya = numAxis(...ext((p) => p.y), style?.yMin, style?.yMax, locale);
-    const za = numAxis(...ext((p) => p.z), null, null, locale);
+    const za = numAxis(...ext((p) => p.z), style?.zMin, style?.zMax, locale);
     // points outside an explicit axis range are left out
-    const inside = (p: (typeof pts)[number]) => p.x >= xa.domain[0] && p.x <= xa.domain[1] && p.y >= ya.domain[0] && p.y <= ya.domain[1];
+    const inside = (p: (typeof pts)[number]) => p.x >= xa.domain[0] && p.x <= xa.domain[1] && p.y >= ya.domain[0] && p.y <= ya.domain[1] && p.z >= za.domain[0] && p.z <= za.domain[1];
     const kept = pts.filter(inside);
     const drawIdx = evenIndices(kept.length, DRAW_LIMIT);
     const drawn = drawIdx.map((i) => kept[i]);
@@ -91,7 +91,7 @@ export function Scatter3dChart({ spec, ...c }: { spec: Scatter3dSpec & { view3d?
       plane = { A: A + (B * BOX.bx) / 2 + (C * BOX.by) / 2, B, C, poly, r2: fit.r2, formula: `z = ${formatValue(fit.a, locale, 3)} ${fit.b < 0 ? '−' : '+'} ${formatValue(Math.abs(fit.b), locale, 3)} x ${fit.c < 0 ? '−' : '+'} ${formatValue(Math.abs(fit.c), locale, 3)} y` };
     }
     return { xa, ya, za, kept, drawn, wx, wy, wz, gi, order, hasGroups, plane, decimated: kept.length > drawn.length, total: spec.points.length };
-  }, [spec, style?.xMin, style?.xMax, style?.yMin, style?.yMax, locale, t]);
+  }, [spec, style?.xMin, style?.xMax, style?.yMin, style?.yMax, style?.zMin, style?.zMax, locale, t]);
 
   const groupNames = prep.order.map((g) => g || tr(t, 'missing'));
   const hasOther = prep.hasGroups && prep.kept.some((p) => p.group !== null && !prep.order.includes(p.group || tr(t, 'missing')));
@@ -199,7 +199,7 @@ export function Scatter3dChart({ spec, ...c }: { spec: Scatter3dSpec & { view3d?
           cam,
           view,
           box: BOX,
-          axes: [numAxisDef(prep.xa, axisTitle(style, 'x', xName)), numAxisDef(prep.ya, axisTitle(style, 'y', yName)), numAxisDef(prep.za, style?.showTitle === false ? undefined : zName)],
+          axes: [numAxisDef(prep.xa, axisTitle(style, 'x', xName)), numAxisDef(prep.ya, axisTitle(style, 'y', yName)), numAxisDef(prep.za, axisTitle(style, 'z', zName))],
           grid: style?.grid !== false,
           fs,
           width: area.width,

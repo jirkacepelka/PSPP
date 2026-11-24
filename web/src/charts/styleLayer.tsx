@@ -42,9 +42,9 @@ export const RegCtx = createContext<AxisReg>(NOOP_REG);
 export const useAxisReg = (): AxisReg => useContext(RegCtx);
 
 /** The title of an axis after the style override; undefined = none (hidden by showTitle: false). */
-export function axisTitle(style: ChartStyle | undefined, which: 'x' | 'y', fallback?: string): string | undefined {
+export function axisTitle(style: ChartStyle | undefined, which: 'x' | 'y' | 'z', fallback?: string): string | undefined {
   if (style?.showTitle === false) return undefined;
-  const o = which === 'x' ? style?.xTitle : style?.yTitle;
+  const o = which === 'x' ? style?.xTitle : which === 'y' ? style?.yTitle : style?.zTitle;
   const s = o !== undefined ? o : fallback;
   return s ? s : undefined;
 }
