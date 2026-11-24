@@ -95,8 +95,9 @@
 
   /* z-index scale */
   --z-sticky: 10;
-  --z-menu: 900;
   --z-dialog: 1000;
+  /* menus can be opened from inside a dialog, so they sit above it */
+  --z-menu: 1050;
   --z-palette: 1100;
   --z-toast: 1200;
   --z-tooltip: 1300;

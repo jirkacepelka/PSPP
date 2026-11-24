@@ -33,7 +33,10 @@ function stylePanels(panels: unknown, def: GraphDef, s: ChartStyle): unknown {
       if (s.refLines) own.refLines = s.refLines;
       if (s.annotations) own.annotations = s.annotations;
     }
-    return { ...p, chart: { ...p.chart, ...(Object.keys(own).length ? { style: own } : {}) } };
+    return {
+      ...p,
+      chart: { ...p.chart, ...(Object.keys(own).length ? { style: own } : {}) },
+    };
   });
 }
 
@@ -54,7 +57,10 @@ export function studioChart(spec: Record<string, unknown>, def: GraphDef, style:
   const three = is3d(def.kind);
   if (three && view) out.view3d = view;
   // appearance defaults carried by the spec itself (e.g. the Bland-Altman limits) sit under the user's style
-  const s = cleanStyle({ ...(isObj(spec.style) ? (spec.style as ChartStyle) : {}), ...cleanStyle(three ? style3d(style) : style) });
+  const s = cleanStyle({
+    ...(isObj(spec.style) ? (spec.style as ChartStyle) : {}),
+    ...cleanStyle(three ? style3d(style) : style),
+  });
   if (spec.type === 'panels') out.panels = stylePanels(spec.panels, def, s);
   if (Object.keys(s).length) out.style = s;
   else delete out.style;
@@ -65,7 +71,14 @@ export function studioChart(spec: Record<string, unknown>, def: GraphDef, style:
 export function insertStudioChart(chart: Record<string, unknown>, title: string): { entryId: string; itemId: string } {
   const entryId = uid('e');
   const itemId = uid('g');
-  const entry: OutputEntry = { id: entryId, title, syntax: '', time: Date.now(), items: [{ id: itemId, kind: 'chart', title, chart }], status: 'ok' };
+  const entry: OutputEntry = {
+    id: entryId,
+    title,
+    syntax: '',
+    time: Date.now(),
+    items: [{ id: itemId, kind: 'chart', title, chart }],
+    status: 'ok',
+  };
   useOutput.getState().add(entry);
   return { entryId, itemId };
 }

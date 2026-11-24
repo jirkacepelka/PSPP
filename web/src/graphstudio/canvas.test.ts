@@ -78,3 +78,13 @@ describe('summary value zone', () => {
     expect(next.options.func).toBe('sum');
   });
 });
+
+describe('double click', () => {
+  it('sends a scale variable to the value zone of a count chart once the category is set', async () => {
+    const { bestSlot } = await import('./Slots');
+    const def = defaultDef('bar', 'simple');
+    def.bind.x = ['gender'];
+    const v = { name: 'age', type: 'numeric', measure: 'scale' } as never;
+    expect(bestSlot(def, v, 40)?.id).toBe('value');
+  });
+});

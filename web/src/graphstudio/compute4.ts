@@ -6,26 +6,7 @@
 import type { GraphDef, RefLine } from '../charts/studioTypes';
 import { valueText, varTitle } from '../ext/data';
 import { tInv } from '../ext/dist';
-import {
-  barChart,
-  byTitle,
-  cat,
-  densityChart,
-  funcLabel,
-  intervalHalf,
-  isDateVar,
-  num,
-  optNum,
-  optStr,
-  secondsToDays,
-  summarize,
-  weightNote,
-  type Col,
-  type Obs,
-  type Prepared,
-  type Summary,
-  type Tf,
-} from './compute';
+import { barChart, byTitle, cat, densityChart, funcLabel, intervalHalf, isDateVar, num, optNum, optStr, secondsToDays, summarize, weightNote, type Col, type Obs, type Prepared, type Summary, type Tf } from './compute';
 
 type Obj = Record<string, unknown>;
 
@@ -79,21 +60,43 @@ function bubbleChart(p: Prepared, t: Tf, notes: string[]): Obj | null {
   const lab = p.cols.label?.[0];
   // a bubble area cannot be negative or zero: such cases are left out
   const keep = p.rows.map((_, k) => k).filter((k) => num(S, p.rows[k]) > 0);
-  if (keep.length < p.rows.length) notes.push(t('graphstudio.note.bubbleDropped', { count: p.rows.length - keep.length, name: varTitle(S.v) }));
+  if (keep.length < p.rows.length)
+    notes.push(
+      t('graphstudio.note.bubbleDropped', {
+        count: p.rows.length - keep.length,
+        name: varTitle(S.v),
+      }),
+    );
   const stride = Math.max(1, Math.ceil(keep.length / BUBBLE_MAX_CASES));
   const picked = keep.filter((_, i) => i % stride === 0).slice(0, BUBBLE_MAX_CASES);
-  if (picked.length < keep.length) notes.push(t('graphstudio.note.sampled', { used: picked.length, total: keep.length }));
+  if (picked.length < keep.length)
+    notes.push(
+      t('graphstudio.note.sampled', {
+        used: picked.length,
+        total: keep.length,
+      }),
+    );
   if (!picked.length) return null;
   return {
     type: 'bubble',
-    title: t('graphstudio.chart.bubble', { y: varTitle(Y.v), x: varTitle(X.v), s: varTitle(S.v) }),
+    title: t('graphstudio.chart.bubble', {
+      y: varTitle(Y.v),
+      x: varTitle(X.v),
+      s: varTitle(S.v),
+    }),
     xlabel: varTitle(X.v),
     ylabel: varTitle(Y.v),
     sizeLabel: varTitle(S.v),
     byvar: g ? varTitle(p.cols.group[0].v) : null,
     points: picked.map((k) => {
       const r = p.rows[k];
-      return { x: num(X, r), y: num(Y, r), size: num(S, r), group: g ? g.labels[g.idx[k]] : null, ...(lab ? { label: valueText(lab.v, lab.col[r]) } : {}) };
+      return {
+        x: num(X, r),
+        y: num(Y, r),
+        size: num(S, r),
+        group: g ? g.labels[g.idx[k]] : null,
+        ...(lab ? { label: valueText(lab.v, lab.col[r]) } : {}),
+      };
     }),
   };
 }
@@ -122,7 +125,12 @@ function blandAltmanChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): O
   const s = sd(diffs);
   const unit = percent ? ' %' : '';
   // limits of agreement: d +- 1.96 s (s uses n - 1); they are ordinary, editable reference lines
-  const line = (value: number, label: string, dash: boolean): RefLine => ({ axis: 'y', value, label, dash });
+  const line = (value: number, label: string, dash: boolean): RefLine => ({
+    axis: 'y',
+    value,
+    label,
+    dash,
+  });
   const refLines: RefLine[] = [
     line(d, t('graphstudio.chart.baMean', { v: `${sig(d)}${unit}` }), false),
     line(d + BA_LIMIT * s, t('graphstudio.chart.baUpper', { v: `${sig(d + BA_LIMIT * s)}${unit}` }), true),
@@ -157,7 +165,12 @@ function ridgelineChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj
   if (!chart) return null;
   const x = varTitle(p.cols.value[0].v);
   const g = varTitle(p.cols.group[0].v);
-  return { ...chart, title: t('graphstudio.chart.ridgeBy', { x, g }), ylabel: g, layout: 'ridge' };
+  return {
+    ...chart,
+    title: t('graphstudio.chart.ridgeBy', { x, g }),
+    ylabel: g,
+    layout: 'ridge',
+  };
 }
 
 function mosaicChart(def: GraphDef, p: Prepared, t: Tf): Obj {
@@ -169,7 +182,16 @@ function mosaicChart(def: GraphDef, p: Prepared, t: Tf): Obj {
     if (x.idx[k] >= 0 && y.idx[k] >= 0) counts[y.idx[k]][x.idx[k]] += p.w[r];
   });
   const [xt, yt] = [varTitle(p.cols.x[0].v), varTitle(p.cols.y[0].v)];
-  return { type: 'mosaic', title: t('graphstudio.chart.by', { y: yt, x: xt }), xlabel: xt, ylabel: yt, xs: x.labels, ys: y.labels, counts, shade: def.options.shade !== false };
+  return {
+    type: 'mosaic',
+    title: t('graphstudio.chart.by', { y: yt, x: xt }),
+    xlabel: xt,
+    ylabel: yt,
+    xs: x.labels,
+    ys: y.labels,
+    counts,
+    shade: def.options.shade !== false,
+  };
 }
 
 /**
@@ -195,7 +217,10 @@ function radarChart(def: GraphDef, p: Prepared, t: Tf): Obj {
       return hi > lo ? (100 * (val - lo)) / (hi - lo) : 50;
     });
   const series = g
-    ? g.cells.map((_, gi) => ({ name: g.labels[gi], values: summary(p.rows.filter((__, k) => g.idx[k] === gi)) }))
+    ? g.cells.map((_, gi) => ({
+        name: g.labels[gi],
+        values: summary(p.rows.filter((__, k) => g.idx[k] === gi)),
+      }))
     : [{ name: funcLabel(t, func), values: summary(p.rows) }];
   const f = funcLabel(t, func);
   return {
@@ -228,17 +253,36 @@ function waterfallChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj
     // the last category is a total: the bar shows the running sum of the steps before it
     const last = steps.length - 1;
     const running = steps.slice(0, last).reduce((s, q) => s + q.value, 0);
-    if (Math.abs(running - steps[last].value) > 1e-9 * Math.max(1, Math.abs(running))) notes.push(t('graphstudio.note.wfTotal', { label: steps[last].label, value: sig(steps[last].value), sum: sig(running) }));
+    if (Math.abs(running - steps[last].value) > 1e-9 * Math.max(1, Math.abs(running)))
+      notes.push(
+        t('graphstudio.note.wfTotal', {
+          label: steps[last].label,
+          value: sig(steps[last].value),
+          sum: sig(running),
+        }),
+      );
     steps[last] = { label: steps[last].label, value: running, total: true };
   }
   const xt = varTitle(X.v);
-  return { type: 'waterfall', title: byTitle(t, funcLabel(t, 'sum', V), xt), xlabel: xt, ylabel: funcLabel(t, 'sum', V), steps };
+  return {
+    type: 'waterfall',
+    title: byTitle(t, funcLabel(t, 'sum', V), xt),
+    xlabel: xt,
+    ylabel: funcLabel(t, 'sum', V),
+    steps,
+  };
 }
 
 function forestChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | null {
   const log = def.options.log === true;
   const level = optNum(def, 'level', 95);
-  type Row = { label: string; est: number; lo: number; hi: number; group?: string | null };
+  type Row = {
+    label: string;
+    est: number;
+    lo: number;
+    hi: number;
+    group?: string | null;
+  };
   let rows: Row[] = [];
   let xlabel: string;
   let title: string;
@@ -270,7 +314,11 @@ function forestChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | 
     if (!log && om !== null) autoRef = om;
     const v = varTitle(V.v);
     xlabel = t('graphstudio.chart.meanCi', { v, level });
-    title = t('graphstudio.chart.forestMeans', { v, x: varTitle(p.cols.x[0].v), level });
+    title = t('graphstudio.chart.forestMeans', {
+      v,
+      x: varTitle(p.cols.x[0].v),
+      level,
+    });
   } else {
     weightNote(p, t, notes);
     const [L, E, LO, HI] = [p.cols.label[0], p.cols.est[0], p.cols.lo[0], p.cols.hi[0]];
@@ -282,15 +330,29 @@ function forestChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | 
         bad++;
         return;
       }
-      rows.push({ label: valueText(L.v, L.col[r]), est, lo, hi, group: g ? g.labels[g.idx[k]] : null });
+      rows.push({
+        label: valueText(L.v, L.col[r]),
+        est,
+        lo,
+        hi,
+        group: g ? g.labels[g.idx[k]] : null,
+      });
     });
     if (bad) notes.push(t(log ? 'graphstudio.note.forestBadLog' : 'graphstudio.note.forestBad', { count: bad }));
     if (rows.length > FOREST_MAX_ROWS) {
-      notes.push(t('graphstudio.note.forestRows', { used: FOREST_MAX_ROWS, total: rows.length }));
+      notes.push(
+        t('graphstudio.note.forestRows', {
+          used: FOREST_MAX_ROWS,
+          total: rows.length,
+        }),
+      );
       rows = rows.slice(0, FOREST_MAX_ROWS);
     }
     xlabel = varTitle(E.v);
-    title = t('graphstudio.chart.forest', { v: varTitle(E.v), l: varTitle(L.v) });
+    title = t('graphstudio.chart.forest', {
+      v: varTitle(E.v),
+      l: varTitle(L.v),
+    });
   }
   if (log) {
     const before = rows.length;
@@ -299,7 +361,14 @@ function forestChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | 
   }
   if (!rows.length) return null;
   const ref = def.options.refValue;
-  return { type: 'forest', title, xlabel, refValue: typeof ref === 'number' && Number.isFinite(ref) ? ref : autoRef, log, rows };
+  return {
+    type: 'forest',
+    title,
+    xlabel,
+    refValue: typeof ref === 'number' && Number.isFinite(ref) ? ref : autoRef,
+    log,
+    rows,
+  };
 }
 
 function treemapChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | null {
@@ -324,13 +393,22 @@ function treemapChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj |
       if (!seen[xi][gi]) continue;
       // an area cannot be zero or negative
       if (!(totals[xi][gi] > 0)) dropped++;
-      else tiles.push({ label: x.labels[xi], value: totals[xi][gi], group: g ? g.labels[gi] : null });
+      else
+        tiles.push({
+          label: x.labels[xi],
+          value: totals[xi][gi],
+          group: g ? g.labels[gi] : null,
+        });
     }
   });
   if (dropped) notes.push(t('graphstudio.note.treemapDropped', { count: dropped }));
   if (!tiles.length) return null;
   const y = funcLabel(t, func, V);
-  return { type: 'treemap', title: byTitle(t, y, varTitle(p.cols.x[0].v), g ? varTitle(p.cols.group[0].v) : undefined), tiles };
+  return {
+    type: 'treemap',
+    title: byTitle(t, y, varTitle(p.cols.x[0].v), g ? varTitle(p.cols.group[0].v) : undefined),
+    tiles,
+  };
 }
 
 /* ------------------------------------------------------------------ forecast */
@@ -390,7 +468,10 @@ export function forecastModel(y: number[], inp: ForecastInput): ForecastOutput |
     if (!(df >= 1) || !(sigma2 >= 0) || !Number.isFinite(sigma2)) return { lo: centre.map(() => null), hi: centre.map(() => null) };
     const q = tInv(0.975, df);
     const half = centre.map((_, i) => q * Math.sqrt(sigma2 * factor(i + 1)));
-    return { lo: centre.map((c, i) => c - half[i]), hi: centre.map((c, i) => c + half[i]) };
+    return {
+      lo: centre.map((c, i) => c - half[i]),
+      hi: centre.map((c, i) => c + half[i]),
+    };
   };
   if (method === 'ma') {
     const w = Math.max(2, Math.round(inp.window));
@@ -404,7 +485,11 @@ export function forecastModel(y: number[], inp: ForecastInput): ForecastOutput |
     }
     const last = level[n - 1] as number;
     const forecast = xf.map(() => last);
-    return { level, forecast, ...band(forecast, m > 1 ? sse / (m - 1) : NaN, m - 1, () => 1) };
+    return {
+      level,
+      forecast,
+      ...band(forecast, m > 1 ? sse / (m - 1) : NaN, m - 1, () => 1),
+    };
   }
   if (method === 'trend') {
     if (n < 3) return null;
@@ -417,7 +502,11 @@ export function forecastModel(y: number[], inp: ForecastInput): ForecastOutput |
     const level = xs.map((x) => a + b * x);
     const sse = y.reduce((s, v, i) => s + (v - (level[i] as number)) ** 2, 0);
     const forecast = xf.map((x) => a + b * x);
-    return { level, forecast, ...band(forecast, sse / (n - 2), n - 2, (k) => 1 + 1 / n + (xf[k - 1] - xbar) ** 2 / sxx) };
+    return {
+      level,
+      forecast,
+      ...band(forecast, sse / (n - 2), n - 2, (k) => 1 + 1 / n + (xf[k - 1] - xbar) ** 2 / sxx),
+    };
   }
   if (method === 'ses') {
     if (n < 3) return null;
@@ -446,7 +535,12 @@ export function forecastModel(y: number[], inp: ForecastInput): ForecastOutput |
     const a = alpha as number;
     const { lev, sse } = run(a);
     const forecast = xf.map(() => lev[n - 1]);
-    return { level: lev, forecast, alpha: a, ...band(forecast, sse / (n - 2), n - 2, (k) => 1 + a * a * (k - 1)) };
+    return {
+      level: lev,
+      forecast,
+      alpha: a,
+      ...band(forecast, sse / (n - 2), n - 2, (k) => 1 + a * a * (k - 1)),
+    };
   }
   // holt
   if (n < 3) return null;
@@ -509,7 +603,14 @@ function forecastChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj 
     const v = def.options[id];
     return typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= 1 ? v : null;
   };
-  const res = forecastModel(y, { method, window: optNum(def, 'window', 3), alpha: fixed('alpha'), beta: fixed('beta'), xs, xf });
+  const res = forecastModel(y, {
+    method,
+    window: optNum(def, 'window', 3),
+    alpha: fixed('alpha'),
+    beta: fixed('beta'),
+    xs,
+    xf,
+  });
   if (!res) {
     notes.push(t('graphstudio.note.forecastShort'));
     return null;
@@ -522,12 +623,31 @@ function forecastChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj 
     { name: methodName, values: [...res.level, ...pad(h)] },
   ];
   const lastLevel = res.level[n - 1];
-  if (h > 0 && lastLevel !== null) series.push({ name: t('graphstudio.chart.forecastLine'), dash: true, values: [...pad(n - 1), lastLevel, ...res.forecast] });
-  const bands: { name: string; lo: (number | null)[]; hi: (number | null)[] }[] = [];
+  if (h > 0 && lastLevel !== null)
+    series.push({
+      name: t('graphstudio.chart.forecastLine'),
+      dash: true,
+      values: [...pad(n - 1), lastLevel, ...res.forecast],
+    });
+  const bands: {
+    name: string;
+    lo: (number | null)[];
+    hi: (number | null)[];
+  }[] = [];
   if (h > 0 && lastLevel !== null && def.options.band !== false && res.lo.every((v) => v !== null)) {
-    bands.push({ name: t('graphstudio.chart.predInterval', { level: 95 }), lo: [...pad(n - 1), lastLevel, ...res.lo], hi: [...pad(n - 1), lastLevel, ...res.hi] });
+    bands.push({
+      name: t('graphstudio.chart.predInterval', { level: 95 }),
+      lo: [...pad(n - 1), lastLevel, ...res.lo],
+      hi: [...pad(n - 1), lastLevel, ...res.hi],
+    });
   } else if (h > 0 && def.options.band !== false) notes.push(t('graphstudio.note.forecastNoBand'));
-  if (res.alpha !== undefined) notes.push(t(res.beta !== undefined ? 'graphstudio.note.fittedAlphaBeta' : 'graphstudio.note.fittedAlpha', { alpha: sig(res.alpha), beta: res.beta !== undefined ? sig(res.beta) : '' }));
+  if (res.alpha !== undefined)
+    notes.push(
+      t(res.beta !== undefined ? 'graphstudio.note.fittedAlphaBeta' : 'graphstudio.note.fittedAlpha', {
+        alpha: sig(res.alpha),
+        beta: res.beta !== undefined ? sig(res.beta) : '',
+      }),
+    );
   return {
     type: 'sequence',
     xFormat: dated ? 'date' : 'number',

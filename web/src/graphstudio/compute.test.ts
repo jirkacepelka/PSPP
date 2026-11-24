@@ -108,7 +108,12 @@ describe('model', () => {
     expect(rejection(slotsOf(d)[0], num('age', { measure: 'nominal' }), 80)).toBeNull();
   });
   it('drops bindings of slots that disappear and fixes options', () => {
-    const d = withVariant({ ...def('bar', 'clustered', { x: ['g'], group: ['g2'] }, { func: 'mean' }) }, 'stacked');
+    const d = withVariant(
+      {
+        ...def('bar', 'clustered', { x: ['g'], group: ['g2'] }, { func: 'mean' }),
+      },
+      'stacked',
+    );
     expect(d.options.func).toBe('count');
     const e = withVariant(d, 'simple');
     expect(e.bind.group).toEqual(['g2']);
@@ -169,7 +174,11 @@ describe('computeChart', () => {
     const r = ok(def('bar', 'simple', { x: ['g'] }), ds);
     expect((r.chart.bars as { count: number }[]).map((b) => b.count)).toEqual([4, 8]);
     expect(r.info.weight).toBe('w');
-    const filtered = small({ filter: 'f', variables: [...small().variables, num('f')], columns: [...small().columns, [1, 1, 1, 0, 1, 1, 1, 1]] });
+    const filtered = small({
+      filter: 'f',
+      variables: [...small().variables, num('f')],
+      columns: [...small().columns, [1, 1, 1, 0, 1, 1, 1, 1]],
+    });
     const f = ok(def('bar', 'simple', { x: ['g'] }), filtered);
     expect(f.info.filtered).toBe(1);
     expect((f.chart.bars as { count: number }[]).map((b) => b.count)).toEqual([4, 3]);
@@ -247,7 +256,11 @@ describe('computeChart', () => {
   });
   it('scatter matrix samples deterministically to at most 2000 cases', () => {
     const n = 5000;
-    const ds: Dataset = { name: 'big', variables: [num('a'), num('b')], columns: [Array.from({ length: n }, (_, i) => i), Array.from({ length: n }, (_, i) => (i * 7) % 101)] };
+    const ds: Dataset = {
+      name: 'big',
+      variables: [num('a'), num('b')],
+      columns: [Array.from({ length: n }, (_, i) => i), Array.from({ length: n }, (_, i) => (i * 7) % 101)],
+    };
     const d = def('scattermatrix', 'simple', { vars: ['a', 'b'] });
     const r1 = ok(d, ds);
     const r2 = ok(d, ds);
@@ -259,10 +272,22 @@ describe('computeChart', () => {
   it('names the series for the palette', () => {
     expect(seriesNames(ok(def('bar', 'clustered', { x: ['g'], group: ['w'] }), small()).chart)).toEqual(['1']);
     expect(seriesNames(ok(def('pie', 'simple', { x: ['g'] }), small()).chart)).toEqual(['Female', 'Male']);
-    expect(seriesNames({ chart: { type: 'roc', curves: [{ name: 'A' }, { name: 'B' }] } })).toEqual(['A', 'B']);
+    expect(
+      seriesNames({
+        chart: { type: 'roc', curves: [{ name: 'A' }, { name: 'B' }] },
+      }),
+    ).toEqual(['A', 'B']);
   });
   it('cleans empty style values', () => {
-    expect(cleanStyle({ title: '', palette: [null, null], xMin: null, fontScale: 1, grid: false })).toEqual({ grid: false });
+    expect(
+      cleanStyle({
+        title: '',
+        palette: [null, null],
+        xMin: null,
+        fontScale: 1,
+        grid: false,
+      }),
+    ).toEqual({ grid: false });
   });
 });
 

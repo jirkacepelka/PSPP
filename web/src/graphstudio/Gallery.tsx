@@ -15,7 +15,10 @@ export function Gallery({ kind, variant, onPick }: { kind: string; variant: stri
   const q = fold(query.trim());
   const groups = useMemo(() => {
     const keep = (e: (typeof GALLERY)[number]) => !q || [t(e.label), t(e.family), t(`graphstudio.group.${e.group}`)].some((s) => fold(s).includes(q));
-    return GROUP_ORDER.map((g) => ({ id: g, entries: GALLERY.filter((e) => e.group === g && keep(e)) })).filter((g) => g.entries.length);
+    return GROUP_ORDER.map((g) => ({
+      id: g,
+      entries: GALLERY.filter((e) => e.group === g && keep(e)),
+    })).filter((g) => g.entries.length);
   }, [q, t]);
   return (
     <section className="gs-gallery" aria-label={t('graphstudio.gallery')}>

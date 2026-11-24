@@ -30,7 +30,12 @@ const num = (name: string, extra: Partial<Variable> = {}): Variable => ({
   ...extra,
 });
 
-const ds = (vars: [string, (number | null)[]][], extra: Partial<Dataset> = {}): Dataset => ({ name: 't', variables: vars.map(([n]) => num(n)), columns: vars.map(([, c]) => c), ...extra });
+const ds = (vars: [string, (number | null)[]][], extra: Partial<Dataset> = {}): Dataset => ({
+  name: 't',
+  variables: vars.map(([n]) => num(n)),
+  columns: vars.map(([, c]) => c),
+  ...extra,
+});
 
 const def = (kind: GraphDef['kind'], variant: string, bind: GraphDef['bind'], options: Record<string, unknown> = {}): GraphDef => {
   const d = defaultDef(kind, variant);
@@ -168,7 +173,14 @@ describe('control charts', () => {
     expect(c4(5)).toBeCloseTo(0.94, 3);
   });
 });
-const r2 = (c: Record<string, unknown>) => c as { values: number[]; center: number; ucl: number[]; lcl: number[]; flags: boolean[] };
+const r2 = (c: Record<string, unknown>) =>
+  c as {
+    values: number[];
+    center: number;
+    ucl: number[];
+    lcl: number[];
+    flags: boolean[];
+  };
 
 describe('density and violin', () => {
   const rnd = (n: number) => Array.from({ length: n }, (_, i) => Math.sin(i * 12.9898) * 43758.5453 - Math.floor(Math.sin(i * 12.9898) * 43758.5453)).map((u) => u * 10);
@@ -183,7 +195,13 @@ describe('density and violin', () => {
   });
   it('violin: 64 points clipped to the data range, quartiles', () => {
     const r = ok(def('violin', 'simple', { value: ['y'], x: ['g'] }), small());
-    const vs = r.chart.violins as { label: string; points: [number, number][]; median: number; q1: number; q3: number }[];
+    const vs = r.chart.violins as {
+      label: string;
+      points: [number, number][];
+      median: number;
+      q1: number;
+      q3: number;
+    }[];
     expect(vs.map((x) => x.label)).toEqual(['1', '2']);
     expect(vs[0].points).toHaveLength(64);
     expect(vs[0].points[0][0]).toBe(2);
@@ -204,7 +222,10 @@ describe('panels', () => {
     const d = def('bar', 'simple', { x: ['z'], value: ['y'], panel: ['g'] }, { func: 'max' });
     const r = ok(d, ds([['g', G], ['y', Y], ['z', [1, 2, 1, 2, 1, 2, 1, 2]]]));
     expect(r.chart.type).toBe('panels');
-    const panels = r.chart.panels as { title: string; chart: { type: string; style: { yMin: number; yMax: number } } }[];
+    const panels = r.chart.panels as {
+      title: string;
+      chart: { type: string; style: { yMin: number; yMax: number } };
+    }[];
     expect(panels).toHaveLength(2);
     expect(panels[0].chart.type).toBe('bar');
     expect(panels[0].chart.style).toEqual(panels[1].chart.style);
@@ -216,7 +237,9 @@ describe('panels', () => {
   it('can leave the axes free and sets the columns', () => {
     const d = def('histogram', 'simple', { value: ['y'], panel: ['g'] }, { sharedAxes: false, panelCols: 1 });
     const r = ok(d, small());
-    const panels = r.chart.panels as { chart: { style?: unknown; bins: number[][] } }[];
+    const panels = r.chart.panels as {
+      chart: { style?: unknown; bins: number[][] };
+    }[];
     expect(panels[0].chart.style).toBeUndefined();
     expect(r.chart.columns).toBe(1);
     // the bins come from all the data so the panels line up
@@ -243,9 +266,15 @@ describe('panels', () => {
     const d = def('bar', 'simple', { x: ['z'], panel: ['g'] });
     const r = ok(d, ds([['g', G], ['z', [1, 2, 1, 2, 1, 2, 1, 2]]]));
     const before = JSON.stringify(r.chart);
-    const out = studioChart(r.chart, d, { refLines: [{ axis: 'y', value: 2 }], palette: ['#ff0000'], title: 'T' });
+    const out = studioChart(r.chart, d, {
+      refLines: [{ axis: 'y', value: 2 }],
+      palette: ['#ff0000'],
+      title: 'T',
+    });
     expect(JSON.stringify(r.chart)).toBe(before);
-    const panels = out.panels as { chart: { style: Record<string, unknown> } }[];
+    const panels = out.panels as {
+      chart: { style: Record<string, unknown> };
+    }[];
     expect(panels[0].chart.style.refLines).toEqual([{ axis: 'y', value: 2 }]);
     expect(panels[1].chart.style.palette).toEqual(['#ff0000']);
     expect(panels[0].chart.style.title).toBeUndefined();

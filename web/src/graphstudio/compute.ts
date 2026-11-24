@@ -30,7 +30,12 @@ export interface ComputeInfo {
 }
 
 export type ComputeResult =
-  | { ok: true; chart: Record<string, unknown>; info: ComputeInfo; notes: string[] }
+  | {
+      ok: true;
+      chart: Record<string, unknown>;
+      info: ComputeInfo;
+      notes: string[];
+    }
   | { ok: false; reason: 'missing'; slots: string[] }
   | { ok: false; reason: 'novar'; names: string[] }
   | { ok: false; reason: 'nodata' }
@@ -188,7 +193,11 @@ export interface Merge {
 export function mergeOf(def: GraphDef): Merge | undefined {
   const mode = def.options.mergeMode;
   if (!MERGE_KINDS.includes(def.kind) || (mode !== 'width' && mode !== 'count')) return undefined;
-  return { mode, width: optNum(def, 'mergeWidth', 0), count: optNum(def, 'mergeCount', 0) };
+  return {
+    mode,
+    width: optNum(def, 'mergeWidth', 0),
+    count: optNum(def, 'mergeCount', 0),
+  };
 }
 
 /** Interval width and aligned start for the sorted distinct values CELLS, or null when nothing merges. */
@@ -218,7 +227,11 @@ function categories(c: Col, rows: number[], universe: number[] = rows, merge?: M
   const iv = merge && cells.every((x) => typeof x === 'number') ? intervalsFor(cells as number[], merge) : null;
   if (!iv) {
     const index = new Map(cells.map((x, i) => [keyOf(x), i]));
-    return { cells, labels: cells.map((x) => valueText(c.v, x)), idx: rows.map((r) => index.get(keyOf(c.col[r])) ?? -1) };
+    return {
+      cells,
+      labels: cells.map((x) => valueText(c.v, x)),
+      idx: rows.map((r) => index.get(keyOf(c.col[r])) ?? -1),
+    };
   }
   const binOf = (x: number) => Math.floor((x - iv.start) / iv.width + 1e-9);
   const members = new Map<number, number[]>();
@@ -270,7 +283,11 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
     for (const name of def.bind[s.id] ?? []) {
       const i = ds.variables.findIndex((x) => x.name.toUpperCase() === name.toUpperCase());
       if (i < 0) unknown.push(name);
-      else cols[s.id].push({ v: ds.variables[i], col: (ds.columns[i] ?? []) as Cell[] });
+      else
+        cols[s.id].push({
+          v: ds.variables[i],
+          col: (ds.columns[i] ?? []) as Cell[],
+        });
     }
   }
   if (unknown.length) return { ok: false, reason: 'novar', names: unknown };
@@ -296,7 +313,16 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
     weight: ds.weight ?? null,
   };
   if (!rows.length) return { ok: false, reason: 'nodata' };
-  return { rows, universe: rows, w, cols, info, seen: [], merge: mergeOf(def), mergeY: def.kind === 'bar3d' };
+  return {
+    rows,
+    universe: rows,
+    w,
+    cols,
+    info,
+    seen: [],
+    merge: mergeOf(def),
+    mergeY: def.kind === 'bar3d',
+  };
 }
 
 const isPrepared = (p: Prepared | ComputeResult): p is Prepared => 'rows' in p;
@@ -348,8 +374,16 @@ function cellValue(def: GraphDef, p: Prepared, positions: number[], total: numbe
   const func = optStr(def, 'func', 'count');
   const W = positions.reduce((s, k) => s + p.w[p.rows[k]], 0);
   if (func === 'count') return { value: positions.length ? W : null, lo: null, hi: null };
-  if (func === 'pct') return { value: positions.length ? (100 * W) / total : null, lo: null, hi: null };
-  const vals = positions.map((k) => ({ y: num(valueCol!, p.rows[k]), w: p.w[p.rows[k]] }));
+  if (func === 'pct')
+    return {
+      value: positions.length ? (100 * W) / total : null,
+      lo: null,
+      hi: null,
+    };
+  const vals = positions.map((k) => ({
+    y: num(valueCol!, p.rows[k]),
+    w: p.w[p.rows[k]],
+  }));
   const value = summarize(func as Summary, vals);
   const kind = optStr(def, 'interval', 'none');
   let lo: number | null = null;
@@ -392,7 +426,11 @@ export function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unkn
     for (let gi = 0; gi < (c.g ? c.g.cells.length : 1); gi++) {
       const cell = grid[xi][gi];
       if (cell.value === null) continue;
-      bars.push({ x: c.x.labels[xi], group: c.g ? c.g.labels[gi] : null, count: cell.value });
+      bars.push({
+        x: c.x.labels[xi],
+        group: c.g ? c.g.labels[gi] : null,
+        count: cell.value,
+      });
       err.push(cell.lo !== null && cell.hi !== null ? { lo: cell.lo, hi: cell.hi } : null);
     }
   }
@@ -493,12 +531,19 @@ function pieChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
   const func = optStr(def, 'func', 'count');
   const c = cellsOf(p);
   const val = p.cols.value?.[0];
-  let slices = c.x.cells.map((_, xi) => ({ label: c.x.labels[xi], value: Math.max(0, cellValue(def, p, c.at[xi][0], p.info.usedWeight, val).value ?? 0) }));
+  let slices = c.x.cells.map((_, xi) => ({
+    label: c.x.labels[xi],
+    value: Math.max(0, cellValue(def, p, c.at[xi][0], p.info.usedWeight, val).value ?? 0),
+  }));
   slices = slices.filter((s) => s.value > 0);
   const sort = optStr(def, 'sort', 'category');
   if (sort !== 'category') slices.sort((a, b) => (sort === 'asc' ? a.value - b.value : b.value - a.value));
   const y = funcLabel(t, func, needsVariable(func) ? val : undefined);
-  return { type: 'pie', title: t('graphstudio.chart.of', { y, x: varTitle(p.cols.x[0].v) }), slices };
+  return {
+    type: 'pie',
+    title: t('graphstudio.chart.of', { y, x: varTitle(p.cols.x[0].v) }),
+    slices,
+  };
 }
 
 /* ------------------------------------------------------------------ distributions */
@@ -512,7 +557,13 @@ function binsFor(def: GraphDef, sorted: number[]): { edges: number[]; integer: b
   const rule = optStr(def, 'binRule', 'fd');
   const width = rule === 'width' ? optNum(def, 'binWidth', 0) : 0;
   const wanted = binCountByRule(sorted, rule, optNum(def, 'bins', 10));
-  return { edges: binEdges(sorted[0], sorted[sorted.length - 1], wanted, { width, integer }), integer };
+  return {
+    edges: binEdges(sorted[0], sorted[sorted.length - 1], wanted, {
+      width,
+      integer,
+    }),
+    integer,
+  };
 }
 
 function histogramChart(def: GraphDef, p: Prepared): Record<string, unknown> {
@@ -550,7 +601,12 @@ function histogramChart(def: GraphDef, p: Prepared): Record<string, unknown> {
     integer: integer && edges[1] - edges[0] === 1,
     mode: def.variant === 'polygon' ? 'polygon' : 'bars',
     bins: edges.slice(0, -1).map((lo, i) => [lo, edges[i + 1], counts[i]]),
-    ...(g ? { series: g.labels.map((name, gi) => ({ name, counts: per[gi] })), legendTitle: varTitle(p.cols.group[0].v) } : {}),
+    ...(g
+      ? {
+          series: g.labels.map((name, gi) => ({ name, counts: per[gi] })),
+          legendTitle: varTitle(p.cols.group[0].v),
+        }
+      : {}),
   };
 }
 
@@ -561,7 +617,14 @@ function pyramidChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Recor
   const nb = edges.length - 1;
   const swap = def.options.swap === true;
   const [li, ri] = swap ? [1, 0] : [0, 1];
-  if (g.cells.length > 2) notes.push(t('graphstudio.note.pyramidTwo', { count: g.cells.length, a: g.labels[0], b: g.labels[1] }));
+  if (g.cells.length > 2)
+    notes.push(
+      t('graphstudio.note.pyramidTwo', {
+        count: g.cells.length,
+        a: g.labels[0],
+        b: g.labels[1],
+      }),
+    );
   const bins = Array.from({ length: nb }, (_, i) => [edges[i], edges[i + 1], 0, 0] as [number, number, number, number]);
   p.rows.forEach((r, k) => {
     const b = binIndex(edges, num(col, r));
@@ -570,7 +633,17 @@ function pyramidChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Recor
     else if (g.idx[k] === ri) bins[b][3] += p.w[r];
   });
   const x = varTitle(col.v);
-  return { type: 'pyramid', title: t('graphstudio.chart.pyramid', { x, g: varTitle(p.cols.group[0].v) }), xlabel: x, leftName: g.labels[li], rightName: g.labels[ri], bins };
+  return {
+    type: 'pyramid',
+    title: t('graphstudio.chart.pyramid', {
+      x,
+      g: varTitle(p.cols.group[0].v),
+    }),
+    xlabel: x,
+    leftName: g.labels[li],
+    rightName: g.labels[ri],
+    bins,
+  };
 }
 
 /** Tukey's hinges, whiskers (1.5 hinge spreads) and outliers of ROWS, as SPSS draws boxplots. */
@@ -591,7 +664,13 @@ export function boxStats(vals: { y: number; row: number }[], label: string, with
     hinges: [q1, med(ys), q3] as [number, number, number],
     whiskers: [inside[0] ?? null, inside[inside.length - 1] ?? null] as [number | null, number | null],
     outliers: withOutliers
-      ? s.filter((x) => x.y < fenceLo || x.y > fenceHi).map((x) => ({ value: x.y, label: String(x.row + 1), extreme: x.y < q1 - 3 * spread || x.y > q3 + 3 * spread }))
+      ? s
+          .filter((x) => x.y < fenceLo || x.y > fenceHi)
+          .map((x) => ({
+            value: x.y,
+            label: String(x.row + 1),
+            extreme: x.y < q1 - 3 * spread || x.y > q3 + 3 * spread,
+          }))
       : [],
   };
 }
@@ -614,7 +693,10 @@ function boxplotChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
       const vals = buckets.get(`${xi}|${gi}`);
       if (!vals?.length) continue;
       // clustered: boxes with the same label form a cluster, `group` names the box inside it
-      boxes.push({ ...boxStats(vals, x ? x.labels[xi] : varTitle(col.v), withOut), ...(g ? { group: g.labels[gi] } : {}) });
+      boxes.push({
+        ...boxStats(vals, x ? x.labels[xi] : varTitle(col.v), withOut),
+        ...(g ? { group: g.labels[gi] } : {}),
+      });
     }
   }
   const y = varTitle(col.v);
@@ -651,7 +733,10 @@ function dotChart(def: GraphDef, p: Prepared): Record<string, unknown> {
   if (!width && integer && distinct <= 60) {
     p.rows.forEach((r, k) => add(num(col, r), g ? g.labels[g.idx[k]] : null, p.w[r]));
   } else {
-    const edges = binEdges(sorted[0], sorted[sorted.length - 1], 30, { width, integer: false });
+    const edges = binEdges(sorted[0], sorted[sorted.length - 1], 30, {
+      width,
+      integer: false,
+    });
     p.rows.forEach((r, k) => {
       const b = binIndex(edges, num(col, r));
       if (b >= 0) add(roundTo((edges[b] + edges[b + 1]) / 2, 8), g ? g.labels[g.idx[k]] : null, p.w[r]);
@@ -729,7 +814,9 @@ function heatmapChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
   const [X, Y] = [p.cols.x[0], p.cols.y[0]];
   const edgesOf = (c: Col, n: number) => {
     const s = sortedValues(c, p.universe);
-    return binEdges(s[0], s[s.length - 1], n, { integer: s.every((x) => Number.isInteger(x)) });
+    return binEdges(s[0], s[s.length - 1], n, {
+      integer: s.every((x) => Number.isInteger(x)),
+    });
   };
   const xEdges = edgesOf(X, optNum(def, 'xBins', 20));
   const yEdges = edgesOf(Y, optNum(def, 'yBins', 20));
@@ -739,7 +826,15 @@ function heatmapChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
     const yi = binIndex(yEdges, num(Y, r));
     if (xi >= 0 && yi >= 0) counts[yi][xi] += p.w[r];
   }
-  return { type: 'heatmap', title: t('graphstudio.chart.vs', { y: varTitle(Y.v), x: varTitle(X.v) }), xlabel: varTitle(X.v), ylabel: varTitle(Y.v), xEdges, yEdges, counts };
+  return {
+    type: 'heatmap',
+    title: t('graphstudio.chart.vs', { y: varTitle(Y.v), x: varTitle(X.v) }),
+    xlabel: varTitle(X.v),
+    ylabel: varTitle(Y.v),
+    xEdges,
+    yEdges,
+    counts,
+  };
 }
 
 /* ------------------------------------------------------------------ 3D (phase 3) */
@@ -763,7 +858,12 @@ function scatter3dChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Rec
     xlabel: varTitle(X.v),
     ylabel: varTitle(Y.v),
     zlabel: varTitle(Z.v),
-    points: picked.map((k) => ({ x: num(X, p.rows[k]), y: num(Y, p.rows[k]), z: num(Z, p.rows[k]), group: g ? g.labels[g.idx[k]] : null })),
+    points: picked.map((k) => ({
+      x: num(X, p.rows[k]),
+      y: num(Y, p.rows[k]),
+      z: num(Z, p.rows[k]),
+      group: g ? g.labels[g.idx[k]] : null,
+    })),
     fit: optStr(def, 'fit', 'none') === 'plane' ? 'plane' : 'none',
     groupLabel: g ? varTitle(p.cols.group[0].v) : null,
   };
@@ -868,12 +968,23 @@ function surface3dChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Rec
   if (Z) {
     z = sum.map((row, yi) => row.map((s, xi) => (wsum[yi][xi] > 0 ? s / wsum[yi][xi] : null)));
     const filled = fillHoles(z);
-    if (filled) notes.push(t('graphstudio.note.surfaceFilled', { count: filled, reach: SURFACE_FILL_REACH }));
+    if (filled)
+      notes.push(
+        t('graphstudio.note.surfaceFilled', {
+          count: filled,
+          reach: SURFACE_FILL_REACH,
+        }),
+      );
   } else z = wsum.map((row) => row.slice());
   const zlabel = Z ? varTitle(Z.v) : funcLabel(t, 'count');
   return {
     type: 'surface3d',
-    title: Z ? byTitle(t, zlabel, varTitle(X.v), varTitle(Y.v)) : t('graphstudio.chart.surfaceCount', { x: varTitle(X.v), y: varTitle(Y.v) }),
+    title: Z
+      ? byTitle(t, zlabel, varTitle(X.v), varTitle(Y.v))
+      : t('graphstudio.chart.surfaceCount', {
+          x: varTitle(X.v),
+          y: varTitle(Y.v),
+        }),
     xlabel: varTitle(X.v),
     ylabel: varTitle(Y.v),
     zlabel,
@@ -902,8 +1013,13 @@ function highLowChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
   const low = perCategory(def, p, c, p.cols.low[0])!;
   const close = mode === 'hlc' ? perCategory(def, p, c, p.cols.close?.[0]) : null;
   const keep = c.x.cells.map((_, i) => i).filter((i) => high[i] !== null || low[i] !== null);
-  const pick = <T,>(a: T[]) => keep.map((i) => a[i]);
-  const names = { x: varTitle(p.cols.x[0].v), high: varTitle(p.cols.high[0].v), low: varTitle(p.cols.low[0].v), close: p.cols.close?.[0] ? varTitle(p.cols.close[0].v) : '' };
+  const pick = <T>(a: T[]) => keep.map((i) => a[i]);
+  const names = {
+    x: varTitle(p.cols.x[0].v),
+    high: varTitle(p.cols.high[0].v),
+    low: varTitle(p.cols.low[0].v),
+    close: p.cols.close?.[0] ? varTitle(p.cols.close[0].v) : '',
+  };
   const key = mode === 'hlc' ? (close ? 'hlc' : 'hl') : mode;
   const xs = numericX(def, c, p);
   return {
@@ -927,12 +1043,28 @@ function dualAxisChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknow
   const side = (slotId: string, kind: string) => {
     const col = p.cols[slotId][0];
     const name = funcLabel(t, func, col);
-    return { name, ylabel: name, kind: kind === 'bar' ? 'bar' : 'line', values: perCategory(def, p, c, col)! };
+    return {
+      name,
+      ylabel: name,
+      kind: kind === 'bar' ? 'bar' : 'line',
+      values: perCategory(def, p, c, col)!,
+    };
   };
   const left = side('left', kinds[0]);
   const right = side('right', kinds[1]);
   const x = varTitle(p.cols.x[0].v);
-  return { type: 'dualaxis', title: t('graphstudio.chart.dual', { left: left.name, right: right.name, x }), xlabel: x, categories: c.x.labels, left, right };
+  return {
+    type: 'dualaxis',
+    title: t('graphstudio.chart.dual', {
+      left: left.name,
+      right: right.name,
+      x,
+    }),
+    xlabel: x,
+    categories: c.x.labels,
+    left,
+    right,
+  };
 }
 
 /* ------------------------------------------------------------------ probability plots */
@@ -981,7 +1113,13 @@ function probChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<s
   // exponential needs x >= 0, lognormal x > 0; other values cannot be drawn
   const ok = dist === 'lognormal' ? raw.filter((x) => x > 0) : dist === 'exponential' ? raw.filter((x) => x >= 0) : raw;
   const distName = t(`graphstudio.dist.${dist}`);
-  if (ok.length < raw.length) notes.push(t('graphstudio.note.dropped', { count: raw.length - ok.length, dist: distName }));
+  if (ok.length < raw.length)
+    notes.push(
+      t('graphstudio.note.dropped', {
+        count: raw.length - ok.length,
+        dist: distName,
+      }),
+    );
   // a lognormal sample is a normal one on the log scale
   const ys = dist === 'lognormal' ? ok.map(Math.log) : ok;
   const n = ys.length;
@@ -1116,8 +1254,24 @@ export function individualsParts(def: GraphDef, p: Prepared, t: Tf): { i: Contro
   const mrUcl = mrBar * (1 + (k * D3_2) / D2[2]);
   const mrLcl = Math.max(0, mrBar * (1 - (k * D3_2) / D2[2]));
   return {
-    i: { title: t('graphstudio.chart.control.individuals', { y }), ylabel: t('graphstudio.chart.individual'), labels, values: vals, center, ucl: vals.map(() => center + half), lcl: vals.map(() => center - half) },
-    mr: { title: t('graphstudio.chart.control.movingrange', { y }), ylabel: t('graphstudio.chart.movingRange'), labels, values: [null, ...mrs], center: mrBar, ucl: vals.map(() => mrUcl), lcl: vals.map(() => mrLcl) },
+    i: {
+      title: t('graphstudio.chart.control.individuals', { y }),
+      ylabel: t('graphstudio.chart.individual'),
+      labels,
+      values: vals,
+      center,
+      ucl: vals.map(() => center + half),
+      lcl: vals.map(() => center - half),
+    },
+    mr: {
+      title: t('graphstudio.chart.control.movingrange', { y }),
+      ylabel: t('graphstudio.chart.movingRange'),
+      labels,
+      values: [null, ...mrs],
+      center: mrBar,
+      ucl: vals.map(() => mrUcl),
+      lcl: vals.map(() => mrLcl),
+    },
   };
 }
 
@@ -1153,7 +1307,10 @@ export function xbarParts(def: GraphDef, p: Prepared, t: Tf): ControlParts | nul
   const half = ns.map((n) => (k * sigma) / Math.sqrt(n));
   const y = varTitle(col.v);
   return {
-    title: t('graphstudio.chart.control.xbar', { y, x: varTitle(p.cols.subgroup[0].v) }),
+    title: t('graphstudio.chart.control.xbar', {
+      y,
+      x: varTitle(p.cols.subgroup[0].v),
+    }),
     ylabel: t('graphstudio.chart.subgroupMean'),
     labels: used.map((x) => x.label),
     values: means,
@@ -1180,7 +1337,10 @@ function controlChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Recor
     title: t('graphstudio.chart.control.imr', { y }),
     columns: 1,
     sharedAxes: false,
-    panels: [parts.i, parts.mr].map((c) => ({ title: c.ylabel, chart: controlSpec(c, caseNo) })),
+    panels: [parts.i, parts.mr].map((c) => ({
+      title: c.ylabel,
+      chart: controlSpec(c, caseNo),
+    })),
   };
 }
 
@@ -1227,7 +1387,13 @@ function violinChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record
   const col = p.cols.value[0];
   const x = p.cols.x?.[0] ? cat(p, p.cols.x[0]) : null;
   const factor = optNum(def, 'bwFactor', 1);
-  const violins: { label: string; points: [number, number][]; median: number; q1: number; q3: number }[] = [];
+  const violins: {
+    label: string;
+    points: [number, number][];
+    median: number;
+    q1: number;
+    q3: number;
+  }[] = [];
   let skipped = 0;
   bucketValues(p, col, x).forEach((g, i) => {
     const h = silverman(g) * factor;
@@ -1236,12 +1402,24 @@ function violinChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record
       return;
     }
     // clipped to the data range, so the shape never reaches beyond the observed values
-    violins.push({ label: x ? x.labels[i] : varTitle(col.v), points: kde(g, h, g[0], g[g.length - 1], VIOLIN_POINTS), median: quantile(g, 0.5), q1: quantile(g, 0.25), q3: quantile(g, 0.75) });
+    violins.push({
+      label: x ? x.labels[i] : varTitle(col.v),
+      points: kde(g, h, g[0], g[g.length - 1], VIOLIN_POINTS),
+      median: quantile(g, 0.5),
+      q1: quantile(g, 0.25),
+      q3: quantile(g, 0.75),
+    });
   });
   if (skipped) notes.push(t('graphstudio.note.groupsSkipped', { count: skipped }));
   if (!violins.length) return null;
   const y = varTitle(col.v);
-  return { type: 'violin', title: x ? byTitle(t, y, varTitle(p.cols.x[0].v)) : y, ylabel: y, xlabel: x ? varTitle(p.cols.x[0].v) : '', violins };
+  return {
+    type: 'violin',
+    title: x ? byTitle(t, y, varTitle(p.cols.x[0].v)) : y,
+    ylabel: y,
+    xlabel: x ? varTitle(p.cols.x[0].v) : '',
+    violins,
+  };
 }
 
 export function densityChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> | null {
@@ -1258,7 +1436,10 @@ export function densityChart(def: GraphDef, p: Prepared, t: Tf, notes: string[])
       return;
     }
     // the curve runs 3 bandwidths past the data so it comes down to (almost) zero
-    curves.push({ name: g ? g.labels[i] : varTitle(col.v), points: kde(vals, h, vals[0] - 3 * h, vals[vals.length - 1] + 3 * h, DENSITY_POINTS) });
+    curves.push({
+      name: g ? g.labels[i] : varTitle(col.v),
+      points: kde(vals, h, vals[0] - 3 * h, vals[vals.length - 1] + 3 * h, DENSITY_POINTS),
+    });
   });
   if (skipped) notes.push(t('graphstudio.note.groupsSkipped', { count: skipped }));
   if (!curves.length) return null;
@@ -1306,35 +1487,66 @@ export function chartExtent(c: Obj): Extent {
       return c.horizontal ? { x: r, zero: true } : { y: r, zero: true };
     }
     case 'line':
-      return { y: rangeOf(list(c.series).flatMap((s) => [...list(s.values), ...list(s.lo), ...list(s.hi)])) };
+      return {
+        y: rangeOf(list(c.series).flatMap((s) => [...list(s.values), ...list(s.lo), ...list(s.hi)])),
+      };
     case 'area': {
       const ser = list(c.series);
       if (c.stack === 'stack100') return { y: [0, 100], zero: true };
-      if (c.stack === 'stack') return { y: rangeOf(list(c.categories).map((_, i) => ser.reduce((s, x) => s + (x.values[i] ?? 0), 0))), zero: true };
+      if (c.stack === 'stack')
+        return {
+          y: rangeOf(list(c.categories).map((_, i) => ser.reduce((s, x) => s + (x.values[i] ?? 0), 0))),
+          zero: true,
+        };
       return { y: rangeOf(ser.flatMap((s) => list(s.values))), zero: true };
     }
     case 'histogram': {
       const bins = list(c.bins);
-      return { x: rangeOf(bins.flatMap((b) => [b[0], b[1]])), y: rangeOf(bins.map((b) => b[2])), zero: true };
+      return {
+        x: rangeOf(bins.flatMap((b) => [b[0], b[1]])),
+        y: rangeOf(bins.map((b) => b[2])),
+        zero: true,
+      };
     }
     case 'boxplot':
-      return { y: rangeOf(list(c.boxes).flatMap((b) => [...list(b.whiskers), ...list(b.outliers).map((o) => o.value), ...list(b.hinges)])) };
+      return {
+        y: rangeOf(list(c.boxes).flatMap((b) => [...list(b.whiskers), ...list(b.outliers).map((o) => o.value), ...list(b.hinges)])),
+      };
     case 'scatter':
-      return { x: rangeOf(list(c.points).map((q) => q[0])), y: rangeOf(list(c.points).map((q) => q[1])) };
+      return {
+        x: rangeOf(list(c.points).map((q) => q[0])),
+        y: rangeOf(list(c.points).map((q) => q[1])),
+      };
     case 'dot':
       return { x: rangeOf(list(c.bins).map((b) => b.x)) };
     case 'highlow':
-      return { y: rangeOf([...list(c.high), ...list(c.low), ...list(c.close)]) };
+      return {
+        y: rangeOf([...list(c.high), ...list(c.low), ...list(c.close)]),
+      };
     case 'probplot':
-      return { x: rangeOf([...list(c.points).map((q) => q[0]), ...list(c.reference).map((q) => q[0])]), y: rangeOf([...list(c.points).map((q) => q[1]), ...list(c.reference).map((q) => q[1])]) };
+      return {
+        x: rangeOf([...list(c.points).map((q) => q[0]), ...list(c.reference).map((q) => q[0])]),
+        y: rangeOf([...list(c.points).map((q) => q[1]), ...list(c.reference).map((q) => q[1])]),
+      };
     case 'sequence':
-      return { x: rangeOf(list(c.x)), y: rangeOf(list(c.series).flatMap((s) => list(s.values))) };
+      return {
+        x: rangeOf(list(c.x)),
+        y: rangeOf(list(c.series).flatMap((s) => list(s.values))),
+      };
     case 'control':
-      return { y: rangeOf([...list(c.values), ...list(c.ucl), ...list(c.lcl), c.center]) };
+      return {
+        y: rangeOf([...list(c.values), ...list(c.ucl), ...list(c.lcl), c.center]),
+      };
     case 'density':
-      return { x: rangeOf(list(c.curves).flatMap((k) => list(k.points).map((q) => q[0]))), y: rangeOf(list(c.curves).flatMap((k) => list(k.points).map((q) => q[1]))), zero: true };
+      return {
+        x: rangeOf(list(c.curves).flatMap((k) => list(k.points).map((q) => q[0]))),
+        y: rangeOf(list(c.curves).flatMap((k) => list(k.points).map((q) => q[1]))),
+        zero: true,
+      };
     case 'violin':
-      return { y: rangeOf(list(c.violins).flatMap((v) => list(v.points).map((q) => q[0]))) };
+      return {
+        y: rangeOf(list(c.violins).flatMap((v) => list(v.points).map((q) => q[0]))),
+      };
     default:
       return {};
   }
@@ -1392,12 +1604,23 @@ function panelsChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record
   lv.cells.forEach((_, li) => {
     const rows = p.rows.filter((__, k) => lv.idx[k] === li);
     if (!rows.length) return;
-    const sub: Prepared = { ...p, rows, info: { ...p.info, used: rows.length, usedWeight: rows.reduce((s, r) => s + p.w[r], 0) } };
+    const sub: Prepared = {
+      ...p,
+      rows,
+      info: {
+        ...p.info,
+        used: rows.length,
+        usedWeight: rows.reduce((s, r) => s + p.w[r], 0),
+      },
+    };
     const chart = buildOne(def, sub, t, notes);
     if (!chart) return;
     base = base || String(chart.title ?? '');
     // the chart keeps its own title (some renderers use it as the axis title); the panel heading is `title`
-    panels.push({ title: t('graphstudio.chart.panel', { g, level: lv.labels[li] }), chart });
+    panels.push({
+      title: t('graphstudio.chart.panel', { g, level: lv.labels[li] }),
+      chart,
+    });
   });
   if (!panels.length) return null;
   const shared = def.options.sharedAxes !== false;
@@ -1456,7 +1679,10 @@ export function quickStats(def: GraphDef, ds: Dataset, chart?: Record<string, un
     if (def.kind === 'qq' && optStr(def, 'dist', 'normal') === 'lognormal') obs = obs.filter((o) => o.y > 0).map((o) => ({ y: Math.log(o.y), w: o.w }));
     if (def.kind === 'bar' && (def.variant === 'horizontal' || def.options.horizontal === true)) axis = 'x';
   } else if (chart && chart.type === 'bar' && Array.isArray(chart.bars)) {
-    obs = (chart.bars as { count: number }[]).map((b) => ({ y: b.count, w: 1 }));
+    obs = (chart.bars as { count: number }[]).map((b) => ({
+      y: b.count,
+      w: 1,
+    }));
     axis = chart.horizontal === true ? 'x' : 'y';
   } else if (chart && (chart.type === 'line' || chart.type === 'area') && Array.isArray(chart.series)) {
     obs = ((chart.series as { values: (number | null)[] }[])[0]?.values ?? []).filter((v): v is number => v !== null).map((y) => ({ y, w: 1 }));
@@ -1465,7 +1691,13 @@ export function quickStats(def: GraphDef, ds: Dataset, chart?: Record<string, un
   const m = summarize('mean', obs);
   const med = summarize('median', obs);
   if (m === null || med === null) return null;
-  return { axis, n: obs.reduce((s, o) => s + o.w, 0), mean: m, median: med, sd: summarize('sd', obs) };
+  return {
+    axis,
+    n: obs.reduce((s, o) => s + o.w, 0),
+    mean: m,
+    median: med,
+    sd: summarize('sd', obs),
+  };
 }
 
 /* ------------------------------------------------------------------ entry point */

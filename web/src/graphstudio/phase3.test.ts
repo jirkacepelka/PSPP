@@ -30,7 +30,12 @@ const num = (name: string, extra: Partial<Variable> = {}): Variable => ({
   ...extra,
 });
 
-const ds = (vars: [string, (number | null)[]][], extra: Partial<Dataset> = {}): Dataset => ({ name: 't', variables: vars.map(([n]) => num(n)), columns: vars.map(([, c]) => c), ...extra });
+const ds = (vars: [string, (number | null)[]][], extra: Partial<Dataset> = {}): Dataset => ({
+  name: 't',
+  variables: vars.map(([n]) => num(n)),
+  columns: vars.map(([, c]) => c),
+  ...extra,
+});
 
 const def = (kind: GraphDef['kind'], bind: GraphDef['bind'], options: Record<string, unknown> = {}): GraphDef => {
   const d = defaultDef(kind);
@@ -66,7 +71,12 @@ describe('scatter3d', () => {
   const data = ds([['g', [1, 1, 2, 2, 2]], ['x', [1, 2, 3, 4, 5]], ['y', [5, 4, 3, 2, 1]], ['z', [1, 4, 9, null, 25]]]);
   it('keeps complete cases, groups and the plane option', () => {
     const r = ok(def('scatter3d', { x: ['x'], y: ['y'], z: ['z'], group: ['g'] }, { fit: 'plane' }), data);
-    const c = r.chart as { type: string; fit: string; groupLabel: string; points: { x: number; z: number; group: string | null }[] };
+    const c = r.chart as {
+      type: string;
+      fit: string;
+      groupLabel: string;
+      points: { x: number; z: number; group: string | null }[];
+    };
     expect(c.type).toBe('scatter3d');
     expect(c.fit).toBe('plane');
     expect(c.points).toHaveLength(4);
@@ -97,7 +107,11 @@ describe('scatter3d', () => {
 describe('bar3d', () => {
   const data = ds([['a', [1, 1, 2, 2, 2, 3]], ['b', [1, 2, 1, 1, 2, 1]], ['v', [10, 20, 30, 50, 60, 70]], ['w', [1, 1, 2, 1, 1, 1]]]);
   it('counts per cell and leaves empty cells null (nothing is dropped)', () => {
-    const c = ok(def('bar3d', { x: ['a'], y: ['b'] }), data).chart as { xs: string[]; ys: string[]; values: (number | null)[][] };
+    const c = ok(def('bar3d', { x: ['a'], y: ['b'] }), data).chart as {
+      xs: string[];
+      ys: string[];
+      values: (number | null)[][];
+    };
     expect(c.xs).toEqual(['1', '2', '3']);
     expect(c.ys).toEqual(['1', '2']);
     // values[yi][xi]
@@ -119,7 +133,12 @@ describe('bar3d', () => {
     expect(c.xs).toHaveLength(4);
   });
   it('filters like every chart', () => {
-    const filtered = { ...data, filter: 'f', columns: [...data.columns, [1, 1, 1, 0, 0, 0]], variables: [...data.variables, num('f')] };
+    const filtered = {
+      ...data,
+      filter: 'f',
+      columns: [...data.columns, [1, 1, 1, 0, 0, 0]],
+      variables: [...data.variables, num('f')],
+    };
     const r = ok(def('bar3d', { x: ['a'], y: ['b'] }), filtered);
     expect(r.info.used).toBe(3);
   });
@@ -166,7 +185,11 @@ describe('surface3d', () => {
     const z = x.map((v) => v * 2);
     const data = ds([['x', x], ['y', y], ['z', z]]);
     const withZ = ok(def('surface3d', { x: ['x'], y: ['y'], z: ['z'] }, { grid: 10 }), data);
-    const s = withZ.chart as { xs: number[]; ys: number[]; z: (number | null)[][] };
+    const s = withZ.chart as {
+      xs: number[];
+      ys: number[];
+      z: (number | null)[][];
+    };
     expect(s.xs).toHaveLength(10);
     expect(s.z).toHaveLength(10);
     expect(s.z.flat().some((v) => v === null)).toBe(true);
@@ -187,8 +210,26 @@ describe('surface3d', () => {
 describe('students sample', () => {
   const data = students as unknown as Dataset;
   it('builds every 3D kind', () => {
-    expect((ok(def('scatter3d', { x: ['hours'], y: ['sleep'], z: ['gpa'], group: ['faculty'] }), data).chart as { points: unknown[] }).points.length).toBeGreaterThan(50);
-    expect((ok(def('bar3d', { x: ['faculty'], y: ['year'] }), data).chart as { values: unknown[][] }).values.length).toBeGreaterThan(1);
+    expect(
+      (
+        ok(
+          def('scatter3d', {
+            x: ['hours'],
+            y: ['sleep'],
+            z: ['gpa'],
+            group: ['faculty'],
+          }),
+          data,
+        ).chart as { points: unknown[] }
+      ).points.length,
+    ).toBeGreaterThan(50);
+    expect(
+      (
+        ok(def('bar3d', { x: ['faculty'], y: ['year'] }), data).chart as {
+          values: unknown[][];
+        }
+      ).values.length,
+    ).toBeGreaterThan(1);
     expect((ok(def('surface3d', { x: ['hours'], y: ['sleep'], z: ['gpa'] }), data).chart as { z: unknown[][] }).z.length).toBe(25);
   });
 });
@@ -213,10 +254,20 @@ describe('stored view', () => {
   it('restyleChart keeps or replaces the view', () => {
     const chart = studioChart(ok(d, data).chart, d, {}, view);
     expect((restyleChart(chart, { grid: false }) as { view3d: unknown }).view3d).toEqual(view);
-    expect((restyleChart(chart, {}, { ...view, azimuth: 5 }) as { view3d: { azimuth: number } }).view3d.azimuth).toBe(5);
+    expect(
+      (
+        restyleChart(chart, {}, { ...view, azimuth: 5 }) as {
+          view3d: { azimuth: number };
+        }
+      ).view3d.azimuth,
+    ).toBe(5);
   });
   it('drops reference lines and annotations on 3D charts', () => {
-    const chart = studioChart(ok(d, data).chart, d, { grid: false, refLines: [{ axis: 'y', value: 1 }], annotations: [{ x: 1, y: 1, text: 'a' }] });
+    const chart = studioChart(ok(d, data).chart, d, {
+      grid: false,
+      refLines: [{ axis: 'y', value: 1 }],
+      annotations: [{ x: 1, y: 1, text: 'a' }],
+    });
     expect(chart.style).toEqual({ grid: false });
   });
   it('series names for the palette', () => {
@@ -233,7 +284,9 @@ describe('3D axis style', () => {
   it('passes z title and range through studioChart and restyleChart', () => {
     const chart = studioChart(ok(d, data).chart, d, style);
     expect(chart.style).toEqual({ zTitle: 'Height', zMin: 0, zMax: 10 });
-    const r = restyleChart(chart, { zMax: 5, zMin: null }) as { style: unknown };
+    const r = restyleChart(chart, { zMax: 5, zMin: null }) as {
+      style: unknown;
+    };
     expect(r.style).toEqual({ zMax: 5 });
   });
 });

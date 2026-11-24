@@ -155,7 +155,13 @@ export function AppearanceTab({ style, onChange, auto, series, decimal, three }:
             );
           })}
         </ul>
-        {series.length > PALETTE_ROWS && <p className="gs-muted">{t('graphstudio.app.moreSeries', { count: series.length - PALETTE_ROWS })}</p>}
+        {series.length > PALETTE_ROWS && (
+          <p className="gs-muted">
+            {t('graphstudio.app.moreSeries', {
+              count: series.length - PALETTE_ROWS,
+            })}
+          </p>
+        )}
       </fieldset>
 
       <fieldset className="gs-fieldset">
@@ -189,14 +195,22 @@ interface ElementsProps {
 /** A number for a line label: a few decimals, no grouping, the decimal separator of the settings. */
 export function labelNumber(x: number, decimal: '.' | ','): string {
   const digits = Math.abs(x) >= 1000 ? 0 : Math.abs(x) >= 100 ? 1 : 2;
-  return new Intl.NumberFormat(decimal === ',' ? 'cs-CZ' : 'en-US', { maximumFractionDigits: digits, useGrouping: false }).format(x);
+  return new Intl.NumberFormat(decimal === ',' ? 'cs-CZ' : 'en-US', {
+    maximumFractionDigits: digits,
+    useGrouping: false,
+  }).format(x);
 }
 
 type Quick = 'mean' | 'median' | 'sd1' | 'sd2';
 
 /** The reference lines of a quick choice: plain RefLines, editable like any other. */
 export function quickLines(q: QuickStats, which: Quick, label: (key: string, v: string) => string, decimal: '.' | ','): RefLine[] {
-  const line = (key: string, value: number, dash: boolean): RefLine => ({ axis: q.axis, value, label: label(key, labelNumber(value, decimal)), dash });
+  const line = (key: string, value: number, dash: boolean): RefLine => ({
+    axis: q.axis,
+    value,
+    label: label(key, labelNumber(value, decimal)),
+    dash,
+  });
   if (which === 'mean') return [line('mean', q.mean, false)];
   if (which === 'median') return [line('median', q.median, true)];
   if (q.sd === null) return [];
