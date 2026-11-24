@@ -416,7 +416,7 @@ function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
  */
 /** PSPP date formats store seconds since 1582-10-14; the renderer wants days since 1970-01-01. */
 const DATE_FORMATS = new Set(['DATE', 'ADATE', 'EDATE', 'SDATE', 'JDATE', 'QYR', 'MOYR', 'WKYR', 'DATETIME']);
-const isDateVar = (v: { format?: { type: string } }): boolean => !!v.format && DATE_FORMATS.has(v.format.type.toUpperCase());
+const isDateVar = (v: { print: { type: string } }): boolean => DATE_FORMATS.has(v.print.type.toUpperCase());
 const secondsToDays = (sec: number): number => sec / 86400 - 141428;
 
 function numericX(def: GraphDef, c: Cells, p: Prepared): number[] | null {
