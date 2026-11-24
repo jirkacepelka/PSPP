@@ -36,6 +36,12 @@ import { PanelsChart } from './panels';
 import { Scatter3dChart } from './scatter3d';
 import { Bar3dChart } from './bar3d';
 import { Surface3dChart } from './surface3d';
+import { BubbleChart } from './bubble';
+import { MosaicChart } from './mosaic';
+import { RadarChart } from './radar';
+import { WaterfallChart } from './waterfall';
+import { ForestChart } from './forest';
+import { TreemapChart } from './treemap';
 import type { View3d } from './studioTypes';
 
 export interface PsppChartProps {
@@ -126,6 +132,18 @@ function ChartBody({ spec, common }: { spec: StyledSpec; common: ChartCommonProp
       return <Bar3dChart spec={spec} {...common} />;
     case 'surface3d':
       return <Surface3dChart spec={spec} {...common} />;
+    case 'bubble':
+      return <BubbleChart spec={spec} {...common} />;
+    case 'mosaic':
+      return <MosaicChart spec={spec} {...common} />;
+    case 'radar':
+      return <RadarChart spec={spec} {...common} />;
+    case 'waterfall':
+      return <WaterfallChart spec={spec} {...common} />;
+    case 'forest':
+      return <ForestChart spec={spec} {...common} />;
+    case 'treemap':
+      return <TreemapChart spec={spec} {...common} />;
     default:
       return (
         <figure className="pspp-chart pspp-chart--fallback" style={width ? { width } : undefined} role="img" aria-label={spec.title || tr(t, 'untitled')}>

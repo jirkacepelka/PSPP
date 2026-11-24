@@ -83,7 +83,23 @@ export function parseSequence(c: Obj, title: string): SequenceSpec {
     x: keep.map((i) => x[i] as number),
     series: arr(c.series)
       .filter(isObj)
-      .map((s) => ({ name: str(s.name), values: keep.map((i) => num(arr(s.values)[i])) })),
+      .map((s) => ({ name: str(s.name), values: keep.map((i) => num(arr(s.values)[i])), ...(s.dash === true ? { dash: true } : {}) })),
+    ...(Array.isArray(c.bands)
+      ? {
+          bands: arr(c.bands)
+            .filter(isObj)
+            .slice(0, 12)
+            .map((b) => {
+              const ref = num(b.series);
+              return {
+                name: str(b.name),
+                lo: keep.map((i) => num(arr(b.lo)[i])),
+                hi: keep.map((i) => num(arr(b.hi)[i])),
+                ...(ref !== null && ref >= 0 ? { series: Math.floor(ref) } : {}),
+              };
+            }),
+        }
+      : {}),
   };
 }
 
@@ -119,6 +135,7 @@ export function parseDensity(c: Obj, title: string): DensitySpec {
       .filter(isObj)
       .map((cv) => ({ name: str(cv.name), points: pairs(cv.points).sort((p, q) => p[0] - q[0]) })),
     fill: c.fill !== false,
+    ...(c.layout === 'ridge' || c.layout === 'overlay' ? { layout: c.layout } : {}),
   };
 }
 

@@ -99,6 +99,8 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
   const gList = grouped ? groups : [''];
   const stackMode = grouped && nG > 1 ? (spec.stack ?? 'none') : 'none';
   const stacked = stackMode !== 'none';
+  // lollipop: stem and dot instead of a bar; stacked bars stay bars, very dense charts too
+  const lolliOn = spec.lollipop === true && !stacked;
   const pct100 = stackMode === 'stack100';
   const value = (count: number) => (spec.percent && spec.total ? (count * 100) / spec.total : count);
   const fmtVal = (count: number) => (spec.percent && spec.total ? formatPercent(count / spec.total, locale) : formatValue(count, locale));
@@ -196,7 +198,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
 
         if (horizontal) {
           const labels = cats.map((cName, i) => (nBars > DENSE && i % thinEvery(FONT.tick * fs, (area.height - 60) / nBars) ? '' : truncateText(cName, catW(area.width), FONT.tick * fs)));
-          const valLabW = wantLabels && !stacked ? Math.max(...segs.map((s) => measureText(segText(s), FONT.label * fs))) + 8 : 0;
+          const valLabW = wantLabels && !stacked ? Math.max(...segs.map((s) => measureText(segText(s), FONT.label * fs))) + 8 + (lolliOn ? 7 : 0) : 0;
           const m = plotMargins({ yTickLabels: labels, yTitle: xT, xTitle: valueName, right: Math.max(16, valLabW), style });
           const plotW = area.width - m.left - m.right;
           const plotH = area.height - m.top - m.bottom;
@@ -209,6 +211,8 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
           const cluster = dense ? band * (band >= 3 ? 0.85 : 1) : Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
           const slot = stacked ? cluster : Math.max(dense ? 0.3 : 1, (cluster - (nG - 1) * gp) / nG);
           const base = sx(Math.max(vt.domain[0], Math.min(0, vt.domain[1])));
+          const lolli = lolliOn && !dense;
+          const lr = lolli ? clamp(slot / 2, 3.5, 7) : 0;
           const denseD: string[] = gList.map(() => '');
           const byCat: Seg[][] = [];
           if (dense) {
@@ -229,7 +233,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
             <g>
               <defs>
                 <clipPath id={area.uid + '-bc'}>
-                  <rect x={m.left} y={m.top - 2} width={plotW} height={plotH + 4} />
+                  <rect x={m.left} y={m.top - 2} width={plotW + lr} height={plotH + 4} />
                 </clipPath>
               </defs>
               <XAxis axis={{ scale: sx, ticks: vt.ticks, format: fv }} top={m.top} height={plotH} left={m.left} width={plotW} grid />
@@ -270,7 +274,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                   const txt = segText(s);
                   const tw = measureText(txt, FONT.label * fs);
                   if (wantLabels && (stacked ? w >= tw + 8 && slot >= FONT.label * fs + 2 : slot >= FONT.label * fs - 2)) {
-                    const lx = stacked ? x + w / 2 : s.v1 >= 0 ? Math.max(xa, xb) + 5 : Math.min(xa, xb) - 5;
+                    const lx = stacked ? x + w / 2 : s.v1 >= 0 ? Math.max(xa, xb) + 5 + lr : Math.min(xa, xb) - 5 - lr;
                     const anchor = stacked ? 'middle' : s.v1 >= 0 ? 'start' : 'end';
                     if (!stacked) avoidText(area.reg, lx, y + slot / 2 + FONT.label * fs * 0.35, tw, FONT.label * fs, anchor);
                     labelEls.push(
@@ -284,6 +288,11 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                       <rect x={m.left} y={y - GAP / 2} width={plotW} height={slot + GAP} className="pspp-chart__hitband" data-export="omit" />
                       {stacked ? (
                         <rect x={x} y={y} width={w} height={slot} style={{ fill: gColor(s.group), stroke: 'var(--c-surface)', strokeWidth: 1 }} />
+                      ) : lolli ? (
+                        <g>
+                          <line className="pspp-chart__stem" x1={base} x2={xb} y1={y + slot / 2} y2={y + slot / 2} style={{ stroke: gColor(s.group) }} />
+                          <circle cx={xb} cy={y + slot / 2} r={lr} style={{ fill: gColor(s.group) }} />
+                        </g>
                       ) : (
                         <path d={hBarPath(y, slot, base, xb)} style={{ fill: gColor(s.group) }} />
                       )}
@@ -321,12 +330,14 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
           : true;
         const labelsOn = wantLabels && nBars <= 24 && (style?.valueLabels === true || fitsAll);
         const above = labelsOn && !stacked;
-        const top = m.top + (above ? 14 * fs : 0);
+        const cluster = dense ? band * (band >= 3 ? 0.85 : 1) : Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
+        const slot = stacked ? cluster : Math.max(dense ? 0.3 : 1, (cluster - (nG - 1) * gp) / nG);
+        const lolli = lolliOn && !dense;
+        const lr = lolli ? clamp(slot / 2, 3.5, 7) : 0;
+        const top = m.top + (above ? (14 + lr) * fs : 0);
         const plotH = area.height - top - labelBand - 4 - (xT ? 20 : 0);
         const sy = linearScale(vt.domain, [top + plotH, top]);
         const base = sy(Math.max(vt.domain[0], Math.min(0, vt.domain[1])));
-        const cluster = dense ? band * (band >= 3 ? 0.85 : 1) : Math.min(nG * MAX_BAR + (nG - 1) * GAP, band * (nG > 1 && !stacked ? 0.84 : 0.7));
-        const slot = stacked ? cluster : Math.max(dense ? 0.3 : 1, (cluster - (nG - 1) * gp) / nG);
         area.reg.x = (i: number) => m.left + band * (i + 0.5);
         area.reg.top = top;
         area.reg.height = plotH;
@@ -350,7 +361,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
           <g>
             <defs>
               <clipPath id={area.uid + '-bc'}>
-                <rect x={m.left} y={top - 2} width={plotW} height={plotH + 4} />
+                <rect x={m.left} y={top - 2 - lr} width={plotW} height={plotH + 4 + lr} />
               </clipPath>
             </defs>
             <YAxis axis={{ scale: sy, ticks: vt.ticks, format: fv }} left={m.left} width={plotW} />
@@ -406,7 +417,7 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                 const inSeg = stacked && slot >= tw + 4 && Math.abs(yb - ya) >= FONT.label * fs + 2;
                 const outSeg = !stacked && tw <= slot + band * 0.2;
                 if (labelsOn && (stacked ? inSeg : outSeg)) {
-                  const ly = stacked ? (ya + yb) / 2 : s.err ? Math.min(yb, sy(value(s.err.hi))) - 5 : s.v1 >= 0 ? Math.min(yb, base) - 5 : Math.max(yb, base) + 12;
+                  const ly = stacked ? (ya + yb) / 2 : s.err ? Math.min(yb, sy(value(s.err.hi))) - 5 : s.v1 >= 0 ? Math.min(yb, base) - 5 - lr : Math.max(yb, base) + 12 + lr;
                   if (!stacked) avoidText(area.reg, x + slot / 2, ly, tw, FONT.label * fs);
                   labelEls.push(
                     <text key={'v' + k} className={stacked ? 'pspp-chart__value pspp-chart__value--in' : 'pspp-chart__value'} x={x + slot / 2} y={ly} textAnchor="middle" dominantBaseline={stacked ? 'central' : undefined}>
@@ -419,6 +430,11 @@ export function BarChart({ spec, ...c }: { spec: BarSpec } & ChartCommonProps) {
                     <rect x={x - GAP / 2} y={top} width={slot + GAP} height={plotH} className="pspp-chart__hitband" data-export="omit" />
                     {stacked ? (
                       <rect x={x} y={Math.min(ya, yb)} width={slot} height={Math.abs(yb - ya)} style={{ fill: gColor(s.group), stroke: 'var(--c-surface)', strokeWidth: 1 }} />
+                    ) : lolli ? (
+                      <g>
+                        <line className="pspp-chart__stem" x1={x + slot / 2} x2={x + slot / 2} y1={base} y2={yb} style={{ stroke: gColor(s.group) }} />
+                        <circle cx={x + slot / 2} cy={yb} r={lr} style={{ fill: gColor(s.group) }} />
+                      </g>
                     ) : (
                       <path d={barPath(x, slot, base, yb)} style={{ fill: gColor(s.group) }} />
                     )}

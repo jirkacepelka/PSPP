@@ -1,7 +1,7 @@
 /* Point/line charts on two linear axes: normal Q-Q (and detrended), ROC,
    scatterplot, scree and spread-vs-level all share XYPlot. */
 
-import { useMemo, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useMemo, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 import {
   AxisTitles,
   Baseline,
@@ -25,6 +25,7 @@ import type { NpSpec, Pt, RocSpec, ScatterSpec, ScreeSpec, SpreadLevelSpec } fro
 import { useStyle } from './styleLayer';
 import { applyDomain } from './styleSpec';
 import { fitBand, fitCurve, type BandPoint, type FitKind } from './studioMath';
+import { drawMarginals, type MarginalGroup } from './marginals';
 
 export interface XYSeries {
   name: string;
@@ -84,6 +85,20 @@ interface XYPlotProps {
   xFormat?: (v: number) => string;
   emptyText?: string;
   tipFor: (s: XYSeries, p: Pt) => TipContent;
+  /** room kept free above / right of the plot for marginal plots, and what to draw there (see marginals.tsx) */
+  marginal?: { top: number; right: number; draw: (g: PlotGeometry) => ReactNode };
+}
+
+/** Pixel geometry of a finished XYPlot, handed to `marginal.draw` so side plots line up with the axes. */
+export interface PlotGeometry {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  xDomain: [number, number];
+  yDomain: [number, number];
+  sx: (v: number) => number;
+  sy: (v: number) => number;
 }
 
 interface FlatPt {
@@ -101,7 +116,8 @@ export function XYPlot(props: XYPlotProps) {
   const y = applyDomain(props.y, style?.yMin, style?.yMax, clamp(Math.floor(area.height / 48), 3, 9));
   const fx = props.xFormat && x === props.x ? props.xFormat : tickFormatter(x.step, x.ticks, locale);
   const fy = tickFormatter(y.step, y.ticks, locale);
-  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: props.yTitle, xTitle: props.xTitle, right: 16, style });
+  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: props.yTitle, xTitle: props.xTitle, right: 16 + (props.marginal?.right ?? 0), style });
+  m.top += props.marginal?.top ?? 0;
   const plotW = Math.max(40, area.width - m.left - m.right);
   const plotH = Math.max(40, area.height - m.top - m.bottom);
   const sx = linearScale(x.domain, [m.left, m.left + plotW]);
@@ -274,6 +290,7 @@ export function XYPlot(props: XYPlotProps) {
           {props.emptyText}
         </text>
       )}
+      {props.marginal?.draw({ left: m.left, top: m.top, width: plotW, height: plotH, xDomain: x.domain, yDomain: y.domain, sx, sy })}
       <AxisTitles xTitle={props.xTitle} yTitle={props.yTitle} left={m.left} top={m.top} width={plotW} height={plotH} totalHeight={area.height} />
     </g>
   );
@@ -455,6 +472,9 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
     });
   }, [fitKind, series, spec.fitByGroup, spec.fitCi]);
   const bands = fitResults.flatMap((f) => (f.band ? [{ color: f.color, pts: f.band }] : []));
+  // marginal plots (phase 4): thickness 56 px, 40 on narrow charts
+  const marginal = spec.marginals && spec.marginals !== 'none' ? spec.marginals : null;
+  const marginalSize = (w: number) => (w < 480 ? 40 : 56);
   const fitLabel = (f: { name: string; r2: number | null }) =>
     [fitName, f.name].filter(Boolean).join(' · ') + (spec.showR2 && f.r2 !== null ? `, ${tr(t, 'rSquared')} = ${formatValue(f.r2, locale, 3)}` : '');
   const legend: LegendItem[] | undefined =
@@ -472,6 +492,7 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
       legend={legend}
       ariaLabel={`${title}. ${tr(t, 'ariaPoints', { count: spec.points.length })}${spec.byvar ? ', ' + tr(t, 'ariaGroups', { count: series.length }) : ''}.`}
       table={{ ...xyTable(xName, yName, series, locale, spec.byvar ?? undefined), note: fitResults.map(fitLabel).join('; ') || undefined }}
+      plotHeight={marginal ? (w) => clamp(Math.round(w * 0.56), 240, 420) + marginalSize(w) : undefined}
     >
       {(area) => {
         const xs = spec.points.map((p) => p.x);
@@ -495,6 +516,29 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
             fits={fitResults}
             bands={bands}
             tipFor={pointTip(xName, yName, locale, series.length > 1)}
+            marginal={
+              marginal
+                ? {
+                    top: marginalSize(area.width),
+                    right: marginalSize(area.width),
+                    draw: (g) =>
+                      drawMarginals(
+                        {
+                          kind: marginal,
+                          groups: series.map<MarginalGroup>((s) => ({ name: s.name, color: s.color, xs: s.points.map((p) => p[0]), ys: s.points.map((p) => p[1]) })),
+                          size: marginalSize(area.width),
+                          gap: 4,
+                          tip: area.tip,
+                          uid: area.uid,
+                          locale,
+                          names: { x: xName, y: yName, count: tr(t, 'count'), median: tr(t, 'median'), q1: tr(t, 'q1'), q3: tr(t, 'q3'), group: tr(t, 'group') },
+                          label: (axis) => tr(t, marginal === 'histogram' ? 'marginalHistogram' : marginal === 'density' ? 'marginalDensity' : 'marginalBox', { name: axis === 'x' ? xName : yName }),
+                        },
+                        g,
+                      ),
+                  }
+                : undefined
+            }
           />
         );
       }}

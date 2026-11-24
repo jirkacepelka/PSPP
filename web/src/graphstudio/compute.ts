@@ -9,6 +9,7 @@ import type { Dataset, Variable } from '../engine/types';
 import type { GraphDef, GraphKind } from '../charts/studioTypes';
 import { activeRows, caseCount, isMissing, valueText, varTitle, weights, type Cell } from '../ext/data';
 import { lgamma, normCdf, normInv, tInv } from '../ext/dist';
+import { buildFour } from './compute4';
 import { CATEGORY_CROWDED, CATEGORY_WARN, MAX_PANELS, MERGE_KINDS, SURFACE_GRID_DEFAULT, SURFACE_GRID_MAX, SURFACE_GRID_MIN, needsVariable, slotsOf, missingSlots } from './model';
 
 export type Tf = (key: string, args?: Record<string, unknown>) => string;
@@ -145,12 +146,12 @@ export function intervalHalf(kind: 'ci' | 'se' | 'sd', level: number, mult: numb
 
 /* ------------------------------------------------------------------ data access */
 
-interface Col {
+export interface Col {
   v: Variable;
   col: Cell[];
 }
 
-interface Prepared {
+export interface Prepared {
   rows: number[];
   /** all drawn rows of the chart; equals `rows` except inside a panel, where categories and bins are shared */
   universe: number[];
@@ -168,7 +169,7 @@ interface Prepared {
 const keyOf = (x: Cell) => (typeof x === 'number' ? `n${x}` : `s${String(x).trimEnd()}`);
 const cmpCells = (a: Cell, b: Cell) => (typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b)));
 
-interface CatSet {
+export interface CatSet {
   labels: string[];
   /** category index per row (parallel to the rows array), -1 when none */
   idx: number[];
@@ -252,7 +253,7 @@ function categories(c: Col, rows: number[], universe: number[] = rows, merge?: M
 }
 
 /** Categories of C over the rows of P; inside a panel the category set comes from the whole chart. */
-function cat(p: Prepared, c: Col): CatSet {
+export function cat(p: Prepared, c: Col): CatSet {
   const set = categories(c, p.rows, p.universe, c === p.cols.x?.[0] || (p.mergeY && c === p.cols.y?.[0]) ? p.merge : undefined);
   p.seen.push({ name: varTitle(c.v), count: set.cells.length });
   return set;
@@ -299,20 +300,20 @@ function prepare(def: GraphDef, ds: Dataset): Prepared | ComputeResult {
 }
 
 const isPrepared = (p: Prepared | ComputeResult): p is Prepared => 'rows' in p;
-const num = (c: Col, r: number) => c.col[r] as number;
-const optNum = (def: GraphDef, id: string, d: number): number => {
+export const num = (c: Col, r: number) => c.col[r] as number;
+export const optNum = (def: GraphDef, id: string, d: number): number => {
   const x = def.options[id];
   return typeof x === 'number' && Number.isFinite(x) ? x : d;
 };
-const optStr = (def: GraphDef, id: string, d: string): string => (typeof def.options[id] === 'string' ? (def.options[id] as string) : d);
+export const optStr = (def: GraphDef, id: string, d: string): string => (typeof def.options[id] === 'string' ? (def.options[id] as string) : d);
 
-function funcLabel(t: Tf, func: string, v?: Col): string {
+export function funcLabel(t: Tf, func: string, v?: Col): string {
   const f = t(`graphstudio.func.${func}`);
   return v ? t('graphstudio.chart.funcOf', { f, v: varTitle(v.v) }) : f;
 }
 
 /** Title "Y by X [and G]". */
-function byTitle(t: Tf, y: string, x: string, g?: string): string {
+export function byTitle(t: Tf, y: string, x: string, g?: string): string {
   return g ? t('graphstudio.chart.byGroup', { y, x, g }) : t('graphstudio.chart.by', { y, x });
 }
 
@@ -371,7 +372,7 @@ function errorLabel(def: GraphDef, t: Tf): string {
   return '';
 }
 
-function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
+export function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
   const func = optStr(def, 'func', 'count');
   const c = cellsOf(p);
   const total = p.info.usedWeight;
@@ -418,8 +419,8 @@ function barChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
  */
 /** PSPP date formats store seconds since 1582-10-14; the renderer wants days since 1970-01-01. */
 const DATE_FORMATS = new Set(['DATE', 'ADATE', 'EDATE', 'SDATE', 'JDATE', 'QYR', 'MOYR', 'WKYR', 'DATETIME']);
-const isDateVar = (v: { print: { type: string } }): boolean => DATE_FORMATS.has(v.print.type.toUpperCase());
-const secondsToDays = (sec: number): number => sec / 86400 - 141428;
+export const isDateVar = (v: { print: { type: string } }): boolean => DATE_FORMATS.has(v.print.type.toUpperCase());
+export const secondsToDays = (sec: number): number => sec / 86400 - 141428;
 
 function numericX(def: GraphDef, c: Cells, p: Prepared): number[] | null {
   if (def.options.numericAxis !== true || p.cols.x[0].v.type !== 'numeric') return null;
@@ -502,7 +503,7 @@ function pieChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown> {
 
 /* ------------------------------------------------------------------ distributions */
 
-function sortedValues(c: Col, rows: number[]): number[] {
+export function sortedValues(c: Col, rows: number[]): number[] {
   return rows.map((r) => num(c, r)).sort((a, b) => a - b);
 }
 
@@ -703,6 +704,7 @@ function scatterChart(def: GraphDef, p: Prepared, t: Tf): Record<string, unknown
     fitByGroup: !!g && def.options.fitByGroup === true,
     showR2: fit !== 'none' && def.options.showR2 !== false,
     fitCi: fit !== 'none' && def.options.fitCi === true,
+    ...(optStr(def, 'marginals', 'none') !== 'none' ? { marginals: optStr(def, 'marginals', 'none') } : {}),
   };
 }
 
@@ -966,7 +968,7 @@ function thin<T>(a: T[]): T[] {
 }
 
 /** These charts treat every case alike; say so when the dataset is weighted. */
-function weightNote(p: Prepared, t: Tf, notes: string[]) {
+export function weightNote(p: Prepared, t: Tf, notes: string[]) {
   if (p.info.weight) notes.push(t('graphstudio.note.weightIgnored', { name: p.info.weight }));
 }
 
@@ -1242,7 +1244,7 @@ function violinChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record
   return { type: 'violin', title: x ? byTitle(t, y, varTitle(p.cols.x[0].v)) : y, ylabel: y, xlabel: x ? varTitle(p.cols.x[0].v) : '', violins };
 }
 
-function densityChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> | null {
+export function densityChart(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Record<string, unknown> | null {
   weightNote(p, t, notes);
   const col = p.cols.value[0];
   const g = p.cols.group?.[0] ? cat(p, p.cols.group[0]) : null;
@@ -1522,7 +1524,7 @@ function buildOne(def: GraphDef, p: Prepared, t: Tf, notes: string[]): Obj | nul
     case 'surface3d':
       return surface3dChart(def, p, t, notes);
     default:
-      return null;
+      return buildFour(def, p, t, notes);
   }
 }
 

@@ -801,3 +801,45 @@
 .pspp-chart__s3--15 {
   fill: color-mix(in srgb, var(--c-series-1) 100%, var(--c-surface));
 }
+
+/* ----------------------------------------------------- phase 4 helpers */
+
+/* Small muted label that stays readable over lines and fills (radar rings). */
+.pspp-chart__halo {
+  fill: var(--c-muted);
+  stroke: var(--c-surface);
+  stroke-width: 3px;
+  paint-order: stroke;
+  stroke-linejoin: round;
+  font-variant-numeric: tabular-nums;
+}
+
+.pspp-chart__tile-label {
+  fill: var(--c-ink);
+  font-size: calc(11px * var(--c-fs, 1));
+  font-weight: 600;
+}
+
+.pspp-chart__tile-value {
+  fill: var(--c-ink-2);
+  font-size: calc(11px * var(--c-fs, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+.pspp-chart__connector {
+  stroke: var(--c-muted);
+  stroke-width: 1px;
+  stroke-dasharray: 3 3;
+  shape-rendering: crispEdges;
+}
+
+.pspp-chart__stem {
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+.pspp-chart__mark:focus-visible rect:not(.pspp-chart__hitband),
+.pspp-chart__mark:focus-visible circle:not(.pspp-chart__hitband) {
+  stroke: var(--c-ink);
+  stroke-width: 2px;
+}

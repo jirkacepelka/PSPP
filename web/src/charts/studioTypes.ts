@@ -193,7 +193,11 @@ export interface SequenceSpec {
   x: number[];
   /** how to print x: 'number' (default) or 'date', where x is then days since 1970-01-01 (not PSPP seconds since 1582) */
   xFormat?: 'number' | 'date';
-  series: { name: string; values: (number | null)[] }[];
+  /** phase 4: dash = draw the whole series dashed (a forecast part is a series of its own) */
+  series: { name: string; values: (number | null)[]; dash?: boolean }[];
+  /** phase 4: translucent bands aligned with `x` (null = no band at that position); `series` (contract addition, optional)
+      is the index of the series whose colour the band takes, default: the band's own index */
+  bands?: { name: string; lo: (number | null)[]; hi: (number | null)[]; series?: number }[];
 }
 
 /** Shewhart style control chart: points, centre line and per point limits, flagged points out of limits. */
@@ -218,6 +222,8 @@ export interface DensitySpec {
   ylabel: string;
   curves: { name: string; points: [number, number][] }[];
   fill: boolean;
+  /** phase 4: 'ridge' offsets the curves vertically, one baseline per group, group names on the left (default 'overlay') */
+  layout?: 'overlay' | 'ridge';
 }
 
 /** Violin plot: mirrored density per category with median and quartiles. */

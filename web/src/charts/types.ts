@@ -8,21 +8,28 @@ import { parseLine, type LineSpec } from './lineSpec';
 import { parseStyle } from './styleSpec';
 import { parseArea, parseDot, parseHeatmap, parseMatrix, parsePareto, parsePyramid } from './studioSpecs';
 import { parseBar3d, parseScatter3d, parseSurface3d, parseView3d } from './spec3d';
+import { parseBubble, parseForest, parseMosaic, parseRadar, parseTreemap, parseWaterfall } from './phase4Specs';
 import { parseControl, parseDensity, parseDualAxis, parseHighLow, parsePanels, parseProbPlot, parseSequence, parseViolin } from './phase2Specs';
 import type {
   AreaSpec,
+  BubbleSpec,
   ChartStyle,
   ControlSpec,
   DensitySpec,
   DotSpec,
   DualAxisSpec,
+  ForestSpec,
   HeatmapSpec,
   HighLowSpec,
   MatrixSpec,
+  MosaicSpec,
   PanelsSpec,
   ParetoSpec,
   ProbPlotSpec,
   PyramidSpec,
+  RadarSpec,
+  TreemapSpec,
+  WaterfallSpec,
   Bar3dSpec,
   Scatter3dSpec,
   SequenceSpec,
@@ -66,6 +73,8 @@ export interface BarSpec {
   xlabel?: string;
   /** studio: error whiskers aligned with `bars` (null = none for that bar) */
   err?: ({ lo: number; hi: number } | null)[];
+  /** studio: stem and dot instead of a bar (not for stacked bars) */
+  lollipop?: boolean;
 }
 
 export interface PieSpec {
@@ -128,6 +137,8 @@ export interface ScatterSpec {
   showR2?: boolean;
   /** studio: translucent 95 % confidence band around the fit */
   fitCi?: boolean;
+  /** studio: small marginal plots above and to the right of the scatter, sharing its axis ranges */
+  marginals?: 'none' | 'histogram' | 'density' | 'box';
 }
 
 export interface ScreeSpec {
@@ -180,6 +191,12 @@ export type ChartSpec =
   | Scatter3dSpec
   | Bar3dSpec
   | Surface3dSpec
+  | BubbleSpec
+  | MosaicSpec
+  | RadarSpec
+  | WaterfallSpec
+  | ForestSpec
+  | TreemapSpec
   | UnknownSpec;
 
 /** Every parsed spec may carry the appearance overrides of `chart.style`. */
@@ -267,6 +284,7 @@ function parseChartBody(input: unknown): ChartSpec {
           .map((b) => ({ x: clean(str(b.x)), group: b.group === null || b.group === undefined ? null : clean(str(b.group)), count: num(b.count) ?? 0 })),
         ...(c.stack === 'stack' || c.stack === 'stack100' || c.stack === 'none' ? { stack: c.stack } : {}),
         ...(c.horizontal === true ? { horizontal: true } : {}),
+        ...(c.lollipop === true ? { lollipop: true } : {}),
         ...(typeof c.xlabel === 'string' && c.xlabel ? { xlabel: clean(c.xlabel) } : {}),
         ...(Array.isArray(c.err)
           ? {
@@ -363,6 +381,7 @@ function parseChartBody(input: unknown): ChartSpec {
         ...(c.fitByGroup === true ? { fitByGroup: true } : {}),
         ...(c.showR2 === true ? { showR2: true } : {}),
         ...(c.fitCi === true ? { fitCi: true } : {}),
+        ...(c.marginals === 'histogram' || c.marginals === 'density' || c.marginals === 'box' ? { marginals: c.marginals } : {}),
       };
     }
     case 'scree':
@@ -414,6 +433,18 @@ function parseChartBody(input: unknown): ChartSpec {
       return parseBar3d(c, title);
     case 'surface3d':
       return parseSurface3d(c, title);
+    case 'bubble':
+      return parseBubble(c, title);
+    case 'mosaic':
+      return parseMosaic(c, title);
+    case 'radar':
+      return parseRadar(c, title);
+    case 'waterfall':
+      return parseWaterfall(c, title);
+    case 'forest':
+      return parseForest(c, title);
+    case 'treemap':
+      return parseTreemap(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }

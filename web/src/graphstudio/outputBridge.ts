@@ -53,7 +53,8 @@ export function studioChart(spec: Record<string, unknown>, def: GraphDef, style:
   const out: Record<string, unknown> = { ...spec, studio: def };
   const three = is3d(def.kind);
   if (three && view) out.view3d = view;
-  const s = cleanStyle(three ? style3d(style) : style);
+  // appearance defaults carried by the spec itself (e.g. the Bland-Altman limits) sit under the user's style
+  const s = cleanStyle({ ...(isObj(spec.style) ? (spec.style as ChartStyle) : {}), ...cleanStyle(three ? style3d(style) : style) });
   if (spec.type === 'panels') out.panels = stylePanels(spec.panels, def, s);
   if (Object.keys(s).length) out.style = s;
   else delete out.style;

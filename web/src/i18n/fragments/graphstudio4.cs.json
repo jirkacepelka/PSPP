@@ -1,0 +1,133 @@
+{
+  "graphstudio": {
+    "group": {
+      "mosaic": "Mozaikový",
+      "treemap": "Stromová mapa",
+      "radar": "Radarový",
+      "waterfall": "Vodopádový",
+      "forest": "Forest plot"
+    },
+    "kind": {
+      "overlay": "Překrytý bodový graf",
+      "bubble": "Bublinový graf",
+      "mosaic": "Mozaikový graf",
+      "ridgeline": "Hřebenový graf (ridgeline)",
+      "radar": "Radarový graf",
+      "lollipop": "Lízátkový graf",
+      "waterfall": "Vodopádový graf",
+      "forest": "Forest plot",
+      "treemap": "Stromová mapa",
+      "blandaltman": "Bland-Altmanův graf",
+      "forecast": "Předpověď"
+    },
+    "variant": {
+      "overlay": "Překrytý bodový",
+      "bubble": "Bublinový",
+      "mosaic": "Mozaikový",
+      "ridgeline": "Hřebenový",
+      "radar": "Radarový",
+      "lolSimple": "Jednoduchý lízátkový",
+      "lolClustered": "Seskupený lízátkový",
+      "lolHorizontal": "Vodorovný lízátkový",
+      "waterfall": "Vodopádový",
+      "forestEst": "Forest plot odhadů",
+      "forestMeans": "Forest plot průměrů",
+      "treemap": "Stromová mapa",
+      "blandaltman": "Bland-Altman",
+      "forecast": "Předpověď"
+    },
+    "slot": {
+      "overlayY": "Proměnné na ose y (2 až 8)",
+      "size": "Velikost bubliny",
+      "labelBy": "Popisek (volitelně)",
+      "mosaicX": "Sloupce",
+      "mosaicY": "Řádky",
+      "ridgeBy": "Skupina (jeden hřeben pro každou)",
+      "radarVars": "Proměnné (3 až 12)",
+      "radarGroup": "Mnohoúhelník podle (volitelně)",
+      "sumOfValue": "Proměnná k sečtení",
+      "rowLabel": "Popisek řádku",
+      "estimate": "Odhad",
+      "lower": "Dolní mez",
+      "upper": "Horní mez",
+      "tileBy": "Dlaždice podle",
+      "methodA": "Měření A",
+      "methodB": "Měření B"
+    },
+    "slotHint": {
+      "overlayY": "Sem přetáhněte několik číselných proměnných pro osu y",
+      "size": "Sem přetáhněte číselnou proměnnou; ploše bubliny odpovídá její hodnota",
+      "label": "Sem přetáhněte proměnnou, jejíž hodnoty pojmenují bubliny",
+      "radarVars": "Sem přetáhněte číselné proměnné, každá bude jedna osa",
+      "rowLabel": "Sem přetáhněte proměnnou, která pojmenuje každý řádek",
+      "method": "Sem přetáhněte měření jedné metody nebo hodnotitele"
+    },
+    "opt": {
+      "marginals": "Okrajové grafy",
+      "shade": "Barevně podle reziduí",
+      "standardise": "Standardizovat každou osu na 0 až 100",
+      "lastTotal": "Poslední kategorie je součet",
+      "overall": "Přidat řádek pro celek",
+      "logAxis": "Logaritmická osa",
+      "refValue": "Referenční hodnota",
+      "size": "Velikost dlaždice",
+      "percentDiff": "Rozdíl v procentech průměru",
+      "baTrend": "Zobrazit trend rozdílů",
+      "method": "Metoda",
+      "window": "Okno (počet průměrovaných hodnot)",
+      "alpha": "Vyhlazení úrovně (alfa)",
+      "beta": "Vyhlazení trendu (beta)",
+      "horizon": "Horizont předpovědi (kroky)",
+      "predBand": "95% predikční interval"
+    },
+    "marginals": {
+      "none": "Žádné",
+      "histogram": "Histogramy",
+      "density": "Křivky hustoty",
+      "box": "Krabicové grafy"
+    },
+    "forecast": {
+      "ma": "Klouzavý průměr",
+      "trend": "Lineární trend",
+      "ses": "Jednoduché exponenciální vyhlazování",
+      "holt": "Holtovo lineární vyhlazování"
+    },
+    "legend": {
+      "variables": "Proměnné"
+    },
+    "chart": {
+      "bubble": "{{y}} a {{x}}, velikost: {{s}}",
+      "blandAltman": "Bland-Altman: {{a}} a {{b}}",
+      "baAverage": "Průměr: {{a}} a {{b}}",
+      "baDiff": "Rozdíl: {{a}} - {{b}}",
+      "baDiffPct": "Rozdíl: {{a}} - {{b}} (%)",
+      "baMean": "Průměrný rozdíl {{v}}",
+      "baUpper": "Horní mez {{v}}",
+      "baLower": "Dolní mez {{v}}",
+      "ridgeBy": "Hustota: {{x}}, členění: {{g}}",
+      "radar": "Profil: {{f}}",
+      "radarBy": "Profil: {{f}}, členění: {{g}}",
+      "forest": "{{v}}, členění: {{l}}",
+      "forestMeans": "Průměr: {{v}}, členění: {{x}}, {{level}} % IS",
+      "meanCi": "Průměr: {{v}} ({{level}} % IS)",
+      "overall": "Celkem",
+      "forecast": "Předpověď: {{y}}",
+      "forecastLine": "Předpověď",
+      "predInterval": "{{level}} % predikční interval"
+    },
+    "note": {
+      "bubbleDropped": "{{count}} případů s nekladnou velikostí ({{name}}) se nevykreslí.",
+      "baZeroMean": "{{count}} případů s nulovým průměrem nemá procentní rozdíl a je vynecháno.",
+      "wfTotal": "Součet {{label}} je v datech {{value}}, ale kroky před ním dávají {{sum}}; sloupec ukazuje {{sum}}.",
+      "forestFew": "{{count}} skupin s méně než dvěma případy nemá interval spolehlivosti a je vynecháno.",
+      "forestBad": "{{count}} řádků je vynecháno, protože odhad leží mimo své meze.",
+      "forestBadLog": "{{count}} řádků je vynecháno, protože logaritmická osa potřebuje kladné meze.",
+      "forestRows": "Zobrazeno prvních {{used}} z {{total}} řádků.",
+      "treemapDropped": "{{count}} dlaždic s nekladným součtem se nevykreslí.",
+      "forecastShort": "Pro tuto metodu je hodnot příliš málo.",
+      "forecastNoBand": "Z tak malého počtu hodnot nelze predikční interval odhadnout.",
+      "fittedAlpha": "Vyhlazovací konstanta určená metodou nejmenších čtverců: alfa = {{alpha}}.",
+      "fittedAlphaBeta": "Použité vyhlazovací konstanty: alfa = {{alpha}}, beta = {{beta}} (určeno metodou nejmenších čtverců, pokud nebylo zadáno)."
+    }
+  }
+}

@@ -393,3 +393,226 @@
   flex-wrap: wrap;
   gap: var(--s-2);
 }
+
+/* canvas: the preview framed by drop zones placed where the role belongs */
+.gs-canvas {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(16rem, 1fr) auto;
+  align-content: start;
+  gap: var(--s-2);
+  flex: 1 0 auto;
+}
+.gs-canvas-top {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.gs-canvas-top {
+  align-items: flex-start;
+}
+.gs-canvas-top > .gs-zone {
+  flex: 1 1 10rem;
+}
+.gs-canvas-left {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+}
+.gs-canvas-mid {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.gs-canvas-mid > .gs-preview {
+  flex: 1 0 auto;
+}
+.gs-canvas-right {
+  grid-column: 3;
+  grid-row: 2;
+  display: flex;
+}
+.gs-canvas-bottom {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.gs-canvas-bottom > .gs-zone {
+  flex: 1 1 12rem;
+}
+.gs-canvas-left,
+.gs-canvas-right {
+  gap: var(--s-2);
+}
+
+.gs-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+  padding: var(--s-2);
+  border: var(--hairline) dashed var(--line-control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.gs-zone.filled {
+  border-style: solid;
+  border-color: var(--line-strong);
+}
+.gs-zone.need {
+  border-color: var(--warning);
+}
+.gs-zone.ready {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+.gs-zone.over {
+  background: var(--accent-tint-strong);
+  box-shadow: inset 0 0 0 var(--hairline) var(--accent);
+}
+.gs-zone.blocked {
+  background: var(--surface-sunken);
+}
+.gs-zone-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-weight: var(--fw-medium);
+}
+.gs-zone-req {
+  color: var(--warning-ink);
+}
+.gs-zone-main {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-h-sm);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.gs-zone-main:focus-visible,
+.gs-zone-add:focus-visible,
+.gs-func:focus-visible,
+.gs-func-inline:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+.gs-zone.ready .gs-zone-main {
+  color: var(--accent-text);
+}
+.gs-zone-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1);
+}
+.gs-zone-chips:empty {
+  display: none;
+}
+.gs-zone-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-btn-sm);
+  height: var(--icon-btn-sm);
+  padding: 0;
+  border: var(--hairline) solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.gs-zone-add:hover {
+  background: var(--surface-hover);
+}
+.gs-func,
+.gs-func-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-0);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.gs-func-inline {
+  padding: 0;
+}
+.gs-func {
+  border: var(--hairline) solid var(--line-strong);
+}
+.gs-zone-why {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-1);
+  margin: 0;
+  color: var(--danger-ink);
+}
+.gs-zone-warn {
+  color: var(--warning-ink);
+}
+
+/* y runs along the left edge and reads bottom to top, like an axis title */
+.gs-place-y,
+.gs-place-y2 {
+  writing-mode: vertical-rl;
+  flex-direction: column;
+}
+.gs-place-y {
+  transform: rotate(180deg);
+}
+.gs-place-y .gs-zone-chips,
+.gs-place-y2 .gs-zone-chips {
+  flex-wrap: nowrap;
+}
+.gs-place-y .gs-zone-main,
+.gs-place-y2 .gs-zone-main {
+  align-items: flex-start;
+}
+.gs-place-y .gs-zone-hint,
+.gs-place-y2 .gs-zone-hint {
+  max-height: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}.gs-place-y .chip,
+.gs-place-y2 .chip,
+.gs-place-z .chip {
+  width: 24px;
+  height: auto;
+  max-width: none;
+  padding: var(--s-2) 0;
+}
+.gs-place-y .gs-zone-main,
+.gs-place-y2 .gs-zone-main {
+  flex: 1;
+}
+.gs-place-z {
+  writing-mode: vertical-rl;
+}
+
+.gs-summary {
+  flex: none;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.gs-summary > summary {
+  cursor: pointer;
+  padding: var(--s-1) 0;
+}
+.gs-summary[open] > summary {
+  margin-bottom: var(--s-2);
+}

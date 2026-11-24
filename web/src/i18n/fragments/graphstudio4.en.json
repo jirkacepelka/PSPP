@@ -1,0 +1,133 @@
+{
+  "graphstudio": {
+    "group": {
+      "mosaic": "Mosaic",
+      "treemap": "Treemap",
+      "radar": "Radar",
+      "waterfall": "Waterfall",
+      "forest": "Forest plot"
+    },
+    "kind": {
+      "overlay": "Overlay scatterplot",
+      "bubble": "Bubble chart",
+      "mosaic": "Mosaic plot",
+      "ridgeline": "Ridgeline plot",
+      "radar": "Radar chart",
+      "lollipop": "Lollipop chart",
+      "waterfall": "Waterfall chart",
+      "forest": "Forest plot",
+      "treemap": "Treemap",
+      "blandaltman": "Bland-Altman plot",
+      "forecast": "Forecast"
+    },
+    "variant": {
+      "overlay": "Overlay scatter",
+      "bubble": "Bubble",
+      "mosaic": "Mosaic",
+      "ridgeline": "Ridgeline",
+      "radar": "Radar",
+      "lolSimple": "Simple lollipop",
+      "lolClustered": "Clustered lollipop",
+      "lolHorizontal": "Horizontal lollipop",
+      "waterfall": "Waterfall",
+      "forestEst": "Forest of estimates",
+      "forestMeans": "Forest of means",
+      "treemap": "Treemap",
+      "blandaltman": "Bland-Altman",
+      "forecast": "Forecast"
+    },
+    "slot": {
+      "overlayY": "Y variables (2 to 8)",
+      "size": "Bubble size",
+      "labelBy": "Label by (optional)",
+      "mosaicX": "Columns",
+      "mosaicY": "Rows",
+      "ridgeBy": "Group (one ridge each)",
+      "radarVars": "Variables (3 to 12)",
+      "radarGroup": "Polygon by (optional)",
+      "sumOfValue": "Variable to add up",
+      "rowLabel": "Row label",
+      "estimate": "Estimate",
+      "lower": "Lower limit",
+      "upper": "Upper limit",
+      "tileBy": "Tiles by",
+      "methodA": "Measurement A",
+      "methodB": "Measurement B"
+    },
+    "slotHint": {
+      "overlayY": "Drop several numeric variables to plot against the x axis",
+      "size": "Drop a numeric variable; the bubble area follows it",
+      "label": "Drop a variable whose values name the bubbles",
+      "radarVars": "Drop numeric variables, one axis each",
+      "rowLabel": "Drop the variable that names each row",
+      "method": "Drop the measurement of one method or rater"
+    },
+    "opt": {
+      "marginals": "Marginal plots",
+      "shade": "Shade tiles by residual",
+      "standardise": "Standardise each axis to 0-100",
+      "lastTotal": "Last category is a total",
+      "overall": "Add an overall row",
+      "logAxis": "Logarithmic axis",
+      "refValue": "Reference value",
+      "size": "Tile size",
+      "percentDiff": "Difference in percent of the average",
+      "baTrend": "Show trend of the differences",
+      "method": "Method",
+      "window": "Window (values averaged)",
+      "alpha": "Level smoothing (alpha)",
+      "beta": "Trend smoothing (beta)",
+      "horizon": "Forecast horizon (steps)",
+      "predBand": "95% prediction interval"
+    },
+    "marginals": {
+      "none": "None",
+      "histogram": "Histograms",
+      "density": "Density curves",
+      "box": "Boxplots"
+    },
+    "forecast": {
+      "ma": "Moving average",
+      "trend": "Linear trend",
+      "ses": "Simple exponential smoothing",
+      "holt": "Holt linear smoothing"
+    },
+    "legend": {
+      "variables": "Variables"
+    },
+    "chart": {
+      "bubble": "{{y}} vs. {{x}}, size: {{s}}",
+      "blandAltman": "Bland-Altman: {{a}} and {{b}}",
+      "baAverage": "Average of {{a}} and {{b}}",
+      "baDiff": "Difference: {{a}} - {{b}}",
+      "baDiffPct": "Difference: {{a}} - {{b}} (%)",
+      "baMean": "Mean difference {{v}}",
+      "baUpper": "Upper limit {{v}}",
+      "baLower": "Lower limit {{v}}",
+      "ridgeBy": "Density of {{x}} by {{g}}",
+      "radar": "Profile: {{f}}",
+      "radarBy": "Profile: {{f}} by {{g}}",
+      "forest": "{{v}} by {{l}}",
+      "forestMeans": "Mean of {{v}} by {{x}} with {{level}}% CI",
+      "meanCi": "Mean of {{v}} ({{level}}% CI)",
+      "overall": "Overall",
+      "forecast": "Forecast: {{y}}",
+      "forecastLine": "Forecast",
+      "predInterval": "{{level}}% prediction interval"
+    },
+    "note": {
+      "bubbleDropped": "{{count}} cases with a size ({{name}}) that is not positive are not drawn.",
+      "baZeroMean": "{{count}} cases with an average of zero have no percent difference and are left out.",
+      "wfTotal": "The total {{label}} is {{value}} in the data but the steps before it add up to {{sum}}; the bar shows {{sum}}.",
+      "forestFew": "{{count}} groups with fewer than two cases have no confidence interval and are left out.",
+      "forestBad": "{{count}} rows are left out because the estimate lies outside its limits.",
+      "forestBadLog": "{{count}} rows are left out because a logarithmic axis needs positive limits.",
+      "forestRows": "Showing the first {{used}} of {{total}} rows.",
+      "treemapDropped": "{{count}} tiles with a total that is not positive are not drawn.",
+      "forecastShort": "There are too few values for this method.",
+      "forecastNoBand": "The prediction interval cannot be estimated from so few values.",
+      "fittedAlpha": "Smoothing constant fitted by least squares: alpha = {{alpha}}.",
+      "fittedAlphaBeta": "Smoothing constants used: alpha = {{alpha}}, beta = {{beta}} (fitted by least squares unless set)."
+    }
+  }
+}

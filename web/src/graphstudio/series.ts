@@ -58,6 +58,23 @@ export function seriesNames(chart: unknown): string[] {
     case 'bar3d':
     case 'surface3d':
       return [str(c.zlabel) || str(c.title)];
+    case 'bubble': {
+      const groups = [...new Set(arr(c.points).filter(isObj).map((p) => p.group).filter((g): g is string => typeof g === 'string'))];
+      return groups.length ? groups.map(str) : [str(c.ylabel) || str(c.title)];
+    }
+    case 'mosaic':
+      return arr(c.ys).map(str);
+    case 'radar':
+      return arr(c.series).filter(isObj).map((s) => str(s.name));
+    case 'forest': {
+      const groups = [...new Set(arr(c.rows).filter(isObj).map((r) => r.group).filter((g): g is string => typeof g === 'string'))];
+      return groups.length ? groups.map(str) : [str(c.title)];
+    }
+    case 'treemap': {
+      const groups = [...new Set(arr(c.tiles).filter(isObj).map((r) => r.group).filter((g): g is string => typeof g === 'string'))];
+      return groups.length ? groups.map(str) : [str(c.title)];
+    }
+    case 'waterfall':
     case 'pareto':
     case 'heatmap':
     case 'highlow':

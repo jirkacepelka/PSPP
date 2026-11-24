@@ -6,6 +6,7 @@
  */
 import type { Cell, Variable } from '../engine/types';
 import type { GraphDef, GraphKind } from '../charts/studioTypes';
+import { GROUP_ORDER4, KINDS4, MARGINALS_OPTION } from './kinds4';
 
 /** What a slot takes: a grouping variable (few distinct values) or a numeric variable. */
 export type Accept = 'category' | 'numeric';
@@ -277,8 +278,9 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
       { id: 'fitByGroup', type: 'bool', label: 'graphstudio.opt.fitByGroup', when: (d) => d.options.fit !== 'none' && (d.bind.group?.length ?? 0) > 0 },
       { id: 'fitCi', type: 'bool', label: 'graphstudio.opt.fitCi', when: (d) => d.options.fit !== 'none' },
       { id: 'showR2', type: 'bool', label: 'graphstudio.opt.showR2', when: (d) => d.options.fit !== 'none' },
+      MARGINALS_OPTION,
     ],
-    defaults: { fit: 'none', fitByGroup: false, fitCi: false, showR2: true },
+    defaults: { fit: 'none', fitByGroup: false, fitCi: false, showR2: true, marginals: 'none' },
   },
   dot: {
     kind: 'dot',
@@ -466,10 +468,11 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     defaults: { grid: SURFACE_GRID_DEFAULT },
     panels: () => false,
   },
+  ...KINDS4,
 };
 
 /** Gallery group order (ids of KindModel.group). */
-export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'highlow', 'boxplot', 'errorbar', 'dualaxis', 'probplot', 'sequence', 'pareto', 'matrix', '3d'];
+export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'highlow', 'boxplot', 'errorbar', 'dualaxis', 'probplot', 'sequence', 'pareto', 'matrix', ...GROUP_ORDER4, '3d'];
 
 export interface GalleryEntry {
   id: string;
@@ -568,6 +571,12 @@ export function slotsOf(def: GraphDef): SlotDef[] {
   return [...m.slots(def), ...(m.panels && !m.panels(def) ? [] : [panelSlot()])].map((s) => ({ ...s, place: resolvePlace(def, s) }));
 }
 
+/** Summary functions the kind offers for DEF (empty when it has no summary option). */
+export function funcChoices(def: GraphDef): Choice[] {
+  const f = optionsOf(def).find((o) => o.id === 'func');
+  return f ? (typeof f.choices === 'function' ? f.choices(def) : (f.choices ?? [])) : [];
+}
+
 /**
  * Summary kinds (bar, line, area, pie, 3D bars) have no value slot while the summary is a count or
  * percent. The canvas still shows the value zone: this is the slot a variable dropped there fills.
@@ -575,9 +584,7 @@ export function slotsOf(def: GraphDef): SlotDef[] {
 export function summaryValueSlot(def: GraphDef): SlotDef | null {
   const m = KINDS[def.kind];
   if (!m || slotsOf(def).some((s) => s.id === 'value')) return null;
-  const f = optionsOf(def).find((o) => o.id === 'func');
-  const choices = f ? (typeof f.choices === 'function' ? f.choices(def) : (f.choices ?? [])) : [];
-  if (!choices.some((c) => c.value === 'count')) return null;
+  if (!funcChoices(def).some((c) => c.value === 'count')) return null;
   const s = valueSlot(0);
   return { ...s, place: resolvePlace(def, { ...s, place: PLACES[def.kind]?.value ?? 'y' }) };
 }
@@ -612,7 +619,7 @@ export const CATEGORY_WARN = 50;
 /** Above this many categories the chart is crowded: a warning marks the slot and the preview. */
 export const CATEGORY_CROWDED = 500;
 /** Kinds whose category (x) slot can merge numeric values into intervals. */
-export const MERGE_KINDS: GraphKind[] = ['bar', 'line', 'area', 'errorbar', 'highlow', 'dualaxis', 'pareto', 'boxplot', 'bar3d'];
+export const MERGE_KINDS: GraphKind[] = ['bar', 'line', 'area', 'errorbar', 'highlow', 'dualaxis', 'pareto', 'boxplot', 'bar3d', 'lollipop'];
 /** Most levels of a panel variable. */
 export const MAX_PANELS = 12;
 
