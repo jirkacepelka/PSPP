@@ -55,3 +55,18 @@ Variable-slot UX, gallery icons, i18n wording, test fixtures.
   not used, and a note says so).
 - Quick reference lines (mean, median, mean +- 1 or 2 SD) are computed from the data of the value axis and added as
   ordinary editable `RefLine`s.
+
+## Phase 3 notes
+- Gallery group "3D": scatter (x, y, z, optional group, optional least squares plane), bars (two categorical axes, the
+  2D bar summaries without SD, weight/filter honoured, numeric category merging applies to both axes, no category
+  dropped) and surface. All cases up to 20000 go to a 3D scatter; beyond that every n-th case is kept (deterministic) and
+  a note says so.
+- Surface: a regular grid of N x N cells (N 10..60, default 25) over the data range. With z the height is the weighted
+  mean of z per cell and empty cells are filled by inverse distance weighting (1 / d squared) from cells with data within
+  2 cells in each direction; cells with no such neighbour stay holes. Without z the height is the weighted case count
+  per cell (empty cells are 0, not holes).
+- The rotated view is stored as `chart.view3d` ({azimuth, elevation, perspective, zoom}) at Insert/Update, restored on
+  edit, and read by the renderer in the output, so the saved view is what users see (and what the HTML/DOCX exports
+  draw). The preview reports the view through `onView3dChange`.
+- 3D charts have no reference lines, annotations, quick lines or panels (the Elements tab is hidden, a hint says so);
+  the Appearance tab is the same. A short hint under the preview explains rotating and that 3D can hide data.

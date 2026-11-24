@@ -230,7 +230,8 @@
 
 /* preview */
 .gs-preview {
-  flex: 1;
+  /* never shrink below the chart: the column scrolls instead of the notes overlapping it */
+  flex: 1 0 auto;
   display: grid;
   align-content: start;
   min-height: 16rem;
@@ -242,12 +243,14 @@
   background: var(--chart-surface);
 }
 .gs-notes {
+  flex: none;
   margin: 0;
   font-size: var(--fs-sm);
   color: var(--ink-3);
 }
 
 .gs-hint {
+  flex: none;
   display: flex;
   align-items: flex-start;
   gap: var(--s-2);
