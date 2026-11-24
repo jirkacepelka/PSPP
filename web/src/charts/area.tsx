@@ -209,6 +209,7 @@ export function AreaChart({ spec, ...c }: { spec: AreaSpec } & ChartCommonProps)
     <ChartShell
       {...c}
       title={title}
+      legendTitle={spec.legendTitle}
       legend={named ? legend : undefined}
       ariaLabel={`${title}. ${tr(t, 'ariaLines', { count: spec.series.length })}: ${spec.series.map((s) => s.name).join(', ')}.`}
       table={{

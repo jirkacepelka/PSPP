@@ -15,7 +15,7 @@ import { useOutput } from '../store/output';
 import { useSettings } from '../store/settings';
 import { useUi } from '../store/ui';
 import { ChartView } from '../features/output/ChartView';
-import { computeChart, type ComputeResult } from './compute';
+import { computeChart, quickStats, type ComputeResult } from './compute';
 import { Gallery } from './Gallery';
 import { AppearanceTab, ElementsTab, OptionsTab } from './Properties';
 import type { Dataset } from '../engine/types';
@@ -79,6 +79,14 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
     if (appearanceOnly) return target ? restyleChart(target.item.chart, style) : null;
     return result?.ok ? studioChart(result.chart, live, style) : null;
   }, [appearanceOnly, target, result, live, style]);
+  const quick = useMemo(() => {
+    if (appearanceOnly || !dataset || !result?.ok) return null;
+    try {
+      return quickStats(live, dataset, result.chart);
+    } catch {
+      return null;
+    }
+  }, [appearanceOnly, dataset, live, result]);
   const series = useMemo(() => (spec ? seriesNames(spec) : []), [spec]);
   const model = modelOf(def.kind)!;
 
@@ -184,6 +192,8 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
               <EmptyState icon="dataset" title={t('graphstudio.noData')} description={t('graphstudio.noDataHint')} />
             ) : result && !result.ok && result.reason === 'novar' ? (
               <EmptyState icon="error" title={t('graphstudio.noVars', { names: result.names.join(', ') })} />
+            ) : result && !result.ok && result.reason === 'panels' ? (
+              <EmptyState icon="grid_view" title={t('graphstudio.tooManyPanels', { max: result.max })} description={t('graphstudio.tooManyPanelsHint')} />
             ) : result && !result.ok && result.reason === 'nodata' ? (
               <EmptyState icon="filter_alt_off" title={t('graphstudio.noCases')} description={t('graphstudio.noCasesHint')} />
             ) : (
@@ -225,7 +235,7 @@ export function GraphStudio({ edit }: { edit?: { entryId: string; itemId: string
               />
             </TabPanel>
             <TabPanel tabsId="gs-props" value="elements" active={tab === 'elements'}>
-              <ElementsTab style={style} onChange={setStyle} decimal={decimal} />
+              <ElementsTab style={style} onChange={setStyle} decimal={decimal} quick={quick} />
             </TabPanel>
           </div>
         </div>

@@ -30,6 +30,8 @@ export interface ChartCommonProps {
   width?: number;
   /** Fixed total height in px; omit for an aspect-ratio based height. */
   height?: number;
+  /** Set by the panels chart: no title, no toolbar, optionally the legend and the data table (driven by the panels). */
+  embedded?: { legend: boolean; table: boolean };
 }
 
 export type MarkerShape =
@@ -534,6 +536,27 @@ const IconDownload = () => (
   </svg>
 );
 
+export function ChartToolbar({ t, showTable, onTable, onSvg, onPng }: { t: ChartT; showTable: boolean; onTable: () => void; onSvg: () => void; onPng: () => void }) {
+  const tableLabel = showTable ? tr(t, 'hideDataTable') : tr(t, 'showDataTable');
+  const svgLabel = tr(t, 'downloadSvg');
+  const pngLabel = tr(t, 'downloadPng');
+  return (
+    <div className="pspp-chart__toolbar" role="toolbar" aria-label={tr(t, 'chartTools')}>
+      <button type="button" className="pspp-chart__btn" aria-pressed={showTable} title={tableLabel} aria-label={tableLabel} onClick={onTable}>
+        <IconTable />
+      </button>
+      <button type="button" className="pspp-chart__btn" title={svgLabel} aria-label={svgLabel} onClick={onSvg}>
+        <IconDownload />
+        <span>SVG</span>
+      </button>
+      <button type="button" className="pspp-chart__btn" title={pngLabel} aria-label={pngLabel} onClick={onPng}>
+        <IconDownload />
+        <span>PNG</span>
+      </button>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ shell */
 
 /** CSS variables of the style: the palette replaces --c-series-N, fontScale feeds --c-fs. */
@@ -552,6 +575,8 @@ export interface ChartShellProps extends ChartCommonProps {
   legend?: LegendItem[];
   ariaLabel: string;
   table: TableSpec;
+  /** The spec's own legend title; shown above the legend unless the style sets one (an empty style title hides it). */
+  legendTitle?: string;
   /** Plot-area height for a given inner width (when no fixed height is set). */
   plotHeight?: (innerWidth: number) => number;
   children: (area: PlotArea) => ReactNode;
@@ -564,12 +589,15 @@ export function ChartShell(props: ChartShellProps) {
   const style = useStyle();
   const fs = fontScaleOf(style);
   const reg = useMemo<AxisReg>(() => ({}), []);
-  const hideTitle = style?.showTitle === false;
+  const embedded = props.embedded;
+  const hideTitle = style?.showTitle === false || !!embedded;
   const title = hideTitle ? '' : style?.title || props.title;
   const subtitle = hideTitle ? undefined : style?.subtitle !== undefined ? style.subtitle : props.subtitle;
-  const legend = style?.legend === 'none' ? undefined : props.legend;
-  const legendTitle = legend && legend.length ? style?.legendTitle : undefined;
+  const legend = style?.legend === 'none' || (embedded && !embedded.legend) ? undefined : props.legend;
+  const legendTitle = legend && legend.length ? (style?.legendTitle !== undefined ? style.legendTitle : props.legendTitle) || undefined : undefined;
   const fileTitle = props.title;
+  // renderers register the boxes of their value labels here, annotations keep clear of them
+  reg.avoid = [];
   const rootRef = useRef<HTMLElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [measured, setMeasured] = useState(0);
@@ -657,12 +685,8 @@ export function ChartShell(props: ChartShellProps) {
   }, [tip]);
 
   const rootStyle: CSSProperties = { ...(props.width ? { width: props.width } : {}), ...styleVars(style) };
-  const tableLabel = showTable ? tr(t, 'hideDataTable') : tr(t, 'showDataTable');
-  const svgLabel = tr(t, 'downloadSvg');
-  const pngLabel = tr(t, 'downloadPng');
-
   return (
-    <figure ref={rootRef} className="pspp-chart" style={rootStyle}>
+    <figure ref={rootRef} className={embedded ? 'pspp-chart pspp-chart--embedded' : 'pspp-chart'} style={rootStyle}>
       <TipCtx.Provider value={tipApi}>
         {width > 0 ? (
           <svg
@@ -704,19 +728,7 @@ export function ChartShell(props: ChartShellProps) {
           <div style={{ height: 320 }} />
         )}
       </TipCtx.Provider>
-      <div className="pspp-chart__toolbar" role="toolbar" aria-label={tr(t, 'chartTools')}>
-        <button type="button" className="pspp-chart__btn" aria-pressed={showTable} title={tableLabel} aria-label={tableLabel} onClick={() => setShowTable((s) => !s)}>
-          <IconTable />
-        </button>
-        <button type="button" className="pspp-chart__btn" title={svgLabel} aria-label={svgLabel} onClick={doSvg}>
-          <IconDownload />
-          <span>SVG</span>
-        </button>
-        <button type="button" className="pspp-chart__btn" title={pngLabel} aria-label={pngLabel} onClick={doPng}>
-          <IconDownload />
-          <span>PNG</span>
-        </button>
-      </div>
+      {!props.embedded && <ChartToolbar t={t} showTable={showTable} onTable={() => setShowTable((v) => !v)} onSvg={doSvg} onPng={doPng} />}
       {tip && (
         <div
           className="pspp-chart__tooltip"
@@ -737,7 +749,7 @@ export function ChartShell(props: ChartShellProps) {
           ))}
         </div>
       )}
-      {showTable && <DataTable table={table} title={fileTitle} t={t} />}
+      {(embedded ? embedded.table : showTable) && <DataTable table={table} title={fileTitle} t={t} />}
     </figure>
   );
 }

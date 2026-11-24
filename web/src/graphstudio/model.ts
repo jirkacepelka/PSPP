@@ -22,6 +22,8 @@ export interface SlotDef {
   /** minimum number of variables needed to draw (0 = optional) */
   min: number;
   icon: string;
+  /** category slots: most distinct values the variable may have (panel by); absent = any number */
+  maxDistinct?: number;
 }
 
 export interface Choice {
@@ -63,6 +65,8 @@ export interface KindModel {
   slots: (def: GraphDef) => SlotDef[];
   options: OptionDef[];
   defaults: Record<string, unknown>;
+  /** false when the kind cannot be split into panels (default: it can) */
+  panels?: (def: GraphDef) => boolean;
 }
 
 export const FUNCS = ['count', 'pct', 'mean', 'median', 'sum', 'min', 'max', 'sd'] as const;
@@ -73,6 +77,8 @@ export const needsVariable = (f: unknown) => f !== 'count' && f !== 'pct';
 
 const fn = (id: Func): Choice => ({ value: id, label: `graphstudio.func.${id}` });
 const ALL_FUNCS: Choice[] = FUNCS.map(fn);
+/** Summaries of a numeric variable (no count/percent). */
+const VALUE_FUNCS: Choice[] = (['mean', 'median', 'sum', 'min', 'max', 'sd'] as Func[]).map(fn);
 const ADDITIVE_FUNCS: Choice[] = (['count', 'pct', 'sum'] as Func[]).map(fn);
 
 const opt = (def: GraphDef, id: string): unknown => def.options[id];
@@ -122,6 +128,8 @@ const slot = (id: string, label: string, accepts: Accept, o: Partial<SlotDef> & 
 const catX = (min = 1) => slot('x', 'graphstudio.slot.category', 'category', { min, hint: 'graphstudio.slotHint.category' });
 const groupSlot = (min: number, label = 'graphstudio.slot.group') => slot('group', label, 'category', { min, hint: 'graphstudio.slotHint.group' });
 const valueSlot = (min: number, label = 'graphstudio.slot.value') => slot('value', label, 'numeric', { min, hint: 'graphstudio.slotHint.value' });
+
+const DISTS: Choice[] = ['normal', 'exponential', 'uniform', 'lognormal'].map((value) => ({ value, label: `graphstudio.dist.${value}` }));
 
 const v = (id: string, label: string, icon: string): VariantDef => ({ id, label: `graphstudio.variant.${label}`, icon });
 
@@ -245,9 +253,10 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
         choices: ['none', 'linear', 'quadratic', 'cubic', 'loess'].map((value) => ({ value, label: `graphstudio.fit.${value}` })),
       },
       { id: 'fitByGroup', type: 'bool', label: 'graphstudio.opt.fitByGroup', when: (d) => d.options.fit !== 'none' && (d.bind.group?.length ?? 0) > 0 },
+      { id: 'fitCi', type: 'bool', label: 'graphstudio.opt.fitCi', when: (d) => d.options.fit !== 'none' },
       { id: 'showR2', type: 'bool', label: 'graphstudio.opt.showR2', when: (d) => d.options.fit !== 'none' },
     ],
-    defaults: { fit: 'none', fitByGroup: false, showR2: true },
+    defaults: { fit: 'none', fitByGroup: false, fitCi: false, showR2: true },
   },
   dot: {
     kind: 'dot',
@@ -278,6 +287,7 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     slots: () => [slot('vars', 'graphstudio.slot.matrixVars', 'numeric', { min: 2, max: 8, hint: 'graphstudio.slotHint.matrixVars' }), groupSlot(0, 'graphstudio.slot.colorBy')],
     options: [],
     defaults: {},
+    panels: () => false,
   },
   heatmap: {
     kind: 'heatmap',
@@ -292,10 +302,110 @@ export const KINDS: Partial<Record<GraphKind, KindModel>> = {
     ],
     defaults: { xBins: 20, yBins: 20 },
   },
+  highlow: {
+    kind: 'highlow',
+    group: 'highlow',
+    label: 'graphstudio.kind.highlow',
+    icon: 'finance_mode',
+    variants: [v('hlc', 'hlc', 'finance_mode'), v('range', 'hlRange', 'height'), v('diff', 'hlDiff', 'area_chart')],
+    slots: (d) => [
+      catX(),
+      slot('high', 'graphstudio.slot.high', 'numeric', { min: 1, hint: 'graphstudio.slotHint.value' }),
+      slot('low', 'graphstudio.slot.low', 'numeric', { min: 1, hint: 'graphstudio.slotHint.value' }),
+      ...(d.variant === 'hlc' ? [slot('close', 'graphstudio.slot.close', 'numeric', { hint: 'graphstudio.slotHint.value' })] : []),
+    ],
+    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: VALUE_FUNCS }],
+    defaults: { func: 'mean' },
+  },
+  dualaxis: {
+    kind: 'dualaxis',
+    group: 'dualaxis',
+    label: 'graphstudio.kind.dualaxis',
+    icon: 'swap_vert',
+    variants: [v('barline', 'barLine', 'swap_vert'), v('lineline', 'lineLine', 'multiline_chart'), v('barbar', 'barBar', 'bar_chart_4_bars'), v('linebar', 'lineBar', 'stacked_line_chart')],
+    slots: () => [
+      catX(),
+      slot('left', 'graphstudio.slot.left', 'numeric', { min: 1, hint: 'graphstudio.slotHint.value' }),
+      slot('right', 'graphstudio.slot.right', 'numeric', { min: 1, hint: 'graphstudio.slotHint.value' }),
+    ],
+    options: [{ id: 'func', type: 'select', label: 'graphstudio.opt.func', choices: VALUE_FUNCS }],
+    defaults: { func: 'mean' },
+  },
+  qq: {
+    kind: 'qq',
+    group: 'probplot',
+    label: 'graphstudio.kind.qq',
+    icon: 'show_chart',
+    variants: [v('qq', 'qq', 'show_chart')],
+    slots: () => [slot('value', 'graphstudio.slot.measure', 'numeric', { min: 1, hint: 'graphstudio.slotHint.measure' })],
+    options: [{ id: 'dist', type: 'select', label: 'graphstudio.opt.dist', choices: DISTS }],
+    defaults: { dist: 'normal' },
+  },
+  pp: {
+    kind: 'pp',
+    group: 'probplot',
+    label: 'graphstudio.kind.pp',
+    icon: 'ssid_chart',
+    variants: [v('pp', 'pp', 'ssid_chart')],
+    slots: () => [slot('value', 'graphstudio.slot.measure', 'numeric', { min: 1, hint: 'graphstudio.slotHint.measure' })],
+    options: [{ id: 'dist', type: 'select', label: 'graphstudio.opt.dist', choices: DISTS }],
+    defaults: { dist: 'normal' },
+  },
+  sequence: {
+    kind: 'sequence',
+    group: 'sequence',
+    label: 'graphstudio.kind.sequence',
+    icon: 'timeline',
+    variants: [v('sequence', 'sequence', 'timeline')],
+    slots: () => [
+      slot('value', 'graphstudio.slot.seqVars', 'numeric', { min: 1, max: 8, hint: 'graphstudio.slotHint.matrixVars' }),
+      slot('x', 'graphstudio.slot.seqAxis', 'numeric', { hint: 'graphstudio.slotHint.seqAxis' }),
+    ],
+    options: [{ id: 'transform', type: 'select', label: 'graphstudio.opt.transform', choices: ['none', 'diff', 'log'].map((value) => ({ value, label: `graphstudio.transform.${value}` })) }],
+    defaults: { transform: 'none' },
+  },
+  control: {
+    kind: 'control',
+    group: 'sequence',
+    label: 'graphstudio.kind.control',
+    icon: 'monitoring',
+    variants: [v('imr', 'ctlImr', 'monitoring'), v('individuals', 'ctlIndividuals', 'show_chart'), v('movingrange', 'ctlMr', 'vital_signs'), v('xbar', 'ctlXbar', 'query_stats')],
+    slots: (d) => [slot('value', 'graphstudio.slot.measure', 'numeric', { min: 1, hint: 'graphstudio.slotHint.measure' }), ...(d.variant === 'xbar' ? [slot('subgroup', 'graphstudio.slot.subgroup', 'category', { min: 1, hint: 'graphstudio.slotHint.subgroup' })] : [])],
+    options: [
+      { id: 'limitK', type: 'number', label: 'graphstudio.opt.limitK', min: 1, max: 5, step: 0.5 },
+      { id: 'sigma', type: 'select', label: 'graphstudio.opt.sigma', choices: ['sd', 'range'].map((value) => ({ value, label: `graphstudio.sigma.${value}` })), when: (d) => d.variant === 'xbar' },
+    ],
+    defaults: { limitK: 3, sigma: 'sd' },
+    // the I-MR variant already is a pair of charts
+    panels: (d) => d.variant !== 'imr',
+  },
+  violin: {
+    kind: 'violin',
+    group: 'boxplot',
+    label: 'graphstudio.kind.violin',
+    icon: 'ecg_heart',
+    variants: [v('simple', 'violin', 'ecg_heart')],
+    slots: () => [valueSlot(1, 'graphstudio.slot.measure'), catX(0)],
+    options: [{ id: 'bwFactor', type: 'number', label: 'graphstudio.opt.bwFactor', min: 0.2, max: 3, step: 0.1 }],
+    defaults: { bwFactor: 1 },
+  },
+  density: {
+    kind: 'density',
+    group: 'histogram',
+    label: 'graphstudio.kind.density',
+    icon: 'density_small',
+    variants: [v('simple', 'density', 'density_small')],
+    slots: () => [slot('value', 'graphstudio.slot.measure', 'numeric', { min: 1, hint: 'graphstudio.slotHint.measure' }), groupSlot(0, 'graphstudio.slot.splitBy')],
+    options: [
+      { id: 'fill', type: 'bool', label: 'graphstudio.opt.fill' },
+      { id: 'bwFactor', type: 'number', label: 'graphstudio.opt.bwFactor', min: 0.2, max: 3, step: 0.1 },
+    ],
+    defaults: { fill: true, bwFactor: 1 },
+  },
 };
 
 /** Gallery group order (ids of KindModel.group). */
-export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'boxplot', 'errorbar', 'pareto', 'matrix'];
+export const GROUP_ORDER = ['bar', 'line', 'area', 'pie', 'histogram', 'pyramid', 'scatter', 'highlow', 'boxplot', 'errorbar', 'dualaxis', 'probplot', 'sequence', 'pareto', 'matrix'];
 
 export interface GalleryEntry {
   id: string;
@@ -318,7 +428,7 @@ export const modelOf = (kind: GraphKind): KindModel | undefined => KINDS[kind];
 
 export function defaultDef(kind: GraphKind, variant?: string): GraphDef {
   const m = KINDS[kind]!;
-  return { v: 1, kind, variant: variant ?? m.variants[0].id, bind: {}, options: { ...m.defaults } };
+  return { v: 1, kind, variant: variant ?? m.variants[0].id, bind: {}, options: { ...m.defaults, ...PANEL_DEFAULTS } };
 }
 
 /** Switches the variant, dropping bindings of slots that no longer exist and fixing option values. */
@@ -332,9 +442,8 @@ export function withVariant(def: GraphDef, variant: string): GraphDef {
 
 /** Keeps option values valid after a change (e.g. a stacked bar cannot show a mean). */
 export function normalizeOptions(def: GraphDef): GraphDef {
-  const m = KINDS[def.kind];
-  if (!m) return def;
-  for (const o of m.options) {
+  if (!KINDS[def.kind]) return def;
+  for (const o of optionsOf(def)) {
     if (o.type !== 'select') continue;
     const choices = typeof o.choices === 'function' ? o.choices(def) : (o.choices ?? []);
     if (choices.length && !choices.some((c) => c.value === def.options[o.id])) def.options[o.id] = choices[0].value;
@@ -342,8 +451,29 @@ export function normalizeOptions(def: GraphDef): GraphDef {
   return def;
 }
 
+/** The 'panel by' slot every kind (but the scatterplot matrix) offers. */
+const panelSlot = (): SlotDef => slot('panel', 'graphstudio.slot.panel', 'category', { maxDistinct: MAX_PANELS, hint: 'graphstudio.slotHint.panel', icon: 'grid_view' });
+
 export function slotsOf(def: GraphDef): SlotDef[] {
-  return KINDS[def.kind]?.slots(def) ?? [];
+  const m = KINDS[def.kind];
+  if (!m) return [];
+  return [...m.slots(def), ...(m.panels && !m.panels(def) ? [] : [panelSlot()])];
+}
+
+const hasPanel = (d: GraphDef) => (d.bind.panel?.length ?? 0) > 0;
+
+/** Options shared by every kind that can be split into panels. */
+const PANEL_OPTIONS: OptionDef[] = [
+  { id: 'sharedAxes', type: 'bool', label: 'graphstudio.opt.sharedAxes', when: hasPanel },
+  { id: 'panelCols', type: 'number', label: 'graphstudio.opt.panelCols', min: 1, max: 6, step: 1, auto: true, when: hasPanel },
+];
+const PANEL_DEFAULTS: Record<string, unknown> = { sharedAxes: true, panelCols: null };
+
+/** The options of a definition: those of its kind plus the panel options. */
+export function optionsOf(def: GraphDef): OptionDef[] {
+  const m = KINDS[def.kind];
+  if (!m) return [];
+  return [...m.options, ...(slotsOf(def).some((s) => s.id === 'panel') ? PANEL_OPTIONS : [])];
 }
 
 /** Required slots that are still empty, in order. */
@@ -351,8 +481,12 @@ export function missingSlots(def: GraphDef): SlotDef[] {
   return slotsOf(def).filter((s) => (def.bind[s.id]?.length ?? 0) < s.min);
 }
 
-/** Largest number of distinct values a scale variable may have to serve as a category. */
-export const MAX_CATEGORIES = 30;
+/** Above this many categories the studio warns that the chart may be crowded. */
+export const CATEGORY_WARN = 50;
+/** Hard safety ceiling: further categories are left out so the computation stays fast. */
+export const CATEGORY_CAP = 500;
+/** Most levels of a panel variable. */
+export const MAX_PANELS = 12;
 
 export interface Rejection {
   /** i18n key under graphstudio.reject */
@@ -360,20 +494,18 @@ export interface Rejection {
   args?: Record<string, unknown>;
 }
 
-/** Why variable V cannot go into slot S, or null when it is accepted. */
+/** Why variable V cannot go into slot S, or null when it is accepted. Any variable may be a category. */
 export function rejection(s: SlotDef, variable: Variable, distinct: number): Rejection | null {
   if (s.accepts === 'numeric') return variable.type === 'string' ? { key: 'graphstudio.reject.text', args: { name: variable.name } } : null;
-  if (variable.type === 'numeric' && variable.measure === 'scale' && distinct > MAX_CATEGORIES) {
-    return { key: 'graphstudio.reject.manyValues', args: { name: variable.name, count: distinct, max: MAX_CATEGORIES } };
-  }
+  if (s.maxDistinct && distinct > s.maxDistinct) return { key: 'graphstudio.reject.manyLevels', args: { name: variable.name, max: s.maxDistinct } };
   return null;
 }
 
 /** Variable names bound anywhere in the definition. */
 export const boundNames = (def: GraphDef): string[] => [...new Set(Object.values(def.bind).flat())];
 
-/** Cheap distinct count of a column, capped just above MAX_CATEGORIES. */
-export function distinctCapped(col: Cell[] | undefined, cap = MAX_CATEGORIES + 1): number {
+/** Cheap distinct count of a column, capped just above CATEGORY_CAP. */
+export function distinctCapped(col: Cell[] | undefined, cap = CATEGORY_CAP + 1): number {
   const s = new Set<string | number>();
   for (const x of col ?? []) {
     if (x === null || x === '') continue;

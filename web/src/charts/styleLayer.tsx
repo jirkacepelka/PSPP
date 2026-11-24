@@ -4,7 +4,7 @@
 
 import { createContext, useContext, type ReactNode } from 'react';
 import type { ChartStyle } from './studioTypes';
-import { truncateText } from './scale';
+import { measureText, truncateText } from './scale';
 
 export const StyleCtx = createContext<ChartStyle | undefined>(undefined);
 export const useStyle = (): ChartStyle | undefined => useContext(StyleCtx);
@@ -18,6 +18,23 @@ export interface AxisReg {
   width?: number;
   top?: number;
   height?: number;
+  /** Pixel boxes of drawn value labels; annotations are placed clear of them. Reset by the shell on every render. */
+  avoid?: Box[];
+}
+
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+const hit = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+
+/** Register the box of a value label centred (anchor middle) or starting (anchor start) / ending (end) at x. */
+export function avoidText(reg: AxisReg, x: number, baseline: number, width: number, size: number, anchor: 'start' | 'middle' | 'end' = 'middle'): void {
+  const x0 = anchor === 'middle' ? x - width / 2 : anchor === 'start' ? x : x - width;
+  (reg.avoid ??= []).push({ x0, x1: x0 + width, y0: baseline - size, y1: baseline + 3 });
 }
 
 const NOOP_REG: AxisReg = {};
@@ -30,6 +47,30 @@ export function axisTitle(style: ChartStyle | undefined, which: 'x' | 'y', fallb
   const o = which === 'x' ? style?.xTitle : style?.yTitle;
   const s = o !== undefined ? o : fallback;
   return s ? s : undefined;
+}
+
+interface Placement {
+  x: number;
+  y: number;
+  anchor: 'start' | 'end';
+  box: Box;
+}
+
+/** First free spot for an annotation label: four corners around the dot, then a second ring further out. */
+function placeNote(o: { px: number; py: number; w: number; fsz: number; flip0: boolean; up0: boolean; left: number; right: number; taken: Box[]; dot: Box }): Placement | null {
+  for (const ring of [0, 1]) {
+    for (const dx of [o.flip0 ? -1 : 1, o.flip0 ? 1 : -1]) {
+      for (const dy of [o.up0 ? -1 : 1, o.up0 ? 1 : -1]) {
+        const x = o.px + dx * 7;
+        const y = dy < 0 ? o.py - 7 - ring * (o.fsz + 6) : o.py + o.fsz + 4 + ring * (o.fsz + 6);
+        const anchor = dx < 0 ? 'end' : 'start';
+        const x0 = anchor === 'end' ? x - o.w : x;
+        const box: Box = { x0, x1: x0 + o.w, y0: y - o.fsz, y1: y + 3 };
+        if (box.x0 >= o.left - 2 && box.x1 <= o.right + 2 && !o.taken.some((b) => b !== o.dot && hit(b, box))) return { x, y, anchor, box };
+      }
+    }
+  }
+  return null;
 }
 
 /** Reference lines and annotations, drawn on top of the plot in plot coordinates. */
@@ -88,23 +129,35 @@ export function StyleOverlay({ reg, style, fs, uid }: { reg: AxisReg; style?: Ch
         })}
       </g>
       <g clipPath={`url(#${clipId})`} aria-hidden="true">
-        {notes.map((a, i) => {
-          if (!reg.x || !reg.y) return null;
-          const px = reg.x(a.x);
-          const py = reg.y(a.y);
-          if (!isFinite(px) || !isFinite(py)) return null;
-          const label = truncateText(a.text, 180, fsz);
-          const flip = px > right - 150;
-          const up = py > top + fsz + 12;
-          return (
-            <g key={i}>
-              <circle cx={px} cy={py} r={3.5} className="pspp-chart__note-dot" />
-              <text className="pspp-chart__note-text" x={flip ? px - 7 : px + 7} y={up ? py - 7 : py + fsz + 4} textAnchor={flip ? 'end' : 'start'} style={{ fontSize: fsz }}>
-                {label}
-              </text>
-            </g>
-          );
-        })}
+        {(() => {
+          // Each label tries four corners around its dot, then a second ring further out; a label that
+          // would cover a value label or an earlier annotation moves on, and when nothing is free only the dot stays.
+          const taken: Box[] = [...(reg.avoid ?? [])];
+          return notes.map((a, i) => {
+            if (!reg.x || !reg.y) return null;
+            const px = reg.x(a.x);
+            const py = reg.y(a.y);
+            if (!isFinite(px) || !isFinite(py)) return null;
+            const label = truncateText(a.text, 180, fsz);
+            const w = measureText(label, fsz);
+            const dot: Box = { x0: px - 4, x1: px + 4, y0: py - 4, y1: py + 4 };
+            taken.push(dot);
+            const flip0 = px > right - 150;
+            const up0 = py > top + fsz + 12;
+            const chosen = placeNote({ px, py, w, fsz, flip0, up0, left, right, taken, dot });
+            if (chosen) taken.push(chosen.box);
+            return (
+              <g key={i}>
+                <circle cx={px} cy={py} r={3.5} className="pspp-chart__note-dot" />
+                {chosen && (
+                  <text className="pspp-chart__note-text" x={chosen.x} y={chosen.y} textAnchor={chosen.anchor} style={{ fontSize: fsz }}>
+                    {label}
+                  </text>
+                )}
+              </g>
+            );
+          });
+        })()}
       </g>
     </g>
   );

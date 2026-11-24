@@ -37,6 +37,12 @@ export function DotChart({ spec, ...c }: { spec: DotSpec } & ChartCommonProps) {
       title={title}
       subtitle={tr(t, 'dotNote')}
       legend={legend}
+      plotHeight={(w) => {
+        // a plot just tall enough for the tallest stack at the dot size the width allows
+        const span = xs.length ? xs[xs.length - 1] - xs[0] + 2 * binW : 1;
+        const r0 = dotRadius(maxStack, ((w - 80) * binW) / span, 1e6);
+        return clamp(Math.round(maxStack * 2 * r0 + 96), 180, 420);
+      }}
       ariaLabel={`${title}. ${tr(t, 'ariaPoints', { count: totalCases })}.`}
       table={{
         columns: [...(grouped ? [tr(t, 'group')] : []), spec.xlabel || tr(t, 'value'), tr(t, 'count')],
@@ -61,9 +67,11 @@ export function DotChart({ spec, ...c }: { spec: DotSpec } & ChartCommonProps) {
         const plotW0 = area.width - m0.left - m0.right;
         const plotH0 = area.height - m0.top - m0.bottom;
         const binPx = (plotW0 * binW) / (xt.domain[1] - xt.domain[0]);
-        const r = dotRadius(maxStack, binPx, plotH0);
-        const unit = Math.min(2 * r, plotH0 / maxStack);
-        const yMaxUnits = plotH0 / unit;
+        // the axis ends just above the tallest stack (a little head room), not at the top of the plot
+        const rFit = dotRadius(maxStack, binPx, plotH0);
+        const yMaxUnits = Math.min(plotH0 / (2 * rFit), maxStack + Math.max(0.6, maxStack * 0.12));
+        const r = dotRadius(yMaxUnits, binPx, plotH0);
+        const unit = plotH0 / yMaxUnits;
         const yBase = ticksWithin(0, yMaxUnits, clamp(Math.floor(area.height / 48), 3, 9));
         const yt = applyDomain({ ...yBase, domain: [0, yMaxUnits] }, style?.yMin, style?.yMax, 6);
         const fy = tickFormatter(yt.step, yt.ticks, locale);

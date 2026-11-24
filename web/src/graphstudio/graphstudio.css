@@ -367,3 +367,9 @@
     max-height: 12rem;
   }
 }
+
+.gs-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}

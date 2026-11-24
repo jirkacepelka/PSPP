@@ -545,3 +545,49 @@
 .pspp-chart__fit {
   stroke-width: 2.5px;
 }
+
+/* ------------------------------------------------------------ studio: panels */
+
+.pspp-chart--embedded {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.pspp-chart--embedded .pspp-chart__table-wrap {
+  max-height: 200px;
+}
+
+.pspp-panels__title {
+  padding: 14px 16px 4px;
+  color: var(--c-ink);
+  font-size: calc(14px * var(--c-fs, 1));
+  font-weight: 600;
+  padding-right: 120px;
+}
+
+.pspp-panels__grid {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.pspp-panels__cell {
+  min-width: 0;
+}
+
+.pspp-panels__ptitle {
+  padding: 0 4px 2px;
+  color: var(--c-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pspp-chart__empty-note {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--c-muted);
+  font-size: 13px;
+  text-align: center;
+}

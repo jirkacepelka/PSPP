@@ -11,7 +11,8 @@ import { NumberField, Select, TextField } from '../components/Field';
 import { Switch } from '../components/Choice';
 import { Segmented } from '../components/Segmented';
 import type { Annotation, ChartStyle, GraphDef, RefLine } from '../charts/studioTypes';
-import { KINDS, type OptionDef } from './model';
+import { optionsOf, type OptionDef } from './model';
+import type { QuickStats } from './compute';
 
 const PALETTE_ROWS = 12;
 
@@ -35,9 +36,8 @@ interface OptionsProps {
 
 export function OptionsTab({ def, onChange, decimal }: OptionsProps) {
   const { t } = useTranslation();
-  const model = KINDS[def.kind];
   const set = (id: string, value: unknown) => onChange({ ...def, options: { ...def.options, [id]: value } });
-  const shown = (model?.options ?? []).filter((o) => !o.when || o.when(def));
+  const shown = optionsOf(def).filter((o) => !o.when || o.when(def));
   if (!shown.length) return <p className="gs-muted">{t('graphstudio.noOptions')}</p>;
   return (
     <div className="gs-form">
@@ -176,9 +176,29 @@ interface ElementsProps {
   style: ChartStyle;
   onChange: (style: ChartStyle) => void;
   decimal: '.' | ',';
+  /** statistics of the value axis for the quick reference lines; null when the chart has none */
+  quick: QuickStats | null;
 }
 
-export function ElementsTab({ style, onChange, decimal }: ElementsProps) {
+/** A number for a line label: a few decimals, no grouping, the decimal separator of the settings. */
+export function labelNumber(x: number, decimal: '.' | ','): string {
+  const digits = Math.abs(x) >= 1000 ? 0 : Math.abs(x) >= 100 ? 1 : 2;
+  return new Intl.NumberFormat(decimal === ',' ? 'cs-CZ' : 'en-US', { maximumFractionDigits: digits, useGrouping: false }).format(x);
+}
+
+type Quick = 'mean' | 'median' | 'sd1' | 'sd2';
+
+/** The reference lines of a quick choice: plain RefLines, editable like any other. */
+export function quickLines(q: QuickStats, which: Quick, label: (key: string, v: string) => string, decimal: '.' | ','): RefLine[] {
+  const line = (key: string, value: number, dash: boolean): RefLine => ({ axis: q.axis, value, label: label(key, labelNumber(value, decimal)), dash });
+  if (which === 'mean') return [line('mean', q.mean, false)];
+  if (which === 'median') return [line('median', q.median, true)];
+  if (q.sd === null) return [];
+  const k = which === 'sd1' ? 1 : 2;
+  return [line(`plus${k}`, q.mean + k * q.sd, true), line(`minus${k}`, q.mean - k * q.sd, true)];
+}
+
+export function ElementsTab({ style, onChange, decimal, quick }: ElementsProps) {
   const { t } = useTranslation();
   const id = useId();
   const refs = style.refLines ?? [];
@@ -192,6 +212,24 @@ export function ElementsTab({ style, onChange, decimal }: ElementsProps) {
       <fieldset className="gs-fieldset">
         <legend>{t('graphstudio.el.refLines')}</legend>
         <p className="gs-muted">{t('graphstudio.el.refHint')}</p>
+        <div className="gs-quick" role="group" aria-label={t('graphstudio.el.quick')}>
+          {(['mean', 'median', 'sd1', 'sd2'] as Quick[]).map((w) => (
+            <Button
+              key={w}
+              size="sm"
+              variant="secondary"
+              disabled={!quick || (quick.sd === null && (w === 'sd1' || w === 'sd2'))}
+              onClick={() => {
+                if (!quick) return;
+                const fresh = quickLines(quick, w, (k, v) => t(`graphstudio.el.q.${k}`, { v }), decimal).filter((l) => !refs.some((r) => r.axis === l.axis && Math.abs(r.value - l.value) < 1e-9));
+                if (fresh.length) setRefs([...refs, ...fresh]);
+              }}
+            >
+              {t(`graphstudio.el.quick_${w}`)}
+            </Button>
+          ))}
+        </div>
+        {!quick && <p className="gs-muted">{t('graphstudio.el.quickNone')}</p>}
         {refs.map((r, i) => (
           <div key={i} className="gs-row" role="group" aria-label={t('graphstudio.el.refLine', { n: i + 1 })}>
             <Select

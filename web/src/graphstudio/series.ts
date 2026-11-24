@@ -47,10 +47,29 @@ export function seriesNames(chart: unknown): string[] {
     }
     case 'matrix':
       return [...new Set(arr(c.groups).filter((g): g is string => typeof g === 'string'))];
-    case 'boxplot':
+    case 'boxplot': {
+      const groups = [...new Set(arr(c.boxes).filter(isObj).map((b) => b.group).filter((g): g is string => typeof g === 'string'))];
+      return groups.length ? groups.map(str) : [str(c.title)];
+    }
     case 'pareto':
     case 'heatmap':
+    case 'highlow':
+    case 'probplot':
+    case 'control':
       return [str(c.title)];
+    case 'sequence':
+      return arr(c.series).filter(isObj).map((s) => str(s.name));
+    case 'dualaxis':
+      return [isObj(c.left) ? str(c.left.name) : '', isObj(c.right) ? str(c.right.name) : ''];
+    case 'density':
+      return arr(c.curves).filter(isObj).map((s) => str(s.name));
+    case 'violin':
+      return arr(c.violins).filter(isObj).map((s) => str(s.label));
+    case 'panels': {
+      // the colours of the panels follow the first one
+      const first = arr(c.panels).find(isObj);
+      return first ? seriesNames(first.chart) : [];
+    }
     default:
       return [];
   }

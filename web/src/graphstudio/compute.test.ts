@@ -104,7 +104,7 @@ describe('model', () => {
     const s = slotsOf(defaultDef('scatter', 'simple'));
     const text = num('t', { type: 'string' });
     expect(rejection(s[0], text, 3)?.key).toBe('graphstudio.reject.text');
-    expect(rejection(slotsOf(d)[0], num('age'), 80)?.key).toBe('graphstudio.reject.manyValues');
+    expect(rejection(slotsOf(d)[0], num('age'), 80)).toBeNull();
     expect(rejection(slotsOf(d)[0], num('age', { measure: 'nominal' }), 80)).toBeNull();
   });
   it('drops bindings of slots that disappear and fixes options', () => {
@@ -224,7 +224,8 @@ describe('computeChart', () => {
     const b = ok(def('boxplot', 'simple', { value: ['y'], x: ['g'] }), small());
     expect((b.chart.boxes as { label: string }[]).map((x) => x.label)).toEqual(['Female', 'Male']);
     const c = ok(def('boxplot', 'clustered', { value: ['y'], x: ['g'], group: ['w'] }), small());
-    expect((c.chart.boxes as { label: string }[])[0].label).toBe('Female, 1');
+    // clustered boxes keep the category as the label and name the cluster member in `group`
+    expect((c.chart.boxes as { label: string; group: string }[]).map((x) => [x.label, x.group])).toEqual([['Female', '1'], ['Male', '1']]);
   });
   it('scatter keeps fit options and group labels; listwise missing', () => {
     const r = ok(def('scatter', 'grouped', { x: ['x'], y: ['y'], group: ['g'] }, { fit: 'linear' }), small());

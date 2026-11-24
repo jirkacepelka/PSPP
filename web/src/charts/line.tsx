@@ -19,10 +19,10 @@ import {
   type PlotArea,
   type TipContent,
 } from './shell';
-import { clamp, formatValue, linearScale, niceTicks, tickFormatter, truncateText } from './scale';
+import { clamp, formatValue, linearScale, measureText, niceTicks, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { LineSpec } from './lineSpec';
-import { useAxisReg, useStyle } from './styleLayer';
+import { avoidText, useAxisReg, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 
 const f1 = (v: number) => v.toFixed(1);
@@ -165,13 +165,17 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
               })}
             {connect && <path className="pspp-chart__line" d={linePath(s.values, px, sy)} style={{ stroke: colors[si] }} />}
             {showValues &&
-              s.values.map((v, i) =>
-                v === null ? null : (
-                  <text key={'v' + i} className="pspp-chart__value" x={px[i]} y={sy(v) - 8 * fs} textAnchor="middle">
-                    {formatValue(v, locale, 2)}
+              s.values.map((v, i) => {
+                if (v === null) return null;
+                const ly = sy(v) - 8 * fs;
+                const txt = formatValue(v, locale, 2);
+                avoidText(reg, px[i], ly, measureText(txt, FONT.label * fs), FONT.label * fs);
+                return (
+                  <text key={'v' + i} className="pspp-chart__value" x={px[i]} y={ly} textAnchor="middle">
+                    {txt}
                   </text>
-                ),
-              )}
+                );
+              })}
             {markers &&
               s.values.map((v, i) =>
                 v === null ? null : <Marker key={i} shape={GROUP_SHAPES[si % GROUP_SHAPES.length]} x={px[i]} y={sy(v)} r={hi === i ? r + 1.5 : r} color={colors[si]} />,
@@ -226,6 +230,7 @@ export function LineChart({ spec, ...c }: { spec: LineSpec } & ChartCommonProps)
     <ChartShell
       {...c}
       title={title}
+      legendTitle={spec.legendTitle}
       subtitle={bars ? tr(t, 'errorBars', { label: spec.errorLabel }) : undefined}
       legend={named ? legend : undefined}
       ariaLabel={`${title}. ${tr(t, 'ariaLines', { count: spec.series.length })}: ${spec.series.map((s) => s.name).join(', ')}.`}

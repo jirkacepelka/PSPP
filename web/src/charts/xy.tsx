@@ -24,7 +24,7 @@ import { tr } from './strings';
 import type { NpSpec, Pt, RocSpec, ScatterSpec, ScreeSpec, SpreadLevelSpec } from './types';
 import { useStyle } from './styleLayer';
 import { applyDomain } from './styleSpec';
-import { fitCurve, type FitKind } from './studioMath';
+import { fitBand, fitCurve, type BandPoint, type FitKind } from './studioMath';
 
 export interface XYSeries {
   name: string;
@@ -33,6 +33,25 @@ export interface XYSeries {
   points: Pt[];
   line?: boolean;
   markers?: boolean;
+  /** stroke-dasharray of the line, e.g. '6 4' */
+  dash?: string;
+  /** false: not a hover/keyboard target (reference lines drawn as series) */
+  hover?: boolean;
+  /** marker radius, default 4 */
+  r?: number;
+}
+
+/** Translucent band between lo and hi (confidence band of a fit). */
+export interface Band {
+  color: string;
+  pts: { x: number; lo: number; hi: number }[];
+}
+
+/** Area under a curve down to `base` (density fill). */
+export interface Fill {
+  color: string;
+  pts: Pt[];
+  base: number;
 }
 
 export interface RefLine {
@@ -58,6 +77,9 @@ interface XYPlotProps {
   series: XYSeries[];
   refLines?: RefLine[];
   fits?: FitLine[];
+  bands?: Band[];
+  fills?: Fill[];
+  ariaLabel?: string;
   xGrid?: boolean;
   xFormat?: (v: number) => string;
   emptyText?: string;
@@ -88,7 +110,7 @@ export function XYPlot(props: XYPlotProps) {
 
   const flat = useMemo(() => {
     const out: FlatPt[] = [];
-    series.forEach((s, si) => s.points.forEach((p) => out.push({ px: sx(p[0]), py: sy(p[1]), s: si, p })));
+    series.forEach((s, si) => s.hover !== false && s.points.forEach((p) => out.push({ px: sx(p[0]), py: sy(p[1]), s: si, p })));
     out.sort((a, b) => a.px - b.px || a.py - b.py);
     return out;
     // sx/sy are fully determined by the domains and plot geometry below.
@@ -165,6 +187,26 @@ export function XYPlot(props: XYPlotProps) {
           <line key={i} className="pspp-chart__ref" x1={sx(l.x1)} y1={sy(l.y1)} x2={sx(l.x2)} y2={sy(l.y2)} />
         ))}
       </g>
+      <g clipPath={`url(#${clipId}l)`} aria-hidden="true">
+        {(props.fills ?? []).map((f, i) => (
+          <path
+            key={'a' + i}
+            d={`M${sx(f.pts[0][0]).toFixed(1)},${sy(f.base).toFixed(1)}${f.pts.map((p) => `L${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join('')}L${sx(f.pts[f.pts.length - 1][0]).toFixed(1)},${sy(f.base).toFixed(1)}Z`}
+            style={{ fill: f.color, fillOpacity: 0.18, stroke: 'none' }}
+            pointerEvents="none"
+          />
+        ))}
+        {(props.bands ?? []).map((b, i) =>
+          b.pts.length < 2 ? null : (
+            <path
+              key={'b' + i}
+              d={`M${b.pts.map((p) => `${sx(p.x).toFixed(1)},${sy(p.hi).toFixed(1)}`).join('L')}L${[...b.pts].reverse().map((p) => `${sx(p.x).toFixed(1)},${sy(p.lo).toFixed(1)}`).join('L')}Z`}
+              style={{ fill: b.color, fillOpacity: 0.16, stroke: 'none' }}
+              pointerEvents="none"
+            />
+          ),
+        )}
+      </g>
       <g clipPath={`url(#${clipId}l)`}>
         {(props.fits ?? []).map((f, i) => (
           <polyline
@@ -183,7 +225,8 @@ export function XYPlot(props: XYPlotProps) {
               key={'l' + si}
               className="pspp-chart__line"
               points={s.points.map((p) => `${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' ')}
-              style={{ stroke: s.color }}
+              style={{ stroke: s.color, ...(s.dash ? { strokeDasharray: s.dash } : {}) }}
+              pointerEvents="none"
             />
           ) : null,
         )}
@@ -193,7 +236,7 @@ export function XYPlot(props: XYPlotProps) {
           s.markers !== false ? (
             <g key={'m' + si}>
               {s.points.map((p, i) => (
-                <Marker key={i} shape={s.shape} x={sx(p[0])} y={sy(p[1])} color={s.color} />
+                <Marker key={i} shape={s.shape} x={sx(p[0])} y={sy(p[1])} r={s.r} color={s.color} />
               ))}
             </g>
           ) : null,
@@ -214,7 +257,7 @@ export function XYPlot(props: XYPlotProps) {
         height={plotH}
         tabIndex={0}
         role="graphics-symbol"
-        aria-label={`${props.xTitle ?? ''} / ${props.yTitle ?? ''}`}
+        aria-label={props.ariaLabel ?? `${props.xTitle ?? ''} / ${props.yTitle ?? ''}`}
         onPointerMove={onMove}
         onPointerLeave={() => {
           setHi(null);
@@ -238,7 +281,7 @@ export function XYPlot(props: XYPlotProps) {
 
 /* ------------------------------------------------------------- helpers */
 
-function extent(values: number[]): [number, number] {
+export function extent(values: number[]): [number, number] {
   let lo = Infinity;
   let hi = -Infinity;
   for (const v of values) {
@@ -248,10 +291,10 @@ function extent(values: number[]): [number, number] {
   return lo <= hi ? [lo, hi] : [0, 1];
 }
 
-const xCount = (w: number) => clamp(Math.floor(w / 90), 3, 10);
-const yCount = (h: number) => clamp(Math.floor(h / 48), 3, 9);
+export const xCount = (w: number) => clamp(Math.floor(w / 90), 3, 10);
+export const yCount = (h: number) => clamp(Math.floor(h / 48), 3, 9);
 
-function xyTable(xName: string, yName: string, series: XYSeries[], locale?: string, groupCol?: string) {
+export function xyTable(xName: string, yName: string, series: XYSeries[], locale?: string, groupCol?: string) {
   const rows: string[][] = [];
   for (const s of series) for (const p of s.points) rows.push([...(groupCol ? [s.name] : []), formatValue(p[0], locale), formatValue(p[1], locale)]);
   return {
@@ -261,7 +304,7 @@ function xyTable(xName: string, yName: string, series: XYSeries[], locale?: stri
   };
 }
 
-const pointTip =
+export const pointTip =
   (xName: string, yName: string, locale: string | undefined, named: boolean) =>
   (s: XYSeries, p: Pt): TipContent => ({
     title: named ? s.name : undefined,
@@ -406,9 +449,12 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
       const x0 = Math.min(...g.pts.map((p) => p[0]));
       const x1 = Math.max(...g.pts.map((p) => p[0]));
       const r = fitCurve(g.pts, fitKind, x0, x1);
-      return r ? [{ ...g, ...r }] : [];
+      // fitCi: 95 % band around the fit, see fitBand in studioMath.ts
+      const band: BandPoint[] | null = r && spec.fitCi ? fitBand(g.pts, fitKind, x0, x1) : null;
+      return r ? [{ ...g, ...r, band }] : [];
     });
-  }, [fitKind, series, spec.fitByGroup]);
+  }, [fitKind, series, spec.fitByGroup, spec.fitCi]);
+  const bands = fitResults.flatMap((f) => (f.band ? [{ color: f.color, pts: f.band }] : []));
   const fitLabel = (f: { name: string; r2: number | null }) =>
     [fitName, f.name].filter(Boolean).join(' · ') + (spec.showR2 && f.r2 !== null ? `, ${tr(t, 'rSquared')} = ${formatValue(f.r2, locale, 3)}` : '');
   const legend: LegendItem[] | undefined =
@@ -416,6 +462,7 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
       ? [
           ...(series.length > 1 || spec.byvar ? series.map((s) => ({ label: s.name, kind: 'marker' as const, color: s.color, shape: s.shape })) : []),
           ...fitResults.map((f) => ({ label: fitLabel(f), kind: 'line' as const, color: f.color })),
+          ...(bands.length ? [{ label: tr(t, 'confidenceBand'), kind: 'rect' as const, color: bands[0].color }] : []),
         ]
       : undefined;
   return (
@@ -446,6 +493,7 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
             yTitle={yName}
             series={series}
             fits={fitResults}
+            bands={bands}
             tipFor={pointTip(xName, yName, locale, series.length > 1)}
           />
         );

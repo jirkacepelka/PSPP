@@ -2,10 +2,10 @@
    Studio only (ParetoSpec in studioTypes.ts).  SPDX-License-Identifier: GPL-3.0-or-later */
 
 import { AxisTitles, Baseline, ChartShell, FONT, Marker, YAxis, barPath, markTip, plotMargins, seriesColor, type ChartCommonProps, type LegendItem } from './shell';
-import { clamp, formatPercent, formatValue, linearScale, measureText, ticksWithin, tickFormatter } from './scale';
+import { clamp, formatPercent, formatValue, linearScale, measureText, ticksWithin, tickFormatter, type Ticks } from './scale';
 import { tr } from './strings';
 import type { ParetoSpec } from './studioTypes';
-import { axisTitle, useStyle } from './styleLayer';
+import { avoidText, axisTitle, useStyle } from './styleLayer';
 import { applyDomain, fontScaleOf } from './styleSpec';
 import { cumulativePercent } from './studioMath';
 import { catLabels } from './bar';
@@ -53,8 +53,16 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
           );
         }
         const yCount = clamp(Math.floor(area.height / 48), 3, 8);
-        const yt = applyDomain(ticksWithin(0, spec.total, yCount), style?.yMin, style?.yMax, yCount);
-        const fy = tickFormatter(yt.step, yt.ticks, locale);
+        // Left max = total, so 100 percent sits on the top gridline.  The left ticks are the percent ticks
+        // (0, 20 ... 100 percent of the total) so both axes share their gridlines; an explicit axis range
+        // from the style falls back to nice count ticks.
+        const overridden = style?.yMin != null || style?.yMax != null;
+        const pStep = area.height < 200 ? 50 : area.height < 300 ? 25 : 20;
+        const yBase: Ticks = overridden
+          ? ticksWithin(0, spec.total, yCount)
+          : { ticks: Array.from({ length: 100 / pStep + 1 }, (_, i) => (i * pStep * spec.total) / 100), step: (pStep * spec.total) / 100, domain: [0, spec.total] };
+        const yt = applyDomain(yBase, style?.yMin, style?.yMax, yCount);
+        const fy = overridden ? tickFormatter(yt.step, yt.ticks, locale) : (v: number) => formatValue(v, locale, spec.total >= 100 ? 0 : spec.total >= 10 ? 1 : 2);
         const rightW = Math.ceil(measureText('100%', FONT.tick * fs)) + 12;
         const m = plotMargins({ yTickLabels: yt.ticks.map(fy), yTitle: yName, right: rightW, style });
         const plotW = area.width - m.left - m.right;
@@ -73,7 +81,7 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
         area.reg.x = xAt;
         area.reg.top = top;
         area.reg.height = plotH;
-        const pctTicks = [0, 20, 40, 60, 80, 100].filter((p) => py(p) >= top - 0.5 && py(p) <= top + plotH + 0.5);
+        const pctTicks = (overridden ? [0, 20, 40, 60, 80, 100] : Array.from({ length: 100 / pStep + 1 }, (_, i) => i * pStep)).filter((p) => py(p) >= top - 0.5 && py(p) <= top + plotH + 0.5);
         const line = cum.map((p, i) => `${i ? 'L' : 'M'}${xAt(i).toFixed(1)},${py(p).toFixed(1)}`).join('');
         return (
           <g>
@@ -104,11 +112,6 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
                   <g key={i} className="pspp-chart__mark" {...markTip(area.tip, tip, `${b.label}: ${formatValue(b.count, locale)}, ${cumName} ${pctText(cum[i])}`)}>
                     <rect x={xAt(i) - band / 2} y={top} width={band} height={plotH} className="pspp-chart__hitband" data-export="omit" />
                     <path d={barPath(xAt(i) - barW / 2, barW, base, sy(b.count))} style={{ fill: seriesColor(0) }} />
-                    {showValues && (
-                      <text className="pspp-chart__value" x={xAt(i)} y={Math.min(sy(b.count), base) - 5} textAnchor="middle">
-                        {formatValue(b.count, locale)}
-                      </text>
-                    )}
                   </g>
                 );
               })}
@@ -117,6 +120,19 @@ export function ParetoChart({ spec, ...c }: { spec: ParetoSpec } & ChartCommonPr
                 <Marker key={i} shape="circle" x={xAt(i)} y={py(p)} r={n > 24 ? 2 : 3.5} color={seriesColor(1)} />
               ))}
             </g>
+            {showValues && (
+              <g aria-hidden="true" pointerEvents="none">
+                {spec.bars.map((b, i) => {
+                  const ly = Math.min(sy(b.count), base) - 5;
+                  avoidText(area.reg, xAt(i), ly, measureText(formatValue(b.count, locale), FONT.label * fs), FONT.label * fs);
+                  return (
+                    <text key={'v' + i} className="pspp-chart__value" x={xAt(i)} y={ly} textAnchor="middle">
+                      {formatValue(b.count, locale)}
+                    </text>
+                  );
+                })}
+              </g>
+            )}
             {spec.bars.map((_b, i) =>
               i % every ? null : mode === 'flat' ? (
                 <text key={'l' + i} className="pspp-chart__tick pspp-chart__tick--cat" x={xAt(i)} y={top + plotH + 15} textAnchor="middle">

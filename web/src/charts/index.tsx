@@ -26,6 +26,13 @@ import { NpChart, RocChart, ScatterChart, ScreeChart, SpreadLevelChart } from '.
 import { SurvivalChart } from './survival';
 import { DendrogramChart } from './dendrogram';
 import { LineChart } from './line';
+import { HighLowChart } from './highlow';
+import { DualAxisChart } from './dualaxis';
+import { ProbPlotChart } from './probplot';
+import { ControlChart, SequenceChart } from './sequence';
+import { DensityChart } from './density';
+import { ViolinChart } from './violin';
+import { PanelsChart } from './panels';
 
 export interface PsppChartProps {
   /** The `chart` member of an output item (or the whole item). */
@@ -38,13 +45,15 @@ export interface PsppChartProps {
   t?: ChartT;
   /** BCP 47 locale for number formatting (e.g. "cs"). Default: the browser's. */
   locale?: string;
+  /** Used by the panels chart for its cells: no title and no toolbar, legend and data table on request. */
+  embedded?: { legend: boolean; table: boolean };
 }
 
-export function PsppChart({ chart, width, height, t = defaultT, locale }: PsppChartProps) {
+export function PsppChart({ chart, width, height, t = defaultT, locale, embedded }: PsppChartProps) {
   const spec = useMemo<StyledSpec>(() => parseChart(chart), [chart]);
   return (
     <StyleCtx.Provider value={spec.style}>
-      <ChartBody spec={spec} common={{ t, locale, width, height }} />
+      <ChartBody spec={spec} common={{ t, locale, width, height, embedded }} />
     </StyleCtx.Provider>
   );
 }
@@ -89,6 +98,22 @@ function ChartBody({ spec, common }: { spec: StyledSpec; common: ChartCommonProp
       return <HeatmapChart spec={spec} {...common} />;
     case 'pyramid':
       return <PyramidChart spec={spec} {...common} />;
+    case 'highlow':
+      return <HighLowChart spec={spec} {...common} />;
+    case 'dualaxis':
+      return <DualAxisChart spec={spec} {...common} />;
+    case 'probplot':
+      return <ProbPlotChart spec={spec} {...common} />;
+    case 'sequence':
+      return <SequenceChart spec={spec} {...common} />;
+    case 'control':
+      return <ControlChart spec={spec} {...common} />;
+    case 'density':
+      return <DensityChart spec={spec} {...common} />;
+    case 'violin':
+      return <ViolinChart spec={spec} {...common} />;
+    case 'panels':
+      return <PanelsChart spec={spec} {...common} />;
     default:
       return (
         <figure className="pspp-chart pspp-chart--fallback" style={width ? { width } : undefined} role="img" aria-label={spec.title || tr(t, 'untitled')}>

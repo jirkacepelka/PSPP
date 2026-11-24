@@ -13,10 +13,36 @@ type ChartItem = Extract<OutputItem, { kind: 'chart' }>;
 let counter = 0;
 const uid = (p: string) => `${p}${Date.now().toString(36)}${counter++}`;
 
+/** Style members that also apply inside every panel (the titles of the whole chart stay outside). */
+const PANEL_KEYS: (keyof ChartStyle)[] = ['xTitle', 'yTitle', 'legend', 'legendTitle', 'palette', 'grid', 'xMin', 'xMax', 'yMin', 'yMax', 'valueLabels', 'fontScale'];
+
+/**
+ * Copies of the panels of a panels spec with the user's style merged over the shared axes the studio
+ * computed, so each panel is a complete styled chart. Reference lines and annotations go to the first
+ * panel only for the I-MR control chart, whose second panel has another scale.
+ */
+function stylePanels(panels: unknown, def: GraphDef, s: ChartStyle): unknown {
+  if (!Array.isArray(panels)) return panels;
+  const firstOnly = def.kind === 'control' && def.variant === 'imr';
+  return panels.map((p, i) => {
+    if (!isObj(p) || !isObj(p.chart)) return p;
+    const own: Record<string, unknown> = isObj(p.chart.style) ? { ...p.chart.style } : {};
+    for (const k of PANEL_KEYS) if (s[k] !== undefined) own[k] = s[k];
+    if (!firstOnly || i === 0) {
+      if (s.refLines) own.refLines = s.refLines;
+      if (s.annotations) own.annotations = s.annotations;
+    }
+    return { ...p, chart: { ...p.chart, ...(Object.keys(own).length ? { style: own } : {}) } };
+  });
+}
+
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+
 /** The chart object stored in the output: the resolved spec plus the definition and the style. */
 export function studioChart(spec: Record<string, unknown>, def: GraphDef, style: ChartStyle): Record<string, unknown> {
   const out: Record<string, unknown> = { ...spec, studio: def };
   const s = cleanStyle(style);
+  if (spec.type === 'panels') out.panels = stylePanels(spec.panels, def, s);
   if (Object.keys(s).length) out.style = s;
   else delete out.style;
   return out;

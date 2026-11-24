@@ -205,6 +205,7 @@ export function SurvivalChart({ spec, ...c }: { spec: SurvivalSpec } & ChartComm
     <ChartShell
       {...c}
       title={title}
+      legendTitle={spec.legendTitle}
       legend={named || anyCensored ? legend : undefined}
       ariaLabel={`${title}. ${tr(t, 'ariaCurves', { count: spec.curves.length })}: ${spec.curves.map((s) => s.name).join(', ')}.`}
       table={{

@@ -7,7 +7,24 @@ import { parseDendrogram, type DendrogramSpec } from './dendrogram';
 import { parseLine, type LineSpec } from './lineSpec';
 import { parseStyle } from './styleSpec';
 import { parseArea, parseDot, parseHeatmap, parseMatrix, parsePareto, parsePyramid } from './studioSpecs';
-import type { AreaSpec, ChartStyle, DotSpec, HeatmapSpec, MatrixSpec, ParetoSpec, PyramidSpec } from './studioTypes';
+import { parseControl, parseDensity, parseDualAxis, parseHighLow, parsePanels, parseProbPlot, parseSequence, parseViolin } from './phase2Specs';
+import type {
+  AreaSpec,
+  ChartStyle,
+  ControlSpec,
+  DensitySpec,
+  DotSpec,
+  DualAxisSpec,
+  HeatmapSpec,
+  HighLowSpec,
+  MatrixSpec,
+  PanelsSpec,
+  ParetoSpec,
+  ProbPlotSpec,
+  PyramidSpec,
+  SequenceSpec,
+  ViolinSpec,
+} from './studioTypes';
 
 export type Pt = [number, number];
 
@@ -55,6 +72,8 @@ export interface BoxSpec {
   hinges: [number, number, number];
   whiskers: [number | null, number | null];
   outliers: { value: number; label: string; extreme: boolean }[];
+  /** studio: boxes with the same label form a cluster, one box per group (colour by group) */
+  group?: string | null;
 }
 
 export interface BoxplotSpec {
@@ -100,6 +119,8 @@ export interface ScatterSpec {
   fit?: 'linear' | 'quadratic' | 'cubic' | 'loess' | 'none';
   fitByGroup?: boolean;
   showR2?: boolean;
+  /** studio: translucent 95 % confidence band around the fit */
+  fitCi?: boolean;
 }
 
 export interface ScreeSpec {
@@ -141,6 +162,14 @@ export type ChartSpec =
   | MatrixSpec
   | HeatmapSpec
   | PyramidSpec
+  | HighLowSpec
+  | DualAxisSpec
+  | ProbPlotSpec
+  | SequenceSpec
+  | ControlSpec
+  | DensitySpec
+  | ViolinSpec
+  | PanelsSpec
   | UnknownSpec;
 
 /** Every parsed spec may carry the appearance overrides of `chart.style`. */
@@ -263,6 +292,7 @@ function parseChartBody(input: unknown): ChartSpec {
             return [
               {
                 label: clean(str(b.label)),
+                ...(b.group !== undefined && b.group !== null ? { group: clean(str(b.group)) } : {}),
                 hinges: [h[0], h[1], h[2]],
                 whiskers: [w[0] ?? null, w[1] ?? null],
                 outliers: arr(b.outliers)
@@ -319,6 +349,7 @@ function parseChartBody(input: unknown): ChartSpec {
         ...(['linear', 'quadratic', 'cubic', 'loess', 'none'].includes(str(c.fit)) ? { fit: c.fit as ScatterSpec['fit'] } : {}),
         ...(c.fitByGroup === true ? { fitByGroup: true } : {}),
         ...(c.showR2 === true ? { showR2: true } : {}),
+        ...(c.fitCi === true ? { fitCi: true } : {}),
       };
     }
     case 'scree':
@@ -348,6 +379,22 @@ function parseChartBody(input: unknown): ChartSpec {
       return parseHeatmap(c, title);
     case 'pyramid':
       return parsePyramid(c, title);
+    case 'highlow':
+      return parseHighLow(c, title);
+    case 'dualaxis':
+      return parseDualAxis(c, title);
+    case 'probplot':
+      return parseProbPlot(c, title);
+    case 'sequence':
+      return parseSequence(c, title);
+    case 'control':
+      return parseControl(c, title);
+    case 'density':
+      return parseDensity(c, title);
+    case 'violin':
+      return parseViolin(c, title);
+    case 'panels':
+      return parsePanels(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }
