@@ -13,7 +13,15 @@ import { BoxplotChart } from './boxplot';
 import { HistogramChart } from './histogram';
 import { PieChart } from './pie';
 import { defaultT, tr, type ChartT } from './strings';
-import { parseChart, type ChartSpec } from './types';
+import type { ChartCommonProps } from './shell';
+import { parseChart, type StyledSpec } from './types';
+import { StyleCtx } from './styleLayer';
+import { AreaChart } from './area';
+import { DotChart } from './dot';
+import { ParetoChart } from './pareto';
+import { MatrixChart } from './matrix';
+import { HeatmapChart } from './heatmap';
+import { PyramidChart } from './pyramid';
 import { NpChart, RocChart, ScatterChart, ScreeChart, SpreadLevelChart } from './xy';
 import { SurvivalChart } from './survival';
 import { DendrogramChart } from './dendrogram';
@@ -33,8 +41,17 @@ export interface PsppChartProps {
 }
 
 export function PsppChart({ chart, width, height, t = defaultT, locale }: PsppChartProps) {
-  const spec = useMemo<ChartSpec>(() => parseChart(chart), [chart]);
-  const common = { t, locale, width, height };
+  const spec = useMemo<StyledSpec>(() => parseChart(chart), [chart]);
+  return (
+    <StyleCtx.Provider value={spec.style}>
+      <ChartBody spec={spec} common={{ t, locale, width, height }} />
+    </StyleCtx.Provider>
+  );
+}
+
+function ChartBody({ spec, common }: { spec: StyledSpec; common: ChartCommonProps }) {
+  const t = common.t;
+  const width = common.width;
   switch (spec.type) {
     case 'histogram':
       return <HistogramChart spec={spec} {...common} />;
@@ -60,6 +77,18 @@ export function PsppChart({ chart, width, height, t = defaultT, locale }: PsppCh
       return <DendrogramChart spec={spec} {...common} />;
     case 'line':
       return <LineChart spec={spec} {...common} />;
+    case 'area':
+      return <AreaChart spec={spec} {...common} />;
+    case 'dot':
+      return <DotChart spec={spec} {...common} />;
+    case 'pareto':
+      return <ParetoChart spec={spec} {...common} />;
+    case 'matrix':
+      return <MatrixChart spec={spec} {...common} />;
+    case 'heatmap':
+      return <HeatmapChart spec={spec} {...common} />;
+    case 'pyramid':
+      return <PyramidChart spec={spec} {...common} />;
     default:
       return (
         <figure className="pspp-chart pspp-chart--fallback" style={width ? { width } : undefined} role="img" aria-label={spec.title || tr(t, 'untitled')}>
@@ -83,5 +112,6 @@ export default PsppChart;
 
 export { chartStrings, tr, type ChartT, type ChartStringKey } from './strings';
 export { chartToSvgString, chartToPngBlob, downloadSvg, downloadPng } from './export';
-export { parseChart, type ChartSpec } from './types';
+export { parseChart, type ChartSpec, type StyledSpec } from './types';
+export type { ChartStyle, GraphDef, GraphKind, RefLine, Annotation } from './studioTypes';
 export { niceTicks, ticksWithin, linearScale, tickFormatter, formatValue } from './scale';

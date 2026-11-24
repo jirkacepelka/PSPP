@@ -17,6 +17,9 @@ import {
 import { downloadPng, downloadSvg } from './export';
 import { clamp, measureText, setMeasureFont, truncateText, wrapText, type LinearScale } from './scale';
 import { tr, type ChartT } from './strings';
+import { RegCtx, StyleOverlay, axisTitle, useAxisReg, useStyle, type AxisReg } from './styleLayer';
+import { fontScaleOf } from './styleSpec';
+import type { ChartStyle } from './studioTypes';
 
 /* ------------------------------------------------------------------ types */
 
@@ -82,6 +85,11 @@ export interface PlotArea {
   uid: string;
   /** Tooltip API of the enclosing chart. */
   tip: TipApi;
+  /** Appearance overrides of the chart (chart.style); renderers apply axis bounds and value labels. */
+  style?: ChartStyle;
+  /** Pixel mapping of the axes for reference lines and annotations; renderers with their own
+      (e.g. categorical) axes fill it in, YAxis/XAxis do it themselves. */
+  reg: AxisReg;
 }
 
 /** Categorical slot colors (1-based slots, never cycled past 8). */
@@ -247,15 +255,33 @@ export interface AxisSpec {
 }
 
 /** Margins around the plot rectangle that leave room for tick labels and axis titles. */
-export function plotMargins(opts: { yTickLabels: string[]; yTitle?: string; xTitle?: string; xTickLabels?: boolean; extraBottom?: number; right?: number }) {
-  const tickW = opts.yTickLabels.reduce((m, s) => Math.max(m, measureText(s, FONT.tick)), 0);
-  const left = Math.ceil(tickW + 8 + (opts.yTitle ? 22 : 0));
-  const bottom = (opts.xTickLabels === false ? 4 : 20) + (opts.xTitle ? 22 : 0) + (opts.extraBottom ?? 0);
+export function plotMargins(opts: {
+  yTickLabels: string[];
+  yTitle?: string;
+  xTitle?: string;
+  xTickLabels?: boolean;
+  extraBottom?: number;
+  right?: number;
+  /** chart style: titles hidden by showTitle: false take no room, fontScale widens the margins */
+  style?: ChartStyle;
+}) {
+  const fs = fontScaleOf(opts.style);
+  const yTitle = axisTitle(opts.style, 'y', opts.yTitle);
+  const xTitle = axisTitle(opts.style, 'x', opts.xTitle);
+  const tickW = opts.yTickLabels.reduce((m, s) => Math.max(m, measureText(s, FONT.tick * fs)), 0);
+  const left = Math.ceil(tickW + 8 + (yTitle ? 22 * fs : 0));
+  const bottom = Math.ceil((opts.xTickLabels === false ? 4 : 20 * fs) + (xTitle ? 22 * fs : 0) + (opts.extraBottom ?? 0));
   return { left, right: opts.right ?? 12, top: 10, bottom };
 }
 
 /** Horizontal gridlines + y tick labels (left of plot). */
 export function YAxis({ axis, left, width, grid = true }: { axis: AxisSpec; left: number; width: number; grid?: boolean }) {
+  const style = useStyle();
+  const reg = useAxisReg();
+  reg.y = axis.scale;
+  reg.left = left;
+  reg.width = width;
+  if (style?.grid !== undefined) grid = style.grid;
   return (
     <g className="pspp-chart__axis pspp-chart__axis--y" aria-hidden="true">
       {axis.ticks.map((v) => {
@@ -274,12 +300,12 @@ export function YAxis({ axis, left, width, grid = true }: { axis: AxisSpec; left
 }
 
 /** Pick every k-th tick so the labels don't collide. */
-function thinTicks(px: number[], labels: string[], minGap = 10): number {
+function thinTicks(px: number[], labels: string[], minGap = 10, fs = 1): number {
   for (let k = 1; k < labels.length; k++) {
     let ok = true;
     let prevRight = -Infinity;
     for (let i = 0; i < labels.length; i += k) {
-      const w = measureText(labels[i], FONT.tick);
+      const w = measureText(labels[i], FONT.tick * fs);
       if (px[i] - w / 2 < prevRight + minGap) {
         ok = false;
         break;
@@ -307,9 +333,20 @@ export function XAxis({
   width: number;
   grid?: boolean;
 }) {
+  const style = useStyle();
+  const reg = useAxisReg();
+  reg.x = axis.scale;
+  reg.top = top;
+  reg.height = height;
+  if (reg.left === undefined) {
+    reg.left = left;
+    reg.width = width;
+  }
+  if (style?.grid !== undefined) grid = style.grid;
+  const fs = fontScaleOf(style);
   const px = axis.ticks.map((v) => axis.scale(v));
   const labels = axis.ticks.map(axis.format);
-  const k = thinTicks(px, labels);
+  const k = thinTicks(px, labels, 10, fs);
   return (
     <g className="pspp-chart__axis pspp-chart__axis--x" aria-hidden="true">
       {grid &&
@@ -318,7 +355,7 @@ export function XAxis({
         ))}
       {axis.ticks.map((v, i) => {
         if (i % k) return null;
-        const w = measureText(labels[i], FONT.tick);
+        const w = measureText(labels[i], FONT.tick * fs);
         let anchor: 'middle' | 'start' | 'end' = 'middle';
         let x = px[i];
         if (x - w / 2 < left - 24) {
@@ -331,7 +368,7 @@ export function XAxis({
         return (
           <g key={v}>
             <line className="pspp-chart__tickmark" x1={Math.round(px[i]) + 0.5} x2={Math.round(px[i]) + 0.5} y1={top + height} y2={top + height + 4} />
-            <text className="pspp-chart__tick" x={x} y={top + height + 15} textAnchor={anchor}>
+            <text className="pspp-chart__tick" x={x} y={top + height + 14 * fs + 1} textAnchor={anchor}>
               {labels[i]}
             </text>
           </g>
@@ -364,16 +401,20 @@ export function AxisTitles({
   height: number;
   totalHeight: number;
 }) {
+  const style = useStyle();
+  const fs = fontScaleOf(style);
+  xTitle = axisTitle(style, 'x', xTitle);
+  yTitle = axisTitle(style, 'y', yTitle);
   return (
     <g aria-hidden="true">
       {xTitle && (
         <text className="pspp-chart__axis-title" x={left + width / 2} y={totalHeight - 4} textAnchor="middle">
-          {truncateText(xTitle, width + left * 0.8, FONT.axisTitle)}
+          {truncateText(xTitle, width + left * 0.8, FONT.axisTitle * fs)}
         </text>
       )}
       {yTitle && (
-        <text className="pspp-chart__axis-title" transform={`translate(11 ${top + height / 2}) rotate(-90)`} textAnchor="middle" dominantBaseline="central">
-          {truncateText(yTitle, height + 10, FONT.axisTitle)}
+        <text className="pspp-chart__axis-title" transform={`translate(${11 * fs} ${top + height / 2}) rotate(-90)`} textAnchor="middle" dominantBaseline="central">
+          {truncateText(yTitle, height + 10, FONT.axisTitle * fs)}
         </text>
       )}
     </g>
@@ -389,13 +430,13 @@ interface LegendLayout {
 
 const SWATCH = 16;
 
-function layoutLegend(items: LegendItem[], maxW: number): LegendLayout {
+function layoutLegend(items: LegendItem[], maxW: number, fs = 1): LegendLayout {
   const rows: LegendLayout['rows'] = [];
   let row: LegendLayout['rows'][number] = [];
   let x = 0;
   for (const item of items) {
-    const text = truncateText(item.label, Math.max(40, maxW - SWATCH - 6), FONT.legend);
-    const w = SWATCH + 6 + measureText(text, FONT.legend);
+    const text = truncateText(item.label, Math.max(40, maxW - SWATCH - 6), FONT.legend * fs);
+    const w = SWATCH + 6 + measureText(text, FONT.legend * fs);
     if (row.length && x + w > maxW) {
       rows.push(row);
       row = [];
@@ -405,7 +446,7 @@ function layoutLegend(items: LegendItem[], maxW: number): LegendLayout {
     x += w + 16;
   }
   if (row.length) rows.push(row);
-  return { rows, height: rows.length * 20 };
+  return { rows, height: rows.length * Math.round(20 * fs) };
 }
 
 export function LegendSwatch({ item, x, y }: { item: LegendItem; x: number; y: number }) {
@@ -414,14 +455,15 @@ export function LegendSwatch({ item, x, y }: { item: LegendItem; x: number; y: n
   return <Marker shape={item.shape ?? 'circle'} x={x + SWATCH / 2} y={y} r={4} color={item.color} />;
 }
 
-function Legend({ layout, y }: { layout: LegendLayout; y: number }) {
+function Legend({ layout, y, fs = 1 }: { layout: LegendLayout; y: number; fs?: number }) {
+  const lh = Math.round(20 * fs);
   return (
     <g className="pspp-chart__legend" aria-hidden="true">
       {layout.rows.map((row, ri) =>
         row.map(({ item, x, text }, i) => (
           <g key={ri + ':' + i}>
-            <LegendSwatch item={item} x={x} y={y + ri * 20 + 10} />
-            <text className="pspp-chart__legend-text" x={x + SWATCH + 6} y={y + ri * 20 + 10} dominantBaseline="central">
+            <LegendSwatch item={item} x={x} y={y + ri * lh + lh / 2} />
+            <text className="pspp-chart__legend-text" x={x + SWATCH + 6} y={y + ri * lh + lh / 2} dominantBaseline="central">
               {text}
             </text>
           </g>
@@ -494,6 +536,16 @@ const IconDownload = () => (
 
 /* ------------------------------------------------------------------ shell */
 
+/** CSS variables of the style: the palette replaces --c-series-N, fontScale feeds --c-fs. */
+function styleVars(style?: ChartStyle): CSSProperties {
+  const vars: Record<string, string | number> = {};
+  style?.palette?.forEach((c, i) => {
+    if (c && i < 8) vars[`--c-series-${i + 1}`] = c;
+  });
+  if (style?.fontScale && style.fontScale !== 1) vars['--c-fs'] = style.fontScale;
+  return vars as CSSProperties;
+}
+
 export interface ChartShellProps extends ChartCommonProps {
   title: string;
   subtitle?: string;
@@ -508,7 +560,16 @@ export interface ChartShellProps extends ChartCommonProps {
 const TOOLBAR_RESERVE = 104;
 
 export function ChartShell(props: ChartShellProps) {
-  const { title, subtitle, legend, ariaLabel, table, t, children } = props;
+  const { ariaLabel, table, t, children } = props;
+  const style = useStyle();
+  const fs = fontScaleOf(style);
+  const reg = useMemo<AxisReg>(() => ({}), []);
+  const hideTitle = style?.showTitle === false;
+  const title = hideTitle ? '' : style?.title || props.title;
+  const subtitle = hideTitle ? undefined : style?.subtitle !== undefined ? style.subtitle : props.subtitle;
+  const legend = style?.legend === 'none' ? undefined : props.legend;
+  const legendTitle = legend && legend.length ? style?.legendTitle : undefined;
+  const fileTitle = props.title;
   const rootRef = useRef<HTMLElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [measured, setMeasured] = useState(0);
@@ -562,15 +623,19 @@ export function ChartShell(props: ChartShellProps) {
   const innerW = Math.max(120, width - px * 2);
 
   // Header layout (all inside the SVG, so exports carry the title and legend).
-  const titleLines = width ? wrapText(title, Math.max(80, innerW - TOOLBAR_RESERVE), FONT.title, 600, 3) : [];
-  const subLines = width && subtitle ? wrapText(subtitle, innerW, FONT.subtitle, 400, 3) : [];
-  const legendLayout = width && legend && legend.length ? layoutLegend(legend, innerW) : null;
-  let y = 14;
+  const titleLH = Math.round(20 * fs);
+  const subLH = Math.round(17 * fs);
+  const titleLines = width && title ? wrapText(title, Math.max(80, innerW - TOOLBAR_RESERVE), FONT.title * fs, 600, 3) : [];
+  const subLines = width && subtitle ? wrapText(subtitle, innerW, FONT.subtitle * fs, 400, 3) : [];
+  const legendLayout = width && legend && legend.length ? layoutLegend(legend, innerW, fs) : null;
+  let y = titleLines.length || subLines.length || legendLayout ? 14 : 6;
   const titleY = y;
-  y += titleLines.length * 20;
+  y += titleLines.length * titleLH;
   const subY = y;
-  y += subLines.length * 17;
+  y += subLines.length * subLH;
   if (subLines.length) y += 2;
+  const legendTitleY = y + (legendTitle ? 4 : 0);
+  if (legendTitle) y = legendTitleY + titleLH - 2;
   const legendY = y + (legendLayout ? 4 : 0);
   if (legendLayout) y = legendY + legendLayout.height;
   const headerH = y + 8;
@@ -579,9 +644,9 @@ export function ChartShell(props: ChartShellProps) {
   const plotH = Math.round(props.height ? Math.max(160, props.height - headerH - bottomPad) : defaultPlotH);
   const totalH = headerH + plotH + bottomPad;
 
-  const doSvg = () => svgRef.current && downloadSvg(svgRef.current, title);
+  const doSvg = () => svgRef.current && downloadSvg(svgRef.current, title || fileTitle);
   const doPng = () => {
-    if (svgRef.current) void downloadPng(svgRef.current, title).catch(() => undefined);
+    if (svgRef.current) void downloadPng(svgRef.current, title || fileTitle).catch(() => undefined);
   };
 
   useEffect(() => {
@@ -591,12 +656,13 @@ export function ChartShell(props: ChartShellProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [tip]);
 
+  const rootStyle: CSSProperties = { ...(props.width ? { width: props.width } : {}), ...styleVars(style) };
   const tableLabel = showTable ? tr(t, 'hideDataTable') : tr(t, 'showDataTable');
   const svgLabel = tr(t, 'downloadSvg');
   const pngLabel = tr(t, 'downloadPng');
 
   return (
-    <figure ref={rootRef} className="pspp-chart" style={props.width ? ({ width: props.width } as CSSProperties) : undefined}>
+    <figure ref={rootRef} className="pspp-chart" style={rootStyle}>
       <TipCtx.Provider value={tipApi}>
         {width > 0 ? (
           <svg
@@ -611,17 +677,27 @@ export function ChartShell(props: ChartShellProps) {
             <rect className="pspp-chart__bg" x="0" y="0" width={width} height={totalH} />
             <g transform={`translate(${px} 0)`}>
               {titleLines.map((l, i) => (
-                <text key={i} className="pspp-chart__title" x={0} y={titleY + i * 20 + 10} dominantBaseline="central">
+                <text key={i} className="pspp-chart__title" x={0} y={titleY + i * titleLH + titleLH / 2} dominantBaseline="central">
                   {l}
                 </text>
               ))}
               {subLines.map((l, i) => (
-                <text key={i} className="pspp-chart__subtitle" x={0} y={subY + i * 17 + 9} dominantBaseline="central">
+                <text key={i} className="pspp-chart__subtitle" x={0} y={subY + i * subLH + subLH / 2} dominantBaseline="central">
                   {l}
                 </text>
               ))}
-              {legendLayout && <Legend layout={legendLayout} y={legendY} />}
-              <g transform={`translate(0 ${headerH})`}>{children({ width: innerW, height: plotH, uid, tip: tipApi })}</g>
+              {legendTitle && (
+                <text className="pspp-chart__legend-title" x={0} y={legendTitleY + titleLH / 2 - 1} dominantBaseline="central">
+                  {truncateText(legendTitle, innerW, FONT.legend * fs, 600)}
+                </text>
+              )}
+              {legendLayout && <Legend layout={legendLayout} y={legendY} fs={fs} />}
+              <g transform={`translate(0 ${headerH})`}>
+                <RegCtx.Provider value={reg}>
+                  {children({ width: innerW, height: plotH, uid, tip: tipApi, style, reg })}
+                  <StyleOverlay reg={reg} style={style} fs={fs} uid={uid} />
+                </RegCtx.Provider>
+              </g>
             </g>
           </svg>
         ) : (
@@ -661,7 +737,7 @@ export function ChartShell(props: ChartShellProps) {
           ))}
         </div>
       )}
-      {showTable && <DataTable table={table} title={title} t={t} />}
+      {showTable && <DataTable table={table} title={fileTitle} t={t} />}
     </figure>
   );
 }

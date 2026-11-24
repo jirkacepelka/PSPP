@@ -2,9 +2,12 @@ import { Baseline, ChartShell, FONT, Marker, YAxis, plotMargins, seriesColor, ma
 import { clamp, formatValue, linearScale, niceTicks, padExtent, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { BoxplotSpec } from './types';
+import { useStyle } from './styleLayer';
+import { applyDomain } from './styleSpec';
 
 export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommonProps) {
   const { t, locale } = c;
+  const style = useStyle();
   const title = spec.title || tr(t, 'boxplot');
   const boxes = spec.boxes;
   const hasOut = boxes.some((b) => b.outliers.some((o) => !o.extreme));
@@ -57,13 +60,17 @@ export function BoxplotChart({ spec, ...c }: { spec: BoxplotSpec } & ChartCommon
           );
         }
         const [d0, d1] = padExtent(lo, hi, 0.04);
-        const yt = niceTicks(d0, d1, clamp(Math.floor(area.height / 48), 3, 8));
+        const yCount = clamp(Math.floor(area.height / 48), 3, 8);
+        const yt = applyDomain(niceTicks(d0, d1, yCount), style?.yMin, style?.yMax, yCount);
         const fy = tickFormatter(yt.step, yt.ticks, locale);
-        const m = plotMargins({ yTickLabels: yt.ticks.map(fy), xTickLabels: anyLabel });
+        const m = plotMargins({ yTickLabels: yt.ticks.map(fy), xTickLabels: anyLabel, style });
         const plotW = area.width - m.left - m.right;
         const plotH = area.height - m.top - m.bottom;
         const sy = linearScale(yt.domain, [m.top + plotH, m.top]);
         const band = plotW / boxes.length;
+        area.reg.x = (i: number) => m.left + band * (i + 0.5);
+        area.reg.top = m.top;
+        area.reg.height = plotH;
         const boxW = clamp(band * 0.4, 12, 56);
         return (
           <g>

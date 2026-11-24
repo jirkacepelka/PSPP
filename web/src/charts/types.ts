@@ -5,6 +5,9 @@
 import { parseSurvival, type SurvivalSpec } from './survivalSpec';
 import { parseDendrogram, type DendrogramSpec } from './dendrogram';
 import { parseLine, type LineSpec } from './lineSpec';
+import { parseStyle } from './styleSpec';
+import { parseArea, parseDot, parseHeatmap, parseMatrix, parsePareto, parsePyramid } from './studioSpecs';
+import type { AreaSpec, ChartStyle, DotSpec, HeatmapSpec, MatrixSpec, ParetoSpec, PyramidSpec } from './studioTypes';
 
 export type Pt = [number, number];
 
@@ -19,6 +22,10 @@ export interface HistogramSpec {
   integer: boolean;
   /** [lower, upper, count] per bin. */
   bins: [number, number, number][];
+  /** studio: stacked series over the same bins (counts[i] belongs to bins[i]); `bins` holds the totals */
+  series?: { name: string; counts: number[] }[];
+  /** studio: 'polygon' draws a frequency polygon instead of bars */
+  mode?: 'bars' | 'polygon';
 }
 
 export interface BarSpec {
@@ -28,6 +35,13 @@ export interface BarSpec {
   ylabel: string;
   total: number;
   bars: { x: string; group: string | null; count: number }[];
+  /** studio: how groups share a category ('none' = side by side) */
+  stack?: 'none' | 'stack' | 'stack100';
+  horizontal?: boolean;
+  /** studio: category axis title */
+  xlabel?: string;
+  /** studio: error whiskers aligned with `bars` (null = none for that bar) */
+  err?: ({ lo: number; hi: number } | null)[];
 }
 
 export interface PieSpec {
@@ -82,6 +96,10 @@ export interface ScatterSpec {
   yMax: number | null;
   byvar: string | null;
   points: { x: number; y: number; group: string | null }[];
+  /** studio: fit line(s) through the points */
+  fit?: 'linear' | 'quadratic' | 'cubic' | 'loess' | 'none';
+  fitByGroup?: boolean;
+  showR2?: boolean;
 }
 
 export interface ScreeSpec {
@@ -117,7 +135,16 @@ export type ChartSpec =
   | SurvivalSpec
   | DendrogramSpec
   | LineSpec
+  | AreaSpec
+  | DotSpec
+  | ParetoSpec
+  | MatrixSpec
+  | HeatmapSpec
+  | PyramidSpec
   | UnknownSpec;
+
+/** Every parsed spec may carry the appearance overrides of `chart.style`. */
+export type StyledSpec = ChartSpec & { style?: ChartStyle };
 
 type Obj = Record<string, unknown>;
 
@@ -140,8 +167,18 @@ function pts(v: unknown): Pt[] {
   return out;
 }
 
-/** Accepts either a bare chart object or an output item `{ kind: 'chart', chart }`. */
-export function parseChart(input: unknown): ChartSpec {
+/** Accepts either a bare chart object or an output item `{ kind: 'chart', chart }`.  `chart.style`
+    (or `style` on the item wrapper) is parsed into `spec.style`; `chart.studio` is ignored. */
+export function parseChart(input: unknown): StyledSpec {
+  let wrapperStyle: unknown;
+  if (isObj(input) && isObj(input.chart)) wrapperStyle = input.style;
+  const spec = parseChartBody(input);
+  const inner = isObj(input) && isObj(input.chart) ? input.chart : input;
+  const style = parseStyle(isObj(inner) && inner.style !== undefined ? inner.style : wrapperStyle);
+  return style ? { ...spec, style } : spec;
+}
+
+function parseChartBody(input: unknown): ChartSpec {
   let c: unknown = input;
   let itemTitle = '';
   if (isObj(c) && isObj(c.chart)) {
@@ -160,7 +197,21 @@ export function parseChart(input: unknown): ChartSpec {
         const hi = num(a[1]);
         if (lo !== null && hi !== null) bins.push([lo, hi, num(a[2]) ?? 0]);
       }
-      return { type, title, n: num(c.n), mean: num(c.mean), stddev: num(c.stddev), showNormal: c.showNormal === true, integer: c.integer === true, bins };
+      const series = arr(c.series)
+        .filter(isObj)
+        .map((sr) => ({ name: clean(str(sr.name)), counts: bins.map((_, i) => Math.max(0, num(arr(sr.counts)[i]) ?? 0)) }));
+      return {
+        type,
+        title,
+        n: num(c.n),
+        mean: num(c.mean),
+        stddev: num(c.stddev),
+        showNormal: c.showNormal === true,
+        integer: c.integer === true,
+        bins,
+        ...(series.length ? { series } : {}),
+        ...(c.mode === 'polygon' || c.mode === 'bars' ? { mode: c.mode } : {}),
+      };
     }
     case 'bar':
       return {
@@ -172,6 +223,22 @@ export function parseChart(input: unknown): ChartSpec {
         bars: arr(c.bars)
           .filter(isObj)
           .map((b) => ({ x: clean(str(b.x)), group: b.group === null || b.group === undefined ? null : clean(str(b.group)), count: num(b.count) ?? 0 })),
+        ...(c.stack === 'stack' || c.stack === 'stack100' || c.stack === 'none' ? { stack: c.stack } : {}),
+        ...(c.horizontal === true ? { horizontal: true } : {}),
+        ...(typeof c.xlabel === 'string' && c.xlabel ? { xlabel: clean(c.xlabel) } : {}),
+        ...(Array.isArray(c.err)
+          ? {
+              err: arr(c.bars)
+                .filter(isObj)
+                .map((_, i) => {
+                  const e = arr(c.err)[i];
+                  if (!isObj(e)) return null;
+                  const lo = num(e.lo);
+                  const hi = num(e.hi);
+                  return lo === null || hi === null ? null : { lo: Math.min(lo, hi), hi: Math.max(lo, hi) };
+                }),
+            }
+          : {}),
       };
     case 'pie':
       return {
@@ -249,6 +316,9 @@ export function parseChart(input: unknown): ChartSpec {
         yMax: num(c.yMax),
         byvar: typeof c.byvar === 'string' ? c.byvar : null,
         points,
+        ...(['linear', 'quadratic', 'cubic', 'loess', 'none'].includes(str(c.fit)) ? { fit: c.fit as ScatterSpec['fit'] } : {}),
+        ...(c.fitByGroup === true ? { fitByGroup: true } : {}),
+        ...(c.showR2 === true ? { showR2: true } : {}),
       };
     }
     case 'scree':
@@ -266,6 +336,18 @@ export function parseChart(input: unknown): ChartSpec {
       return parseDendrogram(c, title);
     case 'line':
       return parseLine(c, title);
+    case 'area':
+      return parseArea(c, title);
+    case 'dot':
+      return parseDot(c, title);
+    case 'pareto':
+      return parsePareto(c, title);
+    case 'matrix':
+      return parseMatrix(c, title);
+    case 'heatmap':
+      return parseHeatmap(c, title);
+    case 'pyramid':
+      return parsePyramid(c, title);
     default:
       return { type: 'unknown', title, rawType: type || 'unknown' };
   }

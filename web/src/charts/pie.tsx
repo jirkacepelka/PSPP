@@ -2,6 +2,7 @@ import { ChartShell, FONT, seriesColor, markTip, type ChartCommonProps } from '.
 import { formatPercent, formatValue, measureText, truncateText } from './scale';
 import { tr } from './strings';
 import type { PieSpec } from './types';
+import { useStyle } from './styleLayer';
 
 interface Slice {
   label: string;
@@ -40,6 +41,7 @@ function arcPath(cx: number, cy: number, r: number, a0: number, a1: number): str
 
 export function PieChart({ spec, ...c }: { spec: PieSpec } & ChartCommonProps) {
   const { t, locale } = c;
+  const style = useStyle();
   const title = spec.title || tr(t, 'pieChart');
   const { slices, folded } = foldSlices(spec, tr(t, 'other'));
   const total = slices.reduce((s, x) => s + x.value, 0);
@@ -99,14 +101,23 @@ export function PieChart({ spec, ...c }: { spec: PieSpec } & ChartCommonProps) {
                   ...(s.members ? [{ label: '', value: s.members.join(', '), key: 'none' as const }] : []),
                 ],
               };
+              const frac = s.value / total;
+              const mid = (a0 + a) / 2;
+              const lr = r * 0.66;
               return (
-                <path
-                  key={i}
-                  className="pspp-chart__mark pspp-chart__slice"
-                  d={arcPath(cx, cy, r, a0, a)}
-                  style={{ fill: s.color }}
-                  {...markTip(area.tip, tip, `${s.label}: ${valueText(s.value)}`)}
-                />
+                <g key={i}>
+                  <path
+                    className="pspp-chart__mark pspp-chart__slice"
+                    d={arcPath(cx, cy, r, a0, a)}
+                    style={{ fill: s.color }}
+                    {...markTip(area.tip, tip, `${s.label}: ${valueText(s.value)}`)}
+                  />
+                  {style?.valueLabels === true && frac >= 0.05 && (
+                    <text className="pspp-chart__value pspp-chart__value--in" x={cx + lr * Math.sin(mid)} y={cy - lr * Math.cos(mid)} textAnchor="middle" dominantBaseline="central" pointerEvents="none">
+                      {formatPercent(frac, locale)}
+                    </text>
+                  )}
+                </g>
               );
             })}
             <g aria-hidden="true">

@@ -22,6 +22,9 @@ import {
 import { clamp, formatValue, linearScale, niceStep, niceTicks, padExtent, tickFormatter, ticksWithin, type Ticks } from './scale';
 import { tr } from './strings';
 import type { NpSpec, Pt, RocSpec, ScatterSpec, ScreeSpec, SpreadLevelSpec } from './types';
+import { useStyle } from './styleLayer';
+import { applyDomain } from './styleSpec';
+import { fitCurve, type FitKind } from './studioMath';
 
 export interface XYSeries {
   name: string;
@@ -39,6 +42,12 @@ export interface RefLine {
   y2: number;
 }
 
+/** A fitted curve drawn over the points (not hoverable). */
+export interface FitLine {
+  color: string;
+  curve: Pt[];
+}
+
 interface XYPlotProps {
   area: PlotArea;
   locale?: string;
@@ -48,6 +57,7 @@ interface XYPlotProps {
   yTitle?: string;
   series: XYSeries[];
   refLines?: RefLine[];
+  fits?: FitLine[];
   xGrid?: boolean;
   xFormat?: (v: number) => string;
   emptyText?: string;
@@ -62,11 +72,14 @@ interface FlatPt {
 }
 
 export function XYPlot(props: XYPlotProps) {
-  const { area, x, y, series, locale } = props;
+  const { area, series, locale } = props;
   const tip = useTip();
-  const fx = props.xFormat ?? tickFormatter(x.step, x.ticks, locale);
+  const style = useStyle();
+  const x = applyDomain(props.x, style?.xMin, style?.xMax, clamp(Math.floor(area.width / 90), 3, 10));
+  const y = applyDomain(props.y, style?.yMin, style?.yMax, clamp(Math.floor(area.height / 48), 3, 9));
+  const fx = props.xFormat && x === props.x ? props.xFormat : tickFormatter(x.step, x.ticks, locale);
   const fy = tickFormatter(y.step, y.ticks, locale);
-  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: props.yTitle, xTitle: props.xTitle, right: 16 });
+  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: props.yTitle, xTitle: props.xTitle, right: 16, style });
   const plotW = Math.max(40, area.width - m.left - m.right);
   const plotH = Math.max(40, area.height - m.top - m.bottom);
   const sx = linearScale(x.domain, [m.left, m.left + plotW]);
@@ -150,6 +163,17 @@ export function XYPlot(props: XYPlotProps) {
       <g clipPath={`url(#${clipId}l)`}>
         {(props.refLines ?? []).map((l, i) => (
           <line key={i} className="pspp-chart__ref" x1={sx(l.x1)} y1={sy(l.y1)} x2={sx(l.x2)} y2={sy(l.y2)} />
+        ))}
+      </g>
+      <g clipPath={`url(#${clipId}l)`}>
+        {(props.fits ?? []).map((f, i) => (
+          <polyline
+            key={'f' + i}
+            className="pspp-chart__line pspp-chart__fit"
+            points={f.curve.map((p) => `${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' ')}
+            style={{ stroke: f.color }}
+            pointerEvents="none"
+          />
         ))}
       </g>
       <g clipPath={`url(#${clipId})`}>
@@ -372,15 +396,35 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
     if (other) out.push({ name: tr(t, 'other'), color: 'var(--c-other)', shape: 'circle', points: other });
     return out;
   }, [spec, t]);
+  const fitKind = spec.fit && spec.fit !== 'none' ? (spec.fit as FitKind) : null;
+  const fitName = fitKind ? tr(t, ({ linear: 'fitLinear', quadratic: 'fitQuadratic', cubic: 'fitCubic', loess: 'fitLoess' } as const)[fitKind]) : '';
+  const fitResults = useMemo(() => {
+    if (!fitKind) return [];
+    const targets = spec.fitByGroup && series.length > 1 ? series.map((s) => ({ name: s.name, color: s.color, pts: s.points })) : [{ name: '', color: 'var(--c-ink)', pts: series.flatMap((s) => s.points) }];
+    return targets.flatMap((g) => {
+      if (!g.pts.length) return [];
+      const x0 = Math.min(...g.pts.map((p) => p[0]));
+      const x1 = Math.max(...g.pts.map((p) => p[0]));
+      const r = fitCurve(g.pts, fitKind, x0, x1);
+      return r ? [{ ...g, ...r }] : [];
+    });
+  }, [fitKind, series, spec.fitByGroup]);
+  const fitLabel = (f: { name: string; r2: number | null }) =>
+    [fitName, f.name].filter(Boolean).join(' · ') + (spec.showR2 && f.r2 !== null ? `, ${tr(t, 'rSquared')} = ${formatValue(f.r2, locale, 3)}` : '');
   const legend: LegendItem[] | undefined =
-    series.length > 1 || spec.byvar ? series.map((s) => ({ label: s.name, kind: 'marker' as const, color: s.color, shape: s.shape })) : undefined;
+    series.length > 1 || spec.byvar || fitResults.length
+      ? [
+          ...(series.length > 1 || spec.byvar ? series.map((s) => ({ label: s.name, kind: 'marker' as const, color: s.color, shape: s.shape })) : []),
+          ...fitResults.map((f) => ({ label: fitLabel(f), kind: 'line' as const, color: f.color })),
+        ]
+      : undefined;
   return (
     <ChartShell
       {...c}
       title={title}
       legend={legend}
       ariaLabel={`${title}. ${tr(t, 'ariaPoints', { count: spec.points.length })}${spec.byvar ? ', ' + tr(t, 'ariaGroups', { count: series.length }) : ''}.`}
-      table={xyTable(xName, yName, series, locale, spec.byvar ?? undefined)}
+      table={{ ...xyTable(xName, yName, series, locale, spec.byvar ?? undefined), note: fitResults.map(fitLabel).join('; ') || undefined }}
     >
       {(area) => {
         const xs = spec.points.map((p) => p.x);
@@ -391,7 +435,20 @@ export function ScatterChart({ spec, ...c }: { spec: ScatterSpec } & ChartCommon
         const yd = padExtent(spec.yMin ?? ey0, spec.yMax ?? ey1, 0.02);
         const xt = niceTicks(xd[0], xd[1], xCount(area.width));
         const yt = niceTicks(yd[0], yd[1], yCount(area.height));
-        return <XYPlot emptyText={tr(t, 'noData')} area={area} locale={locale} x={xt} y={yt} xTitle={xName} yTitle={yName} series={series} tipFor={pointTip(xName, yName, locale, series.length > 1)} />;
+        return (
+          <XYPlot
+            emptyText={tr(t, 'noData')}
+            area={area}
+            locale={locale}
+            x={xt}
+            y={yt}
+            xTitle={xName}
+            yTitle={yName}
+            series={series}
+            fits={fitResults}
+            tipFor={pointTip(xName, yName, locale, series.length > 1)}
+          />
+        );
       }}
     </ChartShell>
   );

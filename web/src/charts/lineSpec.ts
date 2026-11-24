@@ -23,6 +23,8 @@ export interface LineSpec {
   series: LineSeries[];
   /** draw a marker at each value (default true) */
   markers: boolean;
+  /** studio: false = markers and error bars only (an error bar chart), default true */
+  connect?: boolean;
 }
 
 type Obj = Record<string, unknown>;
@@ -44,6 +46,7 @@ export function parseLine(c: Obj, title: string): LineSpec {
     errorLabel: str(c.errorLabel),
     categories,
     markers: c.markers !== false,
+    ...(c.connect === false ? { connect: false } : {}),
     series: arr(c.series)
       .filter(isObj)
       .map((s) => ({ name: str(s.name), values: vals(s.values), ...(Array.isArray(s.lo) && Array.isArray(s.hi) ? { lo: vals(s.lo), hi: vals(s.hi) } : {}) })),

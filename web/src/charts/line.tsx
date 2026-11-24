@@ -22,6 +22,8 @@ import {
 import { clamp, formatValue, linearScale, niceTicks, tickFormatter, truncateText } from './scale';
 import { tr } from './strings';
 import type { LineSpec } from './lineSpec';
+import { useAxisReg, useStyle } from './styleLayer';
+import { applyDomain, fontScaleOf } from './styleSpec';
 
 const f1 = (v: number) => v.toFixed(1);
 
@@ -42,6 +44,11 @@ function linePath(vals: (number | null)[], xs: number[], sy: (v: number) => numb
 
 function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: PlotArea; locale?: string; colors: string[]; t: ChartCommonProps['t'] }) {
   const tip = useTip();
+  const style = useStyle();
+  const reg = useAxisReg();
+  const fs = fontScaleOf(style);
+  const connect = spec.connect !== false;
+  const markers = spec.markers || !connect;
   const [hi, setHi] = useState<number | null>(null);
   const n = spec.categories.length;
   const all: number[] = [];
@@ -49,15 +56,20 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
   const lo = all.length ? Math.min(...all) : 0;
   const hiV = all.length ? Math.max(...all) : 1;
   const pad = (hiV - lo) * 0.06 || Math.abs(hiV) * 0.1 || 1;
-  const y = niceTicks(lo - pad, hiV + pad, clamp(Math.floor(area.height / 48), 3, 9));
+  const yCount = clamp(Math.floor(area.height / 48), 3, 9);
+  const y = applyDomain(niceTicks(lo - pad, hiV + pad, yCount), style?.yMin, style?.yMax, yCount);
   const fy = tickFormatter(y.step, y.ticks, locale);
-  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: spec.ylabel, xTitle: spec.xlabel, right: 16 });
+  const m = plotMargins({ yTickLabels: y.ticks.map(fy), yTitle: spec.ylabel, xTitle: spec.xlabel, right: 16, style });
   const plotW = Math.max(40, area.width - m.left - m.right);
   const plotH = Math.max(40, area.height - m.top - m.bottom);
   const band = plotW / Math.max(1, n);
   const xs = spec.categories.map((_, i) => m.left + band * (i + 0.5));
   const sy = linearScale(y.domain, [m.top + plotH, m.top]);
+  reg.x = (i: number) => m.left + band * (i + 0.5);
+  reg.top = m.top;
+  reg.height = plotH;
   const S = spec.series.length;
+  const showValues = style?.valueLabels === true && n * S <= 60 && S <= 4;
   // with error bars, nudge the series apart so overlapping bars stay readable
   const dodge = spec.errorLabel ? Math.min(7, band * 0.09) : 0;
   const sx = (si: number) => xs.map((x) => x + (si - (S - 1) / 2) * dodge);
@@ -75,7 +87,7 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
         label: named ? s.name : spec.ylabel,
         value: v === null ? '—' : formatValue(v, locale, 3) + ci95,
         color: colors[si],
-        key: spec.markers ? ('marker' as const) : ('line' as const),
+        key: markers ? ('marker' as const) : ('line' as const),
         shape: GROUP_SHAPES[si % GROUP_SHAPES.length],
       };
     }),
@@ -151,8 +163,16 @@ function LinePlot({ spec, area, locale, colors, t }: { spec: LineSpec; area: Plo
                   />
                 );
               })}
-            <path className="pspp-chart__line" d={linePath(s.values, px, sy)} style={{ stroke: colors[si] }} />
-            {spec.markers &&
+            {connect && <path className="pspp-chart__line" d={linePath(s.values, px, sy)} style={{ stroke: colors[si] }} />}
+            {showValues &&
+              s.values.map((v, i) =>
+                v === null ? null : (
+                  <text key={'v' + i} className="pspp-chart__value" x={px[i]} y={sy(v) - 8 * fs} textAnchor="middle">
+                    {formatValue(v, locale, 2)}
+                  </text>
+                ),
+              )}
+            {markers &&
               s.values.map((v, i) =>
                 v === null ? null : <Marker key={i} shape={GROUP_SHAPES[si % GROUP_SHAPES.length]} x={px[i]} y={sy(v)} r={hi === i ? r + 1.5 : r} color={colors[si]} />,
               )}
@@ -189,7 +209,7 @@ export function LineChart({ spec, ...c }: { spec: LineSpec } & ChartCommonProps)
   const colors = spec.series.map((_, i) => seriesColor(i));
   const title = spec.title || tr(t, 'untitled');
   const named = spec.series.length > 1;
-  const legend: LegendItem[] = spec.series.map((s, i) => ({ label: s.name, kind: spec.markers ? 'marker' : 'line', shape: GROUP_SHAPES[i % GROUP_SHAPES.length], color: colors[i] }));
+  const legend: LegendItem[] = spec.series.map((s, i) => ({ label: s.name, kind: spec.markers || spec.connect === false ? 'marker' : 'line', shape: GROUP_SHAPES[i % GROUP_SHAPES.length], color: colors[i] }));
   const bars = !!spec.errorLabel && spec.series.some((s) => s.lo);
   const rows: string[][] = [];
   for (const s of spec.series)

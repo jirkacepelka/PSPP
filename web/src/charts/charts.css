@@ -132,23 +132,29 @@
 
 .pspp-chart__title {
   fill: var(--c-ink);
-  font-size: 14px;
+  font-size: calc(14px * var(--c-fs, 1));
   font-weight: 600;
 }
 
 .pspp-chart__subtitle {
   fill: var(--c-ink-2);
-  font-size: 12px;
+  font-size: calc(12px * var(--c-fs, 1));
 }
 
 .pspp-chart__legend-text {
   fill: var(--c-ink-2);
-  font-size: 12px;
+  font-size: calc(12px * var(--c-fs, 1));
+}
+
+.pspp-chart__legend-title {
+  fill: var(--c-ink);
+  font-size: calc(12px * var(--c-fs, 1));
+  font-weight: 600;
 }
 
 .pspp-chart__legend-value {
   fill: var(--c-ink);
-  font-size: 12px;
+  font-size: calc(12px * var(--c-fs, 1));
   font-variant-numeric: tabular-nums;
 }
 
@@ -174,7 +180,7 @@
 
 .pspp-chart__tick {
   fill: var(--c-muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--c-fs, 1));
   font-variant-numeric: tabular-nums;
 }
 
@@ -184,23 +190,31 @@
 
 .pspp-chart__axis-title {
   fill: var(--c-ink-2);
-  font-size: 12px;
+  font-size: calc(12px * var(--c-fs, 1));
 }
 
 .pspp-chart__value {
   fill: var(--c-ink-2);
-  font-size: 11px;
+  font-size: calc(11px * var(--c-fs, 1));
   font-variant-numeric: tabular-nums;
+}
+
+.pspp-chart__value--in {
+  fill: #ffffff;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 2.5px;
+  paint-order: stroke;
+  stroke-linejoin: round;
 }
 
 .pspp-chart__label {
   fill: var(--c-muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--c-fs, 1));
 }
 
 .pspp-chart__empty {
   fill: var(--c-muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--c-fs, 1));
 }
 
 /* ---------------------------------------------------------------- marks */
@@ -217,6 +231,27 @@
   stroke-width: 1.5px;
   stroke-linecap: round;
   opacity: 0.75;
+}
+
+.pspp-chart__ref--user {
+  stroke-width: 1.5px;
+  opacity: 0.9;
+}
+
+.pspp-chart__note-text {
+  fill: var(--c-ink);
+  font-size: calc(11px * var(--c-fs, 1));
+  font-variant-numeric: tabular-nums;
+  stroke: var(--c-surface);
+  stroke-width: 3px;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+
+.pspp-chart__note-dot {
+  fill: var(--c-surface);
+  stroke: var(--c-ink);
+  stroke-width: 1.5px;
 }
 
 .pspp-chart__slice {
@@ -486,4 +521,27 @@
   .pspp-chart__toolbar {
     transition: none;
   }
+}
+
+/* ------------------------------------------------- studio: scatterplot matrix */
+
+.pspp-chart__matrix-cell {
+  fill: transparent;
+  stroke: var(--c-axis);
+  stroke-width: 1px;
+}
+
+.pspp-chart__matrix-diag {
+  fill: color-mix(in srgb, var(--c-ink) 5%, var(--c-surface));
+  stroke: var(--c-axis);
+  stroke-width: 1px;
+}
+
+.pspp-chart__matrix-name {
+  fill: var(--c-ink);
+  font-weight: 600;
+}
+
+.pspp-chart__fit {
+  stroke-width: 2.5px;
 }
